@@ -1,0 +1,41 @@
+- Testing global log functions
+01:02:03 tst <origin>: from log.log()
+01:02:03 tst <origin> DBG: from log.dbg()
+01:02:03 tst <origin> ERR: from log.err()
+- Testing log.Origin functions
+01:02:03 tst some-name(some='detail'): hello log
+01:02:03 tst some-name(some='detail') ERR: hello err
+01:02:03 tst some-name(some='detail'): message {int=3, none=None, str='str\n', tuple=('foo', 42)}
+01:02:03 tst some-name(some='detail') DBG: hello dbg
+- Testing log.style()
+01:02:03: only time
+tst: only category
+DBG: only level
+some-name(some='detail'): only origin
+only src  [log_test.py:69]
+- Testing log.style_change()
+no log format
+01:02:03: add time
+but no time format
+01:02:03 DBG: add level
+01:02:03 tst DBG: add category
+01:02:03 tst DBG: add src  [log_test.py:84]
+01:02:03 tst some-name(some='detail') DBG: add origin  [log_test.py:86]
+- Testing origin_width
+01:02:03 tst               shortname: origin str set to 23 chars  [log_test.py:93]
+01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): long origin str  [log_test.py:95]
+01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details') DBG: long origin str dbg  [log_test.py:96]
+01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details') ERR: long origin str err  [log_test.py:97]
+- Testing log.Origin with omitted info
+01:02:03 tst                 LogTest: hello log, name implicit from class name  [log_test.py:102]
+01:02:03 ---           explicit_name: hello log, no category set  [log_test.py:106]
+01:02:03 ---                 LogTest: hello log, no category nor name set  [log_test.py:109]
+01:02:03 ---                 LogTest DBG: debug message, no category nor name set  [log_test.py:112]
+- Testing logging of Exceptions, tracing origins
+Not throwing an exception in 'with:' works.
+nested print just prints
+01:02:03 tst level1->level2->level3: nested log()  [log_test.py:144]
+01:02:03 tst level1->level2: nested l2 log() from within l3 scope  [log_test.py:145]
+01:02:03 tst level1->level2->level3 ERR: ValueError: bork  [log_test.py:146: raise ValueError('bork')]
+- Enter the same Origin context twice
+01:02:03 tst level1->level2: nested log  [log_test.py:158]

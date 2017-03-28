@@ -1,0 +1,11 @@
+# systemd service file for the osmo-gsm-tester daemon
+[Unit]
+Description=Osmocom GSM Tester
+
+[Service]
+ExecStart=/usr/local/src/osmo-gsm-tester/osmo-gsm-tester
+Restart=on-abort
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

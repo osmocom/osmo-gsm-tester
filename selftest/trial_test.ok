@@ -1,0 +1,16 @@
+- make a few trials dirs
+[TMP]/first
+[TMP]/second
+[TMP]/third
+- fetch trial dirs in order
+[TMP]/first
+['taken']
+[TMP]/second
+[TMP]/third
+- no more trial dirs left
+None
+- test checksum verification
+- detect wrong checksum
+ok, got RuntimeError("Checksum mismatch for 'trial_test/invalid_checksum/file2' vs. 'trial_test/invalid_checksum/checksums.md5' line 2",)
+- detect missing file
+ok, got RuntimeError("File listed in checksums file but missing in trials dir: 'trial_test/missing_file/file2' vs. 'trial_test/missing_file/checksums.md5' line 2",)

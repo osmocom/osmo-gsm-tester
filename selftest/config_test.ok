@@ -1,0 +1,95 @@
+{'addr': ['0.0.0.0',
+          '255.255.255.255',
+          '10.11.12.13',
+          '10.0.99.1',
+          '192.168.0.14'],
+ 'bts': [{'addr': '10.42.42.114',
+          'name': 'sysmoBTS 1002',
+          'trx': [{'band': 'GSM-1800',
+                   'timeslots': ['CCCH+SDCCH4',
+                                 'SDCCH8',
+                                 'TCH/F_TCH/H_PDCH',
+                                 'TCH/F_TCH/H_PDCH',
+                                 'TCH/F_TCH/H_PDCH',
+                                 'TCH/F_TCH/H_PDCH',
+                                 'TCH/F_TCH/H_PDCH',
+                                 'TCH/F_TCH/H_PDCH']},
+                  {'band': 'GSM-1900',
+                   'timeslots': ['SDCCH8',
+                                 'PDCH',
+                                 'PDCH',
+                                 'PDCH',
+                                 'PDCH',
+                                 'PDCH',
+                                 'PDCH',
+                                 'PDCH']}],
+          'type': 'sysmobts'}],
+ 'hwaddr': ['ca:ff:ee:ba:aa:be',
+            '00:00:00:00:00:00',
+            'CA:FF:EE:BA:AA:BE',
+            'cA:Ff:eE:Ba:aA:Be',
+            'ff:ff:ff:ff:ff:ff'],
+ 'imsi': ['012345', '012345678', '012345678912345'],
+ 'ki': ['000102030405060708090a0b0c0d0e0f', '000102030405060708090a0b0c0d0e0f'],
+ 'modems': [{'dbus_path': '/sierra_0',
+             'imsi': '901700000009001',
+             'ki': 'D620F48487B1B782DA55DF6717F08FF9',
+             'msisdn': '7801'},
+            {'dbus_path': '/sierra_1',
+             'imsi': '901700000009002',
+             'ki': 'D620F48487B1B782DA55DF6717F08FF9',
+             'msisdn': '7802'}]}
+- expect validation success:
+Validation: OK
+- unknown item:
+--- -: ERR: ValueError: config item not known: 'bts[].unknown_item'
+Validation: Error
+- wrong type modems[].imsi:
+--- -: ERR: ValueError: config item is dict but should be a leaf node of type 'imsi': 'modems[].imsi'
+Validation: Error
+- invalid key with space:
+--- -: ERR: ValueError: invalid config key: 'imsi '
+Validation: Error
+- list instead of dict:
+--- -: ERR: ValueError: config item not known: 'a_dict[]'
+Validation: Error
+- unknown band:
+--- (item='bts[].trx[].band'): ERR: ValueError: Unknown GSM band: 'what'
+Validation: Error
+- invalid v4 addrs:
+--- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: '1.2.3'
+Validation: Error
+--- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: '1.2.3 .4'
+Validation: Error
+--- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: '91.2.3'
+Validation: Error
+--- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: 'go away'
+Validation: Error
+--- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: ''
+Validation: Error
+--- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: None
+Validation: Error
+- invalid hw addrs:
+--- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: '1.2.3'
+Validation: Error
+--- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: '0b:0c:0d:0e:0f:0g'
+Validation: Error
+--- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: '0b:0c:0d:0e : 0f:0f'
+Validation: Error
+--- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: 'go away'
+Validation: Error
+--- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: ''
+Validation: Error
+--- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: None
+Validation: Error
+- invalid imsis:
+--- (item='imsi[]'): ERR: ValueError: Invalid IMSI: '99999999x9'
+Validation: Error
+--- (item='imsi[]'): ERR: ValueError: Invalid IMSI: '123 456 789 123'
+Validation: Error
+--- (item='imsi[]'): ERR: ValueError: Invalid IMSI: 'go away'
+Validation: Error
+--- (item='imsi[]'): ERR: ValueError: Invalid IMSI: ''
+Validation: Error
+--- (item='imsi[]'): ERR: ValueError: Invalid IMSI: None
+Validation: Error

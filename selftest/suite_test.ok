@@ -1,0 +1,40 @@
+- non-existing suite dir
+--- -: ERR: RuntimeError: Suite not found: 'does_not_exist' in ./suite_test
+- no suite.conf
+cnf empty_dir: DBG: reading suite.conf  [empty_dir↪empty_dir]
+--- ./suite_test/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: './suite_test/empty_dir/suite.conf'  [empty_dir↪./suite_test/empty_dir/suite.conf]
+- valid suite dir
+cnf test_suite: DBG: reading suite.conf  [test_suite↪test_suite]
+defaults:
+  timeout: 60s
+resources:
+  bts:
+  - times: '1'
+  modem:
+  - times: '2'
+  nitb_iface:
+  - times: '1'
+
+- run hello world test
+tst test_suite: reserving resources...
+--- (want='nitb_iface'): DBG: Looking for 1 x nitb_iface , candidates: 3
+--- (want='modem'): DBG: Looking for 2 x modem , candidates: 16
+--- (want='bts'): DBG: Looking for 1 x bts , candidates: 3
+tst hello_world.py: START  [test_suite↪hello_world.py]
+tst hello_world.py:3: hello world  [test_suite↪hello_world.py:3]
+tst hello_world.py:4: I am 'test_suite' / 'hello_world.py:4'  [test_suite↪hello_world.py:4]
+tst hello_world.py:5: one  [test_suite↪hello_world.py:5]
+tst hello_world.py:5: two  [test_suite↪hello_world.py:5]
+tst hello_world.py:5: three  [test_suite↪hello_world.py:5]
+tst hello_world.py: PASS  [test_suite↪hello_world.py]
+pass: all 1 tests passed.
+
+- a test with an error
+tst test_error.py: START  [test_suite↪test_error.py]  [suite.py:96]
+tst test_error.py:3: I am 'test_suite' / 'test_error.py:3'  [test_suite↪test_error.py:3]  [test_error.py:3]
+tst test_error.py:5: FAIL  [test_suite↪test_error.py:5]  [suite.py:108]
+tst test_error.py:5: ERR: AssertionError:   [test_suite↪test_error.py:5]  [test_error.py:5: assert False]
+FAIL: 1 of 1 tests failed:
+  test_error.py
+
+- graceful exit.

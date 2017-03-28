@@ -4,3 +4,6 @@ pid
 version
 _version.py
 tags
+set_pythonpath
+test_work
+state

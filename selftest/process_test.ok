@@ -1,0 +1,33 @@
+run foo: DBG: cd '[TMP]'; PATH=[$PATH] foo.py arg1 arg2  [foo↪foo]
+run foo: DBG: [TMP]/stdout  [foo↪foo]
+run foo: DBG: [TMP]/stderr  [foo↪foo]
+run foo(pid=[PID]): Launched  [foo(pid=[PID])↪foo(pid=[PID])]
+stdout:
+(launched: [DATETIME])
+foo stdout
+[[$0], 'arg1', 'arg2']
+
+stderr:
+(launched: [DATETIME])
+foo stderr
+
+run foo(pid=[PID]): Terminating (SIGINT)
+run foo(pid=[PID]): DBG: Cleanup
+run foo(pid=[PID]): Terminated {rc=1}
+result: 1
+stdout:
+(launched: [DATETIME])
+foo stdout
+[[$0], 'arg1', 'arg2']
+Exiting (stdout)
+
+stderr:
+(launched: [DATETIME])
+foo stderr
+Traceback (most recent call last):
+  File [$0], line [LINE], in <module>
+    time.sleep(1)
+KeyboardInterrupt
+Exiting (stderr)
+
+done.

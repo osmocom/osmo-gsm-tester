@@ -18,34 +18,443 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
+import copy
+import atexit
+import pprint
 
 from . import log
 from . import config
-from .utils import listdict, FileLock
+from . import util
+from . import schema
+from . import ofono_client
+from . import osmo_nitb
+from . import bts_sysmo, bts_osmotrx
 
-class Resources(log.Origin):
+from .util import is_dict, is_list
 
-    def __init__(self, config_path, lock_dir):
-        self.config_path = config_path
-        self.lock_dir = lock_dir
-        self.set_name(conf=self.config_path, lock=self.lock_dir)
+HASH_KEY = '_hash'
+RESERVED_KEY = '_reserved_by'
+USED_KEY = '_used'
 
-    def ensure_lock_dir_exists(self):
-        if not os.path.isdir(self.lock_dir):
-            os.makedirs(self.lock_dir)
+RESOURCES_CONF = 'resources.conf'
+LAST_USED_MSISDN_FILE = 'last_used_msisdn.state'
+RESERVED_RESOURCES_FILE = 'reserved_resources.state'
+
+R_NITB_IFACE = 'nitb_iface'
+R_BTS = 'bts'
+R_ARFCN = 'arfcn'
+R_MODEM = 'modem'
+R_ALL = (R_NITB_IFACE, R_BTS, R_ARFCN, R_MODEM)
+
+RESOURCES_SCHEMA = {
+        'nitb_iface[].addr': schema.IPV4,
+        'bts[].label': schema.STR,
+        'bts[].type': schema.STR,
+        'bts[].unit_id': schema.INT,
+        'bts[].addr': schema.IPV4,
+        'bts[].band': schema.BAND,
+        'bts[].trx[].hwaddr': schema.HWADDR,
+        'arfcn[].arfcn': schema.INT,
+        'arfcn[].band': schema.BAND,
+        'modem[].label': schema.STR,
+        'modem[].path': schema.STR,
+        'modem[].imsi': schema.IMSI,
+        'modem[].ki': schema.KI,
+    }
+
+WANT_SCHEMA = util.dict_add(
+    dict([('%s[].times' % r, schema.INT) for r in R_ALL]),
+    RESOURCES_SCHEMA)
+
+KNOWN_BTS_TYPES = {
+        'sysmo': bts_sysmo.SysmoBts,
+        'osmotrx': bts_osmotrx.OsmoBtsTrx,
+    }
+
+def register_bts_type(name, clazz):
+    KNOWN_BTS_TYPES[name] = clazz
+
+class ResourcesPool(log.Origin):
+    _remember_to_free = None
+    _registered_exit_handler = False
+
+    def __init__(self):
+        self.config_path = config.get_config_file(RESOURCES_CONF)
+        self.state_dir = config.get_state_dir()
+        self.set_name(conf=self.config_path, state=self.state_dir.path)
+        self.read_conf()
+
+    def read_conf(self):
+        self.all_resources = Resources(config.read(self.config_path, RESOURCES_SCHEMA))
+        self.all_resources.set_hashes()
+
+    def reserve(self, origin, want):
+        '''
+        attempt to reserve the resources specified in the dict 'want' for
+        'origin'. Obtain a lock on the resources lock dir, verify that all
+        wanted resources are available, and if yes mark them as reserved.
+
+        On success, return a reservation object which can be used to release
+        the reservation. The reservation will be freed automatically on program
+        exit, if not yet done manually.
+
+        'origin' should be an Origin() instance.
+
+        'want' is a dict matching WANT_SCHEMA, which is the same as
+        the RESOURCES_SCHEMA, except each entity that can be reserved has a 'times'
+        field added, to indicate how many of those should be reserved.
+
+        If an entry has only a 'times' set, any of the resources may be
+        reserved without further limitations.
+
+        ResourcesPool may also be selected with narrowed down constraints.
+        This would reserve one NITB IP address, two modems, one BTS of type
+        sysmo and one of type oct, plus 2 ARFCNs in the 1800 band:
+
+         {
+           'nitb_iface': [ { 'times': 1 } ],
+           'bts': [ { 'type': 'sysmo', 'times': 1 }, { 'type': 'oct', 'times': 1 } ],
+           'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
+           'modem': [ { 'times': 2 } ],
+         }
+
+        A times=1 value is implicit, so the above is equivalent to:
+
+         {
+           'nitb_iface': [ {} ],
+           'bts': [ { 'type': 'sysmo' }, { 'type': 'oct' } ],
+           'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
+           'modem': [ { 'times': 2 } ],
+         }
+        '''
+        schema.validate(want, WANT_SCHEMA)
+
+        # replicate items that have a 'times' > 1
+        want = copy.deepcopy(want)
+        for key, item_list in want.items():
+            more_items = []
+            for item in item_list:
+                times = int(item.pop('times'))
+                if times and times > 1:
+                    for i in range(times - 1):
+                        more_items.append(copy.deepcopy(item))
+            item_list.extend(more_items)
+
+        origin_id = origin.origin_id()
+
+        with self.state_dir.lock(origin_id):
+            rrfile_path = self.state_dir.mk_parentdir(RESERVED_RESOURCES_FILE)
+            reserved = Resources(config.read(rrfile_path, if_missing_return={}))
+            to_be_reserved = self.all_resources.without(reserved).find(want)
+
+            to_be_reserved.mark_reserved_by(origin_id)
+
+            reserved.add(to_be_reserved)
+            config.write(rrfile_path, reserved)
+
+            self.remember_to_free(to_be_reserved)
+            return ReservedResources(self, origin, to_be_reserved)
+
+    def free(self, origin, to_be_freed):
+        with self.state_dir.lock(origin.origin_id()):
+            rrfile_path = self.state_dir.mk_parentdir(RESERVED_RESOURCES_FILE)
+            reserved = Resources(config.read(rrfile_path, if_missing_return={}))
+            reserved.drop(to_be_freed)
+            config.write(rrfile_path, reserved)
+            self.forget_freed(to_be_freed)
+
+    def register_exit_handler(self):
+        if self._registered_exit_handler:
+            return
+        atexit.register(self.clean_up_registered_resources)
+        self._registered_exit_handler = True
+
+    def unregister_exit_handler(self):
+        if not self._registered_exit_handler:
+            return
+        atexit.unregister(self.clean_up_registered_resources)
+        self._registered_exit_handler = False
+
+    def clean_up_registered_resources(self):
+        if not self._remember_to_free:
+            return
+        self.free(log.Origin('atexit.clean_up_registered_resources()'),
+                  self._remember_to_free)
+
+    def remember_to_free(self, to_be_reserved):
+        self.register_exit_handler()
+        if not self._remember_to_free:
+            self._remember_to_free = Resources()
+        self._remember_to_free.add(to_be_reserved)
+
+    def forget_freed(self, freed):
+        if freed is self._remember_to_free:
+            self._remember_to_free.clear()
+        else:
+            self._remember_to_free.drop(freed)
+        if not self._remember_to_free:
+            self.unregister_exit_handler()
+
+    def next_msisdn(self, origin):
+        origin_id = origin.origin_id()
+
+        with self.state_dir.lock(origin_id):
+            msisdn_path = self.state_dir.child(LAST_USED_MSISDN_FILE)
+            with log.Origin(msisdn_path):
+                last_msisdn = '1'
+                if os.path.exists(msisdn_path):
+                    if not os.path.isfile(msisdn_path):
+                        raise RuntimeError('path should be a file but is not: %r' % msisdn_path)
+                    with open(msisdn_path, 'r') as f:
+                        last_msisdn = f.read().strip()
+                    schema.msisdn(last_msisdn)
+
+                next_msisdn = util.msisdn_inc(last_msisdn)
+                with open(msisdn_path, 'w') as f:
+                    f.write(next_msisdn)
+                return next_msisdn
 
 
-global_resources = listdict()
+class NoResourceExn(Exception):
+    pass
 
-def register(kind, instance):
-    global global_resources
-    global_resources.add(kind, instance)
+class Resources(dict):
 
-def reserve(user, config):
-    asdf
+    def __init__(self, all_resources={}, do_copy=True):
+        if do_copy:
+            all_resources = copy.deepcopy(all_resources)
+        self.update(all_resources)
 
-def read_conf(path):
-    with open(path, 'r') as f:
-        conf = f.read()
+    def drop(self, reserved, fail_if_not_found=True):
+        # protect from modifying reserved because we're the same object
+        if reserved is self:
+            raise RuntimeError('Refusing to drop a list of resources from itself.'
+                               ' This is probably a bug where a list of Resources()'
+                               ' should have been copied but is passed as-is.'
+                               ' use Resources.clear() instead.')
+
+        for key, reserved_list in reserved.items():
+            my_list = self.get(key) or []
+
+            if my_list is reserved_list:
+                self.pop(key)
+                continue
+
+            for reserved_item in reserved_list:
+                found = False
+                reserved_hash = reserved_item.get(HASH_KEY)
+                if not reserved_hash:
+                    raise RuntimeError('Resources.drop() only works with hashed items')
+
+                for i in range(len(my_list)):
+                    my_item = my_list[i]
+                    my_hash = my_item.get(HASH_KEY)
+                    if not my_hash:
+                        raise RuntimeError('Resources.drop() only works with hashed items')
+                    if my_hash == reserved_hash:
+                        found = True
+                        my_list.pop(i)
+                        break
+
+                if fail_if_not_found and not found:
+                    raise RuntimeError('Asked to drop resource from a pool, but the'
+                                       ' resource was not found: %s = %r' % (key, reserved_item))
+
+            if not my_list:
+                self.pop(key)
+        return self
+
+    def without(self, reserved):
+        return Resources(self).drop(reserved)
+
+    def find(self, want, skip_if_marked=None, do_copy=True):
+        matches = {}
+        for key, want_list in want.items():
+          with log.Origin(want=key):
+            my_list = self.get(key)
+
+            log.dbg(None, None, 'Looking for', len(want_list), 'x', key, ', candidates:', len(my_list))
+
+            # Try to avoid a less constrained item snatching away a resource
+            # from a more detailed constrained requirement.
+
+            # first record all matches
+            all_matches = []
+            for want_item in want_list:
+                item_match_list = []
+                for i in range(len(my_list)):
+                    my_item = my_list[i]
+                    if skip_if_marked and my_item.get(skip_if_marked):
+                        continue
+                    if item_matches(my_item, want_item, ignore_keys=('times',)):
+                        item_match_list.append(i)
+                if not item_match_list:
+                    raise NoResourceExn('No matching resource available for %s = %r'
+                                        % (key, want_item))
+                all_matches.append( item_match_list )
+
+            if not all_matches:
+                raise NoResourceExn('No matching resource available for %s = %r'
+                                    % (key, want_list))
+
+            # figure out who gets what
+            solution = solve(all_matches)
+            picked = [ my_list[i] for i in solution if i is not None ]
+            log.dbg(None, None, 'Picked', pprint.pformat(picked))
+            matches[key] = picked
+
+        return Resources(matches, do_copy=do_copy)
+
+    def set_hashes(self):
+        for key, item_list in self.items():
+            for item in item_list:
+                item[HASH_KEY] = util.hash_obj(item, HASH_KEY, RESERVED_KEY, USED_KEY)
+
+    def add(self, more):
+        if more is self:
+            raise RuntimeError('adding a list of resources to itself?')
+        config.add(self, copy.deepcopy(more))
+
+    def combine(self, more_rules):
+        if more_rules is self:
+            raise RuntimeError('combining a list of resource rules with itself?')
+        config.combine(self, copy.deepcopy(more))
+
+    def mark_reserved_by(self, origin_id):
+        for key, item_list in self.items():
+            for item in item_list:
+                item[RESERVED_KEY] = origin_id
+
+
+def solve(all_matches):
+    '''
+    all_matches shall be a list of index-lists.
+    all_matches[i] is the list of indexes that item i can use.
+    Return a solution so that each i gets a different index.
+    solve([ [0, 1, 2],
+            [0],
+            [0, 2] ]) == [1, 0, 2]
+    '''
+
+    def all_differ(l):
+        return len(set(l)) == len(l)
+
+    def search_in_permutations(fixed=[]):
+        idx = len(fixed)
+        for i in range(len(all_matches[idx])):
+            val = all_matches[idx][i]
+            # don't add a val that's already in the list
+            if val in fixed:
+                continue
+            l = list(fixed)
+            l.append(val)
+            if len(l) == len(all_matches):
+                # found a solution
+                return l
+            # not at the end yet, add next digit
+            r = search_in_permutations(l)
+            if r:
+                # nested search_in_permutations() call found a solution
+                return r
+        # this entire branch yielded no solution
+        return None
+
+    if not all_matches:
+        raise RuntimeError('Cannot solve: no candidates')
+
+    solution = search_in_permutations()
+    if not solution:
+        raise NoResourceExn('The requested resource requirements are not solvable %r'
+                            % all_matches)
+    return solution
+
+
+def contains_hash(list_of_dicts, a_hash):
+    for d in list_of_dicts:
+        if d.get(HASH_KEY) == a_hash:
+            return True
+    return False
+
+def item_matches(item, wanted_item, ignore_keys=None):
+    if is_dict(wanted_item):
+        # match up two dicts
+        if not isinstance(item, dict):
+            return False
+        for key, wanted_val in wanted_item.items():
+            if ignore_keys and key in ignore_keys:
+                continue
+            if not item_matches(item.get(key), wanted_val, ignore_keys=ignore_keys):
+                return False
+        return True
+
+    if is_list(wanted_item):
+        # multiple possible values
+        if item not in wanted_item:
+            return False
+        return True
+
+    return item == wanted_item
+
+
+class ReservedResources(log.Origin):
+    '''
+    After all resources have been figured out, this is the API that a test case
+    gets to interact with resources. From those resources that have been
+    reserved for it, it can pick some to mark them as currently in use.
+    Functions like nitb() provide a resource by automatically picking its
+    dependencies from so far unused (but reserved) resource.
+    '''
+
+    def __init__(self, resources_pool, origin, reserved):
+        self.resources_pool = resources_pool
+        self.origin = origin
+        self.reserved = reserved
+
+    def __repr__(self):
+        return 'resources(%s)=%s' % (self.origin.name(), pprint.pformat(self.reserved))
+
+    def get(self, kind, specifics=None):
+        if specifics is None:
+            specifics = {}
+        self.dbg('requesting use of', kind, specifics=specifics)
+        want = { kind: [specifics] }
+        available_dict = self.reserved.find(want, skip_if_marked=USED_KEY, do_copy=False)
+        available = available_dict.get(kind)
+        self.dbg(available=len(available))
+        if not available:
+            raise NoResourceExn('No unused resource found: %r%s' %
+                                (kind,
+                                 (' matching %r' % specifics) if specifics else '')
+                               )
+        pick = available[0]
+        self.dbg(using=pick)
+        assert not pick.get(USED_KEY)
+        pick[USED_KEY] = True
+        return copy.deepcopy(pick)
+
+    def put(self, item):
+        if not item.get(USED_KEY):
+            raise RuntimeError('Can only put() a resource that is used: %r' % item)
+        hash_to_put = item.get(HASH_KEY)
+        if not hash_to_put:
+            raise RuntimeError('Can only put() a resource that has a hash marker: %r' % item)
+        for key, item_list in self.reserved.items():
+            my_list = self.get(key)
+            for my_item in my_list:
+                if hash_to_put == my_item.get(HASH_KEY):
+                    my_item.pop(USED_KEY)
+
+    def put_all(self):
+        for key, item_list in self.reserved.items():
+            my_list = self.get(key)
+            for my_item in my_list:
+                if my_item.get(USED_KEY):
+                    my_item.pop(USED_KEY)
+
+    def free(self):
+        self.resources_pool.free(self.origin, self.reserved)
+        self.reserved = None
+
 
 # vim: expandtab tabstop=4 shiftwidth=4

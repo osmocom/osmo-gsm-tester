@@ -18,9 +18,9 @@ osmo_gsm_tester_host=root@10.9.1.190
 osmo_gsm_tester_dir="/var/tmp/osmo-gsm-tester"
 tmp_dir="/var/tmp/prep-osmo-gsm-tester"
 arch="x86_64"
-archive_name="openbsc-$arch-build-$BUILD_NUMBER"
+archive_name="openbsc.$arch-build-$BUILD_NUMBER"
 archive="$archive_name.tgz"
-manifest="manifest.txt"
+manifest="checksums.md5"
 test_report="test-report.xml"
 test_timeout_sec=120
 
@@ -78,7 +78,9 @@ rm -rf "$local_ts_base" || true
 mkdir -p "$local_ts_dir"
 
 # create archive of openbsc build
-tar czf "$local_ts_dir/$archive" "$prefix_dirname"/*
+cd "$prefix_dirname"
+tar czf "../$local_ts_dir/$archive" *
+cd ..
 # move archived bts builds into test session directory
 mv $WORKSPACE/osmo-bts-*.tgz "$local_ts_dir"
 cd "$local_ts_dir"

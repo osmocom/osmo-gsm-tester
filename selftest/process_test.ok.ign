@@ -1,0 +1,7 @@
+PATH='[^']*'	PATH=[$PATH]
+/tmp/[^/ '"]*	[TMP]
+pid=[0-9]*	pid=[PID]
+....-..-.._..:..:..	[DATETIME]
+'[^']*/selftest/process_test/foo.py'	[$0]
+"[^"]*/selftest/process_test/foo.py"	[$0]
+, line [0-9]*	, line [LINE]

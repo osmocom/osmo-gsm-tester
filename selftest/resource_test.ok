@@ -1,0 +1,207 @@
+- expect solutions:
+[0, 1, 2]
+[0, 1, 2]
+[1, 0, 2]
+[1, 2, 0]
+- expect failure to solve:
+The requested resource requirements are not solvable [[0, 2], [2], [0, 2]]
+- test removing a Resources list from itself
+ok, caused exception: RuntimeError('Refusing to drop a list of resources from itself. This is probably a bug where a list of Resources() should have been copied but is passed as-is. use Resources.clear() instead.',)
+- test removing a Resources list from one with the same list in it
+- test resources config and state dir:
+*** all resources:
+{'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df063c',
+            'arfcn': '512',
+            'band': 'GSM-1800'},
+           {'_hash': '022621e513c5a5bf33b77430a1e9c886be676fa1',
+            'arfcn': '514',
+            'band': 'GSM-1800'},
+           {'_hash': '3199abf375a1dd899e554e9d63a552e06d7f38bf',
+            'arfcn': '516',
+            'band': 'GSM-1800'},
+           {'_hash': '57aa7bd1da62495f2857ae6b859193dd592a0a02',
+            'arfcn': '518',
+            'band': 'GSM-1800'},
+           {'_hash': '53dd2e2682b736f427abd2ce59a9a50ca8130678',
+            'arfcn': '520',
+            'band': 'GSM-1800'},
+           {'_hash': '31687a5e6d5140a4b3877606ca5f18244f11d706',
+            'arfcn': '540',
+            'band': 'GSM-1900'},
+           {'_hash': '1def43a5c88a83cdb21279eacab0679ea08ffaf3',
+            'arfcn': '542',
+            'band': 'GSM-1900'},
+           {'_hash': '1d6e3b08a3861fd4d748f111295ec5a93ecd3d23',
+            'arfcn': '544',
+            'band': 'GSM-1900'},
+           {'_hash': '8fb36927de15466fcdbee01f7f65704c312cb36c',
+            'arfcn': '546',
+            'band': 'GSM-1900'},
+           {'_hash': 'dc9ce027a257da087f31a5bc1ee6b4abd2637369',
+            'arfcn': '548',
+            'band': 'GSM-1900'}],
+ 'bts': [{'_hash': 'a7c6d2ebaeb139e8c2e7d45c3495d046d7439007',
+          'addr': '10.42.42.114',
+          'band': 'GSM-1800',
+          'label': 'sysmoBTS 1002',
+          'type': 'sysmo',
+          'unit_id': '1'},
+         {'_hash': '02540ab9eb556056a0b4d28443bc9f4793f6d549',
+          'addr': '10.42.42.115',
+          'band': 'GSM-1800',
+          'label': 'octBTS 3000',
+          'trx': [{'hwaddr': '00:0c:90:32:b5:8a'}],
+          'type': 'oct',
+          'unit_id': '5'},
+         {'_hash': '556c954d475d12cf0dc622c0df5743cac5543fa0',
+          'addr': '10.42.42.190',
+          'band': 'GSM-1900',
+          'label': 'nanoBTS 1900',
+          'trx': [{'hwaddr': '00:02:95:00:41:b3'}],
+          'type': 'nanobts',
+          'unit_id': '1902'}],
+ 'modem': [{'_hash': '19c69e45aa090fb511446bd00797690aa82ff52f',
+            'imsi': '901700000007801',
+            'ki': 'D620F48487B1B782DA55DF6717F08FF9',
+            'label': 'm7801',
+            'path': '/wavecom_0'},
+           {'_hash': 'e1a46516a1fb493b2617ab14fc1693a9a45ec254',
+            'imsi': '901700000007802',
+            'ki': '47FDB2D55CE6A10A85ABDAD034A5B7B3',
+            'label': 'm7802',
+            'path': '/wavecom_1'},
+           {'_hash': '4fe91500a309782bb0fd8ac6fc827834089f8b00',
+            'imsi': '901700000007803',
+            'ki': 'ABBED4C91417DF710F60675B6EE2C8D2',
+            'label': 'm7803',
+            'path': '/wavecom_2'},
+           {'_hash': 'c895badf0c2faaa4a997cd9f2313b5ebda7486e4',
+            'imsi': '901700000007804',
+            'ki': '8BA541179156F2BF0918CA3CFF9351B0',
+            'label': 'm7804',
+            'path': '/wavecom_3'},
+           {'_hash': '60f182abed05adb530e3d06d88cc47703b65d7d8',
+            'imsi': '901700000007805',
+            'ki': '82BEC24B5B50C9FAA69D17DEC0883A23',
+            'label': 'm7805',
+            'path': '/wavecom_4'},
+           {'_hash': 'd1f0fbf089a4bf32dd566af956d23b89e3d60821',
+            'imsi': '901700000007806',
+            'ki': 'DAF6BD6A188F7A4F09866030BF0F723D',
+            'label': 'm7806',
+            'path': '/wavecom_5'},
+           {'_hash': '2445e3b5949d15f4351c0db1d3f3f593f9d73aa5',
+            'imsi': '901700000007807',
+            'ki': 'AEB411CFE39681A6352A1EAE4DDC9DBA',
+            'label': 'm7807',
+            'path': '/wavecom_6'},
+           {'_hash': '80247388b2ca382382c4aec678102355b7922965',
+            'imsi': '901700000007808',
+            'ki': 'F5DEF8692B305D7A65C677CA9EEE09C4',
+            'label': 'm7808',
+            'path': '/wavecom_7'},
+           {'_hash': '5b9e4e117a8889430542d22a9693e7b999362856',
+            'imsi': '901700000007809',
+            'ki': 'A644F4503E812FD75329B1C8D625DA44',
+            'label': 'm7809',
+            'path': '/wavecom_8'},
+           {'_hash': '219a7abb057050eef3ce4b99c487f32bbaae9a41',
+            'imsi': '901700000007810',
+            'ki': 'EF663BDF3477DCD18D3D2293A2BAED67',
+            'label': 'm7810',
+            'path': '/wavecom_9'},
+           {'_hash': '75d45c2d975b893da34c7cae827c25a2039cecd2',
+            'imsi': '901700000007811',
+            'ki': 'E88F37F048A86A9BC4D652539228C039',
+            'label': 'm7811',
+            'path': '/wavecom_10'},
+           {'_hash': '1777362f556b249a5c1d6a83110704dbd037bc20',
+            'imsi': '901700000007812',
+            'ki': 'E8D940DD66FCF6F1CD2C0F8F8C45633D',
+            'label': 'm7812',
+            'path': '/wavecom_11'},
+           {'_hash': '21d7eb4b0c782e004821a9f7f778891c93956924',
+            'imsi': '901700000007813',
+            'ki': 'DBF534700C10141C49F699B0419107E3',
+            'label': 'm7813',
+            'path': '/wavecom_12'},
+           {'_hash': 'f53e4e79bdbc63eb2845de671007d4f733f28409',
+            'imsi': '901700000007814',
+            'ki': 'B36021DEB90C4EA607E408A92F3B024D',
+            'label': 'm7814',
+            'path': '/wavecom_13'},
+           {'_hash': 'df1abec7704ebc89b2c062a69bd299cf3663ed9e',
+            'imsi': '901700000007815',
+            'ki': '1E209F6F839F9195778C4F96BE281A24',
+            'label': 'm7815',
+            'path': '/wavecom_14'},
+           {'_hash': '11df1e4c7708157e5b89020c757763f58d6e610b',
+            'imsi': '901700000007816',
+            'ki': 'BF827D219E739DD189F6F59E60D6455C',
+            'label': 'm7816',
+            'path': '/wavecom_15'}],
+ 'nitb_iface': [{'_hash': 'cde1debf28f07f94f92c761b4b7c6bf35785ced4',
+                 'addr': '10.42.42.1'},
+                {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
+                 'addr': '10.42.42.2'},
+                {'_hash': '1c614d6210c551d142aadca8f25e1534ebb2a70f',
+                 'addr': '10.42.42.3'}]}
+*** end: all resources
+
+- request some resources
+--- (want='nitb_iface'): DBG: Looking for 1 x nitb_iface , candidates: 3
+--- (want='arfcn'): DBG: Looking for 2 x arfcn , candidates: 10
+--- (want='bts'): DBG: Looking for 2 x bts , candidates: 3
+--- (want='modem'): DBG: Looking for 2 x modem , candidates: 16
+~~~ currently reserved:
+arfcn:
+- _hash: e620569450f8259b3f0212ec19c285dd07df063c
+  _reserved_by: testowner-123-1490837279
+  arfcn: '512'
+  band: GSM-1800
+- _hash: 022621e513c5a5bf33b77430a1e9c886be676fa1
+  _reserved_by: testowner-123-1490837279
+  arfcn: '514'
+  band: GSM-1800
+bts:
+- _hash: a7c6d2ebaeb139e8c2e7d45c3495d046d7439007
+  _reserved_by: testowner-123-1490837279
+  addr: 10.42.42.114
+  band: GSM-1800
+  label: sysmoBTS 1002
+  type: sysmo
+  unit_id: '1'
+- _hash: 02540ab9eb556056a0b4d28443bc9f4793f6d549
+  _reserved_by: testowner-123-1490837279
+  addr: 10.42.42.115
+  band: GSM-1800
+  label: octBTS 3000
+  trx:
+  - hwaddr: 00:0c:90:32:b5:8a
+  type: oct
+  unit_id: '5'
+modem:
+- _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  _reserved_by: testowner-123-1490837279
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  _reserved_by: testowner-123-1490837279
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+nitb_iface:
+- _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  _reserved_by: testowner-123-1490837279
+  addr: 10.42.42.1
+
+~~~ end: currently reserved
+
+~~~ currently reserved:
+{}
+
+~~~ end: currently reserved
+

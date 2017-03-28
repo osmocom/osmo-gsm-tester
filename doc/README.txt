@@ -89,4 +89,4 @@ LAUNCHING A TEST RUN
 
 osmo-gsm-tester watches /var/tmp/osmo-gsm-tester for instructions to launch
 test runs.  A test run is triggered by a subdirectory containing binaries and a
-manifest file, typically created by jenkins using the enclosed scripts.
+checksums file, typically created by jenkins using the scripts in contrib/.

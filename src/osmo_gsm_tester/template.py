@@ -23,7 +23,7 @@ from mako.template import Template
 from mako.lookup import TemplateLookup
 
 from . import log
-from .utils import dict2obj
+from .util import dict2obj
 
 _lookup = None
 _logger = log.Origin('no templates dir set')
@@ -47,10 +47,12 @@ def render(name, values):
     global _lookup
     if _lookup is None:
         set_templates_dir()
-    with _logger:
-        tmpl_name = name + '.tmpl'
+    tmpl_name = name + '.tmpl'
+    with log.Origin(tmpl_name):
         template = _lookup.get_template(tmpl_name)
         _logger.dbg('rendering', tmpl_name)
+
+        line_info_name = tmpl_name.replace('-', '_').replace('.', '_')
         return template.render(**dict2obj(values))
 
 # vim: expandtab tabstop=4 shiftwidth=4

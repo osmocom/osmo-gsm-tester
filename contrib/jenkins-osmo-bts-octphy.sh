@@ -91,4 +91,4 @@ main "$octbts_repos"
 
 # build the archive that is going to be copied to the tester and then to the BTS
 rm -f $WORKSPACE/osmo-bts-octphy*.tgz
-tar czf $WORKSPACE/osmo-bts-octphy-build-$BUILD_NUMBER.tgz inst-osmo-bts-octphy
+tar czf $WORKSPACE/osmo-bts-octphy.build-$BUILD_NUMBER.tgz inst-osmo-bts-octphy

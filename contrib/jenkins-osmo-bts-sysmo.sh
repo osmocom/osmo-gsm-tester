@@ -60,9 +60,6 @@ for dep in $deps; do
 done
 
 # build the archive that is going to be copied to the tester and then to the BTS
-tar_name="osmo-bts-sysmo-build-"
-if ls "$base/$tar_name"* ; then
-	rm -f "$base/$tar_name"*
-fi
+rm -f "$base/osmo-bts-sysmo.*.tgz"
 cd "$prefix_base_real"
-tar cvzf "$base/$tar_name${BUILD_NUMBER}.tgz" *
+tar cvzf "$base/osmo-bts-sysmo.build-${BUILD_NUMBER}.tgz" *

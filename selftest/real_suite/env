@@ -1,0 +1,4 @@
+OSMO_GSM_TESTER_SRC="$(readlink -f ../../src)"
+export PYTHONPATH="$OSMO_GSM_TESTER_SRC"
+export PATH="$OSMO_GSM_TESTER_SRC:$PATH"
+export OSMO_GSM_TESTER_CONF="$PWD"

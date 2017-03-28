@@ -22,5 +22,6 @@ import tempfile
 import time
 import traceback
 import yaml
+import pydbus
 
-print('ok')
+print('dependencies ok')

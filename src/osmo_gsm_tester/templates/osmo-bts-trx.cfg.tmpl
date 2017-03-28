@@ -1,0 +1,22 @@
+! Configuration rendered by osmo-gsm-tester
+log stderr
+  logging color 1
+  logging timestamp 1
+  logging print extended-timestamp 1
+  logging print category 1
+  logging level all debug
+  logging level l1c info
+  logging level linp info
+!
+phy 0
+ instance 0
+ osmotrx rx-gain 25
+bts 0
+ band ${osmo_bts_trx.band}
+ ipa unit-id ${osmo_bts_trx.ipa_unit_id} 0
+ oml remote-ip ${osmo_bts_trx.oml_remote_ip}
+ settsc
+ gsmtap-sapi ccch
+ gsmtap-sapi pdtch
+ trx 0
+  phy 0 instance 0

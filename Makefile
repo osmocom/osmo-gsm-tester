@@ -9,7 +9,7 @@ version:
 	./update_version.sh
 
 check:
-	$(MAKE) -C test check	
+	$(MAKE) -C selftest check	
 	@echo "make check: success"
 
 # vim: noexpandtab tabstop=8 shiftwidth=8

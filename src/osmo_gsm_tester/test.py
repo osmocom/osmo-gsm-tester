@@ -1,4 +1,4 @@
-# osmo_gsm_tester: prepare a test run and provide test API
+# osmo_gsm_tester: context for individual test runs
 #
 # Copyright (C) 2016-2017 by sysmocom - s.f.m.c. GmbH
 #
@@ -17,27 +17,33 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os
-import pprint
-import inspect
+# These will be initialized before each test run.
+# A test script can thus establish its context by doing:
+# from osmo_gsm_tester.test import *
+trial = None
+suite = None
+test = None
+resources = None
+log = None
+dbg = None
+err = None
+wait = None
+sleep = None
+poll = None
+prompt = None
 
-from . import suite as _suite
-from . import log
-from . import resource
+def setup(suite_run, _test, ofono_client):
+    global trial, suite, test, resources, log, dbg, err, wait, sleep, poll, prompt
+    trial = suite_run.trial
+    suite = suite_run
+    test = _test
+    resources = suite_run.reserved_resources
+    log = test.log
+    dbg = test.dbg
+    err = test.err
+    wait = suite_run.wait
+    sleep = suite_run.sleep
+    poll = suite_run.poll
+    prompt = suite_run.prompt
 
-# load the configuration for the test
-suite = _suite.Suite(sys.path[0])
-test = _suite.Test(suite, os.path.basename(inspect.stack()[-1][1]))
-
-def test_except_hook(*exc_info):
-    log.exn_add_info(exc_info, test)
-    log.exn_add_info(exc_info, suite)
-    log.log_exn(exc_info=exc_info)
-
-sys.excepthook = test_except_hook
-
-orig_stdout, sys.stdout = sys.stdout, test
-
-resources = {}
-	
 # vim: expandtab tabstop=4 shiftwidth=4

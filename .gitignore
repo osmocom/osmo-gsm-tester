@@ -1,0 +1,6 @@
+__pycache__
+pid
+.*.sw?
+version
+_version.py
+tags

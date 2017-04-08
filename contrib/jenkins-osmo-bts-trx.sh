@@ -1,8 +1,10 @@
+#!/bin/sh
 set -x -e
 
 base="$PWD"
-inst="inst-osmo-bts-trx"
-prefix="$base/$inst"
+prefix="$base/inst-osmo-bts-trx"
+
+rm -f "$base/osmo-bts-trx*.tgz"
 
 deps="
 libosmocore
@@ -38,6 +40,8 @@ export LD_LIBRARY_PATH="$prefix/lib"
 for dep in $deps; do
 	have_repo "$dep"
 	cd "$dep"
+	rm -rf *
+	git checkout .
 
 	echo "$(git rev-parse HEAD) $dep" >> "$prefix/osmo-bts-trx_osmo-trx_git_hashes.txt"
 
@@ -56,6 +60,5 @@ for dep in $deps; do
 done
 
 # build the archive that is going to be copied to the tester
-rm -f "$base/osmo-bts-trx*.tgz"
-cd "$base"
-tar czf "osmo-bts-trx.build-${BUILD_NUMBER}.tgz" "$inst"
+cd "$prefix"
+tar czf "$base/osmo-bts-trx.build-${BUILD_NUMBER}.tgz" *

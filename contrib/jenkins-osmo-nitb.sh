@@ -1,15 +1,18 @@
-#!/bin/sh
-set -x -e
+set -e -x
 
 base="$PWD"
-prefix="$base/inst-osmo-bts-octphy"
+prefix="$base/inst-osmo-nitb"
 
-rm -f "$base/osmo-bts-octphy*.tgz"
+rm -f "$base/osmo-nitb*.tgz"
 
 deps="
 libosmocore
 libosmo-abis
-osmo-bts
+libosmo-netif
+openggsn
+libsmpp34
+libosmo-sccp
+openbsc
 "
 
 have_repo() {
@@ -26,13 +29,6 @@ have_repo() {
 	cd "$base"
 }
 
-# for gsm_data_shared.*
-have_repo openbsc
-
-# octphy headers
-have_repo octphy-2g-headers
-
-
 rm -rf "$prefix"
 mkdir -p "$prefix"
 
@@ -45,21 +41,23 @@ for dep in $deps; do
 	rm -rf *
 	git checkout .
 
-	echo "$(git rev-parse HEAD) $dep" >> "$prefix/osmo-bts-octphy_git_hashes.txt"
-
-	autoreconf -fi
+	echo "$(git rev-parse HEAD) $dep" >> "$prefix/osmo-nitb_git_hashes.txt"
 
 	config_opts=""
 
-	case "$repo" in
-	'osmo-bts')	config_opts="$config_opts --enable-octphy --with-octsdr-2g=$base/octphy-2g-headers" ;;
+	case "$dep" in
+	'openbsc')
+		config_opts="$config_opts --enable-smpp --enable-osmo-bsc --enable-nat"
+		cd openbsc/
+	;;
 	esac
 
+	autoreconf -fi
 	./configure --prefix="$prefix" $config_opts
-	make -j8
+	make -j8 || make  # libsmpp34 can't build in parallel
 	make install
 done
 
 # build the archive that is going to be copied to the tester
 cd "$prefix"
-tar czf "$base/osmo-bts-octphy.build-${BUILD_NUMBER}.tgz" *
+tar czf "$base/osmo-nitb.build-${BUILD_NUMBER}.tgz" *

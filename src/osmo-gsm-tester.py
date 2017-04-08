@@ -66,7 +66,8 @@ package's directory: Upon launch, a 'test_package/run.<date>' directory will be
 created, which will collect logs and reports.
 '''
 
-from osmo_gsm_tester import trial, suite, log, __version__
+from osmo_gsm_tester import __version__
+from osmo_gsm_tester import trial, suite, log, config
 
 if __name__ == '__main__':
     import argparse
@@ -108,6 +109,12 @@ if __name__ == '__main__':
     combination_strs = list(args.suite_scenario or [])
     # for series in args.series:
     #     combination_strs.extend(config.get_series(series))
+
+    if not combination_strs:
+        combination_strs = config.read_config_file(config.DEFAULT_SUITES_CONF, if_missing_return=[])
+
+        if combination_strs:
+            print('Running default suites:\n  ' + ('\n  '.join(combination_strs)))
 
     if not combination_strs:
         raise RuntimeError('Need at least one suite:scenario or series to run')

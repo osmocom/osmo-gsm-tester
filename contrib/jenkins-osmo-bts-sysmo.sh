@@ -1,3 +1,4 @@
+#!/bin/sh
 set -e -x
 
 deps="
@@ -7,6 +8,7 @@ osmo-bts
 "
 
 base="$PWD"
+rm -f "$base/osmo-bts-sysmo.*.tgz"
 
 have_repo() {
 	repo="$1"
@@ -31,6 +33,7 @@ have_repo openbsc
 
 . /opt/poky/1.5.4/environment-setup-armv5te-poky-linux-gnueabi
 
+# Cross-compilation: all installations need to be put in the sysmo SDK sysroot
 export DESTDIR=/opt/poky/1.5.4/sysroots/armv5te-poky-linux-gnueabi
 
 prefix_base="/usr/local/jenkins-build"
@@ -42,24 +45,25 @@ prefix_real="$DESTDIR$prefix"
 mkdir -p "$prefix_real"
 
 for dep in $deps; do
-    cd "$base/$dep"
+        cd "$base/$dep"
+        rm -rf *
+        git checkout .
 
-    echo "$(git rev-parse HEAD) $dep" >> "$prefix_real/osmo-bts-sysmo_git_hashes.txt"
+        echo "$(git rev-parse HEAD) $dep" >> "$prefix_real/osmo-bts-sysmo_git_hashes.txt"
 
-    autoreconf -fi
+        autoreconf -fi
 
-    config_opts=""
-    case "$dep" in
-    'libosmocore')    config_opts="--disable-pcsc" ;;
-    'osmo-bts')       config_opts="--enable-sysmocom-bts --with-openbsc=$base/openbsc/openbsc/include" ;;
-    esac
+        config_opts=""
+        case "$dep" in
+        'libosmocore')    config_opts="--disable-pcsc" ;;
+        'osmo-bts')       config_opts="--enable-sysmocom-bts --with-openbsc=$base/openbsc/openbsc/include" ;;
+        esac
 
-    ./configure --prefix="$prefix" $CONFIGURE_FLAGS $config_opts
-    make -j8
-    make install
+        ./configure --prefix="$prefix" $CONFIGURE_FLAGS $config_opts
+        make -j8
+        make install
 done
 
 # build the archive that is going to be copied to the tester and then to the BTS
-rm -f "$base/osmo-bts-sysmo.*.tgz"
-cd "$prefix_base_real"
+cd "$prefix_real"
 tar cvzf "$base/osmo-bts-sysmo.build-${BUILD_NUMBER}.tgz" *

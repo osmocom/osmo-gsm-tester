@@ -66,6 +66,7 @@ package's directory: Upon launch, a 'test_package/run.<date>' directory will be
 created, which will collect logs and reports.
 '''
 
+import sys
 from osmo_gsm_tester import __version__
 from osmo_gsm_tester import trial, suite, log, config
 

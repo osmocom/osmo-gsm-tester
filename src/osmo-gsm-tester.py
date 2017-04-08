@@ -115,6 +115,9 @@ if __name__ == '__main__':
 
         if combination_strs:
             print('Running default suites:\n  ' + ('\n  '.join(combination_strs)))
+        else:
+            print('No default suites configured (%r)' % config.DEFAULT_SUITES_CONF)
+
 
     if not combination_strs:
         raise RuntimeError('Need at least one suite:scenario or series to run')

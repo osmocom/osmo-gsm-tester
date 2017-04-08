@@ -61,9 +61,9 @@ ENV_CONF = os.getenv(ENV_PREFIX + 'CONF')
 
 DEFAULT_CONFIG_LOCATIONS = [
     '.',
-    os.path.join(os.getenv('HOME'), '.config', 'osmo_gsm_tester'),
-    '/usr/local/etc/osmo_gsm_tester',
-    '/etc/osmo_gsm_tester'
+    os.path.join(os.getenv('HOME'), '.config', 'osmo-gsm-tester'),
+    '/usr/local/etc/osmo-gsm-tester',
+    '/etc/osmo-gsm-tester'
     ]
 
 PATHS_CONF = 'paths.conf'
@@ -81,7 +81,7 @@ PATHS_TEMPDIR_STR = '$TEMPDIR'
 
 PATHS = None
 
-def get_config_file(basename, fail_if_missing=True):
+def _get_config_file(basename, fail_if_missing=True):
     if ENV_CONF:
         locations = [ ENV_CONF ]
     else:
@@ -90,17 +90,23 @@ def get_config_file(basename, fail_if_missing=True):
     for l in locations:
         p = os.path.join(l, basename)
         if os.path.isfile(p):
-            return p
+            return (p, l)
     if not fail_if_missing:
-        return None
+        return None, None
     raise RuntimeError('configuration file not found: %r in %r' % (basename,
         [os.path.abspath(p) for p in locations]))
+
+def get_config_file(basename, fail_if_missing=True):
+    path, found_in = _get_config_file(basename, fail_if_missing)
+    return path
 
 def read_config_file(basename, validation_schema=None, if_missing_return=False):
     fail_if_missing = True
     if if_missing_return is not False:
         fail_if_missing = False
     path = get_config_file(basename, fail_if_missing=fail_if_missing)
+    if path is None:
+        return if_missing_return
     return read(path, validation_schema=validation_schema, if_missing_return=if_missing_return)
 
 def get_configured_path(label, allow_unset=False):
@@ -112,8 +118,11 @@ def get_configured_path(label, allow_unset=False):
         return env_path
 
     if PATHS is None:
-        paths_file = get_config_file(PATHS_CONF)
+        paths_file, found_in = _get_config_file(PATHS_CONF)
         PATHS = read(paths_file, PATHS_SCHEMA)
+        for key, path in PATHS.items():
+            if not path.startswith(os.pathsep):
+                PATHS[key] = os.path.join(found_in, path)
     p = PATHS.get(label)
     if p is None and not allow_unset:
         raise RuntimeError('missing configuration in %s: %r' % (PATHS_CONF, label))

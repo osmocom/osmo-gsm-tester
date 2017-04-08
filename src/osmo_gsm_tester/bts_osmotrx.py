@@ -51,7 +51,10 @@ class OsmoBtsTrx(log.Origin):
         self.configure()
 
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts-trx')))
-        self.env = { 'LD_LIBRARY_PATH': str(self.inst) }
+        lib = self.inst.child('lib')
+        if not os.path.isdir(lib):
+            raise RuntimeError('No lib/ in %r' % self.inst)
+        self.env = { 'LD_LIBRARY_PATH': lib }
 
         self.launch_process(OsmoBtsTrx.BIN_TRX)
         self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1', '-c', os.path.abspath(self.config_file))

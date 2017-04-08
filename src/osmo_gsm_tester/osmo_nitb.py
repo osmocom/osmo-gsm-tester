@@ -43,11 +43,14 @@ class OsmoNitb(log.Origin):
         self.log('Starting osmo-nitb')
         self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
         self.configure()
-        inst = util.Dir(self.suite_run.trial.get_inst('openbsc'))
-        binary = os.path.abspath(inst.child('bin', 'osmo-nitb'))
+        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-nitb')))
+        binary = inst.child('bin', 'osmo-nitb')
         if not os.path.isfile(binary):
             raise RuntimeError('Binary missing: %r' % binary)
-        env = { 'LD_LIBRARY_PATH': os.path.abspath(str(inst)) }
+        lib = inst.child('lib')
+        if not os.path.isdir(lib):
+            raise RuntimeError('No lib/ in %r' % inst)
+        env = { 'LD_LIBRARY_PATH': lib }
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir,
                                        (binary, '-c',

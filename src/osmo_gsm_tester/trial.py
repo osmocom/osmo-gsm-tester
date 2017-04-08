@@ -50,7 +50,7 @@ class Trial(log.Origin):
 
     def __init__(self, trial_dir):
         self.path = trial_dir
-        self.set_name(self.path)
+        self.set_name(os.path.basename(self.path))
         self.set_log_category(log.C_TST)
         self.dir = util.Dir(self.path)
         self.inst_dir = util.Dir(self.dir.child('inst'))
@@ -133,7 +133,7 @@ class Trial(log.Origin):
     def get_inst(self, bin_name):
         bin_tar = self.has_bin_tar(bin_name)
         if not bin_tar:
-            return None
+            raise RuntimeError('No such binary available: %r' % bin_name)
         inst_dir = self.inst_dir.child(bin_name)
 
         if os.path.isdir(inst_dir):

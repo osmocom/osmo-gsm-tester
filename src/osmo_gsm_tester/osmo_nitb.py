@@ -98,9 +98,11 @@ class OsmoNitb(log.Origin):
         return all([self.imsi_attached(m.imsi()) for m in modems])
 
     def imsi_attached(self, imsi):
+        self.err('OsmoNitb.imsi_attached() is still fake and does not do anything')
         return random.choice((True, False))
 
     def sms_received(self, sms):
+        self.err('OsmoNitb.sms_received() is still fake and does not do anything')
         return random.choice((True, False))
 
     def running(self):

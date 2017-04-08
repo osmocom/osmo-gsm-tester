@@ -109,9 +109,11 @@ class Modem(log.Origin):
     def connect(self, nitb):
         'set the modem up to connect to MCC+MNC from NITB config'
         self.log('connect to', nitb)
+        self.err('Modem.connect() is still a fake and does not do anything')
 
     def sms_send(self, msisdn):
         self.log('send sms to MSISDN', msisdn)
+        self.err('Modem.sms_send() is still a fake and does not do anything')
         return 'todo'
 
 # vim: expandtab tabstop=4 shiftwidth=4

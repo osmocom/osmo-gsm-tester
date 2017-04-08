@@ -168,6 +168,8 @@ if __name__ == '__main__':
                 current_trial.err('FAIL')
                 trials_failed.append(current_trial.name())
 
+    sys.stderr.flush()
+    sys.stdout.flush()
     if trials_passed:
         print('Trials passed:\n  ' + ('\n  '.join(trials_passed)))
     if trials_failed:

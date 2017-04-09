@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log
+from . import log, test
 
 from pydbus import SystemBus, Variant
 import time
@@ -27,6 +27,9 @@ from gi.repository import GLib
 glib_main_loop = GLib.MainLoop()
 glib_main_ctx = glib_main_loop.get_context()
 bus = SystemBus()
+
+I_NETREG = 'org.ofono.NetworkRegistration'
+I_SMS = 'org.ofono.MessageManager'
 
 def poll():
     global glib_main_ctx
@@ -52,8 +55,8 @@ class Modem(log.Origin):
         self.set_name(self.path)
         self.set_log_category(log.C_BUS)
         self._dbus_obj = None
-        self._interfaces_was = set()
-        poll()
+        self._interfaces = set()
+        test.poll()
 
     def set_msisdn(self, msisdn):
         self.msisdn = msisdn
@@ -65,7 +68,9 @@ class Modem(log.Origin):
         return self.conf.get('ki')
 
     def set_powered(self, on=True):
+        test.poll()
         self.dbus_obj.SetProperty('Powered', Variant('b', on))
+        test.poll()
 
     def dbus_obj(self):
         if self._dbus_obj is not None:
@@ -83,9 +88,9 @@ class Modem(log.Origin):
 
     def _on_interfaces_change(self, interfaces_now):
         now = set(interfaces_now)
-        additions = now - self._interfaces_was
-        removals = self._interfaces_was - now
-        self._interfaces_was = now
+        additions = now - self._interfaces
+        removals = self._interfaces - now
+        self._interfaces = now
         for iface in removals:
             with log.Origin('modem.disable(%s)' % iface):
                 try:
@@ -101,19 +106,62 @@ class Modem(log.Origin):
 
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)
-        # todo: when the messages service comes up, connect a message reception signal
+        if interface_name == I_SMS:
+            self._dbus_obj[I_SMS].IncomingMessage.connect(self._on_incoming_message)
 
     def _on_interface_disabled(self, interface_name):
         self.dbg('Interface disabled:', interface_name)
 
+    def has_interface(self, name):
+        return name in self._interfaces
+
     def connect(self, nitb):
         'set the modem up to connect to MCC+MNC from NITB config'
         self.log('connect to', nitb)
-        self.err('Modem.connect() is still a fake and does not do anything')
+        self.set_powered()
+        if not self.has_interface(I_NETREG):
+            self.log('No %r interface, hoping that the modem connects by itself' % I_NETREG)
+        else:
+            self.log('Use of %r interface not implemented yet, hoping that the modem connects by itself' % I_NETREG)
 
-    def sms_send(self, msisdn):
-        self.log('send sms to MSISDN', msisdn)
-        self.err('Modem.sms_send() is still a fake and does not do anything')
-        return 'todo'
+    def sms_send(self, to_msisdn):
+        if hasattr(to_msisdn, 'msisdn'):
+            to_msisdn = to_msisdn.msisdn
+        self.log('sending sms to MSISDN', to_msisdn)
+        if not self.has_interface(I_SMS):
+            raise RuntimeError('Modem cannot send SMS, interface not active: %r' % I_SMS)
+        sms = Sms(self.msisdn(), to_msisdn)
+        mm = self.dbus_obj[I_SMS]
+        mm.SendMessage(to_msisdn, str(sms))
+        return sms
+
+    def _on_incoming_message(self, message, info):
+        self.log('Incoming SMS:', repr(message), **info)
+
+    def sms_received(self, sms):
+        pass
+
+class Sms:
+    _last_sms_idx = 0
+    msg = None
+
+    def __init__(self, from_msisdn=None, to_msisdn=None):
+        Sms._last_sms_idx += 1
+        msgs = ['message nr. %d' % Sms._last_sms_idx]
+        if from_msisdn or to_msisdn:
+            msgs.append(' sent')
+        if from_msisdn:
+            msgs.append(' from %s' % from_msisdn)
+        if to_msisdn:
+            msgs.append(' to %s' % to_msisdn)
+        self.msg = ''.join(msgs)
+
+    def __str__(self):
+        return self.msg
+
+    def __eq__(self, other):
+        if isinstance(other, Sms):
+            return self.msg == other.msg
+        return inself.msg == other
 
 # vim: expandtab tabstop=4 shiftwidth=4

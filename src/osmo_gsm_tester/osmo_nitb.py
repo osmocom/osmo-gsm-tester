@@ -82,28 +82,28 @@ class OsmoNitb(log.Origin):
     def addr(self):
         return self.nitb_iface.get('addr')
 
-    def add_bts(self, bts):
+    def bts_add(self, bts):
         self.bts.append(bts)
         bts.set_nitb(self)
 
-    def add_subscriber(self, modem, msisdn=None):
+    def subscriber_add(self, modem, msisdn=None):
         if msisdn is None:
             msisdn = self.suite_run.resources_pool.next_msisdn(modem)
         modem.set_msisdn(msisdn)
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi())
         with self:
-            OsmoNitbCtrl(self).add_subscriber(modem.imsi(), msisdn, modem.ki())
+            OsmoNitbCtrl(self).subscriber_add(modem.imsi(), msisdn, modem.ki())
 
     def subscriber_attached(self, *modems):
-        return all([self.imsi_attached(m.imsi()) for m in modems])
+        return self.imsi_attached([m.imsi() for m in modems])
 
-    def imsi_attached(self, imsi):
-        self.err('OsmoNitb.imsi_attached() is still fake and does not do anything')
-        return random.choice((True, False))
+    def imsi_attached(self, *imsis):
+        attached = self.imsi_list_attached()
+        return all([imsi in attached for imsi in imsis])
 
-    def sms_received(self, sms):
-        self.err('OsmoNitb.sms_received() is still fake and does not do anything')
-        return random.choice((True, False))
+    def imsi_list_attached(self):
+        with self:
+            OsmoNitbCtrl(self).subscriber_list_active()
 
     def running(self):
         return not self.process.terminated()
@@ -123,7 +123,7 @@ class OsmoNitbCtrl(log.Origin):
     def ctrl(self):
         return osmo_ctrl.OsmoCtrl(self.nitb.addr(), OsmoNitbCtrl.PORT)
 
-    def add_subscriber(self, imsi, msisdn, ki=None, algo=None):
+    def subscriber_add(self, imsi, msisdn, ki=None, algo=None):
         created = False
         if ki and not algo:
             algo = 'comp128v1'
@@ -149,7 +149,8 @@ class OsmoNitbCtrl(log.Origin):
         aslist_str = ""
         with osmo_ctrl.OsmoCtrl(self.nitb.addr(), OsmoNitbCtrl.PORT) as ctrl:
             self.ctrl.do_get(OsmoNitbCtrl.SUBSCR_LIST_ACTIVE_VAR)
-            # this looks like it doesn't work for long data. It's legacy code from the old osmo-gsm-tester.
+            # This is legacy code from the old osmo-gsm-tester.
+            # looks like this doesn't work for long data.
             data = self.ctrl.receive()
             while (len(data) > 0):
                 (answer, data) = self.ctrl.remove_ipa_ctrl_header(data)

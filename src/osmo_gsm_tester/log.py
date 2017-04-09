@@ -48,6 +48,9 @@ DATEFMT = '%H:%M:%S'
 # may be overridden by regression tests
 get_process_id = lambda: '%d-%d' % (os.getpid(), time.time())
 
+class Error(Exception):
+    pass
+
 class LogTarget:
     do_log_time = None
     do_log_category = None
@@ -166,13 +169,7 @@ class LogTarget:
         else:
             loglevel = ''
 
-        log_line = [str(m) for m in messages]
-
-        if named_items:
-            # unfortunately needs to be sorted to get deterministic results
-            log_line.append('{%s}' %
-                            (', '.join(['%s=%r' % (k,v)
-                             for k,v in sorted(named_items.items())])))
+        log_line = [compose_message(messages, named_items)]
 
         if deeper_origins:
             log_line.append(' [%s]' % deeper_origins)
@@ -315,6 +312,10 @@ class Origin:
             rc = exn_add_info(exc_info, self)
         Origin._global_current_origin, self._parent_origin = self._parent_origin, None
         return rc
+
+    def raise_exn(self, *messages, exn_class=Error, **named_items):
+        with self:
+            raise exn_class(compose_message(messages, named_items))
 
     def redirect_stdout(self):
         return contextlib.redirect_stdout(SafeRedirectStdout(self))
@@ -497,5 +498,16 @@ def run_logging_exceptions(func, *func_args, return_on_failure=None, **func_kwar
     except:
         log_exn()
         return return_on_failure
+
+def compose_message(messages, named_items):
+    msgs = [str(m) for m in messages]
+
+    if named_items:
+        # unfortunately needs to be sorted to get deterministic results
+        msgs.append('{%s}' %
+                    (', '.join(['%s=%r' % (k,v)
+                     for k,v in sorted(named_items.items())])))
+
+    return ' '.join(msgs)
 
 # vim: expandtab tabstop=4 shiftwidth=4

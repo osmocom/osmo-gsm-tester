@@ -250,10 +250,14 @@ class SuiteRun(log.Origin):
         self.wait(lambda: False, timeout=seconds)
 
     def poll(self):
+        ofono_client.poll()
         if self._processes:
             for process in self._processes:
                 process.poll()
-        ofono_client.poll()
+                if not process.is_running():
+                    process.log_stdout_tail()
+                    process.log_stderr_tail()
+                    process.raise_exn('Process ended prematurely')
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

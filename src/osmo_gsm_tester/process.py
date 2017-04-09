@@ -133,8 +133,20 @@ class Process(log.Origin):
             self.log('Terminated', rc=self.result)
         else:
             self.err('Terminated: ERROR', rc=self.result)
-            #self.err('stdout:\n', self.get_stdout_tail(prefix='| '), '\n')
-            self.err('stderr:\n', self.get_stderr_tail(prefix='| '), '\n')
+            #self.log_stdout_tail()
+            self.log_stderr_tail()
+
+    def log_stdout_tail(self):
+        m = self.get_stdout_tail(prefix='| ')
+        if not m:
+            return
+        self.log('stdout:\n', m, '\n')
+
+    def log_stderr_tail(self):
+        m = self.get_stderr_tail(prefix='| ')
+        if not m:
+            return
+        self.log('stderr:\n', m, '\n')
 
     def close_output_logs(self):
         self.dbg('Cleanup')
@@ -153,6 +165,9 @@ class Process(log.Origin):
         self.result = self.process_obj.poll()
         if self.result is not None:
             self.cleanup()
+
+    def is_running(self):
+        return self.process_obj is not None and self.result is None
 
     def get_output(self, which):
         v = self.outputs.get(which)

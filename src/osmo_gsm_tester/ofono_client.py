@@ -62,14 +62,18 @@ class Modem(log.Origin):
         self.msisdn = msisdn
 
     def imsi(self):
-        return self.conf.get('imsi')
+        imsi = self.conf.get('imsi')
+        if not imsi:
+            with self:
+                raise RuntimeError('No IMSI')
+        return imsi
 
     def ki(self):
         return self.conf.get('ki')
 
     def set_powered(self, on=True):
         test.poll()
-        self.dbus_obj.SetProperty('Powered', Variant('b', on))
+        self.dbus_obj().SetProperty('Powered', Variant('b', on))
         test.poll()
 
     def dbus_obj(self):
@@ -78,6 +82,7 @@ class Modem(log.Origin):
         self._dbus_obj = get(self.path)
         self._dbus_obj.PropertyChanged.connect(self._on_property_change)
         self._on_interfaces_change(self.properties().get('Interfaces'))
+        return self._dbus_obj
 
     def properties(self):
         return self.dbus_obj().GetProperties()
@@ -107,7 +112,7 @@ class Modem(log.Origin):
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)
         if interface_name == I_SMS:
-            self._dbus_obj[I_SMS].IncomingMessage.connect(self._on_incoming_message)
+            self.dbus_obj()[I_SMS].IncomingMessage.connect(self._on_incoming_message)
 
     def _on_interface_disabled(self, interface_name):
         self.dbg('Interface disabled:', interface_name)
@@ -131,7 +136,7 @@ class Modem(log.Origin):
         if not self.has_interface(I_SMS):
             raise RuntimeError('Modem cannot send SMS, interface not active: %r' % I_SMS)
         sms = Sms(self.msisdn(), to_msisdn)
-        mm = self.dbus_obj[I_SMS]
+        mm = self.dbus_obj()[I_SMS]
         mm.SendMessage(to_msisdn, str(sms))
         return sms
 

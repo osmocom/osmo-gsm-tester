@@ -17,7 +17,7 @@ if ssh "$osmo_gsm_tester_host" "test -d \"$osmo_gsm_tester_src\"" ; then
     echo "$status"
     exit 1
   fi
-  ssh "$osmo_gsm_tester_host" "cd \"$osmo_gsm_tester_src\"; git clean -fdx; git pull"
+  ssh "$osmo_gsm_tester_host" "cd \"$osmo_gsm_tester_src\"; git clean -fdx; git fetch; git reset --hard origin/master"
 else
   osmo_gsm_tester_src_dirname="$(dirname "$osmo_gsm_tester_src")"
   ssh "$osmo_gsm_tester_host" "git clone git://git.osmocom.org/osmo-gsm-tester.git \"$osmo_gsm_tester_src\""

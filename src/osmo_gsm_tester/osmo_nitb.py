@@ -95,15 +95,16 @@ class OsmoNitb(log.Origin):
             OsmoNitbCtrl(self).subscriber_add(modem.imsi(), msisdn, modem.ki())
 
     def subscriber_attached(self, *modems):
-        return self.imsi_attached([m.imsi() for m in modems])
+        return self.imsi_attached(*[m.imsi() for m in modems])
 
     def imsi_attached(self, *imsis):
         attached = self.imsi_list_attached()
-        return all([imsi in attached for imsi in imsis])
+        self.dbg('attached:', attached)
+        return all([(imsi in attached) for imsi in imsis])
 
     def imsi_list_attached(self):
         with self:
-            OsmoNitbCtrl(self).subscriber_list_active()
+            return OsmoNitbCtrl(self).subscriber_list_active()
 
     def running(self):
         return not self.process.terminated()
@@ -133,7 +134,7 @@ class OsmoNitbCtrl(log.Origin):
         else:
             value = '%s,%s' % (imsi, msisdn)
 
-        with osmo_ctrl.OsmoCtrl(self.nitb.addr(), OsmoNitbCtrl.PORT) as ctrl:
+        with self.ctrl() as ctrl:
             ctrl.do_set(OsmoNitbCtrl.SUBSCR_MODIFY_VAR, value)
             data = ctrl.receive()
             (answer, data) = ctrl.remove_ipa_ctrl_header(data)
@@ -147,15 +148,16 @@ class OsmoNitbCtrl(log.Origin):
     def subscriber_list_active(self):
         var = 'subscriber-list-active-v1'
         aslist_str = ""
-        with osmo_ctrl.OsmoCtrl(self.nitb.addr(), OsmoNitbCtrl.PORT) as ctrl:
-            self.ctrl.do_get(OsmoNitbCtrl.SUBSCR_LIST_ACTIVE_VAR)
+        with self.ctrl() as ctrl:
+            ctrl.do_get(OsmoNitbCtrl.SUBSCR_LIST_ACTIVE_VAR)
             # This is legacy code from the old osmo-gsm-tester.
             # looks like this doesn't work for long data.
-            data = self.ctrl.receive()
+            data = ctrl.receive()
             while (len(data) > 0):
-                (answer, data) = self.ctrl.remove_ipa_ctrl_header(data)
-                answer = answer.replace('\n', ' ')
-                aslist_str = answer
+                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
+                answer_str = answer.decode('utf-8')
+                answer_str = answer_str.replace('\n', ' ')
+                aslist_str = answer_str
             return aslist_str
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -11,7 +11,8 @@ osmo_gsm_tester_src="${OSMO_GSM_TESTER_REMOTE_SRC:-/usr/local/src/osmo-gsm-teste
 osmo_gsm_tester_dir="/var/tmp/osmo-gsm-tester"
 tmp_dir="/var/tmp/prep-osmo-gsm-tester"
 
-trial_name="$NODE_NAME-$BUILD_TAG"
+#trial_name="$NODE_NAME-$BUILD_TAG"
+trial_name="trial-$BUILD_NUMBER"
 local_trial_base="./compose_trial"
 local_trial_dir="$local_trial_base/$trial_name"
 
@@ -33,4 +34,4 @@ scp -r "$local_trial_dir" $osmo_gsm_tester_host:$tmp_dir/
 ssh "$osmo_gsm_tester_host" "mv $tmp_dir/$trial_name $osmo_gsm_tester_dir"
 trial_dir="$osmo_gsm_tester_dir/$trial_name"
 
-ssh "$osmo_gsm_tester_host" "$osmo_gsm_tester_src/src/osmo-gsm-tester.py $trial_dir"
+ssh "$osmo_gsm_tester_host" "$osmo_gsm_tester_src/src/osmo-gsm-tester.py $trial_dir -T"

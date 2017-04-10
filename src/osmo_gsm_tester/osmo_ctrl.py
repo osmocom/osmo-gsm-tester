@@ -79,10 +79,12 @@ class OsmoCtrl(log.Origin):
         self._send(getmsg)
 
     def __enter__(self):
+        super().__enter__()
         self.connect()
         return self
 
     def __exit__(self, *exc_info):
         self.disconnect()
+        super().__exit__(*exc_info)
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -22,7 +22,7 @@ import time
 import subprocess
 import signal
 
-from . import log
+from . import log, test
 from .util import Dir
 
 class Process(log.Origin):
@@ -166,7 +166,9 @@ class Process(log.Origin):
         if self.result is not None:
             self.cleanup()
 
-    def is_running(self):
+    def is_running(self, poll_first=True):
+        if poll_first:
+            self.poll()
         return self.process_obj is not None and self.result is None
 
     def get_output(self, which):
@@ -178,9 +180,12 @@ class Process(log.Origin):
             return f2.read()
 
     def get_output_tail(self, which, tail=10, prefix=''):
-        out = self.get_output(which).splitlines()
+        out = self.get_output(which)
+        if not out:
+            return None
+        out = out.splitlines()
         tail = min(len(out), tail)
-        return ('\n' + prefix).join(out[-tail:])
+        return prefix + ('\n' + prefix).join(out[-tail:])
 
     def get_stdout(self):
         return self.get_output('stdout')
@@ -194,28 +199,32 @@ class Process(log.Origin):
     def get_stderr_tail(self, tail=10, prefix=''):
         return self.get_output_tail('stderr', tail, prefix)
 
-    def terminated(self):
-        self.poll()
+    def terminated(self, poll_first=True):
+        if poll_first:
+            self.poll()
         return self.result is not None
 
-    def wait(self):
-        self.process_obj.wait()
-        self.poll()
+    def wait(self, timeout=300):
+        test.wait(self.terminated, timeout=timeout)
 
 
 class RemoteProcess(Process):
 
-    def __init__(self, remote_host, remote_cwd, *process_args, **process_kwargs):
-        super().__init__(*process_args, **process_kwargs)
+    def __init__(self, name, run_dir, remote_host, remote_cwd, popen_args, **popen_kwargs):
+        super().__init__(name, run_dir, popen_args, **popen_kwargs)
         self.remote_host = remote_host
         self.remote_cwd = remote_cwd
 
         # hacky: instead of just prepending ssh, i.e. piping stdout and stderr
         # over the ssh link, we should probably run on the remote side,
         # monitoring the process remotely.
-        self.popen_args = ['ssh', '-t', self.remote_host,
-                           'cd "%s"; %s' % (self.remote_cwd,
-                                            ' '.join(['"%s"' % arg for arg in self.popen_args]))]
+        if self.remote_cwd:
+            cd = 'cd "%s"; ' % self.remote_cwd
+        else:
+            cd = ''
+        self.popen_args = ['ssh', self.remote_host,
+                           '%s%s' % (cd,
+                                     ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
 
 # vim: expandtab tabstop=4 shiftwidth=4

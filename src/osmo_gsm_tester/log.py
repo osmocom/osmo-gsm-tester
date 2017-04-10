@@ -66,7 +66,7 @@ class LogTarget:
     get_time_str = lambda self: time.strftime(self.log_time_fmt)
 
     # sink that gets each complete logging line
-    log_sink = sys.stderr.write
+    log_sink = sys.__stdout__.write
 
     category_levels = None
 
@@ -182,8 +182,9 @@ class LogTarget:
                               loglevel,
                               ' '.join(log_line))
 
-        self.log_sink(log_str.strip() + '\n')
-
+        if not log_str.endswith('\n'):
+            log_str = log_str + '\n'
+        self.log_sink(log_str)
 
 targets = [ LogTarget() ]
 

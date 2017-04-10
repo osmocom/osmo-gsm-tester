@@ -232,9 +232,11 @@ class SuiteRun(log.Origin):
         self.log('using MSISDN', msisdn)
         return msisdn
 
-    def wait(self, condition, *condition_args, timeout=300, **condition_kwargs):
+    def _wait(self, condition, condition_args, condition_kwargs, timeout, timestep):
         if not timeout or timeout < 0:
             raise RuntimeError('wait() *must* time out at some point. timeout=%r' % timeout)
+        if timestep < 0.1:
+            timestep = 0.1
 
         started = time.time()
         while True:
@@ -244,17 +246,21 @@ class SuiteRun(log.Origin):
             waited = time.time() - started
             if waited > timeout:
                 return False
-            time.sleep(.1)
+            time.sleep(timestep)
+
+    def wait(self, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
+        if not self._wait(condition, condition_args, condition_kwargs, timeout, timestep):
+            raise RuntimeError('Timeout expired')
 
     def sleep(self, seconds):
-        self.wait(lambda: False, timeout=seconds)
+        assert seconds > 0.
+        self._wait(lambda: False, [], {}, timeout=seconds, timestep=min(seconds, 1))
 
     def poll(self):
         ofono_client.poll()
         if self._processes:
             for process in self._processes:
-                process.poll()
-                if not process.is_running():
+                if process.terminated():
                     process.log_stdout_tail()
                     process.log_stderr_tail()
                     process.raise_exn('Process ended prematurely')

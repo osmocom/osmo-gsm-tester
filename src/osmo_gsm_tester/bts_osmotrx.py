@@ -24,7 +24,6 @@ class OsmoBtsTrx(log.Origin):
     suite_run = None
     nitb = None
     run_dir = None
-    processes = None
     inst = None
     env = None
 
@@ -37,8 +36,6 @@ class OsmoBtsTrx(log.Origin):
         self.conf = conf
         self.set_name('osmo-bts-trx')
         self.set_log_category(log.C_RUN)
-        self.processes = {}
-        self.inst = None
         self.env = {}
 
     def start(self):
@@ -62,9 +59,6 @@ class OsmoBtsTrx(log.Origin):
         self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
-        if self.processes.get(binary_name) is not None:
-            raise RuntimeError('Attempt to launch twice: %r' % binary_name)
-
         binary = os.path.abspath(self.inst.child('bin', binary_name))
         run_dir = self.run_dir.new_dir(binary_name)
         if not os.path.isfile(binary):
@@ -72,7 +66,6 @@ class OsmoBtsTrx(log.Origin):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.processes[binary_name] = proc
         self.suite_run.remember_to_stop(proc)
         proc.launch()
 

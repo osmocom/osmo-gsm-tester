@@ -42,40 +42,41 @@ class SysmoBts(log.Origin):
         self.remote_env = {}
 
     def start(self):
-        if self.nitb is None:
-            raise RuntimeError('BTS needs to be added to a NITB before it can be started')
-        self.log('Starting sysmoBTS to connect to', self.nitb)
-        self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
-        self.configure()
+        with self:
+            if self.nitb is None:
+                raise RuntimeError('BTS needs to be added to a NITB before it can be started')
+            self.log('Starting sysmoBTS to connect to', self.nitb)
+            self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
+            self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(SysmoBts.BTS_SYSMO_BIN)))
-        lib = self.inst.child('lib')
-        if not os.path.isdir(lib):
-            self.raise_exn('No lib/ in', self.inst)
-        if not self.inst.isfile('bin', SysmoBts.BTS_SYSMO_BIN):
-            self.raise_exn('No osmo-bts-sysmo binary in', self.inst)
+            self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(SysmoBts.BTS_SYSMO_BIN)))
+            lib = self.inst.child('lib')
+            if not os.path.isdir(lib):
+                self.raise_exn('No lib/ in', self.inst)
+            if not self.inst.isfile('bin', SysmoBts.BTS_SYSMO_BIN):
+                self.raise_exn('No osmo-bts-sysmo binary in', self.inst)
 
-        self.remote_dir = util.Dir(SysmoBts.REMOTE_DIR)
-        self.remote_inst = util.Dir(self.remote_dir.child(os.path.basename(str(self.inst))))
+            self.remote_dir = util.Dir(SysmoBts.REMOTE_DIR)
+            self.remote_inst = util.Dir(self.remote_dir.child(os.path.basename(str(self.inst))))
 
-        self.run_remote('rm-remote-dir', ('test', '!', '-d', SysmoBts.REMOTE_DIR, '||', 'rm', '-rf', SysmoBts.REMOTE_DIR))
-        self.run_remote('mk-remote-dir', ('mkdir', '-p', SysmoBts.REMOTE_DIR))
-        self.run_local('scp-inst-to-sysmobts',
-            ('scp', '-r', str(self.inst), '%s:%s' % (self.remote_addr, str(self.remote_inst))))
+            self.run_remote('rm-remote-dir', ('test', '!', '-d', SysmoBts.REMOTE_DIR, '||', 'rm', '-rf', SysmoBts.REMOTE_DIR))
+            self.run_remote('mk-remote-dir', ('mkdir', '-p', SysmoBts.REMOTE_DIR))
+            self.run_local('scp-inst-to-sysmobts',
+                ('scp', '-r', str(self.inst), '%s:%s' % (self.remote_addr, str(self.remote_inst))))
 
-        remote_run_dir = self.remote_dir.child(SysmoBts.BTS_SYSMO_BIN)
-        self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
+            remote_run_dir = self.remote_dir.child(SysmoBts.BTS_SYSMO_BIN)
+            self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
 
-        remote_config_file = self.remote_dir.child(SysmoBts.BTS_SYSMO_CFG)
-        self.run_local('scp-cfg-to-sysmobts',
-            ('scp', '-r', self.config_file, '%s:%s' % (self.remote_addr, remote_config_file)))
+            remote_config_file = self.remote_dir.child(SysmoBts.BTS_SYSMO_CFG)
+            self.run_local('scp-cfg-to-sysmobts',
+                ('scp', '-r', self.config_file, '%s:%s' % (self.remote_addr, remote_config_file)))
 
-        remote_lib = self.remote_inst.child('lib')
-        remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
-        self.launch_remote('osmo-bts-sysmo',
-            ('LD_LIBRARY_PATH=%s' % remote_lib,
-             remote_binary, '-c', remote_config_file, '-r', '1'),
-            remote_cwd=remote_run_dir)
+            remote_lib = self.remote_inst.child('lib')
+            remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
+            self.launch_remote('osmo-bts-sysmo',
+                ('LD_LIBRARY_PATH=%s' % remote_lib,
+                 remote_binary, '-c', remote_config_file, '-r', '1'),
+                remote_cwd=remote_run_dir)
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)

@@ -1,0 +1,32 @@
+!
+! OsmoBTS () configuration saved from vty
+!!
+!
+log stderr
+  logging color 1
+  logging timestamp 0
+  logging level all everything
+  logging level rsl info
+  logging level oml info
+  logging level rll notice
+  logging level rr notice
+  logging level meas notice
+  logging level pag info
+  logging level l1c info
+  logging level l1p info
+  logging level dsp info
+  logging level abis notice
+!
+line vty
+ no login
+!
+phy 0
+ octphy hw-addr ${osmo_bts_octphy.hw_addr}
+ octphy net-device ${osmo_bts_octphy.net_device}
+ instance 0
+bts 0
+ band ${osmo_bts_octphy.band}
+ ipa unit-id ${osmo_bts_octphy.ipa_unit_id} 0
+ oml remote-ip ${osmo_bts_octphy.oml_remote_ip}
+ trx 0
+  phy 0 instance 0

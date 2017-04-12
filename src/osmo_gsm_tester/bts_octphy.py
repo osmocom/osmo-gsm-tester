@@ -1,4 +1,4 @@
-# osmo_gsm_tester: specifics for running an osmo-bts-trx
+# osmo_gsm_tester: specifics for running an osmo-bts-octphy
 #
 # Copyright (C) 2016-2017 by sysmocom - s.f.m.c. GmbH
 #
@@ -20,23 +20,20 @@
 import os
 from . import log, config, util, template, process
 
-class OsmoBtsTrx(log.Origin):
+class OsmoBtsOctphy(log.Origin):
     suite_run = None
     nitb = None
     run_dir = None
     inst = None
     env = None
 
-    BIN_TRX = 'osmo-trx'
-    BIN_BTS_TRX = 'osmo-bts-trx'
-    BIN_PCU = 'osmo-pcu'
-
-    CONF_BTS_TRX = 'osmo-bts-trx.cfg'
+    BIN_BTS_OCTPHY = 'osmo-bts-octphy'
+    CONF_BTS_OCTPHY = 'osmo-bts-octphy.cfg'
 
     def __init__(self, suite_run, conf):
         self.suite_run = suite_run
         self.conf = conf
-        self.set_name(OsmoBtsTrx.BIN_BTS_TRX)
+        self.set_name(OsmoBtsOctphy.BIN_BTS_OCTPHY)
         self.set_log_category(log.C_RUN)
         self.env = {}
 
@@ -49,15 +46,13 @@ class OsmoBtsTrx(log.Origin):
         self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoBtsTrx.BIN_BTS_TRX)))
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoBtsOctphy.BIN_BTS_OCTPHY)))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': lib }
 
-        self.launch_process(OsmoBtsTrx.BIN_TRX)
-        self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1', '-c', os.path.abspath(self.config_file))
-        #self.launch_process(OsmoBtsTrx.BIN_PCU, '-r', '1')
+        self.launch_process(OsmoBtsTrx.BIN_BTS_OCTPHY, '-r', '1', '-c', os.path.abspath(self.config_file))
         self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
@@ -74,25 +69,25 @@ class OsmoBtsTrx(log.Origin):
     def configure(self):
         if self.nitb is None:
             raise RuntimeError('BTS needs to be added to a NITB before it can be configured')
-        self.config_file = self.run_dir.new_file(OsmoBtsTrx.CONF_BTS_TRX)
+        self.config_file = self.run_dir.new_file(OsmoBtsOctphy.CONF_BTS_OCTPHY)
         self.dbg(config_file=self.config_file)
 
-        values = dict(osmo_bts_trx=config.get_defaults('osmo_bts_trx'))
+        values = dict(osmo_bts_octphy=config.get_defaults('osmo_bts_octphy'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(osmo_bts_trx=dict(oml_remote_ip=self.nitb.addr())))
-        config.overlay(values, dict(osmo_bts_trx=self.conf))
+        config.overlay(values, dict(osmo_bts_octphy=dict(oml_remote_ip=self.nitb.addr())))
+        config.overlay(values, dict(osmo_bts_octphy=self.conf))
         self.dbg(conf=values)
 
         with open(self.config_file, 'w') as f:
-            r = template.render(OsmoBtsTrx.CONF_BTS_TRX, values)
+            r = template.render(OsmoBtsOctphy.CONF_BTS_OCTPHY, values)
             self.dbg(r)
             f.write(r)
 
     def conf_for_nitb(self):
         values = config.get_defaults('nitb_bts')
-        config.overlay(values, config.get_defaults('osmo_bts_trx'))
+        config.overlay(values, config.get_defaults('osmo_bts_octphy'))
         config.overlay(values, self.conf)
-        # using type 'sysmobts' for osmo-bts-trx
+        # using type 'sysmobts' for osmo-bts-octphy
         config.overlay(values, { 'type': 'sysmobts' })
         self.dbg(conf=values)
         return values

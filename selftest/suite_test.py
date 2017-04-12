@@ -3,7 +3,7 @@ import os
 import _prep
 from osmo_gsm_tester import log, suite, config
 
-config.ENV_CONF = os.path.join(os.getcwd(), 'conf')
+config.ENV_CONF = './suite_test'
 
 #log.style_change(trace=True)
 

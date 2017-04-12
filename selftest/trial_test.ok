@@ -3,10 +3,10 @@
 [TMP]/second
 [TMP]/third
 - fetch trial dirs in order
-[TMP]/first
+first
 ['taken']
-[TMP]/second
-[TMP]/third
+second
+third
 - no more trial dirs left
 None
 - test checksum verification

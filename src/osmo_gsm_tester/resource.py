@@ -51,10 +51,10 @@ RESOURCES_SCHEMA = {
         'nitb_iface[].addr': schema.IPV4,
         'bts[].label': schema.STR,
         'bts[].type': schema.STR,
-        'bts[].unit_id': schema.INT,
+        'bts[].ipa_unit_id': schema.INT,
         'bts[].addr': schema.IPV4,
         'bts[].band': schema.BAND,
-        'bts[].trx[].hwaddr': schema.HWADDR,
+        'bts[].trx[].hw_addr': schema.HWADDR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].label': schema.STR,
@@ -270,7 +270,7 @@ class Resources(dict):
 
     def find(self, want, skip_if_marked=None, do_copy=True):
         matches = {}
-        for key, want_list in want.items():
+        for key, want_list in sorted(want.items()): # sorted for deterministic test results
           with log.Origin(want=key):
             my_list = self.get(key)
 
@@ -301,7 +301,7 @@ class Resources(dict):
             # figure out who gets what
             solution = solve(all_matches)
             picked = [ my_list[i] for i in solution if i is not None ]
-            log.dbg(None, None, 'Picked', pprint.pformat(picked))
+            log.dbg(None, None, 'Picked', config.tostr(picked))
             matches[key] = picked
 
         return Resources(matches, do_copy=do_copy)

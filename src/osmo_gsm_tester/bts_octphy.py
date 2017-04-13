@@ -52,7 +52,7 @@ class OsmoBtsOctphy(log.Origin):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': lib }
 
-        self.launch_process(OsmoBtsTrx.BIN_BTS_OCTPHY, '-r', '1', '-c', os.path.abspath(self.config_file))
+        self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1', '-c', os.path.abspath(self.config_file))
         self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
@@ -87,8 +87,6 @@ class OsmoBtsOctphy(log.Origin):
         values = config.get_defaults('nitb_bts')
         config.overlay(values, config.get_defaults('osmo_bts_octphy'))
         config.overlay(values, self.conf)
-        # using type 'sysmobts' for osmo-bts-octphy
-        config.overlay(values, { 'type': 'sysmobts' })
         self.dbg(conf=values)
         return values
 

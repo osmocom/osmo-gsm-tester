@@ -20,13 +20,17 @@ log stderr
 line vty
  no login
 !
-phy 0
- octphy hw-addr ${osmo_bts_octphy.hw_addr}
- octphy net-device ${osmo_bts_octphy.net_device}
+%for trx in osmo_bts_octphy.trx_list:
+phy ${loop.index}
+ octphy hw-addr ${trx.hw_addr}
+ octphy net-device ${trx.net_device}
  instance 0
+%endfor
 bts 0
  band ${osmo_bts_octphy.band}
  ipa unit-id ${osmo_bts_octphy.ipa_unit_id} 0
  oml remote-ip ${osmo_bts_octphy.oml_remote_ip}
- trx 0
-  phy 0 instance 0
+%for trx in osmo_bts_octphy.trx_list:
+ trx ${loop.index}
+  phy ${loop.index} instance 0
+%endfor

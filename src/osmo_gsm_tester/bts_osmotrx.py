@@ -92,8 +92,6 @@ class OsmoBtsTrx(log.Origin):
         values = config.get_defaults('nitb_bts')
         config.overlay(values, config.get_defaults('osmo_bts_trx'))
         config.overlay(values, self.conf)
-        # using type 'sysmobts' for osmo-bts-trx
-        config.overlay(values, { 'type': 'sysmobts' })
         self.dbg(conf=values)
         return values
 

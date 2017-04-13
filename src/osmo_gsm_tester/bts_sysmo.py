@@ -127,7 +127,6 @@ class SysmoBts(log.Origin):
         values = config.get_defaults('nitb_bts')
         config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
         config.overlay(values, self.conf)
-        config.overlay(values, { 'type': 'sysmobts' })
         self.dbg(conf=values)
         return values
 

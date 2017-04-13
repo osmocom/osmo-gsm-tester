@@ -29,7 +29,7 @@ from . import util
 from . import schema
 from . import ofono_client
 from . import osmo_nitb
-from . import bts_sysmo, bts_osmotrx
+from . import bts_sysmo, bts_osmotrx, bts_octphy
 
 from .util import is_dict, is_list
 
@@ -54,7 +54,8 @@ RESOURCES_SCHEMA = {
         'bts[].ipa_unit_id': schema.INT,
         'bts[].addr': schema.IPV4,
         'bts[].band': schema.BAND,
-        'bts[].trx[].hw_addr': schema.HWADDR,
+        'bts[].trx_list[].hw_addr': schema.HWADDR,
+        'bts[].trx_list[].net_device': schema.STR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].label': schema.STR,
@@ -68,8 +69,9 @@ WANT_SCHEMA = util.dict_add(
     RESOURCES_SCHEMA)
 
 KNOWN_BTS_TYPES = {
-        'sysmo': bts_sysmo.SysmoBts,
-        'osmotrx': bts_osmotrx.OsmoBtsTrx,
+        'osmo-bts-sysmo': bts_sysmo.SysmoBts,
+        'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
+        'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
     }
 
 def register_bts_type(name, clazz):

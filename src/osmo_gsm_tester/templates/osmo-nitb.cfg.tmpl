@@ -46,7 +46,7 @@ network
  timer t3141 0
 %for bts in nitb.net.bts_list:
  bts ${loop.index}
-  type ${bts.type}
+  type ${bts.osmobsc_bts_type}
   band ${bts.band}
   cell_identity 0
   location_area_code ${bts.location_area_code}

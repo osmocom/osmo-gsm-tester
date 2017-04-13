@@ -20,6 +20,7 @@
 import os
 import sys
 import time
+import copy
 from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb
 from . import test
 
@@ -55,7 +56,6 @@ class SuiteDefinition(log.Origin):
                                                  SuiteDefinition.CONF_FILENAME),
                                     SuiteDefinition.CONF_SCHEMA)
             self.load_tests()
-
 
     def load_tests(self):
         with self:
@@ -122,22 +122,27 @@ class SuiteRun(log.Origin):
     _config = None
     _processes = None
 
-    def __init__(self, current_trial, suite_definition, scenarios=[]):
+    def __init__(self, current_trial, suite_scenario_str, suite_definition, scenarios=[]):
         self.trial = current_trial
         self.definition = suite_definition
         self.scenarios = scenarios
-        self.set_name(suite_definition.name())
+        self.set_name(suite_scenario_str)
         self.set_log_category(log.C_TST)
         self.resources_pool = resource.ResourcesPool()
 
     def combined(self, conf_name):
-        combination = self.definition.conf.get(conf_name) or {}
-        for scenario in self.scenarios:
-            c = scenario.get(conf_name)
-            if c is None:
-                continue
-            config.combine(combination, c)
-        return combination
+        self.dbg(combining=conf_name)
+        with log.Origin(combining_scenarios=conf_name):
+            combination = copy.deepcopy(self.definition.conf.get(conf_name) or {})
+            self.dbg(definition_conf=combination)
+            for scenario in self.scenarios:
+                with scenario:
+                    c = scenario.get(conf_name)
+                    self.dbg(scenario=scenario.name(), conf=c)
+                    if c is None:
+                        continue
+                    config.combine(combination, c)
+            return combination
 
     def resource_requirements(self):
         if self._resource_requirements is None:
@@ -183,6 +188,7 @@ class SuiteRun(log.Origin):
             self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
 
     def run_tests(self, names=None):
+        self.log('Suite run start')
         if not self.reserved_resources:
             self.reserve_resources()
         results = SuiteRun.Results()
@@ -281,7 +287,6 @@ class SuiteRun(log.Origin):
         self.log('prompt entered:', entered)
         return entered
 
-
 loaded_suite_definitions = {}
 
 def load(suite_name):
@@ -319,7 +324,7 @@ def load_suite_scenario_str(suite_scenario_str):
     suite_name, scenario_names = parse_suite_scenario_str(suite_scenario_str)
     suite = load(suite_name)
     scenarios = [config.get_scenario(scenario_name) for scenario_name in scenario_names]
-    return (suite, scenarios)
+    return (suite_scenario_str, suite, scenarios)
 
 def bts_obj(suite_run, conf):
     bts_type = conf.get('type')

@@ -177,6 +177,12 @@ def get_defaults(for_kind):
     defaults = read_config_file('default.conf', if_missing_return={})
     return defaults.get(for_kind, {})
 
+class Scenario(log.Origin, dict):
+    def __init__(self, name, path):
+        self.set_name(name)
+        self.set_log_category(log.C_TST)
+        self.path = path
+
 def get_scenario(name, validation_schema=None):
     scenarios_dir = get_scenarios_dir()
     if not name.endswith('.conf'):
@@ -184,7 +190,9 @@ def get_scenario(name, validation_schema=None):
     path = scenarios_dir.child(name)
     if not os.path.isfile(path):
         raise RuntimeError('No such scenario file: %r' % path)
-    return read(path, validation_schema=validation_schema)
+    sc = Scenario(name, path)
+    sc.update(read(path, validation_schema=validation_schema))
+    return sc
 
 def add(dest, src):
     if is_dict(dest):

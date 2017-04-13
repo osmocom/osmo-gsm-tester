@@ -74,6 +74,7 @@ class DictProxy:
         return dict2obj(self.obj[key])
 
     def __getattr__(self, key):
+        'provide error information to know which template item was missing'
         try:
             return dict2obj(getattr(self.obj, key))
         except AttributeError:
@@ -82,19 +83,9 @@ class DictProxy:
             except KeyError:
                 raise AttributeError(key)
 
-class ListProxy:
-    'allow nesting for DictProxy'
-    def __init__(self, obj):
-        self.obj = obj
-
-    def __getitem__(self, key):
-        return dict2obj(self.obj[key])
-
 def dict2obj(value):
-    if isinstance(value, dict):
+    if is_list(value) or is_dict(value):
         return DictProxy(value)
-    if isinstance(value, (tuple, list)):
-        return ListProxy(value)
     return value
 
 

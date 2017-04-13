@@ -186,6 +186,14 @@ class LogTarget:
             log_str = log_str + '\n'
         self.log_sink(log_str)
 
+    def large_separator(self, *msgs):
+        msg = ' '.join(msgs)
+        if not msg:
+            msg = '------------------------------------------'
+        self.log_sink('------------------------------------------\n'
+                      '%s\n'
+                      '------------------------------------------\n' % msg)
+
 targets = [ LogTarget() ]
 
 def level_str(level):
@@ -206,6 +214,10 @@ def _log_all_targets(origin, category, level, src, messages, named_items=None):
         src = get_src_from_caller(src + 1)
     for target in targets:
         target.log(origin, category, level, src, messages, named_items)
+
+def large_separator(*msgs):
+    for target in targets:
+        target.large_separator(*msgs)
 
 def get_src_from_caller(levels_up=1):
     caller = getframeinfo(stack()[levels_up][0])

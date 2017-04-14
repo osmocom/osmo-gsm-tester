@@ -1,3 +1,10 @@
+DOCUMENTATION
+
+For the complete documentation, please refer to the osmo-gsm-manuals:
+http://git.osmocom.org/osmo-gsm-manuals/
+http://jenkins.osmocom.org/jenkins/job/Osmocom_Manuals/ws/
+
+
 INSTALLATION
 
 So far the osmo-gsm-tester directory is manually placed in /usr/local/src

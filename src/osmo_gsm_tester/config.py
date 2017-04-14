@@ -174,7 +174,7 @@ def _standardize(config):
     return config
 
 def get_defaults(for_kind):
-    defaults = read_config_file('default.conf', if_missing_return={})
+    defaults = read_config_file('defaults.conf', if_missing_return={})
     return defaults.get(for_kind, {})
 
 class Scenario(log.Origin, dict):

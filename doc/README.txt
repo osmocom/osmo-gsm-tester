@@ -15,12 +15,14 @@ DEPENDENCIES
 Packages required to run the osmo-gsm-tester:
 
   dbus
-  python3
-  python3-dbus
-  python3-pip
-  python3-mako
   tcpdump
-  smpplib (pip install git+git://github.com/podshumok/python-smpplib.git)
+  python3
+  python3-yaml
+  python3-mako
+  python3-pip
+  python3-gi
+  smpplib: pip3 install git+git://github.com/podshumok/python-smpplib.git
+  pydbus: pip3 install pydbus
   ofono
 
 To build ofono:

@@ -16,7 +16,10 @@ resources:
   - times: '1'
 
 - run hello world test
+tst test_suite: Suite run start
 tst test_suite: reserving resources...
+tst test_suite: DBG: {combining='resources'}  [test_suite↪test_suite]
+tst test_suite: DBG: {definition_conf={bts=[{'times': '1'}], modem=[{'times': '2'}], nitb_iface=[{'times': '1'}]}}  [test_suite↪(combining_scenarios='resources')↪test_suite]
 --- (want='bts'): DBG: Looking for 1 x bts , candidates: 3
 --- (want='bts'): DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
@@ -48,6 +51,7 @@ tst hello_world.py: PASS  [test_suite↪hello_world.py]
 pass: all 1 tests passed.
 
 - a test with an error
+tst test_suite: Suite run start  [suite.py:191]
 tst test_error.py: START  [test_suite↪test_error.py]  [suite.py:96]
 tst test_error.py:3: I am 'test_suite' / 'test_error.py:3'  [test_suite↪test_error.py:3]  [test_error.py:3]
 tst test_error.py:5: FAIL  [test_suite↪test_error.py:5]  [suite.py:108]

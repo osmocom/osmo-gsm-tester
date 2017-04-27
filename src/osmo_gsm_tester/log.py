@@ -24,6 +24,8 @@ import traceback
 import contextlib
 from inspect import getframeinfo, stack
 
+from .util import is_dict
+
 L_ERR = 30
 L_LOG = 20
 L_DBG = 10
@@ -512,14 +514,20 @@ def run_logging_exceptions(func, *func_args, return_on_failure=None, **func_kwar
         log_exn()
         return return_on_failure
 
+def _compose_named_items(item):
+    'make sure dicts are output sorted, for test expectations'
+    if is_dict(item):
+        return '{%s}' % (', '.join(
+               ['%s=%s' % (k, _compose_named_items(v))
+                for k,v in sorted(item.items())]))
+    return repr(item)
+
 def compose_message(messages, named_items):
     msgs = [str(m) for m in messages]
 
     if named_items:
         # unfortunately needs to be sorted to get deterministic results
-        msgs.append('{%s}' %
-                    (', '.join(['%s=%r' % (k,v)
-                     for k,v in sorted(named_items.items())])))
+        msgs.append(_compose_named_items(named_items))
 
     return ' '.join(msgs)
 

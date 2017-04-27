@@ -51,14 +51,14 @@ ok, caused exception: RuntimeError('Refusing to drop a list of resources from it
           'band': 'GSM-1800',
           'ipa_unit_id': '5',
           'label': 'octBTS 3000',
-          'trx': [{'hw_addr': '00:0c:90:32:b5:8a'}],
+          'trx_list': [{'hw_addr': '00:0c:90:32:b5:8a'}],
           'type': 'oct'},
          {'_hash': '0b7fabd512b36aec43d7d496abd00af4e193b0f8',
           'addr': '10.42.42.190',
           'band': 'GSM-1900',
           'ipa_unit_id': '1902',
           'label': 'nanoBTS 1900',
-          'trx': [{'hw_addr': '00:02:95:00:41:b3'}],
+          'trx_list': [{'hw_addr': '00:02:95:00:41:b3'}],
           'type': 'nanobts'}],
  'modem': [{'_hash': '19c69e45aa090fb511446bd00797690aa82ff52f',
             'imsi': '901700000007801',
@@ -168,7 +168,7 @@ ok, caused exception: RuntimeError('Refusing to drop a list of resources from it
   band: GSM-1800
   ipa_unit_id: '5'
   label: octBTS 3000
-  trx:
+  trx_list:
   - hw_addr: 00:0c:90:32:b5:8a
   type: oct
 --- (want='modem'): DBG: Looking for 2 x modem , candidates: 16
@@ -209,7 +209,7 @@ bts:
   band: GSM-1800
   ipa_unit_id: '5'
   label: octBTS 3000
-  trx:
+  trx_list:
   - hw_addr: 00:0c:90:32:b5:8a
   type: oct
 modem:

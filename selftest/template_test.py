@@ -19,7 +19,7 @@ mock_timeslot_list=(
         )
 
 mock_bts = {
-    'type': 'val_type',
+    'osmobsc_bts_type': 'val_type',
     'band': 'val_band',
     'location_area_code': 'val_bts.location_area_code',
     'base_station_id_code': 'val_bts.base_station_id_code',

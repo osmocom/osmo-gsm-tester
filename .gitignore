@@ -7,3 +7,4 @@ tags
 set_pythonpath
 test_work
 state
+*.pyc

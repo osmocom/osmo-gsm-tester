@@ -38,7 +38,7 @@ test_ssh = True
 test_ssh = False
 if test_ssh:
     # this part of the test requires ability to ssh to localhost
-    p = process.RemoteProcess('localhost', '/tmp', 'ssh-test', tmpdir,
+    p = process.RemoteProcess('ssh-test', '/tmp', os.getenv('USER'), 'localhost', tmpdir,
                               ('ls', '-al'))
     p.launch()
     p.wait()

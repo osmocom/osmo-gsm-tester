@@ -210,8 +210,9 @@ class Process(log.Origin):
 
 class RemoteProcess(Process):
 
-    def __init__(self, name, run_dir, remote_host, remote_cwd, popen_args, **popen_kwargs):
+    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, **popen_kwargs):
         super().__init__(name, run_dir, popen_args, **popen_kwargs)
+        self.remote_user = remote_user
         self.remote_host = remote_host
         self.remote_cwd = remote_cwd
 
@@ -222,7 +223,7 @@ class RemoteProcess(Process):
             cd = 'cd "%s"; ' % self.remote_cwd
         else:
             cd = ''
-        self.popen_args = ['ssh', self.remote_host,
+        self.popen_args = ['ssh', self.remote_user+'@'+self.remote_host,
                            '%s%s' % (cd,
                                      ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)

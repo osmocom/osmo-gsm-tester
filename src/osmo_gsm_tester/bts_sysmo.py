@@ -40,6 +40,7 @@ class SysmoBts(log.Origin):
         self.set_name('osmo-bts-sysmo')
         self.set_log_category(log.C_RUN)
         self.remote_env = {}
+        self.remote_user = 'root'
 
     def start(self):
         with self:
@@ -62,14 +63,14 @@ class SysmoBts(log.Origin):
             self.run_remote('rm-remote-dir', ('test', '!', '-d', SysmoBts.REMOTE_DIR, '||', 'rm', '-rf', SysmoBts.REMOTE_DIR))
             self.run_remote('mk-remote-dir', ('mkdir', '-p', SysmoBts.REMOTE_DIR))
             self.run_local('scp-inst-to-sysmobts',
-                ('scp', '-r', str(self.inst), '%s:%s' % (self.remote_addr, str(self.remote_inst))))
+                ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.remote_addr, str(self.remote_inst))))
 
             remote_run_dir = self.remote_dir.child(SysmoBts.BTS_SYSMO_BIN)
             self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
 
             remote_config_file = self.remote_dir.child(SysmoBts.BTS_SYSMO_CFG)
             self.run_local('scp-cfg-to-sysmobts',
-                ('scp', '-r', self.config_file, '%s:%s' % (self.remote_addr, remote_config_file)))
+                ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.remote_addr, remote_config_file)))
 
             self.run_local('reload-dsp-firmware', ('ssh', self.remote_addr, '/bin/sh', '-c', '"cat /lib/firmware/sysmobts-v?.bit > /dev/fpgadl_par0 ; cat /lib/firmware/sysmobts-v?.out > /dev/dspdl_dm644x_0"'))
 
@@ -82,7 +83,7 @@ class SysmoBts(log.Origin):
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.remote_addr, remote_cwd,
+        return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr, remote_cwd,
                                      popen_args)
 
     def run_remote(self, name, popen_args, remote_cwd=None):

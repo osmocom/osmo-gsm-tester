@@ -48,6 +48,7 @@ def list_modems():
 class Modem(log.Origin):
     'convenience for ofono Modem interaction'
     msisdn = None
+    sms_received_list = None
 
     def __init__(self, conf):
         self.conf = conf
@@ -56,6 +57,7 @@ class Modem(log.Origin):
         self.set_log_category(log.C_BUS)
         self._dbus_obj = None
         self._interfaces = set()
+        self.sms_received_list = []
         test.poll()
 
     def set_msisdn(self, msisdn):
@@ -153,10 +155,15 @@ class Modem(log.Origin):
         return sms
 
     def _on_incoming_message(self, message, info):
-        self.log('Incoming SMS:', repr(message), **info)
+        self.log('Incoming SMS:', repr(message), info=info)
+        self.sms_received_list.append((message, info))
 
     def sms_was_received(self, sms):
-        pass
+        for msg, info in self.sms_received_list:
+            if sms.matches(msg):
+                self.log('SMS received as expected:', msg=msg, info=info)
+                return True
+        return False
 
 class Sms:
     _last_sms_idx = 0
@@ -176,9 +183,15 @@ class Sms:
     def __str__(self):
         return self.msg
 
+    def __repr__(self):
+        return repr(self.msg)
+
     def __eq__(self, other):
         if isinstance(other, Sms):
             return self.msg == other.msg
         return inself.msg == other
+
+    def matches(self, msg):
+        return self.msg == msg
 
 # vim: expandtab tabstop=4 shiftwidth=4

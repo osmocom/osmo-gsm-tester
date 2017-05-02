@@ -71,15 +71,21 @@ class Modem(log.Origin):
     def ki(self):
         return self.conf.get('ki')
 
-    def set_powered(self, on=True):
-        test.poll()
-        self.dbus_obj().SetProperty('Powered', Variant('b', on))
+    def _dbus_set_bool(self, name, bool_val):
+        # to make sure any pending signals are received before we send out more DBus requests
         test.poll()
 
+        val = bool(bool_val)
+        self.log('Setting', name, val)
+        self.dbus_obj().SetProperty(name, Variant('b', val))
+
+        test.poll() # <-- probably not necessary
+
+    def set_powered(self, on=True):
+        self._dbus_set_bool('Powered', on)
+
     def set_online(self, on=True):
-        test.poll()
-        self.dbus_obj().SetProperty('Online', Variant('b', on))
-        test.poll()
+        self._dbus_set_bool('Online', on)
 
     def dbus_obj(self):
         if self._dbus_obj is not None:

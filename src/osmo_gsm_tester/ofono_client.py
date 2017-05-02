@@ -81,7 +81,12 @@ class Modem(log.Origin):
         self.log('Setting', name, val)
         self.dbus_obj().SetProperty(name, Variant('b', val))
 
-        test.poll() # <-- probably not necessary
+        test.wait(self.property_is, name, bool_val)
+
+    def property_is(self, name, val):
+        is_val = self.properties().get(name)
+        self.dbg(name, '==', is_val)
+        return is_val is not None and is_val == val
 
     def set_powered(self, on=True):
         self._dbus_set_bool('Powered', on)
@@ -122,8 +127,16 @@ class Modem(log.Origin):
                 except:
                     self.log_exn()
 
+    def _interface_really_present(self, interface_name):
+        try:
+            self.dbus_obj()[interface_name]
+            return True
+        except:
+            return False
+
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)
+        test.wait(self._interface_really_present, interface_name)
         if interface_name == I_SMS:
             self.dbus_obj()[I_SMS].IncomingMessage.connect(self._on_incoming_message)
 
@@ -136,7 +149,9 @@ class Modem(log.Origin):
     def connect(self, nitb):
         'set the modem up to connect to MCC+MNC from NITB config'
         self.log('connect to', nitb)
+        self.set_powered(False)
         self.set_powered()
+        self.set_online(False)
         self.set_online()
         if not self.has_interface(I_NETREG):
             self.log('No %r interface, hoping that the modem connects by itself' % I_NETREG)

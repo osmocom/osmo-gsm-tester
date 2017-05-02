@@ -24,4 +24,4 @@ print(ms_mt.properties())
 wait(nitb.subscriber_attached, ms_mo, ms_mt)
 
 sms = ms_mo.sms_send(ms_mt.msisdn)
-wait(ms_mt.sms_received, sms)
+wait(ms_mt.sms_was_received, sms)

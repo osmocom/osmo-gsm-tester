@@ -155,7 +155,7 @@ class Modem(log.Origin):
     def _on_incoming_message(self, message, info):
         self.log('Incoming SMS:', repr(message), **info)
 
-    def sms_received(self, sms):
+    def sms_was_received(self, sms):
         pass
 
 class Sms:

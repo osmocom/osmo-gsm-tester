@@ -34,4 +34,4 @@ scp -r "$local_trial_dir" $osmo_gsm_tester_host:$tmp_dir/
 ssh "$osmo_gsm_tester_host" "mv $tmp_dir/$trial_name $osmo_gsm_tester_dir"
 trial_dir="$osmo_gsm_tester_dir/$trial_name"
 
-ssh "$osmo_gsm_tester_host" "$osmo_gsm_tester_src/src/osmo-gsm-tester.py $trial_dir -T"
+ssh "$osmo_gsm_tester_host" "python3 -u $osmo_gsm_tester_src/src/osmo-gsm-tester.py $trial_dir -T"

@@ -204,7 +204,7 @@ class ResourcesPool(log.Origin):
         with self.state_dir.lock(origin_id):
             msisdn_path = self.state_dir.child(LAST_USED_MSISDN_FILE)
             with log.Origin(msisdn_path):
-                last_msisdn = '1'
+                last_msisdn = '1000'
                 if os.path.exists(msisdn_path):
                     if not os.path.isfile(msisdn_path):
                         raise RuntimeError('path should be a file but is not: %r' % msisdn_path)

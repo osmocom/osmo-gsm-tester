@@ -76,6 +76,11 @@ class Modem(log.Origin):
         self.dbus_obj().SetProperty('Powered', Variant('b', on))
         test.poll()
 
+    def set_online(self, on=True):
+        test.poll()
+        self.dbus_obj().SetProperty('Online', Variant('b', on))
+        test.poll()
+
     def dbus_obj(self):
         if self._dbus_obj is not None:
             return self._dbus_obj
@@ -124,6 +129,7 @@ class Modem(log.Origin):
         'set the modem up to connect to MCC+MNC from NITB config'
         self.log('connect to', nitb)
         self.set_powered()
+        self.set_online()
         if not self.has_interface(I_NETREG):
             self.log('No %r interface, hoping that the modem connects by itself' % I_NETREG)
         else:

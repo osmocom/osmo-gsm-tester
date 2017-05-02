@@ -61,5 +61,6 @@ for dep in $deps; do
 done
 
 # build the archive that is going to be copied to the tester
+rm "$base"/*.tgz || true
 cd "$prefix"
 tar czf "$base/osmo-bts-octphy.build-${BUILD_NUMBER}.tgz" *

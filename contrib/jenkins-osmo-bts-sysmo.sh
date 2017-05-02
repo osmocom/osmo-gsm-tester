@@ -65,5 +65,6 @@ for dep in $deps; do
 done
 
 # build the archive that is going to be copied to the tester and then to the BTS
+rm "$base"/*.tgz || true
 cd "$prefix_real"
 tar cvzf "$base/osmo-bts-sysmo.build-${BUILD_NUMBER}.tgz" *

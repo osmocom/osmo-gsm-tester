@@ -19,7 +19,9 @@ nitb.subscriber_add(ms_mt)
 
 ms_mo.connect(nitb)
 ms_mt.connect(nitb)
-wait(nitb.subscriber_attached, ms_mo, ms_mt, timeout=20)
+print(ms_mo.properties())
+print(ms_mt.properties())
+wait(nitb.subscriber_attached, ms_mo, ms_mt)
 
 sms = ms_mo.sms_send(ms_mt.msisdn)
 wait(ms_mt.sms_received, sms)

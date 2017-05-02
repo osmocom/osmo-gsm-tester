@@ -161,7 +161,7 @@ class Modem(log.Origin):
     def sms_send(self, to_msisdn):
         if hasattr(to_msisdn, 'msisdn'):
             to_msisdn = to_msisdn.msisdn
-        sms = Sms(self.msisdn(), to_msisdn)
+        sms = Sms(self.msisdn, to_msisdn)
         self.log('sending sms to MSISDN', to_msisdn, sms=sms)
         if not self.has_interface(I_SMS):
             raise RuntimeError('Modem cannot send SMS, interface not active: %r' % I_SMS)

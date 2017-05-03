@@ -36,12 +36,12 @@ def poll():
     while glib_main_ctx.pending():
         glib_main_ctx.iteration()
 
-def get(path):
+def systembus_get(path):
     global bus
     return bus.get('org.ofono', path)
 
 def list_modems():
-    root = get('/')
+    root = systembus_get('/')
     return sorted(root.GetModems())
 
 
@@ -97,7 +97,7 @@ class Modem(log.Origin):
     def dbus_obj(self):
         if self._dbus_obj is not None:
             return self._dbus_obj
-        self._dbus_obj = get(self.path)
+        self._dbus_obj = systembus_get(self.path)
         self._dbus_obj.PropertyChanged.connect(self._on_property_change)
         self._on_interfaces_change(self.properties().get('Interfaces'))
         return self._dbus_obj

@@ -130,8 +130,8 @@ class Modem(log.Origin):
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)
         if interface_name == I_SMS:
+            retries = 3
             while True:
-                retries = 3
                 try:
                     self.dbus_obj()[I_SMS].IncomingMessage.connect(self._on_incoming_message)
                     break

@@ -127,18 +127,21 @@ class Modem(log.Origin):
                 except:
                     self.log_exn()
 
-    def _interface_really_present(self, interface_name):
-        try:
-            self.dbus_obj()[interface_name]
-            return True
-        except:
-            return False
-
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)
-        test.wait(self._interface_really_present, interface_name)
         if interface_name == I_SMS:
-            self.dbus_obj()[I_SMS].IncomingMessage.connect(self._on_incoming_message)
+            while True:
+                retries = 3
+                try:
+                    self.dbus_obj()[I_SMS].IncomingMessage.connect(self._on_incoming_message)
+                    break
+                except:
+                    self.dbg('Interface not yet available:', I_SMS)
+                    retries -= 1
+                    time.sleep(1)
+                    if retries <= 0:
+                        self.err('Interface enabled by signal, but not available:', I_SMS)
+                        raise
 
     def _on_interface_disabled(self, interface_name):
         self.dbg('Interface disabled:', interface_name)

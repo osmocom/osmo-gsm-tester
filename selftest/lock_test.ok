@@ -1,7 +1,7 @@
-acquired lock: 'long_name'
-launched first, locked by: long_name
-launched second, locked by: long_name
-leaving lock: 'long_name'
+acquired lock: 'long name'
+launched first, locked by: long name
+launched second, locked by: long name
+leaving lock: 'long name'
 acquired lock: 'shorter'
 waited, locked by: shorter
 leaving lock: 'shorter'

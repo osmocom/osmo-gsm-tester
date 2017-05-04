@@ -59,6 +59,8 @@ class Modem(log.Origin):
         self._dbus_obj = None
         self._interfaces = set()
         self.sms_received_list = []
+        # init interfaces and connect to signals:
+        self.dbus_obj()
         test.poll()
 
     def set_msisdn(self, msisdn):
@@ -153,9 +155,11 @@ class Modem(log.Origin):
     def connect(self, nitb):
         'set the modem up to connect to MCC+MNC from NITB config'
         self.log('connect to', nitb)
-        self.set_powered(False)
+        prepowered = self.properties().get('Powered')
+        if prepowered is not None and prepowered:
+            self.set_online(False)
+            self.set_powered(False)
         self.set_powered()
-        self.set_online(False)
         self.set_online()
         if not self.has_interface(I_NETREG):
             self.log('No %r interface, hoping that the modem connects by itself' % I_NETREG)

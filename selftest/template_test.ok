@@ -53,7 +53,7 @@ network
   location_area_code val_bts.location_area_code_bts0
   training_sequence_code 7
   base_station_id_code val_bts.base_station_id_code_bts0
-  ms max power 15
+  ms max power 33
   cell reselection hysteresis 4
   rxlev access min 0
   channel allocator ascending
@@ -97,7 +97,7 @@ network
   location_area_code val_bts.location_area_code_bts1
   training_sequence_code 7
   base_station_id_code val_bts.base_station_id_code_bts1
-  ms max power 15
+  ms max power 33
   cell reselection hysteresis 4
   rxlev access min 0
   channel allocator ascending

@@ -71,6 +71,8 @@ class SysmoBts(log.Origin):
             self.run_local('scp-cfg-to-sysmobts',
                 ('scp', '-r', self.config_file, '%s:%s' % (self.remote_addr, remote_config_file)))
 
+            self.run_local('reload-dsp-firmware', ('ssh', self.remote_addr, '/bin/sh', '-c', '"cat /lib/firmware/sysmobts-v?.bit > /dev/fpgadl_par0 ; cat /lib/firmware/sysmobts-v?.out > /dev/dspdl_dm644x_0"'))
+
             remote_lib = self.remote_inst.child('lib')
             remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
             self.launch_remote('osmo-bts-sysmo',

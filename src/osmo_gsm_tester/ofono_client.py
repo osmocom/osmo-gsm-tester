@@ -28,6 +28,7 @@ glib_main_loop = GLib.MainLoop()
 glib_main_ctx = glib_main_loop.get_context()
 bus = SystemBus()
 
+I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
 I_SMS = 'org.ofono.MessageManager'
 
@@ -73,13 +74,13 @@ class Modem(log.Origin):
     def ki(self):
         return self.conf.get('ki')
 
-    def _dbus_set_bool(self, name, bool_val):
+    def _dbus_set_bool(self, name, bool_val, iface=I_MODEM):
         # to make sure any pending signals are received before we send out more DBus requests
         test.poll()
 
         val = bool(bool_val)
         self.log('Setting', name, val)
-        self.dbus_obj().SetProperty(name, Variant('b', val))
+        self.dbus_obj()[iface].SetProperty(name, Variant('b', val))
 
         test.wait(self.property_is, name, bool_val)
 
@@ -102,8 +103,8 @@ class Modem(log.Origin):
         self._on_interfaces_change(self.properties().get('Interfaces'))
         return self._dbus_obj
 
-    def properties(self):
-        return self.dbus_obj().GetProperties()
+    def properties(self, iface=I_MODEM):
+        return self.dbus_obj()[iface].GetProperties()
 
     def _on_property_change(self, name, value):
         if name == 'Interfaces':

@@ -88,9 +88,11 @@ def _get_config_file(basename, fail_if_missing=True):
         locations = DEFAULT_CONFIG_LOCATIONS
 
     for l in locations:
-        p = os.path.join(l, basename)
+        real_l = os.path.realpath(l)
+        p = os.path.realpath(os.path.join(real_l, basename))
         if os.path.isfile(p):
-            return (p, l)
+            log.dbg(None, log.C_CNF, 'Found config file', basename, 'as', p, 'in', l, 'which is', real_l)
+            return (p, real_l)
     if not fail_if_missing:
         return None, None
     raise RuntimeError('configuration file not found: %r in %r' % (basename,
@@ -115,20 +117,26 @@ def get_configured_path(label, allow_unset=False):
     env_name = ENV_PREFIX + label.upper()
     env_path = os.getenv(env_name)
     if env_path:
-        return env_path
+        real_env_path = os.path.realpath(env_path)
+        log.dbg(None, log.C_CNF, 'Found path', label, 'as', env_path, 'in', '$' + env_name, 'which is', real_env_path)
+        return real_env_path
 
     if PATHS is None:
         paths_file, found_in = _get_config_file(PATHS_CONF)
         PATHS = read(paths_file, PATHS_SCHEMA)
-        for key, path in PATHS.items():
+        # sorted for deterministic regression test results
+        for key, path in sorted(PATHS.items()):
             if not path.startswith(os.pathsep):
-                PATHS[key] = os.path.join(found_in, path)
+                PATHS[key] = os.path.realpath(os.path.join(found_in, path))
+                log.dbg(None, log.C_CNF, paths_file + ': relative path', path, 'is', PATHS[key])
     p = PATHS.get(label)
     if p is None and not allow_unset:
         raise RuntimeError('missing configuration in %s: %r' % (PATHS_CONF, label))
 
+    log.dbg(None, log.C_CNF, 'Found path', label, 'as', p)
     if p.startswith(PATHS_TEMPDIR_STR):
         p = os.path.join(get_tempdir(), p[len(PATHS_TEMPDIR_STR):])
+        log.dbg(None, log.C_CNF, 'Path', label, 'contained', PATHS_TEMPDIR_STR, 'and becomes', p)
     return p
 
 def get_state_dir():

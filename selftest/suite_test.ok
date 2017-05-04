@@ -1,9 +1,15 @@
 - non-existing suite dir
---- -: ERR: RuntimeError: Suite not found: 'does_not_exist' in ./suite_test/.
+cnf -: DBG: Found config file paths.conf as [PATH]/selftest/suite_test/paths.conf in ./suite_test which is [PATH]/selftest/suite_test
+cnf -: DBG: [PATH]/selftest/suite_test/paths.conf: relative path ./test_work/state_dir is [PATH]/selftest/suite_test/test_work/state_dir
+cnf -: DBG: [PATH]/selftest/suite_test/paths.conf: relative path . is [PATH]/selftest/suite_test
+cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
+--- -: ERR: RuntimeError: Suite not found: 'does_not_exist' in [PATH]/selftest/suite_test
 - no suite.conf
+cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
 cnf empty_dir: DBG: reading suite.conf  [empty_dir↪empty_dir]
---- ./suite_test/./empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: './suite_test/./empty_dir/suite.conf'  [empty_dir↪./suite_test/./empty_dir/suite.conf]
+--- [PATH]/selftest/suite_test/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/empty_dir/suite.conf'  [empty_dir↪[PATH]/selftest/suite_test/empty_dir/suite.conf]
 - valid suite dir
+cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
 cnf test_suite: DBG: reading suite.conf  [test_suite↪test_suite]
 defaults:
   timeout: 60s
@@ -16,6 +22,8 @@ resources:
   - times: '1'
 
 - run hello world test
+cnf -: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test
+cnf -: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir
 tst test_suite: Suite run start
 tst test_suite: reserving resources...
 tst test_suite: DBG: {combining='resources'}  [test_suite↪test_suite]

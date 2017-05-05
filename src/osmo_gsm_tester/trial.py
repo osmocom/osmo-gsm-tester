@@ -28,12 +28,14 @@ FILE_MARK_TAKEN = 'taken'
 FILE_CHECKSUMS = 'checksums.md5'
 TIMESTAMP_FMT = '%Y-%m-%d_%H-%M-%S'
 FILE_LAST_RUN = 'last_run'
+FILE_LOG = 'log'
 
 class Trial(log.Origin):
     path = None
     dir = None
     _run_dir = None
     bin_tars = None
+    log_targets = None
 
     @staticmethod
     def next(trials_dir):
@@ -60,6 +62,13 @@ class Trial(log.Origin):
         return self.name()
 
     def __enter__(self):
+        # add a log target to log to the run dir
+        run_dir = self.get_run_dir()
+        self.log_targets = [
+            log.FileLogTarget(run_dir.new_child(FILE_LOG))
+              .set_all_levels(log.L_DBG)
+              .style_change(trace=True),
+            ]
         self.log('Trial start')
         self.take()
         super().__enter__()
@@ -67,6 +76,10 @@ class Trial(log.Origin):
     def __exit__(self, *exc_info):
         super().__exit__(*exc_info)
         self.log('Trial end')
+
+        for lt in self.log_targets:
+            lt.remove()
+        self.log_targets = None
 
     def take(self):
         self.dir.touch(FILE_MARK_TAKEN)

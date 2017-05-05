@@ -83,6 +83,9 @@ class LogTarget:
         self.style()
         LogTarget.all_targets.append(self)
 
+    def remove(self):
+        LogTarget.all_targets.remove(self)
+
     def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=32, src=True, trace=False):
         '''
         set all logging format aspects, to defaults if not passed:

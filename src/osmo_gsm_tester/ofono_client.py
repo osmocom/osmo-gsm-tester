@@ -119,16 +119,10 @@ class Modem(log.Origin):
         self._interfaces = now
         for iface in removals:
             with log.Origin('modem.disable(%s)' % iface):
-                try:
-                    self._on_interface_disabled(iface)
-                except:
-                    self.log_exn()
+                self._on_interface_disabled(iface)
         for iface in additions:
             with log.Origin('modem.enable(%s)' % iface):
-                try:
-                    self._on_interface_enabled(iface)
-                except:
-                    self.log_exn()
+                self._on_interface_enabled(iface)
 
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)

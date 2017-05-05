@@ -104,6 +104,9 @@ if __name__ == '__main__':
     print('trials:', repr(args.trial_package))
     print('tests:', repr(args.test))
 
+    # create a default log to stdout
+    log.LogTarget()
+
     if args.log_level:
         log.set_all_levels(log.LEVEL_STRS.get(args.log_level))
     log.style_change(origin_width=32)

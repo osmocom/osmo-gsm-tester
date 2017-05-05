@@ -9,7 +9,7 @@ sys.path.append(src_dir)
 
 from osmo_gsm_tester import log
 
-log.targets = [ log.TestsTarget() ]
+log.TestsTarget()
 log.set_all_levels(log.L_DBG)
 
 if '-v' in sys.argv:

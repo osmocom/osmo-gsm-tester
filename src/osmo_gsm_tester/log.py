@@ -54,6 +54,8 @@ class Error(Exception):
     pass
 
 class LogTarget:
+    all_targets = []
+
     do_log_time = None
     do_log_category = None
     do_log_level = None
@@ -68,13 +70,17 @@ class LogTarget:
     get_time_str = lambda self: time.strftime(self.log_time_fmt)
 
     # sink that gets each complete logging line
-    log_sink = sys.__stdout__.write
+    log_write_func = None
 
     category_levels = None
 
-    def __init__(self):
+    def __init__(self, log_write_func=None):
+        if log_write_func is None:
+            log_write_func = sys.__stdout__.write
+        self.log_write_func = log_write_func
         self.category_levels = {}
         self.style()
+        LogTarget.all_targets.append(self)
 
     def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=0, src=True, trace=False):
         '''
@@ -135,8 +141,8 @@ class LogTarget:
 
     def log(self, origin, category, level, src, messages, named_items):
         if category and len(category) != 3:
-            self.log_sink('WARNING: INVALID LOG SUBSYSTEM %r\n' % category)
-            self.log_sink('origin=%r category=%r level=%r\n' % (origin, category, level));
+            self.log_write_func('WARNING: INVALID LOG SUBSYSTEM %r\n' % category)
+            self.log_write_func('origin=%r category=%r level=%r\n' % (origin, category, level));
 
         if not category:
             category = C_DEFAULT
@@ -186,17 +192,15 @@ class LogTarget:
 
         if not log_str.endswith('\n'):
             log_str = log_str + '\n'
-        self.log_sink(log_str)
+        self.log_write_func(log_str)
 
     def large_separator(self, *msgs):
         msg = ' '.join(msgs)
         if not msg:
             msg = '------------------------------------------'
-        self.log_sink('------------------------------------------\n'
-                      '%s\n'
-                      '------------------------------------------\n' % msg)
-
-targets = [ LogTarget() ]
+        self.log_write_func('------------------------------------------\n'
+                            '%s\n'
+                            '------------------------------------------\n' % msg)
 
 def level_str(level):
     if level == L_TRACEBACK:
@@ -208,17 +212,15 @@ def level_str(level):
     return 'ERR'
 
 def _log_all_targets(origin, category, level, src, messages, named_items=None):
-    global targets
-
     if origin is None:
         origin = Origin._global_current_origin
     if isinstance(src, int):
         src = get_src_from_caller(src + 1)
-    for target in targets:
+    for target in LogTarget.all_targets:
         target.log(origin, category, level, src, messages, named_items)
 
 def large_separator(*msgs):
-    for target in targets:
+    for target in LogTarget.all_targets:
         target.large_separator(*msgs)
 
 def get_src_from_caller(levels_up=1):
@@ -481,31 +483,26 @@ class Origins(list):
 
 
 def set_all_levels(level):
-    global targets
-    for target in targets:
+    for target in LogTarget.all_targets:
         target.set_all_levels(level)
 
 def set_level(category, level):
-    global targets
-    for target in targets:
+    for target in LogTarget.all_targets:
         target.set_level(category, level)
 
 def style(**kwargs):
-    global targets
-    for target in targets:
+    for target in LogTarget.all_targets:
         target.style(**kwargs)
 
 def style_change(**kwargs):
-    global targets
-    for target in targets:
+    for target in LogTarget.all_targets:
         target.style_change(**kwargs)
 
 class TestsTarget(LogTarget):
     'LogTarget producing deterministic results for regression tests'
-    def __init__(self, out=sys.stdout):
-        super().__init__()
+    def __init__(self, log_write_func=None):
+        super().__init__(log_write_func)
         self.style(time=False, src=False)
-        self.log_sink = out.write
 
 def run_logging_exceptions(func, *func_args, return_on_failure=None, **func_kwargs):
     try:

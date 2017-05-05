@@ -32,10 +32,37 @@ I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
 I_SMS = 'org.ofono.MessageManager'
 
+class DeferredHandling:
+    defer_queue = []
+
+    def __init__(self, dbus_iface, handler):
+        self.handler = handler
+        dbus_iface.connect(self.receive_signal)
+
+    def receive_signal(self, *args, **kwargs):
+        DeferredHandling.defer_queue.append((self.handler, args, kwargs))
+
+    @staticmethod
+    def handle_queue():
+        while DeferredHandling.defer_queue:
+            handler, args, kwargs = DeferredHandling.defer_queue.pop(0)
+            handler(*args, **kwargs)
+
+def dbus_connect(dbus_iface, handler):
+    '''This function shall be used instead of directly connecting DBus signals.
+    It ensures that we don't nest a glib main loop within another, and also
+    that we receive exceptions raised within the signal handlers. This makes it
+    so that a signal handler is invoked only after the DBus polling is through
+    by enlisting signals that should be handled in the
+    DeferredHandling.defer_queue.'''
+    DeferredHandling(dbus_iface, handler)
+
+
 def poll():
     global glib_main_ctx
     while glib_main_ctx.pending():
         glib_main_ctx.iteration()
+    DeferredHandling.handle_queue()
 
 def systembus_get(path):
     global bus
@@ -101,7 +128,7 @@ class Modem(log.Origin):
         if self._dbus_obj is not None:
             return self._dbus_obj
         self._dbus_obj = systembus_get(self.path)
-        self._dbus_obj.PropertyChanged.connect(self._on_property_change)
+        dbus_connect(self._dbus_obj.PropertyChanged, self._on_property_change)
         self._on_interfaces_change(self.properties().get('Interfaces'))
         return self._dbus_obj
 
@@ -130,9 +157,9 @@ class Modem(log.Origin):
             retries = 3
             while True:
                 try:
-                    self.dbus_obj()[I_SMS].IncomingMessage.connect(self._on_incoming_message)
+                    dbus_connect(self.dbus_obj()[I_SMS].IncomingMessage, self._on_incoming_message)
                     break
-                except:
+                except KeyError:
                     self.dbg('Interface not yet available:', I_SMS)
                     retries -= 1
                     time.sleep(1)

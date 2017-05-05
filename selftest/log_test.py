@@ -113,7 +113,7 @@ log.set_level(log.C_DEFAULT, log.L_DBG)
 t.dbg("debug message, no category nor name set")
 
 print('- Testing logging of Exceptions, tracing origins')
-log.style(time_fmt=fake_time)
+log.style(time_fmt=fake_time, origin_width=0)
 
 class Thing(log.Origin):
     def __init__(self, some_path):

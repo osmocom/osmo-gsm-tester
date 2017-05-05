@@ -11,7 +11,7 @@
 01:02:03: only time
 tst: only category
 DBG: only level
-some-name(some='detail'): only origin
+        some-name(some='detail'): only origin
 only src  [log_test.py:70]
 - Testing log.style_change()
 no log format
@@ -20,7 +20,7 @@ but no time format
 01:02:03: DBG: add level
 01:02:03 tst: DBG: add category
 01:02:03 tst: DBG: add src  [log_test.py:85]
-01:02:03 tst some-name(some='detail'): DBG: add origin  [log_test.py:87]
+01:02:03 tst         some-name(some='detail'): DBG: add origin  [log_test.py:87]
 - Testing origin_width
 01:02:03 tst               shortname: origin str set to 23 chars  [log_test.py:94]
 01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): long origin str  [log_test.py:96]

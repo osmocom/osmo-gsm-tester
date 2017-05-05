@@ -83,7 +83,7 @@ class LogTarget:
         self.style()
         LogTarget.all_targets.append(self)
 
-    def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=0, src=True, trace=False):
+    def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=32, src=True, trace=False):
         '''
         set all logging format aspects, to defaults if not passed:
         time: log timestamps;
@@ -507,7 +507,7 @@ class TestsTarget(LogTarget):
     'LogTarget producing deterministic results for regression tests'
     def __init__(self, log_write_func=None):
         super().__init__(log_write_func)
-        self.style(time=False, src=False)
+        self.style(time=False, src=False, origin_width=0)
 
 class FileLogTarget(LogTarget):
     'LogTarget to log to a file system path'

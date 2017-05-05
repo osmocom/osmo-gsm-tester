@@ -109,7 +109,6 @@ if __name__ == '__main__':
 
     if args.log_level:
         log.set_all_levels(log.LEVEL_STRS.get(args.log_level))
-    log.style_change(origin_width=32)
     if args.trace:
         log.style_change(trace=True)
 

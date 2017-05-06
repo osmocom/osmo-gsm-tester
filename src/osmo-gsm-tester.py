@@ -130,8 +130,8 @@ if __name__ == '__main__':
     test_names = []
     for test_name in (args.test or []):
         found = False
-        for suite_run in suite_runs:
-            for test in suite_run.definition.tests:
+        for suite_scenario_str, suite_def, scenarios in suite_scenarios:
+            for test in suite_def.tests:
                 if test_name in test.name():
                     found = True
                     test_names.append(test.name())

@@ -271,8 +271,35 @@ class Resources(dict):
         return Resources(self).drop(reserved)
 
     def find(self, want, skip_if_marked=None, do_copy=True):
+        '''
+        Pass a dict of resource requirements, e.g.:
+          want = {
+            'bts': [ {'type': 'osmo-bts-sysmo',}, {} ],
+            'modem': [ {'times': 3} ]
+          }
+        This function tries to find a combination from the available resources that
+        matches these requiremens. The returnvalue is a dict (wrapped in a Resources class)
+        that contains the matching resources in the order of 'want' dict: in above
+        example, the returned dict would have a 'bts' list with the first item being
+        a sysmoBTS, the second item being any other available BTS.
+
+        If skip_if_marked is passed, any resource that contains this key is skipped.
+        E.g. if a BTS has the USED_KEY set like
+          reserved_resources = { 'bts' : {..., '_used': True} }
+        then this may be skipped by passing skip_if_marked='_used'
+        (or rather skip_if_marked=USED_KEY).
+
+        If do_copy is True, the returned dict is a deep copy and does not share
+        lists with any other Resources dict.
+
+        If raise_if_missing is False, this will return an empty item for any
+        resource that had no match, instead of immediately raising an exception.
+        '''
         matches = {}
         for key, want_list in sorted(want.items()): # sorted for deterministic test results
+          # here we have a resource of a given type, e.g. 'bts', with a list
+          # containing as many BTSes as the caller wants to reserve/use. Each
+          # list item contains specifics for the particular BTS.
           with log.Origin(want=key):
             my_list = self.get(key)
 
@@ -281,7 +308,9 @@ class Resources(dict):
             # Try to avoid a less constrained item snatching away a resource
             # from a more detailed constrained requirement.
 
-            # first record all matches
+            # first record all matches, so that each requested item has a list
+            # of all available resources that match it. Some resources may
+            # appear for multiple requested items. Store matching indexes.
             all_matches = []
             for want_item in want_list:
                 item_match_list = []

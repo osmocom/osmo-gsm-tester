@@ -74,20 +74,32 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(epilog=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    # Note: since we're using RawTextHelpFormatter to keep nicely separate
+    # paragraphs in the long help text, we unfortunately also need to take care
+    # of line wraps in the shorter cmdline options help.
+    # The line width here is what remains of screen width after the list of
+    # options placed by ArgumentParser. That's unfortunately subject to change
+    # and undefined, so when things change, just run a local
+    # ./osmo-gsm-tester.py --help and try to keep everything in 80 chars width.
+    # The help text is indented automatically, but line width is manual.
+    # Using multi-line strings here -- doesn't look nice in the python flow but
+    # is easiest to maintain.
     parser.add_argument('-V', '--version', action='store_true',
             help='Show version')
     parser.add_argument('trial_package', nargs='+',
             help='Directory containing binaries to test')
     parser.add_argument('-s', '--suite-scenario', dest='suite_scenario', action='append',
-            help='A suite-scenarios combination like suite:scenario+scenario')
+            help='''A suite-scenarios combination
+like suite:scenario+scenario''')
     parser.add_argument('-S', '--series', dest='series', action='append',
-            help='A series of suite-scenarios combinations as defined in the'
-                 ' osmo-gsm-tester configuration')
+            help='''A series of suite-scenarios combinations
+as defined in the osmo-gsm-tester configuration''')
     parser.add_argument('-t', '--test', dest='test', action='append',
-            help='Run only tests matching this name. Any test name that'
-                 ' contains the given string is run. To get an exact patch,'
-                 ' prepend a "=" like "-t =my_exact_name". The ".py" suffix is'
-                 ' always optional.')
+            help='''Run only tests matching this name.
+Any test name that contains the given string is run.
+To get an exact match, prepend a "=" like
+"-t =my_exact_name". The ".py" suffix is always
+optional.''')
     parser.add_argument('-l', '--log-level', dest='log_level', choices=log.LEVEL_STRS.keys(),
             default=None,
             help='Set logging level for all categories (on stdout)')

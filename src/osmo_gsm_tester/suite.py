@@ -99,7 +99,7 @@ class Test(log.Origin):
                                          self.path)
                     success = True
             except resource.NoResourceExn:
-                self.err('Current resource state:\n', repr(reserved_resources))
+                self.err('Current resource state:\n', repr(suite_run.reserved_resources))
                 raise
             finally:
                 if success:

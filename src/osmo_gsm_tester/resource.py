@@ -270,7 +270,7 @@ class Resources(dict):
     def without(self, reserved):
         return Resources(self).drop(reserved)
 
-    def find(self, want, skip_if_marked=None, do_copy=True):
+    def find(self, want, skip_if_marked=None, do_copy=True, raise_if_missing=True):
         '''
         Pass a dict of resource requirements, e.g.:
           want = {
@@ -321,13 +321,22 @@ class Resources(dict):
                     if item_matches(my_item, want_item, ignore_keys=('times',)):
                         item_match_list.append(i)
                 if not item_match_list:
-                    raise NoResourceExn('No matching resource available for %s = %r'
-                                        % (key, want_item))
+                    if raise_if_missing:
+                        raise NoResourceExn('No matching resource available for %s = %r'
+                                            % (key, want_item))
+                    else:
+                        # this one failed... see below
+                        all_matches = []
+                        break
+
                 all_matches.append( item_match_list )
 
             if not all_matches:
-                raise NoResourceExn('No matching resource available for %s = %r'
-                                    % (key, want_list))
+                # ...this one failed. Makes no sense to solve resource
+                # allocations, return an empty list for this key to mark
+                # failure.
+                matches[key] = []
+                continue
 
             # figure out who gets what
             solution = solve(all_matches)
@@ -450,7 +459,7 @@ class ReservedResources(log.Origin):
             specifics = {}
         self.dbg('requesting use of', kind, specifics=specifics)
         want = { kind: [specifics] }
-        available_dict = self.reserved.find(want, skip_if_marked=USED_KEY, do_copy=False)
+        available_dict = self.reserved.find(want, skip_if_marked=USED_KEY, do_copy=False, raise_if_missing=False)
         available = available_dict.get(kind)
         self.dbg(available=len(available))
         if not available:

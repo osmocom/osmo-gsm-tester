@@ -61,6 +61,7 @@ class LogTarget:
     do_log_category = None
     do_log_level = None
     do_log_origin = None
+    do_log_all_origins = None
     do_log_traceback = None
     do_log_src = None
     origin_width = None
@@ -86,7 +87,7 @@ class LogTarget:
     def remove(self):
         LogTarget.all_targets.remove(self)
 
-    def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=32, src=True, trace=False):
+    def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=32, src=True, trace=False, all_origins=True):
         '''
         set all logging format aspects, to defaults if not passed:
         time: log timestamps;
@@ -105,13 +106,14 @@ class LogTarget:
         self.do_log_category = bool(category)
         self.do_log_level = bool(level)
         self.do_log_origin = bool(origin)
+        self.do_log_all_origins = bool(all_origins)
         self.origin_width = int(origin_width)
         self.origin_fmt = '{:>%ds}' % self.origin_width
         self.do_log_src = src
         self.do_log_traceback = trace
         return self
 
-    def style_change(self, time=None, time_fmt=None, category=None, level=None, origin=None, origin_width=None, src=None, trace=None):
+    def style_change(self, time=None, time_fmt=None, category=None, level=None, origin=None, origin_width=None, src=None, trace=None, all_origins=None):
         'modify only the given aspects of the logging format'
         self.style(
             time=(time if time is not None else self.do_log_time),
@@ -122,6 +124,7 @@ class LogTarget:
             origin_width=(origin_width if origin_width is not None else self.origin_width),
             src=(src if src is not None else self.do_log_src),
             trace=(trace if trace is not None else self.do_log_traceback),
+            all_origins=(all_origins if all_origins is not None else self.do_log_all_origins),
             )
         return self
 
@@ -187,7 +190,7 @@ class LogTarget:
 
         log_line = [compose_message(messages, named_items)]
 
-        if deeper_origins:
+        if deeper_origins and self.do_log_all_origins:
             log_line.append(' [%s]' % deeper_origins)
 
         if self.do_log_src and src:

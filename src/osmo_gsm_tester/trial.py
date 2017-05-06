@@ -29,6 +29,7 @@ FILE_CHECKSUMS = 'checksums.md5'
 TIMESTAMP_FMT = '%Y-%m-%d_%H-%M-%S'
 FILE_LAST_RUN = 'last_run'
 FILE_LOG = 'log'
+FILE_LOG_BRIEF = 'log_brief'
 
 class Trial(log.Origin):
     path = None
@@ -68,6 +69,8 @@ class Trial(log.Origin):
             log.FileLogTarget(run_dir.new_child(FILE_LOG))
               .set_all_levels(log.L_DBG)
               .style_change(trace=True),
+            log.FileLogTarget(run_dir.new_child(FILE_LOG_BRIEF))
+              .style_change(src=False, all_origins=False)
             ]
         self.log('Trial start')
         self.take()

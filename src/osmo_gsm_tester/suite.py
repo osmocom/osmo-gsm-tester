@@ -233,6 +233,12 @@ class SuiteRun(log.Origin):
     def modem(self):
         return modem_obj(self.reserved_resources.get(resource.R_MODEM))
 
+    def modems(self, count):
+        l = []
+        for i in range(count):
+            l.append(self.modem())
+        return l
+
     def msisdn(self):
         msisdn = self.resources_pool.next_msisdn(self.origin)
         self.log('using MSISDN', msisdn)

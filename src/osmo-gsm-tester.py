@@ -84,7 +84,10 @@ if __name__ == '__main__':
             help='A series of suite-scenarios combinations as defined in the'
                  ' osmo-gsm-tester configuration')
     parser.add_argument('-t', '--test', dest='test', action='append',
-            help='Run only tests matching this name')
+            help='Run only tests matching this name. Any test name that'
+                 ' contains the given string is run. To get an exact patch,'
+                 ' prepend a "=" like "-t =my_exact_name". The ".py" suffix is'
+                 ' always optional.')
     parser.add_argument('-l', '--log-level', dest='log_level', choices=log.LEVEL_STRS.keys(),
             default=None,
             help='Set logging level for all categories (on stdout)')
@@ -130,9 +133,15 @@ if __name__ == '__main__':
     test_names = []
     for test_name in (args.test or []):
         found = False
+        if test_name.startswith('=') and not test_name.endswith('.py'):
+            test_name = test_name + '.py'
         for suite_scenario_str, suite_def, scenarios in suite_scenarios:
             for test in suite_def.tests:
-                if test_name in test.name():
+                if test_name.startswith('='):
+                    match = test_name[1:] == test.name()
+                else:
+                    match = test_name in test.name()
+                if match:
                     found = True
                     test_names.append(test.name())
         if not found:

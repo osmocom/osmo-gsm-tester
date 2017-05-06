@@ -148,7 +148,7 @@ class ResourcesPool(log.Origin):
         with self.state_dir.lock(origin_id):
             rrfile_path = self.state_dir.mk_parentdir(RESERVED_RESOURCES_FILE)
             reserved = Resources(config.read(rrfile_path, if_missing_return={}))
-            to_be_reserved = self.all_resources.without(reserved).find(want)
+            to_be_reserved = self.all_resources.without(reserved).find(origin, want)
 
             to_be_reserved.mark_reserved_by(origin_id)
 
@@ -270,7 +270,7 @@ class Resources(dict):
     def without(self, reserved):
         return Resources(self).drop(reserved)
 
-    def find(self, want, skip_if_marked=None, do_copy=True, raise_if_missing=True):
+    def find(self, for_origin, want, skip_if_marked=None, do_copy=True, raise_if_missing=True, log_label='Reserving'):
         '''
         Pass a dict of resource requirements, e.g.:
           want = {
@@ -297,13 +297,12 @@ class Resources(dict):
         '''
         matches = {}
         for key, want_list in sorted(want.items()): # sorted for deterministic test results
-          # here we have a resource of a given type, e.g. 'bts', with a list
-          # containing as many BTSes as the caller wants to reserve/use. Each
-          # list item contains specifics for the particular BTS.
-          with log.Origin(want=key):
+            # here we have a resource of a given type, e.g. 'bts', with a list
+            # containing as many BTSes as the caller wants to reserve/use. Each
+            # list item contains specifics for the particular BTS.
             my_list = self.get(key)
 
-            log.dbg(None, None, 'Looking for', len(want_list), 'x', key, ', candidates:', len(my_list))
+            for_origin.log(log_label, len(want_list), 'x', key, '(candidates: %d)'%len(my_list))
 
             # Try to avoid a less constrained item snatching away a resource
             # from a more detailed constrained requirement.
@@ -341,7 +340,7 @@ class Resources(dict):
             # figure out who gets what
             solution = solve(all_matches)
             picked = [ my_list[i] for i in solution if i is not None ]
-            log.dbg(None, None, 'Picked', config.tostr(picked))
+            for_origin.dbg('Picked', config.tostr(picked))
             matches[key] = picked
 
         return Resources(matches, do_copy=do_copy)
@@ -459,7 +458,9 @@ class ReservedResources(log.Origin):
             specifics = {}
         self.dbg('requesting use of', kind, specifics=specifics)
         want = { kind: [specifics] }
-        available_dict = self.reserved.find(want, skip_if_marked=USED_KEY, do_copy=False, raise_if_missing=False)
+        available_dict = self.reserved.find(self.origin, want, skip_if_marked=USED_KEY,
+                                            do_copy=False, raise_if_missing=False,
+                                            log_label='Using')
         available = available_dict.get(kind)
         self.dbg(available=len(available))
         if not available:

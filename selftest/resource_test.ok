@@ -155,15 +155,15 @@ cnf -: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/state_dir
 *** end: all resources
 
 - request some resources
---- (want='arfcn'): DBG: Looking for 2 x arfcn , candidates: 10
---- (want='arfcn'): DBG: Picked - _hash: e620569450f8259b3f0212ec19c285dd07df063c
+--- testowner: Reserving 2 x arfcn (candidates: 10)
+--- testowner: DBG: Picked - _hash: e620569450f8259b3f0212ec19c285dd07df063c
   arfcn: '512'
   band: GSM-1800
 - _hash: 022621e513c5a5bf33b77430a1e9c886be676fa1
   arfcn: '514'
   band: GSM-1800
---- (want='bts'): DBG: Looking for 2 x bts , candidates: 3
---- (want='bts'): DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+--- testowner: Reserving 2 x bts (candidates: 3)
+--- testowner: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
   band: GSM-1800
   ipa_unit_id: '1'
@@ -177,8 +177,8 @@ cnf -: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/state_dir
   trx_list:
   - hw_addr: 00:0c:90:32:b5:8a
   type: oct
---- (want='modem'): DBG: Looking for 2 x modem , candidates: 16
---- (want='modem'): DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+--- testowner: Reserving 2 x modem (candidates: 16)
+--- testowner: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   imsi: '901700000007801'
   ki: D620F48487B1B782DA55DF6717F08FF9
   label: m7801
@@ -188,8 +188,8 @@ cnf -: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/state_dir
   ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
   label: m7802
   path: /wavecom_1
---- (want='nitb_iface'): DBG: Looking for 1 x nitb_iface , candidates: 3
---- (want='nitb_iface'): DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+--- testowner: Reserving 1 x nitb_iface (candidates: 3)
+--- testowner: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
   addr: 10.42.42.1
 ~~~ currently reserved:
 arfcn:

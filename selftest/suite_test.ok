@@ -28,15 +28,16 @@ tst test_suite: Suite run start
 tst test_suite: reserving resources...
 tst test_suite: DBG: {combining='resources'}  [test_suite↪test_suite]
 tst test_suite: DBG: {definition_conf={bts=[{'times': '1'}], modem=[{'times': '2'}], nitb_iface=[{'times': '1'}]}}  [test_suite↪(combining_scenarios='resources')↪test_suite]
---- (want='bts'): DBG: Looking for 1 x bts , candidates: 3
---- (want='bts'): DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+tst test_suite: Reserving 1 x bts (candidates: 3)  [test_suite↪test_suite]
+tst test_suite: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
   band: GSM-1800
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: sysmo
---- (want='modem'): DBG: Looking for 2 x modem , candidates: 16
---- (want='modem'): DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  [test_suite↪test_suite]
+tst test_suite: Reserving 2 x modem (candidates: 16)  [test_suite↪test_suite]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   imsi: '901700000007801'
   ki: D620F48487B1B782DA55DF6717F08FF9
   label: m7801
@@ -46,9 +47,11 @@ tst test_suite: DBG: {definition_conf={bts=[{'times': '1'}], modem=[{'times': '2
   ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
   label: m7802
   path: /wavecom_1
---- (want='nitb_iface'): DBG: Looking for 1 x nitb_iface , candidates: 3
---- (want='nitb_iface'): DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  [test_suite↪test_suite]
+tst test_suite: Reserving 1 x nitb_iface (candidates: 3)  [test_suite↪test_suite]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
   addr: 10.42.42.1
+  [test_suite↪test_suite]
 tst hello_world.py: START  [test_suite↪hello_world.py]
 tst hello_world.py:3: hello world  [test_suite↪hello_world.py:3]
 tst hello_world.py:4: I am 'test_suite' / 'hello_world.py:4'  [test_suite↪hello_world.py:4]

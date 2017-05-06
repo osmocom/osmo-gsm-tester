@@ -17,7 +17,7 @@ rm_trial() {
 	trial_name="$(basename "$trial_dir")"
 	echo "Removing: $(ls -ld "$trial_dir")"
 	# ensure atomic removal, so that the gsm-tester doesn't take it as a
-	# newly added dir (can happen when the 'SEEN' marker is removed first).
+	# newly added dir (can happen when the 'taken' marker is removed first).
 	mv "$trial_dir" "$trial_prep_dir/"
 	rm -rf "$trial_prep_dir/$trial_name"
 }
@@ -25,6 +25,6 @@ rm_trial() {
 # keep the N newest test session dirs that have been started: find all that
 # have been started sorted by time, then discard all but the N newest ones.
 
-for seen in $(ls -1t "$trial_rx_dir"/*/SEEN | tail -n +31); do
+for seen in $(ls -1t "$trial_rx_dir"/*/taken | tail -n +31); do
 	rm_trial "$(dirname "$seen")"
 done

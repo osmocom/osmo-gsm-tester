@@ -61,6 +61,7 @@ class Trial(log.Origin):
 
     def __enter__(self):
         self.log('Trial start')
+        self.take()
         super().__enter__()
 
     def __exit__(self, *exc_info):

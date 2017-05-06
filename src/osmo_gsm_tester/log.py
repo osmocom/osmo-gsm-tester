@@ -22,6 +22,7 @@ import sys
 import time
 import traceback
 import contextlib
+import atexit
 from inspect import getframeinfo, stack
 
 from .util import is_dict
@@ -507,6 +508,30 @@ class TestsTarget(LogTarget):
     def __init__(self, log_write_func=None):
         super().__init__(log_write_func)
         self.style(time=False, src=False)
+
+class FileLogTarget(LogTarget):
+    'LogTarget to log to a file system path'
+    log_file = None
+
+    def __init__(self, log_path):
+        atexit.register(self.at_exit)
+        self.path = log_path
+        self.log_file = open(log_path, 'a')
+        super().__init__(self.write_to_log_and_flush)
+
+    def remove(self):
+        super().remove()
+        self.log_file.close()
+        self.log_file = None
+
+    def write_to_log_and_flush(self, msg):
+        self.log_file.write(msg)
+        self.log_file.flush()
+
+    def at_exit(self):
+        if self.log_file is not None:
+            self.log_file.flush()
+            self.log_file.close()
 
 def run_logging_exceptions(func, *func_args, return_on_failure=None, **func_kwargs):
     try:

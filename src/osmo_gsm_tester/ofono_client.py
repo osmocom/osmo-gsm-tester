@@ -197,13 +197,13 @@ class Modem(log.Origin):
         return sms
 
     def _on_incoming_message(self, message, info):
-        self.log('Incoming SMS:', repr(message), info=info)
+        self.log('Incoming SMS:', repr(message))
         self.sms_received_list.append((message, info))
 
     def sms_was_received(self, sms):
         for msg, info in self.sms_received_list:
             if sms.matches(msg):
-                self.log('SMS received as expected:', msg=msg, info=info)
+                self.log('SMS received as expected:', repr(msg))
                 return True
         return False
 

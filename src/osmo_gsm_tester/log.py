@@ -105,6 +105,7 @@ class LogTarget:
         self.origin_fmt = '{:>%ds}' % self.origin_width
         self.do_log_src = src
         self.do_log_traceback = trace
+        return self
 
     def style_change(self, time=None, time_fmt=None, category=None, level=None, origin=None, origin_width=None, src=None, trace=None):
         'modify only the given aspects of the logging format'
@@ -118,13 +119,16 @@ class LogTarget:
             src=(src if src is not None else self.do_log_src),
             trace=(trace if trace is not None else self.do_log_traceback),
             )
+        return self
 
     def set_level(self, category, level):
         'set global logging log.L_* level for a given log.C_* category'
         self.category_levels[category] = level
+        return self
 
     def set_all_levels(self, level):
         self.all_levels = level
+        return self
 
     def is_enabled(self, category, level):
         if level == L_TRACEBACK:

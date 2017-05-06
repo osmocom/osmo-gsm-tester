@@ -160,10 +160,10 @@ class Modem(log.Origin):
         else:
             self.log('Use of %r interface not implemented yet, hoping that the modem connects by itself' % I_NETREG)
 
-    def sms_send(self, to_msisdn):
+    def sms_send(self, to_msisdn, *tokens):
         if hasattr(to_msisdn, 'msisdn'):
             to_msisdn = to_msisdn.msisdn
-        sms = Sms(self.msisdn, to_msisdn)
+        sms = Sms(self.msisdn, to_msisdn, 'from ' + self.name(), *tokens)
         self.log('sending sms to MSISDN', to_msisdn, sms=sms)
         if not self.has_interface(I_SMS):
             raise RuntimeError('Modem cannot send SMS, interface not active: %r' % I_SMS)
@@ -186,16 +186,15 @@ class Sms:
     _last_sms_idx = 0
     msg = None
 
-    def __init__(self, from_msisdn=None, to_msisdn=None):
+    def __init__(self, from_msisdn=None, to_msisdn=None, *tokens):
         Sms._last_sms_idx += 1
         msgs = ['message nr. %d' % Sms._last_sms_idx]
-        if from_msisdn or to_msisdn:
-            msgs.append(' sent')
+        msgs.extend(tokens)
         if from_msisdn:
-            msgs.append(' from %s' % from_msisdn)
+            msgs.append('from %s' % from_msisdn)
         if to_msisdn:
-            msgs.append(' to %s' % to_msisdn)
-        self.msg = ''.join(msgs)
+            msgs.append('to %s' % to_msisdn)
+        self.msg = ', '.join(msgs)
 
     def __str__(self):
         return self.msg

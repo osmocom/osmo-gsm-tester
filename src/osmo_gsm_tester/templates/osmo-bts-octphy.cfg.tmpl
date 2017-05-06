@@ -4,18 +4,14 @@
 !
 log stderr
   logging color 1
-  logging timestamp 0
-  logging level all everything
-  logging level rsl info
-  logging level oml info
-  logging level rll notice
-  logging level rr notice
-  logging level meas notice
-  logging level pag info
-  logging level l1c info
-  logging level l1p info
-  logging level dsp info
-  logging level abis notice
+  logging print extended-timestamp 1
+  logging print category 1
+  logging level abis debug
+  logging level oml debug
+  logging level pag debug
+  logging level rll debug
+  logging level rr debug
+  logging level rsl debug
 !
 line vty
  no login

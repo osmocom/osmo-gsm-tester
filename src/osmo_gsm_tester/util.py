@@ -29,7 +29,7 @@ import threading
 import importlib.util
 import fcntl
 import tty
-import termios
+import readline
 
 
 class listdict:
@@ -282,42 +282,24 @@ def msisdn_inc(msisdn_str):
     'add 1 and preserve leading zeros'
     return ('%%0%dd' % len(msisdn_str)) % (int(msisdn_str) + 1)
 
-class polling_stdin:
-    def __init__(self, stream):
-        self.stream = stream
-        self.fd = self.stream.fileno()
-    def __enter__(self):
-        self.original_stty = termios.tcgetattr(self.stream)
-        tty.setcbreak(self.stream)
-        self.orig_fl = fcntl.fcntl(self.fd, fcntl.F_GETFL)
-        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl | os.O_NONBLOCK)
-    def __exit__(self, *args):
-        fcntl.fcntl(self.fd, fcntl.F_SETFL, self.orig_fl)
-        termios.tcsetattr(self.stream, termios.TCSANOW, self.original_stty)
+class InputThread(threading.Thread):
+    def __init__(self, prompt):
+        super().__init__()
+        self.prompt = prompt
+        self.result = None
 
-def input_polling(poll_func, stream=None):
-    if stream is None:
-        stream = sys.stdin
-    unbuffered_stdin = os.fdopen(stream.fileno(), 'rb', buffering=0)
-    try:
-        with polling_stdin(unbuffered_stdin):
-            acc = []
-            while True:
-                poll_func()
-                got = unbuffered_stdin.read(1)
-                if got and len(got):
-                    try:
-                        # this is hacky: can't deal with multibyte sequences
-                        got_str = got.decode('utf-8')
-                    except:
-                        got_str = '?'
-                    acc.append(got_str)
-                    sys.__stdout__.write(got_str)
-                    sys.__stdout__.flush()
-                    if '\n' in got_str:
-                        return ''.join(acc)
-                time.sleep(.1)
-    finally:
-        unbuffered_stdin.close()
+    def run(self):
+        self.result = input(self.prompt)
+
+def input_polling(prompt, poll_func):
+    input_thread = InputThread(prompt)
+    input_thread.start()
+
+    while input_thread.is_alive():
+        poll_func()
+        time.sleep(1)
+
+    input_thread.join()
+    return input_thread.result
 
 # vim: expandtab tabstop=4 shiftwidth=4

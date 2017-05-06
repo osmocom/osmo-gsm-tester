@@ -73,6 +73,7 @@ class Process(log.Origin):
                 self.popen_args,
                 stdout=self.make_output_log('stdout'),
                 stderr=self.make_output_log('stderr'),
+                stdin=subprocess.PIPE,
                 shell=False,
                 cwd=self.run_dir.path,
                 **self.popen_kwargs)

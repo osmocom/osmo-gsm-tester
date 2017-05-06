@@ -286,11 +286,12 @@ class SuiteRun(log.Origin):
                                     for k,v in sorted(msg_details.items())])))
         msg = ' '.join(msgs) or 'Hit Enter to continue'
         self.log('prompt:', msg)
+        sys.__stdout__.write('\n\n--- PROMPT ---\n')
         sys.__stdout__.write(msg)
-        sys.__stdout__.write('\n> ')
+        sys.__stdout__.write('\n')
         sys.__stdout__.flush()
-        entered = util.input_polling(self.poll)
-        self.log('prompt entered:', entered)
+        entered = util.input_polling('> ', self.poll)
+        self.log('prompt entered:', repr(entered))
         return entered
 
 loaded_suite_definitions = {}

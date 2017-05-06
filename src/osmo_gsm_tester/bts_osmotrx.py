@@ -55,7 +55,7 @@ class OsmoBtsTrx(log.Origin):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': lib }
 
-        self.launch_process(OsmoBtsTrx.BIN_TRX)
+        self.launch_process(OsmoBtsTrx.BIN_TRX, '-x')
         self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1', '-c', os.path.abspath(self.config_file))
         #self.launch_process(OsmoBtsTrx.BIN_PCU, '-r', '1')
         self.suite_run.poll()

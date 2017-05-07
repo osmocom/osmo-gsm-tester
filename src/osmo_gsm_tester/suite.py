@@ -24,6 +24,9 @@ import copy
 from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb
 from . import test
 
+class Timeout(Exception):
+    pass
+
 class SuiteDefinition(log.Origin):
     '''A test suite reserves resources for a number of tests.
        Each test requires a specific number of modems, BTSs etc., which are
@@ -262,7 +265,7 @@ class SuiteRun(log.Origin):
 
     def wait(self, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
         if not self._wait(condition, condition_args, condition_kwargs, timeout, timestep):
-            raise RuntimeError('Timeout expired')
+            raise Timeout('Timeout expired')
 
     def sleep(self, seconds):
         assert seconds > 0.

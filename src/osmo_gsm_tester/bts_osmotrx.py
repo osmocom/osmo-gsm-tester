@@ -26,6 +26,7 @@ class OsmoBtsTrx(log.Origin):
     run_dir = None
     inst = None
     env = None
+    proc_trx = None
 
     BIN_TRX = 'osmo-trx'
     BIN_BTS_TRX = 'osmo-bts-trx'
@@ -55,10 +56,18 @@ class OsmoBtsTrx(log.Origin):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': lib }
 
-        self.launch_process(OsmoBtsTrx.BIN_TRX, '-x')
+        self.proc_trx = self.launch_process(OsmoBtsTrx.BIN_TRX, '-x')
+        self.log('Waiting for osmo-trx to start up...')
+        self.suite_run.wait(self.trx_ready)
+        self.proc_trx.log(self.proc_trx.get_stdout_tail(1))
         self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1', '-c', os.path.abspath(self.config_file))
         #self.launch_process(OsmoBtsTrx.BIN_PCU, '-r', '1')
         self.suite_run.poll()
+
+    def trx_ready(self):
+        if not self.proc_trx or not self.proc_trx.is_running:
+            return False
+        return '-- Transceiver active with' in (self.proc_trx.get_stdout() or '')
 
     def launch_process(self, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
@@ -70,6 +79,7 @@ class OsmoBtsTrx(log.Origin):
                                env=self.env)
         self.suite_run.remember_to_stop(proc)
         proc.launch()
+        return proc
 
     def configure(self):
         if self.nitb is None:

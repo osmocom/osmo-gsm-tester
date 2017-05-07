@@ -52,21 +52,21 @@ tst test_suite: Reserving 1 x nitb_iface (candidates: 3)  [test_suite↪test_sui
 tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
   addr: 10.42.42.1
   [test_suite↪test_suite]
-tst hello_world.py: START  [test_suite↪hello_world.py]
-tst hello_world.py:3: hello world  [test_suite↪hello_world.py:3]
-tst hello_world.py:4: I am 'test_suite' / 'hello_world.py:4'  [test_suite↪hello_world.py:4]
-tst hello_world.py:5: one  [test_suite↪hello_world.py:5]
-tst hello_world.py:5: two  [test_suite↪hello_world.py:5]
-tst hello_world.py:5: three  [test_suite↪hello_world.py:5]
-tst hello_world.py: PASS  [test_suite↪hello_world.py]
+tst hello_world.py:[LINENR] START  [test_suite↪hello_world.py]
+tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py:[LINENR]'  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR] PASS  [test_suite↪hello_world.py]
 pass: all 1 tests passed.
 
 - a test with an error
-tst test_suite: Suite run start  [suite.py:191]
-tst test_error.py: START  [test_suite↪test_error.py]  [suite.py:96]
-tst test_error.py:3: I am 'test_suite' / 'test_error.py:3'  [test_suite↪test_error.py:3]  [test_error.py:3]
-tst test_error.py:5: FAIL  [test_suite↪test_error.py:5]  [suite.py:108]
-tst test_error.py:5: ERR: AssertionError:   [test_suite↪test_error.py:5]  [test_error.py:5: assert False]
+tst test_suite: Suite run start  [suite.py:[LINENR]]
+tst test_error.py:[LINENR] START  [test_suite↪test_error.py]  [suite.py:[LINENR]]
+tst test_error.py:[LINENR]: I am 'test_suite' / 'test_error.py:[LINENR]'  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]]
+tst test_error.py:[LINENR]: FAIL  [test_suite↪test_error.py:[LINENR]]  [suite.py:[LINENR]]
+tst test_error.py:[LINENR]: ERR: AssertionError:   [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]: assert False]
 FAIL: 1 of 1 tests failed:
   test_error.py
 

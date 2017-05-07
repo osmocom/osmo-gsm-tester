@@ -1,1 +1,2 @@
 /[^ ]*/selftest/	[PATH]/selftest/
+\.py:[0-9]*	.py:[LINENR]

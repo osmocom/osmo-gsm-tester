@@ -24,7 +24,10 @@ while True:
   if 'quit'.startswith(cmd):
     break
   elif 'wait-registered'.startswith(cmd):
-    wait(nitb.subscriber_attached, *modems)
+    try:
+      wait(nitb.subscriber_attached, *modems)
+    except Timeout:
+      print('Timeout while waiting for registration.')
   elif 'get-registered'.startswith(cmd):
     print(nitb.imsi_list_attached())
     print('RESULT: %s' %

@@ -93,7 +93,7 @@ class Test(log.Origin):
     def run(self, suite_run):
         assert self.suite is suite_run.definition
         with self:
-            test.setup(suite_run, self, ofono_client)
+            test.setup(suite_run, self, ofono_client, sys.modules[__name__])
             success = False
             try:
                 self.log('START')

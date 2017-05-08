@@ -22,7 +22,7 @@ import random
 import re
 import socket
 
-from . import log, util, config, template, process, osmo_ctrl
+from . import log, util, config, template, process, osmo_ctrl, pcaprecorder
 
 class OsmoNitb(log.Origin):
     suite_run = None
@@ -50,6 +50,10 @@ class OsmoNitb(log.Origin):
         lib = inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
+
+        iface = util.ip_to_iface(self.addr())
+        pcaprecorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'),
+                                  iface, self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 

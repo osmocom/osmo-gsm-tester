@@ -30,13 +30,24 @@ import importlib.util
 import fcntl
 import tty
 import readline
-
+import subprocess
 
 def prepend_library_path(path):
     lp = os.getenv('LD_LIBRARY_PATH')
     if not lp:
         return path
     return path + ':' + lp
+
+def ip_to_iface(ip):
+    try:
+        for iface in os.listdir('/sys/class/net'):
+            proc = subprocess.Popen(['ip', 'addr', 'show', 'dev', iface], stdout=subprocess.PIPE, universal_newlines=True)
+            for line in proc.stdout.readlines():
+                if 'inet' in line and ' ' + ip + '/' in line:
+                    return iface
+    except Exception as e:
+        pass
+    return None
 
 class listdict:
     'a dict of lists { "a": [1, 2, 3],  "b": [1, 2] }'

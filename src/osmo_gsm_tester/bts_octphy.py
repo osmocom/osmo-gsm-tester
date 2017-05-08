@@ -50,7 +50,7 @@ class OsmoBtsOctphy(log.Origin):
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)
-        self.env = { 'LD_LIBRARY_PATH': lib }
+        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
         self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1', '-c', os.path.abspath(self.config_file))
         self.suite_run.poll()

@@ -32,6 +32,12 @@ import tty
 import readline
 
 
+def prepend_library_path(path):
+    lp = os.getenv('LD_LIBRARY_PATH')
+    if not lp:
+        return path
+    return path + ':' + lp
+
 class listdict:
     'a dict of lists { "a": [1, 2, 3],  "b": [1, 2] }'
     def __getattr__(ld, name):

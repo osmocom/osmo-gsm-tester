@@ -54,7 +54,7 @@ class OsmoBtsTrx(log.Origin):
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)
-        self.env = { 'LD_LIBRARY_PATH': lib }
+        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
         self.proc_trx = self.launch_process(OsmoBtsTrx.BIN_TRX, '-x')
         self.log('Waiting for osmo-trx to start up...')

@@ -50,7 +50,9 @@ class OsmoNitb(log.Origin):
         lib = inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
-        env = { 'LD_LIBRARY_PATH': lib }
+
+        env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir,
                                        (binary, '-c',

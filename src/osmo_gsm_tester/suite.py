@@ -214,7 +214,7 @@ class SuiteRun(log.Origin):
     def remember_to_stop(self, process):
         if self._processes is None:
             self._processes = []
-        self._processes.append(process)
+        self._processes.insert(0, process)
 
     def stop_processes(self):
         if not self._processes:

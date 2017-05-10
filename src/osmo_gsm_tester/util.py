@@ -49,34 +49,20 @@ def ip_to_iface(ip):
         pass
     return None
 
-class listdict:
+class listdict(dict):
     'a dict of lists { "a": [1, 2, 3],  "b": [1, 2] }'
-    def __getattr__(ld, name):
-        if name == 'add':
-            return ld.__getattribute__(name)
-        return ld.__dict__.__getattribute__(name)
 
-    def add(ld, name, item):
-        l = ld.__dict__.get(name)
+    def add(self, name, item):
+        l = self.get(name)
         if not l:
             l = []
-            ld.__dict__[name] = l
+            self[name] = l
         l.append(item)
         return l
 
-    def add_dict(ld, d):
+    def add_dict(self, d):
         for k,v in d.items():
-            ld.add(k, v)
-
-    def __setitem__(ld, name, val):
-        return ld.__dict__.__setitem__(name, val)
-
-    def __getitem__(ld, name):
-        return ld.__dict__.__getitem__(name)
-
-    def __str__(ld):
-        return ld.__dict__.__str__()
-
+            self.add(k, v)
 
 class DictProxy:
     '''

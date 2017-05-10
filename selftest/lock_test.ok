@@ -1,8 +1,4 @@
-acquired lock: 'long name'
 launched first, locked by: long name
 launched second, locked by: long name
-leaving lock: 'long name'
-acquired lock: 'shorter'
 waited, locked by: shorter
-leaving lock: 'shorter'
 waited more, locked by: 

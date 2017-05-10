@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, test
+from . import log, test, util
 
 from pydbus import SystemBus, Variant
 import time
@@ -37,7 +37,7 @@ class DeferredHandling:
 
     def __init__(self, dbus_iface, handler):
         self.handler = handler
-        dbus_iface.connect(self.receive_signal)
+        self.subscription_id = dbus_iface.connect(self.receive_signal)
 
     def receive_signal(self, *args, **kwargs):
         DeferredHandling.defer_queue.append((self.handler, args, kwargs))
@@ -55,7 +55,7 @@ def dbus_connect(dbus_iface, handler):
     so that a signal handler is invoked only after the DBus polling is through
     by enlisting signals that should be handled in the
     DeferredHandling.defer_queue.'''
-    DeferredHandling(dbus_iface, handler)
+    return DeferredHandling(dbus_iface, handler).subscription_id
 
 
 def poll():
@@ -85,6 +85,7 @@ class Modem(log.Origin):
         self.set_log_category(log.C_BUS)
         self._dbus_obj = None
         self._interfaces = set()
+        self._connected_signals = util.listdict()
         self.sms_received_list = []
         # init interfaces and connect to signals:
         self.dbus_obj()
@@ -149,24 +150,35 @@ class Modem(log.Origin):
         for iface in additions:
             self._on_interface_enabled(iface)
 
+    def _disconnect(self, interface_name):
+        subscriptions = self._connected_signals.pop(interface_name, [])
+        if subscriptions:
+            self.dbg('Disconnecting', len(subscriptions), 'signals from', interface_name)
+        for subscription in subscriptions:
+            subscription.disconnect()
+
     def _on_interface_enabled(self, interface_name):
         self.dbg('Interface enabled:', interface_name)
-        if interface_name == I_SMS:
-            retries = 3
-            while True:
-                try:
-                    dbus_connect(self.dbus_obj()[I_SMS].IncomingMessage, self._on_incoming_message)
-                    break
-                except KeyError:
-                    self.dbg('Interface not yet available:', I_SMS)
-                    retries -= 1
-                    time.sleep(1)
-                    if retries <= 0:
-                        self.err('Interface enabled by signal, but not available:', I_SMS)
-                        raise
+
+        all_wanted_conns = {
+                I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
+            }
+
+        want = all_wanted_conns.get(interface_name)
+        if not want:
+            return
+
+        # sanity
+        self._disconnect(interface_name)
+
+        self.dbg('Connecting', len(want), 'signals to', interface_name)
+        for signal, cb in want:
+            dbus_iface = getattr(self.dbus_obj()[interface_name], signal)
+            self._connected_signals.add(interface_name, dbus_connect(dbus_iface, cb))
 
     def _on_interface_disabled(self, interface_name):
         self.dbg('Interface disabled:', interface_name)
+        self._disconnect(interface_name)
 
     def has_interface(self, name):
         return name in self._interfaces

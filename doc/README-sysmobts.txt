@@ -34,6 +34,10 @@ SSH ACCESS
 Copy the SSH public key from the system/user that runs the tester to the BTS
 authorized keys file so the tester will be able to deploy binaries.
 
+  scp my_key.pub $sysmobts:
+  ssh $sysmobts
+  cat my_key.pub >> ~/.ssh/authorized_keys
+
 It is also advisable to configure the eth0 network interface of the BTS to a
 static IP address instead of using DHCP. To do so adjust /etc/network/interfaces
 and change the line

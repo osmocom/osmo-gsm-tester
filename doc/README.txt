@@ -95,6 +95,17 @@ possibly other) hardware: place the main unit's public SSH key on the sysmoBTS.
 Log in via SSH at least once to accept the BTS' host key.
 
 
+Jenkins Configuration
+
+(TODO: jenkins build slave details)
+
+When adding an entry to jenkins' known_hosts file, be aware that you need to
+add an actual RSA host key. Using 'ssh' to access the main unit may work, but
+jenkins will still fail to access it in the absence of a full RSA host key:
+
+  ssh-keyscan -H $my_main_unit_ip_addr >> ~jenkins/.ssh/known_hosts
+
+
 LAUNCHING A TEST RUN
 
 osmo-gsm-tester watches /var/tmp/osmo-gsm-tester for instructions to launch

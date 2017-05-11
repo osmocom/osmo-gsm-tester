@@ -8,8 +8,8 @@ fi
 
 osmo_gsm_tester_host="$OSMO_GSM_TESTER_REMOTE_MAIN_UNIT"
 osmo_gsm_tester_src="${OSMO_GSM_TESTER_REMOTE_SRC:-/usr/local/src/osmo-gsm-tester}"
-osmo_gsm_tester_dir="/var/tmp/osmo-gsm-tester"
-tmp_dir="/var/tmp/prep-osmo-gsm-tester"
+osmo_gsm_tester_dir="/var/tmp/osmo-gsm-tester/trials"
+tmp_dir="/var/tmp/osmo-gsm-tester/.prep-trials"
 
 #trial_name="$NODE_NAME-$BUILD_TAG"
 trial_name="trial-$BUILD_NUMBER"

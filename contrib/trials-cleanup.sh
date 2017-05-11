@@ -4,10 +4,10 @@
 trial_rx_dir="$1"
 trial_prep_dir="$2"
 if [ -z "$trial_rx_dir" ]; then
-	trial_rx_dir="/var/tmp/osmo-gsm-tester"
+	trial_rx_dir="/var/tmp/osmo-gsm-tester/trials"
 fi
 if [ -z "$trial_prep_dir" ]; then
-	trial_prep_dir="/var/tmp/prep-osmo-gsm-tester"
+	trial_prep_dir="/var/tmp/osmo-gsm-tester/.prep-trials"
 fi
 
 mkdir -p "$trial_prep_dir"

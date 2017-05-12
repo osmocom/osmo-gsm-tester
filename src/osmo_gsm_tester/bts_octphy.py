@@ -52,7 +52,9 @@ class OsmoBtsOctphy(log.Origin):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
-        self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1', '-c', os.path.abspath(self.config_file))
+        self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1',
+                            '-c', os.path.abspath(self.config_file),
+                            '-i', self.nitb.addr())
         self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):

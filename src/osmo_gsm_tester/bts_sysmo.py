@@ -78,7 +78,8 @@ class SysmoBts(log.Origin):
             remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
             self.launch_remote('osmo-bts-sysmo',
                 ('LD_LIBRARY_PATH=%s' % remote_lib,
-                 remote_binary, '-c', remote_config_file, '-r', '1'),
+                 remote_binary, '-c', remote_config_file, '-r', '1',
+                 '-i', self.nitb.addr()),
                 remote_cwd=remote_run_dir)
 
     def _process_remote(self, name, popen_args, remote_cwd=None):

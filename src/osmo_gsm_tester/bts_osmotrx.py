@@ -60,7 +60,9 @@ class OsmoBtsTrx(log.Origin):
         self.log('Waiting for osmo-trx to start up...')
         self.suite_run.wait(self.trx_ready)
         self.proc_trx.log(self.proc_trx.get_stdout_tail(1))
-        self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1', '-c', os.path.abspath(self.config_file))
+        self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
+                            '-c', os.path.abspath(self.config_file),
+                            '-i', self.nitb.addr())
         #self.launch_process(OsmoBtsTrx.BIN_PCU, '-r', '1')
         self.suite_run.poll()
 

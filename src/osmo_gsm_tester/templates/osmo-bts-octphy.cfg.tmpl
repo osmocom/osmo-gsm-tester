@@ -26,6 +26,19 @@ bts 0
  band ${osmo_bts_octphy.band}
  ipa unit-id ${osmo_bts_octphy.ipa_unit_id} 0
  oml remote-ip ${osmo_bts_octphy.oml_remote_ip}
+ gsmtap-sapi bcch
+ gsmtap-sapi ccch
+ gsmtap-sapi rach
+ gsmtap-sapi agch
+ gsmtap-sapi pch
+ gsmtap-sapi sdcch
+ gsmtap-sapi tch/f
+ gsmtap-sapi tch/h
+ gsmtap-sapi pacch
+ gsmtap-sapi pdtch
+ gsmtap-sapi ptcch
+ gsmtap-sapi cbch
+ gsmtap-sapi sacch
 %for trx in osmo_bts_octphy.trx_list:
  trx ${loop.index}
   phy ${loop.index} instance 0

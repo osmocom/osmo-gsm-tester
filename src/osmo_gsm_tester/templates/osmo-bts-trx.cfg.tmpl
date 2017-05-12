@@ -20,7 +20,18 @@ bts 0
  ipa unit-id ${osmo_bts_trx.ipa_unit_id} 0
  oml remote-ip ${osmo_bts_trx.oml_remote_ip}
  settsc
+ gsmtap-sapi bcch
  gsmtap-sapi ccch
+ gsmtap-sapi rach
+ gsmtap-sapi agch
+ gsmtap-sapi pch
+ gsmtap-sapi sdcch
+ gsmtap-sapi tch/f
+ gsmtap-sapi tch/h
+ gsmtap-sapi pacch
  gsmtap-sapi pdtch
+ gsmtap-sapi ptcch
+ gsmtap-sapi cbch
+ gsmtap-sapi sacch
  trx 0
   phy 0 instance 0

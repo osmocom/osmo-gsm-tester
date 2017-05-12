@@ -15,14 +15,14 @@ osmo-bts
 have_repo() {
 	repo="$1"
 	cd "$base"
-	if [ ! -e "$repo" ]; then
-		set +x
-		echo "MISSING REPOSITORY: $repo"
-		echo "should be provided by the jenkins workspace"
-		exit 1
+	if [ ! -d "$repo" ]; then
+		git clone "git://git.osmocom.org/$repo" "$repo"
 	fi
 	cd "$repo"
 	git clean -dxf
+	git fetch origin
+	git reset --hard origin/master
+	git rev-parse HEAD
 	cd "$base"
 }
 

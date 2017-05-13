@@ -60,6 +60,10 @@ for dep in $deps; do
 done
 
 # build the archive that is going to be copied to the tester
-rm "$base"/*.tgz || true
+rm "$base"/*.tgz "$base"/*.md5 || true
 cd "$prefix"
-tar czf "$base/osmo-bts-trx.build-${BUILD_NUMBER}.tgz" *
+this="osmo-bts-trx.build-${BUILD_NUMBER}"
+tar="${this}.tgz"
+tar czf "$base/$tar" *
+cd "$base"
+md5sum "$tar" > "${this}.md5"

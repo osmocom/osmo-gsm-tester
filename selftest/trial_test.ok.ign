@@ -1,2 +1,3 @@
 /tmp/[^/]*	[TMP]
 ....-..-.._..-..-..	[TIMESTAMP]
+'[^']*/trial_test	'[PATH]/trial_test

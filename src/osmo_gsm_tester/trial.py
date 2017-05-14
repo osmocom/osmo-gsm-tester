@@ -52,7 +52,7 @@ class Trial(log.Origin):
             return Trial(trials_dir.child(next_trial)).take()
 
     def __init__(self, trial_dir):
-        self.path = trial_dir
+        self.path = os.path.abspath(trial_dir)
         self.set_name(os.path.basename(self.path))
         self.set_log_category(log.C_TST)
         self.dir = util.Dir(self.path)

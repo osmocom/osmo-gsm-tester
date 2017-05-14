@@ -57,3 +57,5 @@ class PcapRecorder(log.Origin):
 
     def running(self):
         return not self.process.terminated()
+
+# vim: expandtab tabstop=4 shiftwidth=4

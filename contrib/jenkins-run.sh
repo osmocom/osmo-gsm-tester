@@ -16,10 +16,16 @@ rm *.md5
 
 # OSMO_GSM_TESTER_OPTS is a way to pass in e.g. logging preferences from the
 # jenkins build job.
-python3 -u "$(which osmo-gsm-tester.py)" "$trial_dir" $OSMO_GSM_TESTER_OPTS
+# On failure, first clean up below and then return the exit code.
+exit_code="1"
+if python3 -u "$(which osmo-gsm-tester.py)" "$trial_dir" $OSMO_GSM_TESTER_OPTS ; then
+  exit_code="0"
+fi
 
 # no need to keep extracted binaries
 rm -rf "$trial_dir/inst" || true
 
 # tar up all results for archiving (optional)
 tar czf "$trial_dir"-run.tgz "$trial_dir"
+
+exit $exit_code

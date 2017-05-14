@@ -65,14 +65,16 @@ class Trial(log.Origin):
     def __enter__(self):
         # add a log target to log to the run dir
         run_dir = self.get_run_dir()
+        detailed_log = run_dir.new_child(FILE_LOG)
         self.log_targets = [
-            log.FileLogTarget(run_dir.new_child(FILE_LOG))
+            log.FileLogTarget(detailed_log)
               .set_all_levels(log.L_DBG)
               .style_change(trace=True),
             log.FileLogTarget(run_dir.new_child(FILE_LOG_BRIEF))
               .style_change(src=False, all_origins=False)
             ]
         self.log('Trial start')
+        self.log('Detailed log at', detailed_log)
         self.take()
         super().__enter__()
 

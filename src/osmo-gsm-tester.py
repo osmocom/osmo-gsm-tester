@@ -67,11 +67,11 @@ created, which will collect logs and reports.
 '''
 
 import sys
+import argparse
 from osmo_gsm_tester import __version__
 from osmo_gsm_tester import trial, suite, log, config
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser(epilog=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     # Note: since we're using RawTextHelpFormatter to keep nicely separate
@@ -205,8 +205,8 @@ optional.''')
         print('Trials failed:')
         for trial_name, suites_passed, suites_failed in trials_failed:
             print('  %s (%d of %d suite runs failed)' % (trial_name, len(suites_failed), len(suites_failed) + len(suites_passed)))
-            for suite in suites_failed:
-                print('    FAIL:', suite)
+            for suite_failed in suites_failed:
+                print('    FAIL:', suite_failed)
         exit(1)
 
 if __name__ == '__main__':

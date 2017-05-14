@@ -186,7 +186,7 @@ class SuiteRun(log.Origin):
     def reserve_resources(self):
         if self.reserved_resources:
             raise RuntimeError('Attempt to reserve resources twice for a SuiteRun')
-        self.log('reserving resources...')
+        self.log('reserving resources in', self.resources_pool.state_dir, '...')
         with self:
             self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
 

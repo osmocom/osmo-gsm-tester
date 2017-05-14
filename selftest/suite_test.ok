@@ -25,7 +25,7 @@ resources:
 cnf -: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test
 cnf -: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir
 tst test_suite: Suite run start
-tst test_suite: reserving resources...
+tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...
 tst test_suite: DBG: {combining='resources'}  [test_suite↪test_suite]
 tst test_suite: DBG: {definition_conf={bts=[{'times': '1'}], modem=[{'times': '2'}], nitb_iface=[{'times': '1'}]}}  [test_suite↪(combining_scenarios='resources')↪test_suite]
 tst test_suite: Reserving 1 x bts (candidates: 3)  [test_suite↪test_suite]

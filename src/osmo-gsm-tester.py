@@ -70,7 +70,7 @@ import sys
 from osmo_gsm_tester import __version__
 from osmo_gsm_tester import trial, suite, log, config
 
-if __name__ == '__main__':
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(epilog=__doc__, formatter_class=argparse.RawTextHelpFormatter)
@@ -166,11 +166,8 @@ optional.''')
     trials = []
     for trial_package in args.trial_package:
         t = trial.Trial(trial_package)
-        try:
-            t.verify()
-            trials.append(t)
-        except:
-            t.log_exn()
+        t.verify()
+        trials.append(t)
 
     trials_passed = []
     trials_failed = []
@@ -211,5 +208,15 @@ optional.''')
             for suite in suites_failed:
                 print('    FAIL:', suite)
         exit(1)
+
+if __name__ == '__main__':
+    try:
+        main()
+    except:
+        # Tell the log to show the exception, then terminate the program with the exception anyway.
+        # Since exceptions within test runs should be caught and evaluated, this is basically about
+        # exceptions during command line parsing and such, so it's appropriate to abort immediately.
+        log.log_exn()
+        raise
 
 # vim: expandtab tabstop=4 shiftwidth=4

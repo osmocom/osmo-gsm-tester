@@ -32,9 +32,10 @@ sleep = None
 poll = None
 prompt = None
 Timeout = None
+Failure = None
 
 def setup(suite_run, _test, ofono_client, suite_module):
-    global trial, suite, test, resources, log, dbg, err, wait, sleep, poll, prompt, Timeout
+    global trial, suite, test, resources, log, dbg, err, wait, sleep, poll, prompt, Failure, Timeout
     trial = suite_run.trial
     suite = suite_run
     test = _test
@@ -46,6 +47,7 @@ def setup(suite_run, _test, ofono_client, suite_module):
     sleep = suite_run.sleep
     poll = suite_run.poll
     prompt = suite_run.prompt
+    Failure = suite_module.Failure
     Timeout = suite_module.Timeout
 
 # vim: expandtab tabstop=4 shiftwidth=4

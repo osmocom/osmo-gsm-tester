@@ -8,3 +8,4 @@ set_pythonpath
 test_work
 state
 *.pyc
+selftest/trial_test/

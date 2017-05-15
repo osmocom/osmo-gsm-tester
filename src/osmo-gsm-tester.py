@@ -169,44 +169,32 @@ optional.''')
         t.verify()
         trials.append(t)
 
-    trials_passed = []
-    trials_failed = []
+    trials_run = []
+    any_failed = False
 
     for current_trial in trials:
         try:
             with current_trial:
-                suites_passed = []
-                suites_failed = []
                 for suite_scenario_str, suite_def, scenarios in suite_scenarios:
                     log.large_separator(current_trial.name(), suite_scenario_str)
                     suite_run = suite.SuiteRun(current_trial, suite_scenario_str, suite_def, scenarios)
-                    result = suite_run.run_tests(test_names)
-                    if result.all_passed:
-                        suites_passed.append(suite_scenario_str)
-                        suite_run.log('PASS')
-                    else:
-                        suites_failed.append(suite_scenario_str)
-                        suite_run.err('FAIL')
-                if not suites_failed:
-                    current_trial.log('PASS')
-                    trials_passed.append(current_trial.name())
-                else:
-                    current_trial.err('FAIL')
-                    trials_failed.append((current_trial.name(), suites_passed, suites_failed))
+                    current_trial.add_suite(suite_run)
+
+                status = current_trial.run_suites(test_names)
+                if status == trial.Trial.FAIL:
+                    any_failed = True
+                trials_run.append(current_trial)
         except:
             current_trial.log_exn()
 
     sys.stderr.flush()
     sys.stdout.flush()
-    log.large_separator()
-    if trials_passed:
-        print('Trials passed:\n  ' + ('\n  '.join(trials_passed)))
-    if trials_failed:
-        print('Trials failed:')
-        for trial_name, suites_passed, suites_failed in trials_failed:
-            print('  %s (%d of %d suite runs failed)' % (trial_name, len(suites_failed), len(suites_failed) + len(suites_passed)))
-            for suite_failed in suites_failed:
-                print('    FAIL:', suite_failed)
+    if not any_failed:
+            log.large_separator('All trials passed:\n  ' + ('\n  '.join(mytrial.name() for mytrial in trials_run)))
+    else:
+        for mytrial in trials_run:
+            log.large_separator('Trial Report for %s' % mytrial.name())
+            mytrial.log_report()
         exit(1)
 
 if __name__ == '__main__':

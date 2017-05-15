@@ -4,7 +4,7 @@
 [TMP]/third
 - fetch trial dirs in order
 first
-['taken']
+['last_run', 'run.[TIMESTAMP]', 'taken']
 second
 third
 - no more trial dirs left

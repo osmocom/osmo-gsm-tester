@@ -22,7 +22,7 @@ import time
 import shutil
 import tarfile
 
-from . import log, util
+from . import log, util, suite, report
 
 FILE_MARK_TAKEN = 'taken'
 FILE_CHECKSUMS = 'checksums.md5'
@@ -32,6 +32,10 @@ FILE_LOG = 'log'
 FILE_LOG_BRIEF = 'log_brief'
 
 class Trial(log.Origin):
+    UNKNOWN = 'UNKNOWN'
+    PASS = 'PASS'
+    FAIL = 'FAIL'
+
     path = None
     dir = None
     _run_dir = None
@@ -58,6 +62,9 @@ class Trial(log.Origin):
         self.dir = util.Dir(self.path)
         self.inst_dir = util.Dir(self.dir.child('inst'))
         self.bin_tars = []
+        self.suites = []
+        self.junit_path = self.get_run_dir().new_file(self.name()+'.xml')
+        self.status = Trial.UNKNOWN
 
     def __repr__(self):
         return self.name()
@@ -175,5 +182,25 @@ class Trial(log.Origin):
                     t.close()
                 except:
                     pass
+
+    def add_suite(self, suite_run):
+        self.suites.append(suite_run)
+
+    def run_suites(self, names=None):
+        self.status = Trial.UNKNOWN
+        for suite_run in  self.suites:
+            st = suite_run.run_tests(names)
+            if st == suite.SuiteRun.FAIL:
+                self.status = Trial.FAIL
+            elif self.status == Trial.UNKNOWN:
+                self.status = Trial.PASS
+        self.log(self.status)
+        junit_path = self.get_run_dir().new_file(self.name()+'.xml')
+        self.log('Storing JUnit report in', junit_path)
+        report.trial_to_junit_write(self, junit_path)
+        return self.status
+
+    def log_report(self):
+        self.log(report.trial_to_text(self))
 
 # vim: expandtab tabstop=4 shiftwidth=4

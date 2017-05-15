@@ -59,15 +59,30 @@ tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] PASS  [test_suite↪hello_world.py]
-pass: all 1 tests passed.
+tst test_suite: PASS
+pass: all 6 tests passed (5 skipped).
 
 - a test with an error
 tst test_suite: Suite run start  [suite.py:[LINENR]]
 tst test_error.py:[LINENR] START  [test_suite↪test_error.py]  [suite.py:[LINENR]]
 tst test_error.py:[LINENR]: I am 'test_suite' / 'test_error.py:[LINENR]'  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]]
-tst test_error.py:[LINENR]: FAIL  [test_suite↪test_error.py:[LINENR]]  [suite.py:[LINENR]]
-tst test_error.py:[LINENR]: ERR: AssertionError:   [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]: assert False]
-FAIL: 1 of 1 tests failed:
-  test_error.py
+tst test_error.py:[LINENR]: ERR: AssertionError:   [test_error.py:[LINENR]: assert False]
+tst test_error.py:[LINENR] FAIL (AssertionError)  [test_suite↪test_error.py]  [suite.py:[LINENR]]
+tst test_suite: FAIL  [suite.py:[LINENR]]
+
+- a test with a failure
+tst test_suite: Suite run start  [suite.py:[LINENR]]
+tst test_fail.py:[LINENR] START  [test_suite↪test_fail.py]  [suite.py:[LINENR]]
+tst test_fail.py:[LINENR]: I am 'test_suite' / 'test_fail.py:[LINENR]'  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
+tst test_fail.py:[LINENR] FAIL (EpicFail)  [test_suite↪test_fail.py]  [suite.py:[LINENR]]
+tst test_suite: FAIL  [suite.py:[LINENR]]
+
+- a test with a raised failure
+tst test_suite: Suite run start  [suite.py:[LINENR]]
+tst test_fail_raise.py:[LINENR] START  [test_suite↪test_fail_raise.py]  [suite.py:[LINENR]]
+tst test_fail_raise.py:[LINENR]: I am 'test_suite' / 'test_fail_raise.py:[LINENR]'  [test_suite↪test_fail_raise.py:[LINENR]]  [test_fail_raise.py:[LINENR]]
+tst test_fail_raise.py:[LINENR]: ERR: Failure: ('EpicFail', 'This failure is expected')  [test_fail_raise.py:[LINENR]: raise Failure('EpicFail', 'This failure is expected')]
+tst test_fail_raise.py:[LINENR] FAIL (EpicFail)  [test_suite↪test_fail_raise.py]  [suite.py:[LINENR]]
+tst test_suite: FAIL  [suite.py:[LINENR]]
 
 - graceful exit.

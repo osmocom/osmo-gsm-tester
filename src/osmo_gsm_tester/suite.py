@@ -21,11 +21,22 @@ import os
 import sys
 import time
 import copy
+import traceback
 from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb
 from . import test
 
 class Timeout(Exception):
     pass
+
+class Failure(Exception):
+    '''Test failure exception, provided to be raised by tests. fail_type is
+       usually a keyword used to quickly identify the type of failure that
+       occurred. fail_msg is a more extensive text containing information about
+       the issue.'''
+
+    def __init__(self, fail_type, fail_msg):
+        self.fail_type = fail_type
+        self.fail_msg = fail_msg
 
 class SuiteDefinition(log.Origin):
     '''A test suite reserves resources for a number of tests.
@@ -78,9 +89,11 @@ class SuiteDefinition(log.Origin):
                 raise ValueError('add_test(): test already belongs to another suite')
             self.tests.append(test)
 
-
-
 class Test(log.Origin):
+    UNKNOWN = 'UNKNOWN'
+    SKIP = 'SKIP'
+    PASS = 'PASS'
+    FAIL = 'FAIL'
 
     def __init__(self, suite, test_basename):
         self.suite = suite
@@ -89,26 +102,43 @@ class Test(log.Origin):
         super().__init__(self.path)
         self.set_name(self.basename)
         self.set_log_category(log.C_TST)
+        self.status = Test.UNKNOWN
+        self.start_timestamp = 0
+        self.duration = 0
+        self.fail_type = None
+        self.fail_message = None
 
     def run(self, suite_run):
         assert self.suite is suite_run.definition
-        with self:
-            test.setup(suite_run, self, ofono_client, sys.modules[__name__])
-            success = False
-            try:
+        try:
+            with self:
+                self.status = Test.UNKNOWN
+                self.start_timestamp = time.time()
+                test.setup(suite_run, self, ofono_client, sys.modules[__name__])
                 self.log('START')
                 with self.redirect_stdout():
                     util.run_python_file('%s.%s' % (self.suite.name(), self.name()),
                                          self.path)
-                    success = True
-            except resource.NoResourceExn:
-                self.err('Current resource state:\n', repr(suite_run.reserved_resources))
-                raise
-            finally:
-                if success:
-                    self.log('PASS')
-                else:
-                    self.log('FAIL')
+                if self.status == Test.UNKNOWN:
+                     self.set_pass()
+        except Exception as e:
+            self.log_exn()
+            if isinstance(e, Failure):
+                ftype = e.fail_type
+                fmsg =  e.fail_msg + '\n' + traceback.format_exc().rstrip()
+            else:
+                ftype = type(e).__name__
+                fmsg = repr(e) + '\n' + traceback.format_exc().rstrip()
+                if isinstance(e, resource.NoResourceExn):
+                    msg += '\n' + 'Current resource state:\n' + repr(suite_run.reserved_resources)
+            self.set_fail(ftype, fmsg, False)
+
+        finally:
+            if self.status == Test.PASS or self.status == Test.SKIP:
+                self.log(self.status)
+            else:
+                self.log('%s (%s)' % (self.status, self.fail_type))
+        return self.status
 
     def name(self):
         l = log.get_line_for_src(self.path)
@@ -116,7 +146,26 @@ class Test(log.Origin):
             return '%s:%s' % (self._name, l)
         return super().name()
 
+    def set_fail(self, fail_type, fail_message, tb=True):
+        self.status = Test.FAIL
+        self.duration = time.time() - self.start_timestamp
+        self.fail_type = fail_type
+        self.fail_message = fail_message
+        if tb:
+            self.fail_message += '\n' + ''.join(traceback.format_stack()[:-1]).rstrip()
+
+    def set_pass(self):
+        self.status = Test.PASS
+        self.duration = time.time() - self.start_timestamp
+
+    def set_skip(self):
+        self.status = Test.SKIP
+        self.duration = 0
+
 class SuiteRun(log.Origin):
+    UNKNOWN = 'UNKNOWN'
+    PASS = 'PASS'
+    FAIL = 'FAIL'
 
     trial = None
     resources_pool = None
@@ -132,6 +181,14 @@ class SuiteRun(log.Origin):
         self.set_name(suite_scenario_str)
         self.set_log_category(log.C_TST)
         self.resources_pool = resource.ResourcesPool()
+
+    def mark_start(self):
+        self.tests = []
+        self.start_timestamp = time.time()
+        self.duration = 0
+        self.test_failed_ctr = 0
+        self.test_skipped_ctr = 0
+        self.status = SuiteRun.UNKNOWN
 
     def combined(self, conf_name):
         self.dbg(combining=conf_name)
@@ -157,32 +214,6 @@ class SuiteRun(log.Origin):
             self._config = self.combined('config')
         return self._config
 
-    class Results:
-        def __init__(self):
-            self.passed = []
-            self.failed = []
-            self.all_passed = None
-
-        def add_pass(self, test):
-            self.passed.append(test)
-
-        def add_fail(self, test):
-            self.failed.append(test)
-
-        def conclude(self):
-            self.all_passed = bool(self.passed) and not bool(self.failed)
-            return self
-
-        def __str__(self):
-            if self.failed:
-                return 'FAIL: %d of %d tests failed:\n  %s' % (
-                       len(self.failed),
-                       len(self.failed) + len(self.passed),
-                       '\n  '.join([t.name() for t in self.failed]))
-            if not self.passed:
-                return 'no tests were run.'
-            return 'pass: all %d tests passed.' % len(self.passed)
-
     def reserve_resources(self):
         if self.reserved_resources:
             raise RuntimeError('Attempt to reserve resources twice for a SuiteRun')
@@ -192,24 +223,28 @@ class SuiteRun(log.Origin):
 
     def run_tests(self, names=None):
         self.log('Suite run start')
+        self.mark_start()
         if not self.reserved_resources:
             self.reserve_resources()
-        results = SuiteRun.Results()
         for test in self.definition.tests:
             if names and not test.name() in names:
+                test.set_skip()
+                self.test_skipped_ctr += 1
+                self.tests.append(test)
                 continue
-            self._run_test(test, results)
-        self.stop_processes()
-        return results.conclude()
-
-    def _run_test(self, test, results):
-        try:
             with self:
-                test.run(self)
-            results.add_pass(test)
-        except:
-            results.add_fail(test)
-            self.log_exn()
+                st = test.run(self)
+                if st == Test.FAIL:
+                    self.test_failed_ctr += 1
+                self.tests.append(test)
+        self.stop_processes()
+        self.duration = time.time() - self.start_timestamp
+        if self.test_failed_ctr:
+            self.status = SuiteRun.FAIL
+        else:
+            self.status = SuiteRun.PASS
+        self.log(self.status)
+        return self.status
 
     def remember_to_stop(self, process):
         if self._processes is None:

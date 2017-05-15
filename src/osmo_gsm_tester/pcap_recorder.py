@@ -38,7 +38,7 @@ class PcapRecorder(log.Origin):
         self.start()
 
     def start(self):
-        self.log('Recording pcap', self.run_dir, self.gen_filter())
+        self.log('Recording pcap', self.run_dir, self.filters)
         dumpfile = os.path.join(os.path.abspath(self.run_dir), self.name() + ".pcap")
         self.process = process.Process(self.name(), self.run_dir,
                                        ('tcpdump', '-n',

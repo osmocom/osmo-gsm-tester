@@ -26,13 +26,13 @@ from . import log, util, config, template, process, osmo_ctrl
 
 class PcapRecorder(log.Origin):
 
-    def __init__(self, suite_run, run_dir, iface=None, addr=None):
+    def __init__(self, suite_run, run_dir, iface=None, filters=''):
         self.suite_run = suite_run
         self.run_dir = run_dir
         self.iface = iface
         if not self.iface:
             self.iface = "any"
-        self.addr = addr
+        self.filters = filters
         self.set_log_category(log.C_RUN)
         self.set_name('pcap-recorder_%s' % self.iface)
         self.start()
@@ -44,16 +44,9 @@ class PcapRecorder(log.Origin):
                                        ('tcpdump', '-n',
                                        '-i', self.iface,
                                        '-w', dumpfile,
-                                       self.gen_filter())
-                                       )
+                                       self.filters))
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
-
-    def gen_filter(self):
-        filter = ""
-        if self.addr:
-            filter += 'host ' + self.addr
-        return filter
 
     def running(self):
         return not self.process.terminated()

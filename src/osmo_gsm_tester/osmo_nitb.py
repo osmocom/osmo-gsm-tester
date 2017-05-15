@@ -52,8 +52,8 @@ class OsmoNitb(log.Origin):
             raise RuntimeError('No lib/ in %r' % inst)
 
         iface = util.ip_to_iface(self.addr())
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'),
-                                   iface, self.addr())
+        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), iface,
+                                   'host %s' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 

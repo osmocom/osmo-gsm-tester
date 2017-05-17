@@ -68,10 +68,22 @@ created, which will collect logs and reports.
 
 import sys
 import argparse
+from signal import *
 from osmo_gsm_tester import __version__
 from osmo_gsm_tester import trial, suite, log, config
 
+def sig_handler_cleanup(signum, frame):
+    print("killed by signal %d" % signum)
+    # This sys.exit() will raise a SystemExit base exception at the current
+    # point of execution. Code must be prepared to clean system-wide resources
+    # by using the "finally" section. This allows at the end 'atexit' hooks to
+    # be called before exiting.
+    sys.exit(1)
+
 def main():
+
+    for sig in (SIGINT, SIGTERM, SIGQUIT, SIGPIPE, SIGHUP):
+        signal(sig, sig_handler_cleanup)
 
     parser = argparse.ArgumentParser(epilog=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     # Note: since we're using RawTextHelpFormatter to keep nicely separate
@@ -184,7 +196,8 @@ optional.''')
                 if status == trial.Trial.FAIL:
                     any_failed = True
                 trials_run.append(current_trial)
-        except:
+        except Exception:
+            # Do not catch here subclasses of BaseException such as SystemExit, let them finish the program
             current_trial.log_exn()
 
     sys.stderr.flush()

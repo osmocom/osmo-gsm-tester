@@ -223,21 +223,26 @@ class SuiteRun(log.Origin):
 
     def run_tests(self, names=None):
         self.log('Suite run start')
-        self.mark_start()
-        if not self.reserved_resources:
-            self.reserve_resources()
-        for test in self.definition.tests:
-            if names and not test.name() in names:
-                test.set_skip()
-                self.test_skipped_ctr += 1
-                self.tests.append(test)
-                continue
-            with self:
-                st = test.run(self)
-                if st == Test.FAIL:
-                    self.test_failed_ctr += 1
-                self.tests.append(test)
-        self.stop_processes()
+        try:
+            self.mark_start()
+            if not self.reserved_resources:
+                self.reserve_resources()
+            for test in self.definition.tests:
+                if names and not test.name() in names:
+                    test.set_skip()
+                    self.test_skipped_ctr += 1
+                    self.tests.append(test)
+                    continue
+                with self:
+                    st = test.run(self)
+                    if st == Test.FAIL:
+                        self.test_failed_ctr += 1
+                    self.tests.append(test)
+        finally:
+            # if sys.exit() called from signal handler (e.g. SIGINT), SystemExit
+            # base exception is raised. Make sure to stop processes in this
+            # finally section. Resources are automatically freed with 'atexit'.
+            self.stop_processes()
         self.duration = time.time() - self.start_timestamp
         if self.test_failed_ctr:
             self.status = SuiteRun.FAIL

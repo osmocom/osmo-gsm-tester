@@ -17,6 +17,7 @@ Packages required to run the osmo-gsm-tester:
   apt-get install \
   dbus \
   tcpdump \
+  sqlite3 \
   python3 \
   python3-yaml \
   python3-mako \

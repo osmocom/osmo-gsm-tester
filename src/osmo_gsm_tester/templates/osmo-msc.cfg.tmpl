@@ -1,0 +1,30 @@
+! Configuration rendered by osmo-gsm-tester
+log stderr
+ logging filter all 1
+ logging color 1
+ logging print category 1
+ logging print extended-timestamp 1
+ logging level all debug
+line vty
+ no login
+ bind ${msc.ip_address.addr}
+network
+ network country code ${msc.net.mcc}
+ mobile network code ${msc.net.mnc}
+ short name ${msc.net.short_name}
+ long name ${msc.net.long_name}
+ auth policy ${msc.net.auth_policy}
+ location updating reject cause 13
+ encryption ${msc.net.encryption}
+msc
+  mgcpgw remote-ip ${mgcpgw.ip_address.addr}
+  assign-tmsi
+ctrl
+ bind ${msc.ip_address.addr}
+smpp
+ local-tcp-ip ${msc.ip_address.addr} 2775
+ system-id test
+ policy closed
+ esme test
+  password test
+  default-route

@@ -24,6 +24,8 @@ import copy
 import traceback
 import pprint
 from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb
+from . import osmo_nitb
+from . import osmo_hlr, osmo_mgcpgw, osmo_msc, osmo_bsc
 from . import test
 
 class Timeout(Exception):
@@ -271,6 +273,26 @@ class SuiteRun(log.Origin):
         if ip_address is None:
             ip_address = self.ip_address()
         return osmo_nitb.OsmoNitb(self, ip_address)
+
+    def hlr(self, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_hlr.OsmoHlr(self, ip_address)
+
+    def mgcpgw(self, ip_address=None, bts_ip=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_mgcpgw.OsmoMgcpgw(self, ip_address, bts_ip)
+
+    def msc(self, hlr, mgcpgw, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_msc.OsmoMsc(self, hlr, mgcpgw, ip_address)
+
+    def bsc(self, msc, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_bsc.OsmoBsc(self, msc, ip_address)
 
     def bts(self):
         return bts_obj(self, self.reserved_resources.get(resource.R_BTS))

@@ -23,7 +23,7 @@ from . import log, config, util, template, process
 
 class SysmoBts(log.Origin):
     suite_run = None
-    nitb = None
+    bsc = None
     run_dir = None
     inst = None
     remote_addr = None
@@ -45,9 +45,9 @@ class SysmoBts(log.Origin):
 
     def start(self):
         with self:
-            if self.nitb is None:
-                raise RuntimeError('BTS needs to be added to a NITB before it can be started')
-            self.log('Starting sysmoBTS to connect to', self.nitb)
+            if self.bsc is None:
+                raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
+            self.log('Starting sysmoBTS to connect to', self.bsc)
             self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
             self.configure()
 
@@ -80,7 +80,7 @@ class SysmoBts(log.Origin):
             self.launch_remote('osmo-bts-sysmo',
                 ('LD_LIBRARY_PATH=%s' % remote_lib,
                  remote_binary, '-c', remote_config_file, '-r', '1',
-                 '-i', self.nitb.addr()),
+                 '-i', self.bsc.addr()),
                 remote_cwd=remote_run_dir)
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
@@ -109,8 +109,8 @@ class SysmoBts(log.Origin):
             proc.raise_exn('Exited in error')
 
     def configure(self):
-        if self.nitb is None:
-            raise RuntimeError('BTS needs to be added to a NITB before it can be configured')
+        if self.bsc is None:
+            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be configured')
 
         self.remote_addr = self.conf.get('addr')
 
@@ -119,7 +119,7 @@ class SysmoBts(log.Origin):
 
         values = { 'osmo_bts_sysmo': config.get_defaults('osmo_bts_sysmo') }
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, { 'osmo_bts_sysmo': { 'oml_remote_ip': self.nitb.addr() } })
+        config.overlay(values, { 'osmo_bts_sysmo': { 'oml_remote_ip': self.bsc.addr() } })
         config.overlay(values, { 'osmo_bts_sysmo': self.conf })
 
         self.dbg('SYSMOBTS CONFIG:\n' + pprint.pformat(values))
@@ -129,14 +129,14 @@ class SysmoBts(log.Origin):
             self.dbg(r)
             f.write(r)
 
-    def conf_for_nitb(self):
-        values = config.get_defaults('nitb_bts')
+    def conf_for_bsc(self):
+        values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
 
-    def set_nitb(self, nitb):
-        self.nitb = nitb
+    def set_bsc(self, bsc):
+        self.bsc = bsc
 
 # vim: expandtab tabstop=4 shiftwidth=4

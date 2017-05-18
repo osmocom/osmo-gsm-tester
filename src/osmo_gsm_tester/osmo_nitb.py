@@ -74,7 +74,7 @@ class OsmoNitb(log.Origin):
 
         bts_list = []
         for bts in self.bts:
-            bts_list.append(bts.conf_for_nitb())
+            bts_list.append(bts.conf_for_bsc())
         config.overlay(values, dict(nitb=dict(net=dict(bts_list=bts_list))))
 
         self.dbg('NITB CONFIG:\n' + pprint.pformat(values))
@@ -89,7 +89,7 @@ class OsmoNitb(log.Origin):
 
     def bts_add(self, bts):
         self.bts.append(bts)
-        bts.set_nitb(self)
+        bts.set_bsc(self)
 
     def subscriber_add(self, modem, msisdn=None):
         if msisdn is None:

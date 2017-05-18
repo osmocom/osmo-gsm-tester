@@ -23,7 +23,7 @@ from . import log, config, util, template, process
 
 class OsmoBtsTrx(log.Origin):
     suite_run = None
-    nitb = None
+    bsc = None
     run_dir = None
     inst = None
     env = None
@@ -43,11 +43,11 @@ class OsmoBtsTrx(log.Origin):
         self.env = {}
 
     def start(self):
-        if self.nitb is None:
-            raise RuntimeError('BTS needs to be added to a NITB before it can be started')
+        if self.bsc is None:
+            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         self.suite_run.poll()
 
-        self.log('Starting to connect to', self.nitb)
+        self.log('Starting to connect to', self.bsc)
         self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
         self.configure()
 
@@ -63,7 +63,7 @@ class OsmoBtsTrx(log.Origin):
         self.proc_trx.log(self.proc_trx.get_stdout_tail(1))
         self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
-                            '-i', self.nitb.addr())
+                            '-i', self.bsc.addr())
         #self.launch_process(OsmoBtsTrx.BIN_PCU, '-r', '1')
         self.suite_run.poll()
 
@@ -85,14 +85,14 @@ class OsmoBtsTrx(log.Origin):
         return proc
 
     def configure(self):
-        if self.nitb is None:
-            raise RuntimeError('BTS needs to be added to a NITB before it can be configured')
+        if self.bsc is None:
+            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be configured')
         self.config_file = self.run_dir.new_file(OsmoBtsTrx.CONF_BTS_TRX)
         self.dbg(config_file=self.config_file)
 
         values = dict(osmo_bts_trx=config.get_defaults('osmo_bts_trx'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(osmo_bts_trx=dict(oml_remote_ip=self.nitb.addr())))
+        config.overlay(values, dict(osmo_bts_trx=dict(oml_remote_ip=self.bsc.addr())))
         config.overlay(values, dict(osmo_bts_trx=self.conf))
 
         self.dbg('OSMO-BTS-TRX CONFIG:\n' + pprint.pformat(values))
@@ -102,14 +102,14 @@ class OsmoBtsTrx(log.Origin):
             self.dbg(r)
             f.write(r)
 
-    def conf_for_nitb(self):
-        values = config.get_defaults('nitb_bts')
+    def conf_for_bsc(self):
+        values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_trx'))
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
 
-    def set_nitb(self, nitb):
-        self.nitb = nitb
+    def set_bsc(self, bsc):
+        self.bsc = bsc
 
 # vim: expandtab tabstop=4 shiftwidth=4

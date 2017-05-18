@@ -29,7 +29,7 @@ from . import util
 from . import schema
 from . import ofono_client
 from . import osmo_nitb
-from . import bts_sysmo, bts_osmotrx, bts_octphy
+from . import bts_sysmo, bts_osmotrx
 
 from .util import is_dict, is_list
 
@@ -71,7 +71,6 @@ WANT_SCHEMA = util.dict_add(
 KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
         'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
-        'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
     }
 
 def register_bts_type(name, clazz):
@@ -112,11 +111,11 @@ class ResourcesPool(log.Origin):
 
         ResourcesPool may also be selected with narrowed down constraints.
         This would reserve one NITB IP address, two modems, one BTS of type
-        sysmo and one of type oct, plus 2 ARFCNs in the 1800 band:
+        sysmo and one of type trx, plus 2 ARFCNs in the 1800 band:
 
          {
            'nitb_iface': [ { 'times': 1 } ],
-           'bts': [ { 'type': 'sysmo', 'times': 1 }, { 'type': 'oct', 'times': 1 } ],
+           'bts': [ { 'type': 'sysmo', 'times': 1 }, { 'type': 'trx', 'times': 1 } ],
            'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
            'modem': [ { 'times': 2 } ],
          }
@@ -125,7 +124,7 @@ class ResourcesPool(log.Origin):
 
          {
            'nitb_iface': [ {} ],
-           'bts': [ { 'type': 'sysmo' }, { 'type': 'oct' } ],
+           'bts': [ { 'type': 'sysmo' }, { 'type': 'trx' } ],
            'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
            'modem': [ { 'times': 2 } ],
          }

@@ -58,7 +58,7 @@ vals = dict(nitb=dict(
                         bts_list=(mock_bts0, mock_bts1)
                     ),
                 ),
-            nitb_iface=dict(addr='val_nitb_iface_addr'),
+            ip_address=dict(addr='val_ip_address_addr'),
        )
 
 print(template.render('osmo-nitb.cfg', vals))

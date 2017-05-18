@@ -1,11 +1,11 @@
-nitb_iface = resources.nitb_iface()
+ip_address = resources.ip_address()
 nitb = resources.nitb()
 bts = resources.bts()
 ms_ext = resources.msisdn()
 fake_ext = resources.msisdn()
 ms = resources.modem()
 
-nitb.configure(nitb_iface, bts)
+nitb.configure(ip_address, bts)
 bts.configure(nitb)
 
 nitb.start()

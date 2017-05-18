@@ -1,10 +1,10 @@
-nitb_iface = resources.nitb_iface()
+ip_address = resources.ip_address()
 nitb = resources.nitb()
 bts = resources.bts()
 ms_mo = resources.modem()
 ms_mt = resources.modem()
 
-nitb.start(nitb_iface)
+nitb.start(ip_address)
 bts.start(nitb)
 
 nitb.add_subscriber(ms_mo, resources.msisdn())

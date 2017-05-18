@@ -10,11 +10,11 @@ log stderr
 !
 line vty
  no login
- bind ${nitb_iface.addr}
+ bind ${ip_address.addr}
 !
 e1_input
  e1_line 0 driver ipa
- ipa bind ${nitb_iface.addr}
+ ipa bind ${ip_address.addr}
 network
  network country code ${nitb.net.mcc}
  mobile network code ${nitb.net.mnc}
@@ -75,11 +75,11 @@ network
 % endfor
 %endfor
 smpp
- local-tcp-ip ${nitb_iface.addr} 2775
+ local-tcp-ip ${ip_address.addr} 2775
  system-id test
  policy closed
  esme test
   password test
   default-route
 ctrl
- bind ${nitb_iface.addr}
+ bind ${ip_address.addr}

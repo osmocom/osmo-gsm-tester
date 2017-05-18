@@ -1,0 +1,90 @@
+! Configuration rendered by osmo-gsm-tester
+log stderr
+ logging filter all 1
+ logging color 1
+ logging print category 1
+ logging print extended-timestamp 1
+ logging level all debug
+line vty
+ no login
+ bind ${bsc.ip_address.addr}
+e1_input
+ e1_line 0 driver ipa
+ ipa bind ${bsc.ip_address.addr}
+network
+ network country code ${bsc.net.mcc}
+ mobile network code ${bsc.net.mnc}
+ short name ${bsc.net.short_name}
+ long name ${bsc.net.long_name}
+ auth policy ${bsc.net.auth_policy}
+ location updating reject cause 13
+ encryption ${bsc.net.encryption}
+ neci 1
+ rrlp mode none
+ mm info 1
+ handover 0
+ handover window rxlev averaging 10
+ handover window rxqual averaging 1
+ handover window rxlev neighbor averaging 10
+ handover power budget interval 6
+ handover power budget hysteresis 3
+ handover maximum distance 9999
+ timer t3101 10
+ timer t3103 0
+ timer t3105 0
+ timer t3107 0
+ timer t3109 4
+ timer t3111 0
+ timer t3113 60
+ timer t3115 0
+ timer t3117 0
+ timer t3119 0
+ timer t3141 0
+%for bts in bsc.net.bts_list:
+ bts ${loop.index}
+  type ${bts.osmobsc_bts_type}
+  band ${bts.band}
+  cell_identity 0
+  location_area_code ${bts.location_area_code}
+  training_sequence_code 7
+  base_station_id_code ${bts.base_station_id_code}
+  ms max power 33
+  cell reselection hysteresis 4
+  rxlev access min 0
+  channel allocator ascending
+  rach tx integer 9
+  rach max transmission 7
+  ip.access unit_id ${bts.ipa_unit_id} 0
+  oml ip.access stream_id ${bts.stream_id} line 0
+  gprs mode none
+% for trx in bts.trx_list:
+  trx ${loop.index}
+   rf_locked 0
+   arfcn ${trx.arfcn}
+   nominal power 23
+   max_power_red ${trx.max_power_red}
+   rsl e1 tei 0
+%  for ts in trx.timeslot_list:
+   timeslot ${loop.index}
+    phys_chan_config ${ts.phys_chan_config}
+%  endfor
+% endfor
+%endfor
+msc
+ token msc_token_23_42
+ core-mobile-country-code ${bsc.net.mcc}
+ core-mobile-network-code ${bsc.net.mnc}
+ ip.access rtp-base 8000
+ timeout-ping 1800
+ timeout-ping advanced
+ timeout-pong 60
+ codec-list hr3
+ dest 151.80.237.229 5000 184
+ amr-config 12_2k forbidden
+ amr-config 10_2k forbidden
+ amr-config 7_95k forbidden
+ amr-config 7_40k forbidden
+ amr-config 6_70k forbidden
+ amr-config 5_90k allowed
+ amr-config 5_15k forbidden
+ amr-config 4_75k forbidden

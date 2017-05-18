@@ -18,9 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import random
 import re
-import socket
 
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 

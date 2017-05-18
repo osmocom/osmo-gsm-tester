@@ -72,7 +72,7 @@ print('*** end: all resources\n')
 
 print('- request some resources')
 want = {
-       'nitb_iface': [ { 'times': 1 } ],
+       'ip_address': [ { 'times': 1 } ],
        'bts': [ { 'type': 'sysmo', 'times': 1 }, { 'type': 'oct', 'times': 1 } ],
        'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
        'modem': [ { 'times': 2 } ],

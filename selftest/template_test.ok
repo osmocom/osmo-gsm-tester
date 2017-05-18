@@ -12,11 +12,11 @@ log stderr
 !
 line vty
  no login
- bind val_nitb_iface_addr
+ bind val_ip_address_addr
 !
 e1_input
  e1_line 0 driver ipa
- ipa bind val_nitb_iface_addr
+ ipa bind val_ip_address_addr
 network
  network country code val_mcc
  mobile network code val_mnc
@@ -135,14 +135,14 @@ network
    timeslot 3
     phys_chan_config val_phys_chan_config_3
 smpp
- local-tcp-ip val_nitb_iface_addr 2775
+ local-tcp-ip val_ip_address_addr 2775
  system-id test
  policy closed
  esme test
   password test
   default-route
 ctrl
- bind val_nitb_iface_addr
+ bind val_ip_address_addr
 
 - Testing: expect to fail on invalid templates dir
 sucess: setting non-existing templates dir raised RuntimeError

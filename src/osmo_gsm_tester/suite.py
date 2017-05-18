@@ -264,13 +264,13 @@ class SuiteRun(log.Origin):
         for process in self._processes:
             process.terminate()
 
-    def nitb_iface(self):
-        return self.reserved_resources.get(resource.R_NITB_IFACE)
+    def ip_address(self):
+        return self.reserved_resources.get(resource.R_IP_ADDRESS)
 
-    def nitb(self, nitb_iface=None):
-        if nitb_iface is None:
-            nitb_iface = self.nitb_iface()
-        return osmo_nitb.OsmoNitb(self, nitb_iface)
+    def nitb(self, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_nitb.OsmoNitb(self, ip_address)
 
     def bts(self):
         return bts_obj(self, self.reserved_resources.get(resource.R_BTS))

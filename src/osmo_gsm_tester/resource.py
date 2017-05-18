@@ -41,14 +41,14 @@ RESOURCES_CONF = 'resources.conf'
 LAST_USED_MSISDN_FILE = 'last_used_msisdn.state'
 RESERVED_RESOURCES_FILE = 'reserved_resources.state'
 
-R_NITB_IFACE = 'nitb_iface'
+R_IP_ADDRESS = 'ip_address'
 R_BTS = 'bts'
 R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
-R_ALL = (R_NITB_IFACE, R_BTS, R_ARFCN, R_MODEM)
+R_ALL = (R_IP_ADDRESS, R_BTS, R_ARFCN, R_MODEM)
 
 RESOURCES_SCHEMA = {
-        'nitb_iface[].addr': schema.IPV4,
+        'ip_address[].addr': schema.IPV4,
         'bts[].label': schema.STR,
         'bts[].type': schema.STR,
         'bts[].ipa_unit_id': schema.INT,
@@ -110,11 +110,11 @@ class ResourcesPool(log.Origin):
         reserved without further limitations.
 
         ResourcesPool may also be selected with narrowed down constraints.
-        This would reserve one NITB IP address, two modems, one BTS of type
+        This would reserve one IP address, two modems, one BTS of type
         sysmo and one of type trx, plus 2 ARFCNs in the 1800 band:
 
          {
-           'nitb_iface': [ { 'times': 1 } ],
+           'ip_address': [ { 'times': 1 } ],
            'bts': [ { 'type': 'sysmo', 'times': 1 }, { 'type': 'trx', 'times': 1 } ],
            'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
            'modem': [ { 'times': 2 } ],
@@ -123,7 +123,7 @@ class ResourcesPool(log.Origin):
         A times=1 value is implicit, so the above is equivalent to:
 
          {
-           'nitb_iface': [ {} ],
+           'ip_address': [ {} ],
            'bts': [ { 'type': 'sysmo' }, { 'type': 'trx' } ],
            'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
            'modem': [ { 'times': 2 } ],

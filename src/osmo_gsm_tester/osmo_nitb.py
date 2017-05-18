@@ -25,17 +25,17 @@ from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
 class OsmoNitb(log.Origin):
     suite_run = None
-    nitb_iface = None
+    ip_address = None
     run_dir = None
     config_file = None
     process = None
     bts = None
 
-    def __init__(self, suite_run, nitb_iface):
+    def __init__(self, suite_run, ip_address):
         self.suite_run = suite_run
-        self.nitb_iface = nitb_iface
+        self.ip_address = ip_address
         self.set_log_category(log.C_RUN)
-        self.set_name('osmo-nitb_%s' % nitb_iface.get('addr'))
+        self.set_name('osmo-nitb_%s' % ip_address.get('addr'))
         self.bts = []
 
     def start(self):
@@ -70,7 +70,7 @@ class OsmoNitb(log.Origin):
 
         values = dict(nitb=config.get_defaults('nitb'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(nitb_iface=self.nitb_iface))
+        config.overlay(values, dict(ip_address=self.ip_address))
 
         bts_list = []
         for bts in self.bts:
@@ -85,7 +85,7 @@ class OsmoNitb(log.Origin):
             f.write(r)
 
     def addr(self):
-        return self.nitb_iface.get('addr')
+        return self.ip_address.get('addr')
 
     def bts_add(self, bts):
         self.bts.append(bts)

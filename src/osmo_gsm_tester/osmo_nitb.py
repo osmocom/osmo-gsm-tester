@@ -70,7 +70,7 @@ class OsmoNitb(log.Origin):
 
         values = dict(nitb=config.get_defaults('nitb'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(ip_address=self.ip_address))
+        config.overlay(values, dict(nitb=dict(ip_address=self.ip_address)))
 
         bts_list = []
         for bts in self.bts:

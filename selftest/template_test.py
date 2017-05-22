@@ -57,8 +57,8 @@ vals = dict(nitb=dict(
                         encryption='val_encryption',
                         bts_list=(mock_bts0, mock_bts1)
                     ),
-                ),
-            ip_address=dict(addr='val_ip_address_addr'),
+                    ip_address=dict(addr='val_ip_address'),
+            ),
        )
 
 print(template.render('osmo-nitb.cfg', vals))

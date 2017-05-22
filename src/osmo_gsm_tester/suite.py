@@ -22,7 +22,7 @@ import sys
 import time
 import copy
 import traceback
-from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb
+from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb, event_loop
 from . import test
 
 class Timeout(Exception):
@@ -114,7 +114,7 @@ class Test(log.Origin):
             with self:
                 self.status = Test.UNKNOWN
                 self.start_timestamp = time.time()
-                test.setup(suite_run, self, ofono_client, sys.modules[__name__])
+                test.setup(suite_run, self, ofono_client, sys.modules[__name__], event_loop)
                 self.log('START')
                 with self.redirect_stdout():
                     util.run_python_file('%s.%s' % (self.suite.name(), self.name()),
@@ -225,6 +225,7 @@ class SuiteRun(log.Origin):
         self.log('Suite run start')
         try:
             self.mark_start()
+            event_loop.register_poll_func(self.poll)
             if not self.reserved_resources:
                 self.reserve_resources()
             for test in self.definition.tests:
@@ -243,6 +244,7 @@ class SuiteRun(log.Origin):
             # base exception is raised. Make sure to stop processes in this
             # finally section. Resources are automatically freed with 'atexit'.
             self.stop_processes()
+        event_loop.unregister_poll_func(self.poll)
         self.duration = time.time() - self.start_timestamp
         if self.test_failed_ctr:
             self.status = SuiteRun.FAIL
@@ -287,32 +289,7 @@ class SuiteRun(log.Origin):
         self.log('using MSISDN', msisdn)
         return msisdn
 
-    def _wait(self, condition, condition_args, condition_kwargs, timeout, timestep):
-        if not timeout or timeout < 0:
-            raise RuntimeError('wait() *must* time out at some point. timeout=%r' % timeout)
-        if timestep < 0.1:
-            timestep = 0.1
-
-        started = time.time()
-        while True:
-            self.poll()
-            if condition(*condition_args, **condition_kwargs):
-                return True
-            waited = time.time() - started
-            if waited > timeout:
-                return False
-            time.sleep(timestep)
-
-    def wait(self, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
-        if not self._wait(condition, condition_args, condition_kwargs, timeout, timestep):
-            raise Timeout('Timeout expired')
-
-    def sleep(self, seconds):
-        assert seconds > 0.
-        self._wait(lambda: False, [], {}, timeout=seconds, timestep=min(seconds, 1))
-
     def poll(self):
-        ofono_client.poll()
         if self._processes:
             for process in self._processes:
                 if process.terminated():

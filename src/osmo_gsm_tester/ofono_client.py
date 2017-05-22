@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, test, util
+from . import log, test, util, event_loop
 
 from pydbus import SystemBus, Variant
 import time
@@ -57,12 +57,13 @@ def dbus_connect(dbus_iface, handler):
     DeferredHandling.defer_queue.'''
     return DeferredHandling(dbus_iface, handler).subscription_id
 
-
-def poll():
+def poll_glib():
     global glib_main_ctx
     while glib_main_ctx.pending():
         glib_main_ctx.iteration()
     DeferredHandling.handle_queue()
+
+event_loop.register_poll_func(poll_glib)
 
 def systembus_get(path):
     global bus
@@ -89,7 +90,7 @@ class Modem(log.Origin):
         self.sms_received_list = []
         # init interfaces and connect to signals:
         self.dbus_obj()
-        test.poll()
+        event_loop.poll()
 
     def set_msisdn(self, msisdn):
         self.msisdn = msisdn
@@ -106,13 +107,13 @@ class Modem(log.Origin):
 
     def _dbus_set_bool(self, name, bool_val, iface=I_MODEM):
         # to make sure any pending signals are received before we send out more DBus requests
-        test.poll()
+        event_loop.poll()
 
         val = bool(bool_val)
         self.log('Setting', name, val)
         self.dbus_obj()[iface].SetProperty(name, Variant('b', val))
 
-        test.wait(self.property_is, name, bool_val)
+        event_loop.wait(self, self.property_is, name, bool_val)
 
     def property_is(self, name, val):
         is_val = self.properties().get(name)

@@ -28,14 +28,15 @@ log = None
 dbg = None
 err = None
 wait = None
+wait_no_raise = None
 sleep = None
 poll = None
 prompt = None
 Timeout = None
 Failure = None
 
-def setup(suite_run, _test, ofono_client, suite_module):
-    global trial, suite, test, resources, log, dbg, err, wait, sleep, poll, prompt, Failure, Timeout
+def setup(suite_run, _test, ofono_client, suite_module, event_module):
+    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Failure, Timeout
     trial = suite_run.trial
     suite = suite_run
     test = _test
@@ -43,9 +44,10 @@ def setup(suite_run, _test, ofono_client, suite_module):
     log = test.log
     dbg = test.dbg
     err = test.err
-    wait = suite_run.wait
-    sleep = suite_run.sleep
-    poll = suite_run.poll
+    wait = lambda *args, **kwargs: event_module.wait(suite_run, *args, **kwargs)
+    wait_no_raise = lambda *args, **kwargs: event_module.wait_no_raise(suite_run, *args, **kwargs)
+    sleep = lambda *args, **kwargs: event_module.sleep(suite_run, *args, **kwargs)
+    poll = event_module.poll
     prompt = suite_run.prompt
     Failure = suite_module.Failure
     Timeout = suite_module.Timeout

@@ -67,6 +67,10 @@ for dep in $deps; do
         make install
 done
 
+# don't package documentation -- the libosmocore docs can be up to 16 Mb large,
+# a significant amount compared to the binaries
+rm -rf "$prefix_real/share/doc/libosmocore"
+
 # build the archive that is going to be copied to the tester and then to the BTS
 rm "$base"/*.tgz "$base"/*.md5 || true
 cd "$prefix_real"

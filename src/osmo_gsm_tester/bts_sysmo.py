@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import pprint
 from . import log, config, util, template, process
 
 class SysmoBts(log.Origin):
@@ -120,7 +121,8 @@ class SysmoBts(log.Origin):
         config.overlay(values, self.suite_run.config())
         config.overlay(values, { 'osmo_bts_sysmo': { 'oml_remote_ip': self.nitb.addr() } })
         config.overlay(values, { 'osmo_bts_sysmo': self.conf })
-        self.dbg(conf=values)
+
+        self.dbg('SYSMOBTS CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:
             r = template.render(SysmoBts.BTS_SYSMO_CFG, values)

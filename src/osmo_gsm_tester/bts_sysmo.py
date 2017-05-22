@@ -26,7 +26,6 @@ class SysmoBts(log.Origin):
     bsc = None
     run_dir = None
     inst = None
-    remote_addr = None
     remote_inst = None
     remote_env = None
     remote_dir = None
@@ -64,14 +63,14 @@ class SysmoBts(log.Origin):
             self.run_remote('rm-remote-dir', ('test', '!', '-d', SysmoBts.REMOTE_DIR, '||', 'rm', '-rf', SysmoBts.REMOTE_DIR))
             self.run_remote('mk-remote-dir', ('mkdir', '-p', SysmoBts.REMOTE_DIR))
             self.run_local('scp-inst-to-sysmobts',
-                ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.remote_addr, str(self.remote_inst))))
+                ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.remote_addr(), str(self.remote_inst))))
 
             remote_run_dir = self.remote_dir.child(SysmoBts.BTS_SYSMO_BIN)
             self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
 
             remote_config_file = self.remote_dir.child(SysmoBts.BTS_SYSMO_CFG)
             self.run_local('scp-cfg-to-sysmobts',
-                ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.remote_addr, remote_config_file)))
+                ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.remote_addr(), remote_config_file)))
 
             self.run_remote('reload-dsp-firmware', ('/bin/sh', '-c', '"cat /lib/firmware/sysmobts-v?.bit > /dev/fpgadl_par0 ; cat /lib/firmware/sysmobts-v?.out > /dev/dspdl_dm644x_0"'))
 
@@ -85,7 +84,7 @@ class SysmoBts(log.Origin):
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr, remote_cwd,
+        return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
                                      popen_args)
 
     def run_remote(self, name, popen_args, remote_cwd=None):
@@ -108,11 +107,12 @@ class SysmoBts(log.Origin):
         if proc.result != 0:
             proc.raise_exn('Exited in error')
 
+    def remote_addr(self):
+        return self.conf.get('addr')
+
     def configure(self):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be configured')
-
-        self.remote_addr = self.conf.get('addr')
 
         self.config_file = self.run_dir.new_file(SysmoBts.BTS_SYSMO_CFG)
         self.dbg(config_file=self.config_file)

@@ -42,6 +42,10 @@ class OsmoBtsTrx(log.Origin):
         self.set_log_category(log.C_RUN)
         self.env = {}
 
+    def remote_addr(self):
+        # FIXME
+        return '127.0.0.1'
+
     def start(self):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')

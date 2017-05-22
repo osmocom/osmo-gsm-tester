@@ -152,7 +152,6 @@ class OsmoNitbCtrl(log.Origin):
             return True
 
     def subscriber_list_active(self):
-        var = 'subscriber-list-active-v1'
         aslist_str = ""
         with self.ctrl() as ctrl:
             ctrl.do_get(OsmoNitbCtrl.SUBSCR_LIST_ACTIVE_VAR)

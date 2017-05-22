@@ -22,6 +22,7 @@ import sys
 import time
 import copy
 import traceback
+import pprint
 from . import config, log, template, util, resource, schema, ofono_client, osmo_nitb
 from . import test
 
@@ -130,7 +131,8 @@ class Test(log.Origin):
                 ftype = type(e).__name__
                 fmsg = repr(e) + '\n' + traceback.format_exc().rstrip()
                 if isinstance(e, resource.NoResourceExn):
-                    fmsg += '\n' + 'Current resource state:\n' + repr(suite_run.reserved_resources)
+                    fmsg += suite_run.resource_status_str()
+
             self.set_fail(ftype, fmsg, False)
 
         finally:
@@ -336,6 +338,13 @@ class SuiteRun(log.Origin):
         entered = util.input_polling('> ', self.poll)
         self.log('prompt entered:', repr(entered))
         return entered
+
+    def resource_status_str(self):
+        return '\n'.join(('',
+            'SUITE RUN: %s' % self.origin_id(),
+            'ASKED FOR:', pprint.pformat(self._resource_requirements),
+            'RESERVED COUNT:', pprint.pformat(self.reserved_resources.counts()),
+            'RESOURCES STATE:', repr(self.reserved_resources)))
 
 loaded_suite_definitions = {}
 

@@ -463,8 +463,9 @@ class ReservedResources(log.Origin):
         available = available_dict.get(kind)
         self.dbg(available=len(available))
         if not available:
-            raise NoResourceExn('No unused resource found: %r%s' %
+            raise NoResourceExn('When trying to reserve %r nr %d: No unused resource found%s' %
                                 (kind,
+                                 self.count(kind) + 1,
                                  (' matching %r' % specifics) if specifics else '')
                                )
         pick = available[0]
@@ -496,5 +497,13 @@ class ReservedResources(log.Origin):
         self.resources_pool.free(self.origin, self.reserved)
         self.reserved = None
 
+    def counts(self):
+        counts = {}
+        for key in self.reserved.keys():
+            counts[key] = self.count(key)
+        return counts
+
+    def count(self, key):
+        return len(self.reserved.get(key) or [])
 
 # vim: expandtab tabstop=4 shiftwidth=4

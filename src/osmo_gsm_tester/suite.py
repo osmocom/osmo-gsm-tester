@@ -130,7 +130,7 @@ class Test(log.Origin):
                 ftype = type(e).__name__
                 fmsg = repr(e) + '\n' + traceback.format_exc().rstrip()
                 if isinstance(e, resource.NoResourceExn):
-                    msg += '\n' + 'Current resource state:\n' + repr(suite_run.reserved_resources)
+                    fmsg += '\n' + 'Current resource state:\n' + repr(suite_run.reserved_resources)
             self.set_fail(ftype, fmsg, False)
 
         finally:

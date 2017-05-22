@@ -19,6 +19,7 @@
 
 import os
 import re
+import pprint
 
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
@@ -76,7 +77,7 @@ class OsmoNitb(log.Origin):
             bts_list.append(bts.conf_for_nitb())
         config.overlay(values, dict(nitb=dict(net=dict(bts_list=bts_list))))
 
-        self.dbg(conf=values)
+        self.dbg('NITB CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:
             r = template.render('osmo-nitb.cfg', values)

@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import pprint
 from . import log, config, util, template, process
 
 class OsmoBtsTrx(log.Origin):
@@ -93,7 +94,8 @@ class OsmoBtsTrx(log.Origin):
         config.overlay(values, self.suite_run.config())
         config.overlay(values, dict(osmo_bts_trx=dict(oml_remote_ip=self.nitb.addr())))
         config.overlay(values, dict(osmo_bts_trx=self.conf))
-        self.dbg(conf=values)
+
+        self.dbg('OSMO-BTS-TRX CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:
             r = template.render(OsmoBtsTrx.CONF_BTS_TRX, values)

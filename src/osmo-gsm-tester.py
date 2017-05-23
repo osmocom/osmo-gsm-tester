@@ -198,6 +198,7 @@ optional.''')
                 trials_run.append(current_trial)
         except Exception:
             # Do not catch here subclasses of BaseException such as SystemExit, let them finish the program
+            any_failed = True
             current_trial.log_exn()
 
     sys.stderr.flush()

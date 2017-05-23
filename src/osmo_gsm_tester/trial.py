@@ -63,7 +63,6 @@ class Trial(log.Origin):
         self.inst_dir = util.Dir(self.dir.child('inst'))
         self.bin_tars = []
         self.suites = []
-        self.junit_path = self.get_run_dir().new_file(self.name()+'.xml')
         self.status = Trial.UNKNOWN
 
     def __repr__(self):

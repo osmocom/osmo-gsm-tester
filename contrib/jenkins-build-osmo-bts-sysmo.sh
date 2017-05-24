@@ -34,7 +34,7 @@ have_repo openbsc
 . /opt/poky/1.5.4/environment-setup-armv5te-poky-linux-gnueabi
 
 # Cross-compilation: all installations need to be put in the sysmo SDK sysroot
-export DESTDIR=/opt/poky/1.5.4/sysroots/armv5te-poky-linux-gnueabi
+export DESTDIR="/opt/poky/1.5.4/sysroots/armv5te-poky-linux-gnueabi"
 
 prefix_base="/usr/local/jenkins-build"
 prefix_base_real="$DESTDIR$prefix_base"
@@ -47,7 +47,15 @@ mkdir -p "$prefix_real"
 # Installation in non-system dir, but keep the PKG_CONFIG_PATH from the SDK:
 export PKG_CONFIG_PATH="$prefix_real/lib/pkgconfig:$PKG_CONFIG_PATH"
 
+env
+
 for dep in $deps; do
+	set +x; echo "
+
+====================== $dep
+
+"; set -x
+
         cd "$base/$dep"
         rm -rf *
         git checkout .
@@ -62,8 +70,11 @@ for dep in $deps; do
         'osmo-bts')       config_opts="--enable-sysmocom-bts --with-openbsc=$base/openbsc/openbsc/include" ;;
         esac
 
+	set +x;	echo; echo; set -x
         ./configure --prefix="$prefix" $CONFIGURE_FLAGS $config_opts
+	set +x;	echo; echo; set -x
         make -j8
+	set +x;	echo; echo; set -x
         make install
 done
 

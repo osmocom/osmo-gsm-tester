@@ -38,6 +38,12 @@ export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
 export LD_LIBRARY_PATH="$prefix/lib"
 
 for dep in $deps; do
+	set +x; echo "
+
+====================== $dep
+
+"; set -x
+
 	have_repo "$dep"
 	cd "$dep"
 	rm -rf *
@@ -54,8 +60,11 @@ for dep in $deps; do
 	'osmo-trx') config_opts="--without-sse" ;;
 	esac
 
+	set +x;	echo; echo; set -x
 	./configure --prefix="$prefix" $config_opts
+	set +x;	echo; echo; set -x
 	make -j8
+	set +x;	echo; echo; set -x
 	make install
 done
 

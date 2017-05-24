@@ -73,6 +73,182 @@ def list_modems():
     root = systembus_get('/')
     return sorted(root.GetModems())
 
+class ModemDbusInteraction(log.Origin):
+    '''Work around inconveniences specific to pydbus and ofono.
+    ofono adds and removes DBus interfaces and notifies about them.
+    Upon changes we need a fresh pydbus object to benefit from that.
+    Watching the interfaces change is optional; be sure to call
+    watch_interfaces() if you'd like to have signals subscribed.
+    Related: https://github.com/LEW21/pydbus/issues/56
+    '''
+
+    def __init__(self, modem_path):
+        self.modem_path = modem_path
+        self.set_name(self.modem_path)
+        self.set_log_category(log.C_BUS)
+        self.watch_props_subscription = None
+        self._dbus_obj = None
+        self.interfaces = set()
+
+        # A dict listing signal handlers to connect, e.g.
+        # { I_SMS: ( ('IncomingMessage', self._on_incoming_message), ), }
+        self.required_signals = {}
+
+        # A dict collecting subscription tokens for connected signal handlers.
+        # { I_SMS: ( token1, token2, ... ), }
+        self.connected_signals = util.listdict()
+
+    def __del__(self):
+        self.unwatch_interfaces()
+        for interface_name in list(self.connected_signals.keys()):
+            self.remove_signals(interface_name)
+
+    def get_new_dbus_obj(self):
+        return systembus_get(self.modem_path)
+
+    def dbus_obj(self):
+        if self._dbus_obj is None:
+            self._dbus_obj = self.get_new_dbus_obj()
+        return self._dbus_obj
+
+    def interface(self, interface_name):
+        try:
+            return self.dbus_obj()[interface_name]
+        except KeyError:
+            self.raise_exn('Modem interface is not available:', interface_name)
+
+    def signal(self, interface_name, signal):
+        return getattr(self.interface(interface_name), signal)
+
+    def watch_interfaces(self):
+        self.unwatch_interfaces()
+        # Note: we are watching the properties on a get_new_dbus_obj() that is
+        # separate from the one used to interact with interfaces.  We need to
+        # refresh the pydbus object to interact with Interfaces that have newly
+        # appeared, but exchanging the DBus object to watch Interfaces being
+        # enabled and disabled is racy: we may skip some removals and
+        # additions. Hence do not exchange this DBus object. We don't even
+        # need to store the dbus object used for this, we will not touch it
+        # again. We only store the signal subscription.
+        self.watch_props_subscription = dbus_connect(self.get_new_dbus_obj().PropertyChanged,
+                                                     self.on_property_change)
+        self.on_interfaces_change(self.properties().get('Interfaces'))
+
+    def unwatch_interfaces(self):
+        if self.watch_props_subscription is None:
+            return
+        self.watch_props_subscription.disconnect()
+        self.watch_props_subscription = None
+
+    def on_property_change(self, name, value):
+        if name == 'Interfaces':
+            self.on_interfaces_change(value)
+
+    def on_interfaces_change(self, interfaces_now):
+        # First some logging.
+        now = set(interfaces_now)
+        additions = now - self.interfaces
+        removals = self.interfaces - now
+        self.interfaces = now
+        if not (additions or removals):
+            # nothing changed.
+            return
+
+        if additions:
+            self.dbg('interface enabled:', ', '.join(sorted(additions)))
+
+        if removals:
+            self.dbg('interface disabled:', ', '.join(sorted(removals)))
+
+        # The dbus object is now stale and needs refreshing before we
+        # access the next interface function.
+        self._dbus_obj = None
+
+        # If an interface disappeared, disconnect the signal handlers for it.
+        # Even though we're going to use a fresh dbus object for new
+        # subscriptions, we will still keep active subscriptions alive on the
+        # old dbus object which will linger, associated with the respective
+        # signal subscription.
+        for removed in removals:
+            self.remove_signals(removed)
+
+        # Connect signals for added interfaces.
+        for interface_name in additions:
+            self.connect_signals(interface_name)
+
+    def remove_signals(self, interface_name):
+        got = self.connected_signals.pop(interface_name, [])
+
+        if not got:
+            return
+
+        self.dbg('Disconnecting', len(got), 'signals for', interface_name)
+        for subscription in got:
+            subscription.disconnect()
+
+    def connect_signals(self, interface_name):
+        # If an interface was added, it must not have existed before. For
+        # paranoia, make sure we have no handlers for those.
+        self.remove_signals(interface_name)
+
+        want = self.required_signals.get(interface_name, [])
+        if not want:
+            return
+
+        self.dbg('Connecting', len(want), 'signals for', interface_name)
+        for signal, cb in self.required_signals.get(interface_name, []):
+            subscription = dbus_connect(self.signal(interface_name, signal), cb)
+            self.connected_signals.add(interface_name, subscription)
+
+    def has_interface(self, *interface_names):
+        try:
+            for interface_name in interface_names:
+                self.dbus_obj()[interface_name]
+            result = True
+        except KeyError:
+            result = False
+        self.dbg('has_interface(%s) ==' % (', '.join(interface_names)), result)
+        return result
+
+    def properties(self, iface=I_MODEM):
+        return self.dbus_obj()[iface].GetProperties()
+
+    def property_is(self, name, val, iface=I_MODEM):
+        is_val = self.properties(iface).get(name)
+        self.dbg(name, '==', is_val)
+        return is_val is not None and is_val == val
+
+    def set_bool(self, name, bool_val, iface=I_MODEM):
+        # to make sure any pending signals are received before we send out more DBus requests
+        event_loop.poll()
+
+        val = bool(bool_val)
+        self.log('Setting', name, val)
+        self.interface(iface).SetProperty(name, Variant('b', val))
+
+        event_loop.wait(self, self.property_is, name, bool_val)
+
+    def set_powered(self, powered=True):
+        self.set_bool('Powered', powered)
+
+    def set_online(self, online=True):
+        self.set_bool('Online', online)
+
+    def is_powered(self):
+        return self.property_is('Powered', True)
+
+    def is_online(self):
+        return self.property_is('Online', True)
+
+    def require_features(self, *required):
+        '''Make sure the given feature strings are present in
+        properties()['Features'], raise an exception otherwise.'''
+        features = set(self.properties().get('Features'))
+        r = set(required)
+        if not (r < features):
+            self.raise_exn('This modem lacks features:', r - features)
+
+
 
 class Modem(log.Origin):
     'convenience for ofono Modem interaction'
@@ -83,14 +259,54 @@ class Modem(log.Origin):
         self.conf = conf
         self.path = conf.get('path')
         self.set_name(self.path)
-        self.set_log_category(log.C_BUS)
-        self._dbus_obj = None
-        self._interfaces = set()
-        self._connected_signals = util.listdict()
+        self.set_log_category(log.C_TST)
         self.sms_received_list = []
-        # init interfaces and connect to signals:
-        self.dbus_obj()
-        event_loop.poll()
+        self.dbus = ModemDbusInteraction(self.path)
+        self.dbus.require_features('sms', 'net')
+        self.dbus.required_signals = {
+                I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
+            }
+        self.dbus.watch_interfaces()
+
+    def properties(self, *args, **kwargs):
+        '''Return a dict of properties on this modem. For the actual arguments,
+        see ModemDbusInteraction.properties(), which this function calls.  The
+        returned dict is defined by ofono. An example is:
+           {'Lockdown': False,
+            'Powered': True,
+            'Model': 'MC7304',
+            'Revision': 'SWI9X15C_05.05.66.00 r29972 CARMD-EV-FRMWR1 2015/10/08 08:36:28',
+            'Manufacturer': 'Sierra Wireless, Incorporated',
+            'Emergency': False,
+            'Interfaces': ['org.ofono.SmartMessaging',
+                           'org.ofono.PushNotification',
+                           'org.ofono.MessageManager',
+                           'org.ofono.NetworkRegistration',
+                           'org.ofono.ConnectionManager',
+                           'org.ofono.SupplementaryServices',
+                           'org.ofono.RadioSettings',
+                           'org.ofono.AllowedAccessPoints',
+                           'org.ofono.SimManager',
+                           'org.ofono.LocationReporting',
+                           'org.ofono.VoiceCallManager'],
+            'Serial': '356853054230919',
+            'Features': ['sms', 'net', 'gprs', 'ussd', 'rat', 'sim', 'gps'],
+            'Type': 'hardware',
+            'Online': True}
+        '''
+        return self.dbus.properties(*args, **kwargs)
+
+    def set_powered(self, powered=True):
+        return self.dbus.set_powered(powered=powered)
+
+    def set_online(self, online=True):
+        return self.dbus.set_online(online=online)
+
+    def is_powered(self):
+        return self.dbus.is_powered()
+
+    def is_online(self):
+        return self.dbus.is_online()
 
     def set_msisdn(self, msisdn):
         self.msisdn = msisdn
@@ -105,107 +321,24 @@ class Modem(log.Origin):
     def ki(self):
         return self.conf.get('ki')
 
-    def _dbus_set_bool(self, name, bool_val, iface=I_MODEM):
-        # to make sure any pending signals are received before we send out more DBus requests
-        event_loop.poll()
-
-        val = bool(bool_val)
-        self.log('Setting', name, val)
-        self.dbus_obj()[iface].SetProperty(name, Variant('b', val))
-
-        event_loop.wait(self, self.property_is, name, bool_val)
-
-    def property_is(self, name, val):
-        is_val = self.properties().get(name)
-        self.dbg(name, '==', is_val)
-        return is_val is not None and is_val == val
-
-    def set_powered(self, on=True):
-        self._dbus_set_bool('Powered', on)
-
-    def set_online(self, on=True):
-        self._dbus_set_bool('Online', on)
-
-    def dbus_obj(self):
-        if self._dbus_obj is not None:
-            return self._dbus_obj
-        self._dbus_obj = systembus_get(self.path)
-        dbus_connect(self._dbus_obj.PropertyChanged, self._on_property_change)
-        self._on_interfaces_change(self.properties().get('Interfaces'))
-        return self._dbus_obj
-
-    def properties(self, iface=I_MODEM):
-        return self.dbus_obj()[iface].GetProperties()
-
-    def _on_property_change(self, name, value):
-        if name == 'Interfaces':
-            self._on_interfaces_change(value)
-
-    def _on_interfaces_change(self, interfaces_now):
-        now = set(interfaces_now)
-        additions = now - self._interfaces
-        removals = self._interfaces - now
-        self._interfaces = now
-        for iface in removals:
-            self._on_interface_disabled(iface)
-        for iface in additions:
-            self._on_interface_enabled(iface)
-
-    def _disconnect(self, interface_name):
-        subscriptions = self._connected_signals.pop(interface_name, [])
-        if subscriptions:
-            self.dbg('Disconnecting', len(subscriptions), 'signals from', interface_name)
-        for subscription in subscriptions:
-            subscription.disconnect()
-
-    def _on_interface_enabled(self, interface_name):
-        self.dbg('Interface enabled:', interface_name)
-
-        all_wanted_conns = {
-                I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
-            }
-
-        want = all_wanted_conns.get(interface_name)
-        if not want:
-            return
-
-        # sanity
-        self._disconnect(interface_name)
-
-        self.dbg('Connecting', len(want), 'signals to', interface_name)
-        for signal, cb in want:
-            dbus_iface = getattr(self.dbus_obj()[interface_name], signal)
-            self._connected_signals.add(interface_name, dbus_connect(dbus_iface, cb))
-
-    def _on_interface_disabled(self, interface_name):
-        self.dbg('Interface disabled:', interface_name)
-        self._disconnect(interface_name)
-
-    def has_interface(self, name):
-        return name in self._interfaces
-
     def connect(self, nitb):
         'set the modem up to connect to MCC+MNC from NITB config'
         self.log('connect to', nitb)
-        prepowered = self.properties().get('Powered')
-        if prepowered is not None and prepowered:
+        if self.is_powered():
+            self.dbg('is powered')
             self.set_online(False)
             self.set_powered(False)
+            event_loop.wait(self, lambda: not self.dbus.has_interface(I_NETREG, I_SMS), timeout=10)
         self.set_powered()
         self.set_online()
-        if not self.has_interface(I_NETREG):
-            self.log('No %r interface, hoping that the modem connects by itself' % I_NETREG)
-        else:
-            self.log('Use of %r interface not implemented yet, hoping that the modem connects by itself' % I_NETREG)
+        event_loop.wait(self, self.dbus.has_interface, I_NETREG, I_SMS, timeout=10)
 
     def sms_send(self, to_msisdn, *tokens):
         if hasattr(to_msisdn, 'msisdn'):
             to_msisdn = to_msisdn.msisdn
         sms = Sms(self.msisdn, to_msisdn, 'from ' + self.name(), *tokens)
         self.log('sending sms to MSISDN', to_msisdn, sms=sms)
-        if not self.has_interface(I_SMS):
-            raise RuntimeError('Modem cannot send SMS, interface not active: %r' % I_SMS)
-        mm = self.dbus_obj()[I_SMS]
+        mm = self.dbus.interface(I_SMS)
         mm.SendMessage(to_msisdn, str(sms))
         return sms
 

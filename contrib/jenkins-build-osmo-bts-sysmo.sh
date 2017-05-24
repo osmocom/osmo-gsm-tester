@@ -44,6 +44,9 @@ prefix="$prefix_base/inst-osmo-bts-sysmo"
 prefix_real="$DESTDIR$prefix"
 mkdir -p "$prefix_real"
 
+# Installation in non-system dir, but keep the PKG_CONFIG_PATH from the SDK:
+export PKG_CONFIG_PATH="$prefix_real/lib/pkgconfig:$PKG_CONFIG_PATH"
+
 for dep in $deps; do
         cd "$base/$dep"
         rm -rf *

@@ -61,7 +61,7 @@ class LogTarget:
     do_log_category = None
     do_log_level = None
     do_log_origin = None
-    do_log_all_origins = None
+    do_log_all_origins_on_levels = None
     do_log_traceback = None
     do_log_src = None
     origin_width = None
@@ -87,7 +87,7 @@ class LogTarget:
     def remove(self):
         LogTarget.all_targets.remove(self)
 
-    def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=32, src=True, trace=False, all_origins=True):
+    def style(self, time=True, time_fmt=DATEFMT, category=True, level=True, origin=True, origin_width=32, src=True, trace=False, all_origins_on_levels=(L_ERR, L_LOG, L_DBG, L_TRACEBACK)):
         '''
         set all logging format aspects, to defaults if not passed:
         time: log timestamps;
@@ -98,6 +98,7 @@ class LogTarget:
         origin_width: fill up the origin string with whitespace to this witdh;
         src: log the source file and line number the log comes from;
         trace: on exceptions, log the full stack trace;
+        all_origins_on_levels: pass a tuple of logging levels that should have a full trace of origins
         '''
         self.log_time_fmt = time_fmt
         self.do_log_time = bool(time)
@@ -106,14 +107,14 @@ class LogTarget:
         self.do_log_category = bool(category)
         self.do_log_level = bool(level)
         self.do_log_origin = bool(origin)
-        self.do_log_all_origins = bool(all_origins)
         self.origin_width = int(origin_width)
         self.origin_fmt = '{:>%ds}' % self.origin_width
         self.do_log_src = src
         self.do_log_traceback = trace
+        self.do_log_all_origins_on_levels = tuple(all_origins_on_levels or [])
         return self
 
-    def style_change(self, time=None, time_fmt=None, category=None, level=None, origin=None, origin_width=None, src=None, trace=None, all_origins=None):
+    def style_change(self, time=None, time_fmt=None, category=None, level=None, origin=None, origin_width=None, src=None, trace=None, all_origins_on_levels=None):
         'modify only the given aspects of the logging format'
         self.style(
             time=(time if time is not None else self.do_log_time),
@@ -124,7 +125,7 @@ class LogTarget:
             origin_width=(origin_width if origin_width is not None else self.origin_width),
             src=(src if src is not None else self.do_log_src),
             trace=(trace if trace is not None else self.do_log_traceback),
-            all_origins=(all_origins if all_origins is not None else self.do_log_all_origins),
+            all_origins_on_levels=(all_origins_on_levels if all_origins_on_levels is not None else self.do_log_all_origins_on_levels),
             )
         return self
 
@@ -190,7 +191,7 @@ class LogTarget:
 
         log_line = [compose_message(messages, named_items)]
 
-        if deeper_origins and self.do_log_all_origins:
+        if deeper_origins and (level in self.do_log_all_origins_on_levels):
             log_line.append(' [%s]' % deeper_origins)
 
         if self.do_log_src and src:

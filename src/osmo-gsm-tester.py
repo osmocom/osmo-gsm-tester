@@ -129,7 +129,7 @@ optional.''')
     print('tests:', repr(args.test))
 
     # create a default log to stdout
-    log.LogTarget().style(all_origins=False, src=False)
+    log.LogTarget().style(all_origins_on_levels=(log.L_ERR, log.L_TRACEBACK), src=False)
 
     if args.log_level:
         log.set_all_levels(log.LEVEL_STRS.get(args.log_level))

@@ -77,7 +77,7 @@ class Trial(log.Origin):
               .set_all_levels(log.L_DBG)
               .style_change(trace=True),
             log.FileLogTarget(run_dir.new_child(FILE_LOG_BRIEF))
-              .style_change(src=False, all_origins=False)
+              .style_change(src=False, all_origins_on_levels=(log.L_ERR, log.L_TRACEBACK))
             ]
         self.log('Trial start')
         self.log('Detailed log at', detailed_log)

@@ -340,9 +340,13 @@ class Modem(log.Origin):
         self.set_online()
         event_loop.wait(self, self.dbus.has_interface, I_NETREG, I_SMS, timeout=10)
 
-    def sms_send(self, to_msisdn, *tokens):
-        if hasattr(to_msisdn, 'msisdn'):
-            to_msisdn = to_msisdn.msisdn
+    def sms_send(self, to_msisdn_or_modem, *tokens):
+        if isinstance(to_msisdn_or_modem, Modem):
+            to_msisdn = to_msisdn_or_modem.msisdn
+            tokens = list(tokens)
+            tokens.append('to ' + to_msisdn_or_modem.name())
+        else:
+            to_msisdn = str(to_msisdn_or_modem)
         sms = Sms(self.msisdn, to_msisdn, 'from ' + self.name(), *tokens)
         self.log('sending sms to MSISDN', to_msisdn, sms=sms)
         mm = self.dbus.interface(I_SMS)

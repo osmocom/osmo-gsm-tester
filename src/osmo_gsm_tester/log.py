@@ -332,8 +332,9 @@ class Origin:
 
     def __enter__(self):
         if not self.set_child_of(Origin._global_current_origin):
-            return
+            return self
         Origin._global_current_origin = self
+        return self
 
     def __exit__(self, *exc_info):
         rc = None

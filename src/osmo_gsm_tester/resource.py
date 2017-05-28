@@ -299,7 +299,7 @@ class Resources(dict):
             # here we have a resource of a given type, e.g. 'bts', with a list
             # containing as many BTSes as the caller wants to reserve/use. Each
             # list item contains specifics for the particular BTS.
-            my_list = self.get(key)
+            my_list = self.get(key, [])
 
             for_origin.log(log_label, len(want_list), 'x', key, '(candidates: %d)'%len(my_list))
 

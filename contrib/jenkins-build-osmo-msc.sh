@@ -70,7 +70,7 @@ build_repo openbsc aoip
 
 # don't package documentation -- the libosmocore docs can be up to 16 Mb large,
 # a significant amount compared to the binaries
-rm -rf "$prefix/share/doc/libosmocore"
+rm -rf "$prefix/share/doc"
 
 # build the archive that is going to be copied to the tester
 rm "$base"/*.tgz "$base"/*.md5 || true

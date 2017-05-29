@@ -188,6 +188,7 @@ class Trial(log.Origin):
     def run_suites(self, names=None):
         self.status = Trial.UNKNOWN
         for suite_run in  self.suites:
+            log.large_separator(self.name(), suite_run.name())
             st = suite_run.run_tests(names)
             if st == suite.SuiteRun.FAIL:
                 self.status = Trial.FAIL

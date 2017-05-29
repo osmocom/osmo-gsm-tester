@@ -188,7 +188,6 @@ optional.''')
         try:
             with current_trial:
                 for suite_scenario_str, suite_def, scenarios in suite_scenarios:
-                    log.large_separator(current_trial.name(), suite_scenario_str)
                     suite_run = suite.SuiteRun(current_trial, suite_scenario_str, suite_def, scenarios)
                     current_trial.add_suite(suite_run)
 

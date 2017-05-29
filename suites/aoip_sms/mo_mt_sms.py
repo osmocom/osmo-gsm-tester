@@ -23,7 +23,12 @@ hlr.subscriber_add(ms_mt)
 
 ms_mo.connect(bsc)
 ms_mt.connect(bsc)
+
+ms_mo.log_info()
+ms_mt.log_info()
+
+print('waiting for modems to attach...')
 wait(msc.subscriber_attached, ms_mo, ms_mt)
 
-sms = ms_mo.sms_send(ms_mt.msisdn)
+sms = ms_mo.sms_send(ms_mt)
 wait(ms_mt.sms_was_received, sms)

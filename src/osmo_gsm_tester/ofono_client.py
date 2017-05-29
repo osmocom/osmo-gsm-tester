@@ -357,6 +357,13 @@ class Modem(log.Origin):
                 return True
         return False
 
+    def info(self, keys=('Manufacturer', 'Model', 'Revision')):
+        props = self.properties()
+        return ', '.join(['%s: %r'%(k,props.get(k)) for k in keys])
+
+    def log_info(self, *args, **kwargs):
+        self.log(self.info(*args, **kwargs))
+
 class Sms:
     _last_sms_idx = 0
     msg = None

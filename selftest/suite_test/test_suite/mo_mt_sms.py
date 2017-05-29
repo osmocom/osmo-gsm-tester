@@ -14,5 +14,5 @@ ms_mo.start()
 ms_mt.start()
 wait(nitb.subscriber_attached, ms_mo, ms_mt)
 
-sms = ms_mo.sms_send(ms_mt.msisdn)
+sms = ms_mo.sms_send(ms_mt)
 wait(nitb.sms_received, sms)

@@ -98,10 +98,13 @@ class ModemDbusInteraction(log.Origin):
         # { I_SMS: ( token1, token2, ... ), }
         self.connected_signals = util.listdict()
 
-    def __del__(self):
+    def cleanup(self):
         self.unwatch_interfaces()
         for interface_name in list(self.connected_signals.keys()):
             self.remove_signals(interface_name)
+
+    def __del__(self):
+        self.cleanup()
 
     def get_new_dbus_obj(self):
         return systembus_get(self.modem_path)
@@ -267,6 +270,10 @@ class Modem(log.Origin):
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
             }
         self.dbus.watch_interfaces()
+
+    def cleanup(self):
+        self.dbus.cleanup()
+        self.dbus = None
 
     def properties(self, *args, **kwargs):
         '''Return a dict of properties on this modem. For the actual arguments,

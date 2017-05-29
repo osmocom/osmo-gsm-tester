@@ -174,6 +174,7 @@ class SuiteRun(log.Origin):
     trial = None
     resources_pool = None
     reserved_resources = None
+    objects_to_clean_up = None
     _resource_requirements = None
     _config = None
     _processes = None
@@ -185,6 +186,16 @@ class SuiteRun(log.Origin):
         self.set_name(suite_scenario_str)
         self.set_log_category(log.C_TST)
         self.resources_pool = resource.ResourcesPool()
+
+    def register_for_cleanup(self, *obj):
+        assert all([hasattr(o, 'cleanup') for o in obj])
+        self.objects_to_clean_up = self.objects_to_clean_up or []
+        self.objects_to_clean_up.extend(obj)
+
+    def objects_cleanup(self):
+        while self.objects_to_clean_up:
+            obj = self.objects_to_clean_up.pop()
+            obj.cleanup()
 
     def mark_start(self):
         self.tests = []
@@ -248,6 +259,7 @@ class SuiteRun(log.Origin):
             # base exception is raised. Make sure to stop processes in this
             # finally section. Resources are automatically freed with 'atexit'.
             self.stop_processes()
+            self.objects_cleanup()
             self.free_resources()
         event_loop.unregister_poll_func(self.poll)
         self.duration = time.time() - self.start_timestamp
@@ -306,7 +318,11 @@ class SuiteRun(log.Origin):
         return bts_obj(self, self.reserved_resources.get(resource.R_BTS))
 
     def modem(self):
-        return modem_obj(self.reserved_resources.get(resource.R_MODEM))
+        conf = self.reserved_resources.get(resource.R_MODEM)
+        self.dbg('create Modem object', conf=conf)
+        modem = ofono_client.Modem(conf)
+        self.register_for_cleanup(modem)
+        return modem
 
     def modems(self, count):
         l = []
@@ -397,9 +413,5 @@ def bts_obj(suite_run, conf):
     if bts_class is None:
         raise RuntimeError('No such BTS type is defined: %r' % bts_type)
     return bts_class(suite_run, conf)
-
-def modem_obj(conf):
-    log.dbg(None, None, 'create Modem object', conf=conf)
-    return ofono_client.Modem(conf)
 
 # vim: expandtab tabstop=4 shiftwidth=4

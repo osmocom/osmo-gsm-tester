@@ -248,6 +248,7 @@ class SuiteRun(log.Origin):
             # base exception is raised. Make sure to stop processes in this
             # finally section. Resources are automatically freed with 'atexit'.
             self.stop_processes()
+            self.free_resources()
         event_loop.unregister_poll_func(self.poll)
         self.duration = time.time() - self.start_timestamp
         if self.test_failed_ctr:
@@ -267,6 +268,11 @@ class SuiteRun(log.Origin):
             return
         for process in self._processes:
             process.terminate()
+
+    def free_resources(self):
+        if self.reserved_resources is None:
+            return
+        self.reserved_resources.free()
 
     def ip_address(self):
         return self.reserved_resources.get(resource.R_IP_ADDRESS)

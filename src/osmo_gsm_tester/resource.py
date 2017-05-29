@@ -494,7 +494,8 @@ class ReservedResources(log.Origin):
                     my_item.pop(USED_KEY)
 
     def free(self):
-        self.resources_pool.free(self.origin, self.reserved)
+        if self.reserved:
+            self.resources_pool.free(self.origin, self.reserved)
         self.reserved = None
 
     def counts(self):

@@ -19,7 +19,7 @@
 
 import os
 import pprint
-from . import log, config, util, template, process
+from . import log, config, util, template, process, event_loop
 
 class OsmoBtsTrx(log.Origin):
     suite_run = None
@@ -63,7 +63,7 @@ class OsmoBtsTrx(log.Origin):
 
         self.proc_trx = self.launch_process(OsmoBtsTrx.BIN_TRX, '-x')
         self.log('Waiting for osmo-trx to start up...')
-        self.suite_run.wait(self.trx_ready)
+        event_loop.wait(self, self.trx_ready)
         self.proc_trx.log(self.proc_trx.get_stdout_tail(1))
         self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),

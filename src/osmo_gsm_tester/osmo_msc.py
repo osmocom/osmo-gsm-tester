@@ -29,6 +29,7 @@ class OsmoMsc(log.Origin):
     config_file = None
     process = None
     hlr = None
+    config = None
 
     def __init__(self, suite_run, hlr, mgcpgw, ip_address):
         self.suite_run = suite_run
@@ -73,6 +74,7 @@ class OsmoMsc(log.Origin):
         config.overlay(values, dict(msc=dict(ip_address=self.ip_address)))
         config.overlay(values, self.mgcpgw.conf_for_msc())
         config.overlay(values, self.hlr.conf_for_msc())
+        self.config = values
 
         self.dbg('MSC CONFIG:\n' + pprint.pformat(values))
 
@@ -83,6 +85,15 @@ class OsmoMsc(log.Origin):
 
     def addr(self):
         return self.ip_address.get('addr')
+
+    def mcc(self):
+        return self.config['msc']['net']['mcc']
+
+    def mnc(self):
+        return self.config['msc']['net']['mnc']
+
+    def mcc_mnc(self):
+        return (self.mcc(), self.mnc())
 
     def subscriber_attached(self, *modems):
         return self.imsi_attached(*[m.imsi() for m in modems])

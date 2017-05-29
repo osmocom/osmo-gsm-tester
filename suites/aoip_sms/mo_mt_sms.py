@@ -21,13 +21,15 @@ bts.start()
 hlr.subscriber_add(ms_mo)
 hlr.subscriber_add(ms_mt)
 
-ms_mo.connect(bsc)
-ms_mt.connect(bsc)
+ms_mo.connect(msc.mcc_mnc())
+ms_mt.connect(msc.mcc_mnc())
 
 ms_mo.log_info()
 ms_mt.log_info()
 
 print('waiting for modems to attach...')
+wait(ms_mo.is_connected, msc.mcc_mnc())
+wait(ms_mt.is_connected, msc.mcc_mnc())
 wait(msc.subscriber_attached, ms_mo, ms_mt)
 
 sms = ms_mo.sms_send(ms_mt)

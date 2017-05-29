@@ -13,7 +13,7 @@ bts.start()
 
 for m in modems:
   nitb.subscriber_add(m)
-  m.connect(nitb)
+  m.connect(nitb.mcc_mnc())
 
 while True:
   cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered')
@@ -25,6 +25,8 @@ while True:
     break
   elif 'wait-registered'.startswith(cmd):
     try:
+      for m in modems:
+         wait(m.is_connected, nitb.mcc_mnc())
       wait(nitb.subscriber_attached, *modems)
     except Timeout:
       print('Timeout while waiting for registration.')

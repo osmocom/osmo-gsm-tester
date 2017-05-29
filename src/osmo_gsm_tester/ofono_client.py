@@ -22,6 +22,7 @@ from . import log, test, util, event_loop, sms
 from pydbus import SystemBus, Variant
 import time
 import pprint
+import sys
 
 from gi.repository import GLib
 glib_main_loop = GLib.MainLoop()
@@ -31,6 +32,12 @@ bus = SystemBus()
 I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
 I_SMS = 'org.ofono.MessageManager'
+
+# See https://github.com/intgr/ofono/blob/master/doc/network-api.txt#L78
+NETREG_ST_REGISTERED = 'registered'
+NETREG_ST_ROAMING = 'roaming'
+
+NETREG_MAX_REGISTER_ATTEMPTS = 3
 
 class DeferredHandling:
     defer_queue = []
@@ -47,6 +54,9 @@ class DeferredHandling:
         while DeferredHandling.defer_queue:
             handler, args, kwargs = DeferredHandling.defer_queue.pop(0)
             handler(*args, **kwargs)
+
+def defer(handler, *args, **kwargs):
+    DeferredHandling.defer_queue.append((handler, args, kwargs))
 
 def dbus_connect(dbus_iface, handler):
     '''This function shall be used instead of directly connecting DBus signals.
@@ -72,6 +82,53 @@ def systembus_get(path):
 def list_modems():
     root = systembus_get('/')
     return sorted(root.GetModems())
+
+def _async_result_handler(obj, result, user_data):
+    '''Generic callback dispatcher called from glib loop when an async method
+    call has returned. This callback is set up by method dbus_async_call.'''
+    (result_callback, error_callback, real_user_data) = user_data
+    try:
+        ret = obj.call_finish(result)
+    except Exception as e:
+        # return exception as value
+        if error_callback:
+            error_callback(obj, e, real_user_data)
+        else:
+            result_callback(obj, e, real_user_data)
+        return
+
+    ret = ret.unpack()
+    # to be compatible with standard Python behaviour, unbox
+    # single-element tuples and return None for empty result tuples
+    if len(ret) == 1:
+        ret = ret[0]
+    elif len(ret) == 0:
+        ret = None
+    result_callback(obj, ret, real_user_data)
+
+def dbus_async_call(instance, proxymethod, *proxymethod_args,
+                    result_handler=None, error_handler=None,
+                    user_data=None, timeout=30,
+                    **proxymethod_kwargs):
+    '''pydbus doesn't support asynchronous methods. This method adds support for
+    it until pydbus implements it'''
+
+    argdiff = len(proxymethod_args) - len(proxymethod._inargs)
+    if argdiff < 0:
+        raise TypeError(proxymethod.__qualname__ + " missing {} required positional argument(s)".format(-argdiff))
+    elif argdiff > 0:
+        raise TypeError(proxymethod.__qualname__ + " takes {} positional argument(s) but {} was/were given".format(len(proxymethod._inargs), len(proxymethod_args)))
+
+    timeout = timeout * 1000
+    user_data = (result_handler, error_handler, user_data)
+
+    ret = instance._bus.con.call(
+        instance._bus_name, instance._path,
+        proxymethod._iface_name, proxymethod.__name__,
+        GLib.Variant(proxymethod._sinargs, proxymethod_args),
+        GLib.VariantType.new(proxymethod._soutargs),
+        0, timeout, None,
+        _async_result_handler, user_data)
 
 class ModemDbusInteraction(log.Origin):
     '''Work around inconveniences specific to pydbus and ofono.
@@ -257,6 +314,7 @@ class Modem(log.Origin):
         self.set_log_category(log.C_TST)
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.path)
+        self.register_attempts = 0
         self.dbus.required_signals = {
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
                 I_NETREG: ( ('PropertyChanged', self._on_netreg_property_changed), ),
@@ -323,17 +381,94 @@ class Modem(log.Origin):
     def _on_netreg_property_changed(self, name, value):
         self.dbg('%r.PropertyChanged() -> %s=%s' % (I_NETREG, name, value))
 
-    def connect(self, nitb):
-        'set the modem up to connect to MCC+MNC from NITB config'
-        self.log('connect to', nitb)
+    def is_connected(self, mcc_mnc=None):
+        netreg = self.dbus.interface(I_NETREG)
+        prop = netreg.GetProperties()
+        status = prop.get('Status')
+        if not (status == NETREG_ST_REGISTERED or status == NETREG_ST_ROAMING):
+            return False
+        if mcc_mnc is None: # Any network is fine and we are registered.
+            return True
+        mcc = prop.get('MobileCountryCode')
+        mnc = prop.get('MobileNetworkCode')
+        if (mcc, mnc) == mcc_mnc:
+            return True
+        return False
+
+    def schedule_scan_register(self, mcc_mnc):
+        if self.register_attempts > NETREG_MAX_REGISTER_ATTEMPTS:
+            self.raise_exn('Failed to find Network Operator', mcc_mnc=mcc_mnc, attempts=self.register_attempts)
+        self.register_attempts += 1
+        netreg = self.dbus.interface(I_NETREG)
+        self.dbg('Scanning for operators...')
+        # Scan method can take several seconds, and we don't want to block
+        # waiting for that. Make it async and try to register when the scan is
+        # finished.
+        register_func = self.scan_cb_register_automatic if mcc_mnc is None else self.scan_cb_register
+        result_handler = lambda obj, result, user_data: defer(register_func, result, user_data)
+        error_handler = lambda obj, e, user_data: defer(self.raise_exn, 'Scan() failed:', e)
+        dbus_async_call(netreg, netreg.Scan, timeout=30, result_handler=result_handler,
+                        error_handler=error_handler, user_data=mcc_mnc)
+
+    def scan_cb_register_automatic(self, scanned_operators, mcc_mnc):
+        self.dbg('scanned operators: ', scanned_operators);
+        for op_path, op_prop in scanned_operators:
+            if op_prop.get('Status') == 'current':
+                mcc = op_prop.get('MobileCountryCode')
+                mnc = op_prop.get('MobileNetworkCode')
+                self.log('Already registered with network', (mcc, mnc))
+                return
+        self.log('Registering with the default network')
+        netreg = self.dbus.interface(I_NETREG)
+        netreg.Register()
+
+    def scan_cb_register(self, scanned_operators, mcc_mnc):
+        self.dbg('scanned operators: ', scanned_operators);
+        matching_op_path = None
+        for op_path, op_prop in scanned_operators:
+            mcc = op_prop.get('MobileCountryCode')
+            mnc = op_prop.get('MobileNetworkCode')
+            if (mcc, mnc) == mcc_mnc:
+                if op_prop.get('Status') == 'current':
+                    self.log('Already registered with network', mcc_mnc)
+                    # We discovered the network and we are already registered
+                    # with it. Avoid calling op.Register() in this case (it
+                    # won't act as a NO-OP, it actually returns an error).
+                    return
+                matching_op_path = op_path
+                break
+        if matching_op_path is None:
+            self.dbg('Failed to find Network Operator', mcc_mnc=mcc_mnc, attempts=self.register_attempts)
+            self.schedule_scan_register(mcc_mnc)
+            return
+        dbus_op = systembus_get(matching_op_path)
+        self.log('Registering with operator', matching_op_path, mcc_mnc)
+        dbus_op.Register()
+
+    def power_cycle(self):
+        'Power the modem and put it online, power cycle it if it was already on'
         if self.is_powered():
-            self.dbg('is powered')
+            self.dbg('Power cycling')
             self.set_online(False)
             self.set_powered(False)
             event_loop.wait(self, lambda: not self.dbus.has_interface(I_NETREG, I_SMS), timeout=10)
+        else:
+            self.dbg('Powering on')
         self.set_powered()
         self.set_online()
         event_loop.wait(self, self.dbus.has_interface, I_NETREG, I_SMS, timeout=10)
+
+    def connect(self, mcc_mnc=None):
+        'Connect to MCC+MNC'
+        if (mcc_mnc is not None) and (len(mcc_mnc) != 2 or None in mcc_mnc):
+            self.raise_exn('mcc_mnc value is invalid. It should be None or contain both valid mcc and mnc values:', mcc_mnc=mcc_mnc)
+        self.power_cycle()
+        self.register_attempts = 0
+        if self.is_connected(mcc_mnc):
+            self.log('Already registered with', mcc_mnc if mcc_mnc else 'default network')
+        else:
+            self.log('Connect to', mcc_mnc if mcc_mnc else 'default network')
+            self.schedule_scan_register(mcc_mnc)
 
     def sms_send(self, to_msisdn_or_modem, *tokens):
         if isinstance(to_msisdn_or_modem, Modem):

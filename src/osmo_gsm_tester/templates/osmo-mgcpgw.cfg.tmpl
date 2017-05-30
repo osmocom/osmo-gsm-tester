@@ -5,6 +5,9 @@ log stderr
  logging print category 1
  logging print extended-timestamp 1
  logging level all debug
+line vty
+  no login
+  bind ${mgcpgw.ip_address.addr}
 mgcp
   local ip ${mgcpgw.ip_address.addr}
   bts ip ${mgcpgw.bts_ip}

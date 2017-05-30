@@ -21,7 +21,7 @@ import os
 import re
 import pprint
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
+from . import log, util, config, template, process, osmo_ctrl, pcap_recorder, smsc
 
 class OsmoNitb(log.Origin):
     suite_run = None
@@ -30,12 +30,14 @@ class OsmoNitb(log.Origin):
     config_file = None
     process = None
     bts = None
+    smsc = None
 
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'osmo-nitb_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
         self.bts = []
+        self.smsc = smsc.Smsc((ip_address.get('addr'), 2775))
 
     def start(self):
         self.log('Starting osmo-nitb')
@@ -75,6 +77,7 @@ class OsmoNitb(log.Origin):
         for bts in self.bts:
             bts_list.append(bts.conf_for_bsc())
         config.overlay(values, dict(nitb=dict(net=dict(bts_list=bts_list))))
+        config.overlay(values, self.smsc.get_config())
         self.config = values
 
         self.dbg('NITB CONFIG:\n' + pprint.pformat(values))

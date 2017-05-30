@@ -136,10 +136,13 @@ network
     phys_chan_config val_phys_chan_config_3
 smpp
  local-tcp-ip val_ip_address 2775
- system-id test
- policy closed
- esme test
-  password test
+ system-id test-nitb
+ policy val_smsc_policy
+ esme val_system_id_esme0
+  password val_password_esme0
+  default-route
+ esme val_system_id_esme1
+  no password
   default-route
 ctrl
  bind val_ip_address

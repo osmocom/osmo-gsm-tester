@@ -23,7 +23,7 @@ import time
 import copy
 import traceback
 import pprint
-from . import config, log, template, util, resource, schema, ofono_client, event_loop
+from . import config, log, template, util, resource, schema, ofono_client, event_loop, esme, sms
 from . import osmo_nitb
 from . import osmo_hlr, osmo_mgcpgw, osmo_msc, osmo_bsc, osmo_stp
 from . import test
@@ -99,7 +99,7 @@ class Test(log.Origin):
             log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
-            test.setup(self.suite_run, self, ofono_client, sys.modules[__name__], event_loop)
+            test.setup(self.suite_run, self, ofono_client, sys.modules[__name__], event_loop, sms)
             with self.redirect_stdout():
                 util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
                                      self.path)
@@ -363,8 +363,12 @@ class SuiteRun(log.Origin):
             l.append(self.modem())
         return l
 
+    def esme(self):
+        esme_obj = esme.Esme(self.msisdn())
+        return esme_obj
+
     def msisdn(self):
-        msisdn = self.resources_pool.next_msisdn(self.origin)
+        msisdn = self.resources_pool.next_msisdn(self)
         self.log('using MSISDN', msisdn)
         return msisdn
 

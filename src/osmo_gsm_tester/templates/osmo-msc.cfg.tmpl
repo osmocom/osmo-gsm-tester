@@ -23,10 +23,16 @@ ctrl
  bind ${msc.ip_address.addr}
 smpp
  local-tcp-ip ${msc.ip_address.addr} 2775
- system-id test
- policy closed
- esme test
-  password test
+ system-id test-msc
+ policy ${smsc.policy}
+%for esme in smsc.esme_list:
+ esme ${esme.system_id}
+% if esme.password == '':
+  no password
+% else:
+  password ${esme.password}
+% endif
   default-route
+%endfor
 hlr
  remote-ip ${hlr.ip_address.addr}

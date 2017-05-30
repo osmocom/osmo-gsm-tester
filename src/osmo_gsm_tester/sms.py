@@ -21,14 +21,16 @@ class Sms:
     _last_sms_idx = 0
     msg = None
 
-    def __init__(self, from_msisdn=None, to_msisdn=None, *tokens):
+    def __init__(self, src_msisdn=None, dst_msisdn=None, *tokens):
         Sms._last_sms_idx += 1
+        self._src_msisdn = src_msisdn
+        self._dst_msisdn = dst_msisdn
         msgs = ['message nr. %d' % Sms._last_sms_idx]
         msgs.extend(tokens)
-        if from_msisdn:
-            msgs.append('from %s' % from_msisdn)
-        if to_msisdn:
-            msgs.append('to %s' % to_msisdn)
+        if src_msisdn:
+            msgs.append('from %s' % src_msisdn)
+        if dst_msisdn:
+            msgs.append('to %s' % dst_msisdn)
         self.msg = ', '.join(msgs)
 
     def __str__(self):
@@ -41,6 +43,12 @@ class Sms:
         if isinstance(other, Sms):
             return self.msg == other.msg
         return self.msg == other
+
+    def src_msisdn(self):
+        return self._src_msisdn
+
+    def dst_msisdn(self):
+        return self._dst_msisdn
 
     def matches(self, msg):
         return self.msg == msg

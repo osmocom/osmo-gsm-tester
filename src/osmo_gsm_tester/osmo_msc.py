@@ -20,7 +20,7 @@
 import os
 import pprint
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
+from . import log, util, config, template, process, osmo_ctrl, pcap_recorder, smsc
 
 class OsmoMsc(log.Origin):
     suite_run = None
@@ -30,6 +30,7 @@ class OsmoMsc(log.Origin):
     process = None
     hlr = None
     config = None
+    smsc = None
 
     def __init__(self, suite_run, hlr, mgcpgw, ip_address):
         super().__init__(log.C_RUN, 'osmo-msc_%s' % ip_address.get('addr'))
@@ -37,6 +38,7 @@ class OsmoMsc(log.Origin):
         self.ip_address = ip_address
         self.hlr = hlr
         self.mgcpgw = mgcpgw
+        self.smsc = smsc.Smsc((ip_address.get('addr'), 2775))
 
     def start(self):
         self.log('Starting osmo-msc')
@@ -73,6 +75,7 @@ class OsmoMsc(log.Origin):
         config.overlay(values, dict(msc=dict(ip_address=self.ip_address)))
         config.overlay(values, self.mgcpgw.conf_for_msc())
         config.overlay(values, self.hlr.conf_for_msc())
+        config.overlay(values, self.smsc.get_config())
         self.config = values
 
         self.dbg('MSC CONFIG:\n' + pprint.pformat(values))

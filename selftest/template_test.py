@@ -35,6 +35,11 @@ mock_bts = {
             )
 }
 
+mock_esme = {
+    'system_id': 'val_system_id',
+    'password': 'val_password'
+}
+
 def clone_mod(d, val_ext):
     c = dict(d)
     for name in c.keys():
@@ -47,6 +52,10 @@ def clone_mod(d, val_ext):
 mock_bts0 = clone_mod(mock_bts, '_bts0')
 mock_bts1 = clone_mod(mock_bts, '_bts1')
 
+mock_esme0 = clone_mod(mock_esme, '_esme0')
+mock_esme1 = clone_mod(mock_esme, '_esme1')
+mock_esme1['password'] = ''
+
 vals = dict(nitb=dict(
                     net=dict(
                         mcc='val_mcc',
@@ -58,6 +67,10 @@ vals = dict(nitb=dict(
                         bts_list=(mock_bts0, mock_bts1)
                     ),
                     ip_address=dict(addr='val_ip_address'),
+            ),
+            smsc=dict(
+                policy='val_smsc_policy',
+                esme_list=(mock_esme0, mock_esme1)
             ),
        )
 

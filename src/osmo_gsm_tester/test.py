@@ -33,9 +33,10 @@ sleep = None
 poll = None
 prompt = None
 Timeout = None
+Sms = None
 
-def setup(suite_run, _test, ofono_client, suite_module, event_module):
-    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Timeout
+def setup(suite_run, _test, ofono_client, suite_module, event_module, sms_module):
+    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Timeout, Sms
     trial = suite_run.trial
     suite = suite_run
     test = _test
@@ -49,5 +50,6 @@ def setup(suite_run, _test, ofono_client, suite_module, event_module):
     poll = event_module.poll
     prompt = suite_run.prompt
     Timeout = suite_module.Timeout
+    Sms = sms_module.Sms
 
 # vim: expandtab tabstop=4 shiftwidth=4

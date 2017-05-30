@@ -9,6 +9,7 @@ modems = suite.modems(int(prompt('How many modems?')))
 
 hlr.start()
 msc.start()
+mgcpgw.start()
 
 bsc.bts_add(bts)
 bsc.start()

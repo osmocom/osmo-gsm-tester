@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, test, util, event_loop
+from . import log, test, util, event_loop, sms
 
 from pydbus import SystemBus, Variant
 import time
@@ -338,20 +338,20 @@ class Modem(log.Origin):
             tokens.append('to ' + to_msisdn_or_modem.name())
         else:
             to_msisdn = str(to_msisdn_or_modem)
-        sms = Sms(self.msisdn, to_msisdn, 'from ' + self.name(), *tokens)
-        self.log('sending sms to MSISDN', to_msisdn, sms=sms)
+        msg = sms.Sms(self.msisdn, to_msisdn, 'from ' + self.name(), *tokens)
+        self.log('sending sms to MSISDN', to_msisdn, sms=msg)
         mm = self.dbus.interface(I_SMS)
-        mm.SendMessage(to_msisdn, str(sms))
-        return sms
+        mm.SendMessage(to_msisdn, str(msg))
+        return msg
 
     def _on_incoming_message(self, message, info):
         self.log('Incoming SMS:', repr(message))
         self.dbg(info=info)
         self.sms_received_list.append((message, info))
 
-    def sms_was_received(self, sms):
+    def sms_was_received(self, sms_obj):
         for msg, info in self.sms_received_list:
-            if sms.matches(msg):
+            if sms_obj.matches(msg):
                 self.log('SMS received as expected:', repr(msg))
                 self.dbg(info=info)
                 return True
@@ -363,33 +363,5 @@ class Modem(log.Origin):
 
     def log_info(self, *args, **kwargs):
         self.log(self.info(*args, **kwargs))
-
-class Sms:
-    _last_sms_idx = 0
-    msg = None
-
-    def __init__(self, from_msisdn=None, to_msisdn=None, *tokens):
-        Sms._last_sms_idx += 1
-        msgs = ['message nr. %d' % Sms._last_sms_idx]
-        msgs.extend(tokens)
-        if from_msisdn:
-            msgs.append('from %s' % from_msisdn)
-        if to_msisdn:
-            msgs.append('to %s' % to_msisdn)
-        self.msg = ', '.join(msgs)
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return repr(self.msg)
-
-    def __eq__(self, other):
-        if isinstance(other, Sms):
-            return self.msg == other.msg
-        return inself.msg == other
-
-    def matches(self, msg):
-        return self.msg == msg
 
 # vim: expandtab tabstop=4 shiftwidth=4

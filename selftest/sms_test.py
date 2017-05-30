@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
 import _prep
-from osmo_gsm_tester import ofono_client
+from osmo_gsm_tester import sms
 
-print(ofono_client.Sms())
-print(ofono_client.Sms())
-print(ofono_client.Sms())
-sms = ofono_client.Sms('123', '456')
-print(str(sms))
+print(sms.Sms())
+print(sms.Sms())
+print(sms.Sms())
+msg = sms.Sms('123', '456')
+print(str(msg))
 
-sms2 = ofono_client.Sms('123', '456')
-print(str(sms2))
-assert sms != sms2
+msg2 = sms.Sms('123', '456')
+print(str(msg2))
+assert msg != msg2
 
-sms2.msg = str(sms.msg)
-print(str(sms2))
-assert sms == sms2
+msg2.msg = str(msg.msg)
+print(str(msg2))
+assert msg == msg2
 
 # vim: expandtab tabstop=4 shiftwidth=4

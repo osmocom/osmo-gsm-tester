@@ -243,14 +243,6 @@ class ModemDbusInteraction(log.Origin):
     def is_online(self):
         return self.property_is('Online', True)
 
-    def require_features(self, *required):
-        '''Make sure the given feature strings are present in
-        properties()['Features'], raise an exception otherwise.'''
-        features = set(self.properties().get('Features'))
-        r = set(required)
-        if not (r < features):
-            self.raise_exn('This modem lacks features:', r - features)
-
 
 
 class Modem(log.Origin):
@@ -265,7 +257,6 @@ class Modem(log.Origin):
         self.set_log_category(log.C_TST)
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.path)
-        self.dbus.require_features('sms', 'net')
         self.dbus.required_signals = {
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
             }

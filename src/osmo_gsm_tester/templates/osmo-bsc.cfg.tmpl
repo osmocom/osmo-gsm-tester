@@ -8,6 +8,8 @@ log stderr
 line vty
  no login
  bind ${bsc.ip_address.addr}
+ctrl
+ bind ${bsc.ip_address.addr}
 e1_input
  e1_line 0 driver ipa
  ipa bind ${bsc.ip_address.addr}

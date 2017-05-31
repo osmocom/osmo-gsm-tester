@@ -40,7 +40,7 @@ class Sms:
     def __eq__(self, other):
         if isinstance(other, Sms):
             return self.msg == other.msg
-        return inself.msg == other
+        return self.msg == other
 
     def matches(self, msg):
         return self.msg == msg

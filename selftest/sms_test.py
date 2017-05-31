@@ -17,4 +17,6 @@ msg2.msg = str(msg.msg)
 print(str(msg2))
 assert msg == msg2
 
+assert msg == str(msg.msg)
+
 # vim: expandtab tabstop=4 shiftwidth=4

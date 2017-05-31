@@ -259,6 +259,7 @@ class Modem(log.Origin):
         self.dbus = ModemDbusInteraction(self.path)
         self.dbus.required_signals = {
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
+                I_NETREG: ( ('PropertyChanged', self._on_netreg_property_changed), ),
             }
         self.dbus.watch_interfaces()
 
@@ -318,6 +319,9 @@ class Modem(log.Origin):
 
     def ki(self):
         return self.conf.get('ki')
+
+    def _on_netreg_property_changed(self, name, value):
+        self.dbg('%r.PropertyChanged() -> %s=%s' % (I_NETREG, name, value))
 
     def connect(self, nitb):
         'set the modem up to connect to MCC+MNC from NITB config'

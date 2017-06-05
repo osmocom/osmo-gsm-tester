@@ -59,6 +59,8 @@ from .util import is_dict, is_list, Dir, get_tempdir
 ENV_PREFIX = 'OSMO_GSM_TESTER_'
 ENV_CONF = os.getenv(ENV_PREFIX + 'CONF')
 
+override_conf = None
+
 DEFAULT_CONFIG_LOCATIONS = [
     '.',
     os.path.join(os.getenv('HOME'), '.config', 'osmo-gsm-tester'),
@@ -82,7 +84,9 @@ PATHS_TEMPDIR_STR = '$TEMPDIR'
 PATHS = None
 
 def _get_config_file(basename, fail_if_missing=True):
-    if ENV_CONF:
+    if override_conf:
+        locations = [ override_conf ]
+    elif ENV_CONF:
         locations = [ ENV_CONF ]
     else:
         locations = DEFAULT_CONFIG_LOCATIONS

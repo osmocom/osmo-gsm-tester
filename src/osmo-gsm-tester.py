@@ -117,6 +117,9 @@ optional.''')
             help='Set logging level for all categories (on stdout)')
     parser.add_argument('-T', '--traceback', dest='trace', action='store_true',
             help='Enable logging of tracebacks')
+    parser.add_argument('-c', '--conf-dir', dest='conf_dir',
+            help='''Specify configuration dir (overrides
+OSMO_GSM_TESTER_CONF env and default locations)''')
     args = parser.parse_args()
 
     if args.version:
@@ -135,6 +138,8 @@ optional.''')
         log.set_all_levels(log.LEVEL_STRS.get(args.log_level))
     if args.trace:
         log.style_change(trace=True)
+    if args.conf_dir:
+        config.override_conf = args.conf_dir
 
     combination_strs = list(args.suite_scenario or [])
     # for series in args.series:

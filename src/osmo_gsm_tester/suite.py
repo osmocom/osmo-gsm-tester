@@ -286,8 +286,8 @@ class SuiteRun(log.Origin):
             return
         self.reserved_resources.free()
 
-    def ip_address(self):
-        return self.reserved_resources.get(resource.R_IP_ADDRESS)
+    def ip_address(self, specifics=None):
+        return self.reserved_resources.get(resource.R_IP_ADDRESS, specifics=specifics)
 
     def nitb(self, ip_address=None):
         if ip_address is None:
@@ -314,11 +314,11 @@ class SuiteRun(log.Origin):
             ip_address = self.ip_address()
         return osmo_bsc.OsmoBsc(self, msc, ip_address)
 
-    def bts(self):
-        return bts_obj(self, self.reserved_resources.get(resource.R_BTS))
+    def bts(self, specifics=None):
+        return bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
 
-    def modem(self):
-        conf = self.reserved_resources.get(resource.R_MODEM)
+    def modem(self, specifics=None):
+        conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
         self.dbg('create Modem object', conf=conf)
         modem = ofono_client.Modem(conf)
         self.register_for_cleanup(modem)

@@ -301,7 +301,8 @@ class Resources(dict):
             # list item contains specifics for the particular BTS.
             my_list = self.get(key, [])
 
-            for_origin.log(log_label, len(want_list), 'x', key, '(candidates: %d)'%len(my_list))
+            if log_label:
+                for_origin.log(log_label, len(want_list), 'x', key, '(candidates: %d)'%len(my_list))
 
             # Try to avoid a less constrained item snatching away a resource
             # from a more detailed constrained requirement.
@@ -472,11 +473,21 @@ class ReservedResources(log.Origin):
         available = available_dict.get(kind)
         self.dbg(available=len(available))
         if not available:
-            raise NoResourceExn('When trying to reserve %r nr %d: No unused resource found%s' %
-                                (kind,
-                                 self.count(kind) + 1,
-                                 (' matching %r' % specifics) if specifics else '')
-                               )
+            # cook up a detailed error message for the current situation
+            kind_reserved = self.reserved.get(kind, [])
+            used_count = len([r for r in kind_reserved if USED_KEY in r])
+            matching = self.reserved.find(self.origin, want, raise_if_missing=False, log_label=None).get(kind, [])
+            if not matching:
+                msg = 'none of the reserved resources matches requirements %r' % specifics
+            elif not (used_count < len(kind_reserved)):
+                msg = 'suite.conf reserved only %d x %r.' % (len(kind_reserved), kind)
+            else:
+                msg = ('No unused resource left that matches the requirements;'
+                       ' Of reserved %d x %r, %d match the requirements, but all are already in use;'
+                       ' Requirements: %r'
+                       % (len(kind_reserved), kind, len(matching), specifics))
+            raise NoResourceExn('When trying to use instance nr %d of %r: %s' % (used_count + 1, kind, msg))
+
         pick = available[0]
         self.dbg(using=pick)
         assert not pick.get(USED_KEY)

@@ -352,10 +352,20 @@ class Origin:
 
     def gather_origins(self):
         origins = Origins()
+        # this object shall always be seen as the immediate origin of the log message.
         origins.add(self)
+        # now go through the parents of this object.
         origin = self._parent_origin
+        # but if this object is "loose" and not set up with cascaded 'with' statements,
+        # take the last seen 'with' statement's object as next parent:
         if origin is None and Origin._global_current_origin is not None:
             origin = Origin._global_current_origin
+            # if this object is currently the _global_current_origin, we don't
+            # need to add it twice.
+            if origin is self:
+                origin = origin._parent_origin
+        # whichever we determined to be the parent above, go up through all its
+        # ancestors.
         while origin is not None:
             origins.add(origin)
             origin = origin._parent_origin

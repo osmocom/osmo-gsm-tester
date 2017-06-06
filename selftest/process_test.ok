@@ -1,7 +1,7 @@
-run foo: DBG: cd '[TMP]'; PATH=[$PATH] foo.py arg1 arg2  [foo↪foo]
-run foo: DBG: [TMP]/stdout  [foo↪foo]
-run foo: DBG: [TMP]/stderr  [foo↪foo]
-run foo(pid=[PID]): Launched  [foo(pid=[PID])↪foo(pid=[PID])]
+run foo: DBG: cd '[TMP]'; PATH=[$PATH] foo.py arg1 arg2
+run foo: DBG: [TMP]/stdout
+run foo: DBG: [TMP]/stderr
+run foo(pid=[PID]): Launched
 stdout:
 (launched: [DATETIME])
 foo stdout

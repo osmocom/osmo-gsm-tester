@@ -337,7 +337,13 @@ class Resources(dict):
                 continue
 
             # figure out who gets what
-            solution = solve(all_matches)
+            try:
+                solution = solve(all_matches)
+            except NotSolvable:
+                # instead of a cryptic error message, raise an exception that
+                # conveys meaning to the user.
+                raise NoResourceExn('Could not resolve request to reserve resources: '
+                                    '%d x %s with requirements: %r' % (len(want_list), key, want_list))
             picked = [ my_list[i] for i in solution if i is not None ]
             for_origin.dbg('Picked', config.tostr(picked))
             matches[key] = picked
@@ -364,6 +370,9 @@ class Resources(dict):
             for item in item_list:
                 item[RESERVED_KEY] = origin_id
 
+
+class NotSolvable(Exception):
+    pass
 
 def solve(all_matches):
     '''
@@ -403,8 +412,8 @@ def solve(all_matches):
 
     solution = search_in_permutations()
     if not solution:
-        raise NoResourceExn('The requested resource requirements are not solvable %r'
-                            % all_matches)
+        raise NotSolvable('The requested resource requirements are not solvable %r'
+                          % all_matches)
     return solution
 
 

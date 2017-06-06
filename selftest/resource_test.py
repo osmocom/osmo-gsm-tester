@@ -39,7 +39,7 @@ try:
                      [2],
                      [0, 2] ]) 
     assert False
-except resource.NoResourceExn as e:
+except resource.NotSolvable as e:
     print(e)
 
 print('- test removing a Resources list from itself')

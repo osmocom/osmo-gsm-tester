@@ -445,8 +445,6 @@ def exn_add_info(exc_info, origin, category=None):
     exception.origins.add(origin)
     return False
 
-
-
 def log_exn(origin=None, category=None, exc_info=None):
     if not (exc_info is not None and len(exc_info) == 3):
         exc_info = sys.exc_info()
@@ -482,6 +480,7 @@ class Origins(list):
     def __init__(self, origin=None):
         if origin is not None:
             self.add(origin)
+
     def add(self, origin):
         if hasattr(origin, 'name'):
             origin_str = origin.name()
@@ -490,9 +489,9 @@ class Origins(list):
         if origin_str is None:
             raise RuntimeError('origin_str is None for %r' % origin)
         self.insert(0, origin_str)
+
     def __str__(self):
         return '↪'.join(self)
-
 
 
 def set_all_levels(level):

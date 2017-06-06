@@ -188,21 +188,23 @@ class Trial(log.Origin):
 
     def run_suites(self, names=None):
         self.status = Trial.UNKNOWN
-        for suite_run in self.suites:
-            try:
-                suite_run.run_tests(names)
-            except BaseException as e:
-                # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
-                self.err('TRIAL RUN ABORTED: %s' % type(e).__name__)
-                raise
-            finally:
-                if suite_run.status != suite.SuiteRun.PASS:
-                    self.status = Trial.FAIL
-        if self.status == Trial.UNKNOWN:
-            self.status = Trial.PASS
-        junit_path = self.get_run_dir().new_file(self.name()+'.xml')
-        self.log('Storing JUnit report in', junit_path)
-        report.trial_to_junit_write(self, junit_path)
+        try:
+            for suite_run in self.suites:
+                try:
+                    suite_run.run_tests(names)
+                except BaseException as e:
+                    # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
+                    self.err('TRIAL RUN ABORTED: %s' % type(e).__name__)
+                    raise
+                finally:
+                    if suite_run.status != suite.SuiteRun.PASS:
+                        self.status = Trial.FAIL
+            if self.status == Trial.UNKNOWN:
+                self.status = Trial.PASS
+        finally:
+            junit_path = self.get_run_dir().new_file(self.name()+'.xml')
+            self.log('Storing JUnit report in', junit_path)
+            report.trial_to_junit_write(self, junit_path)
 
     def log_report(self):
         log.large_separator(self.name(), self.status)

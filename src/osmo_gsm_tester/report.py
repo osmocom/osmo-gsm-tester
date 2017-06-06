@@ -38,8 +38,9 @@ def suite_to_junit(suite):
     testsuite = et.Element('testsuite')
     testsuite.set('name', suite.name())
     testsuite.set('hostname', 'localhost')
-    testsuite.set('timestamp', datetime.fromtimestamp(round(suite.start_timestamp)).isoformat())
-    testsuite.set('time', str(math.ceil(suite.duration)))
+    if suite.start_timestamp:
+        testsuite.set('timestamp', datetime.fromtimestamp(round(suite.start_timestamp)).isoformat())
+        testsuite.set('time', str(math.ceil(suite.duration)))
     testsuite.set('tests', str(len(suite.tests)))
     testsuite.set('failures', str(suite.count_test_results()[2]))
     for test in suite.tests:
@@ -60,6 +61,9 @@ def test_to_junit(test):
         if test.fail_tb:
             system_err = et.SubElement(testcase, 'system-err')
             system_err.text = test.fail_tb
+    elif test.status != suite.Test.PASS:
+        error = et.SubElement(testcase, 'error')
+        error.text = 'could not run'
     return testcase
 
 def trial_to_text(trial):

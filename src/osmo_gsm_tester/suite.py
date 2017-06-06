@@ -161,6 +161,8 @@ class SuiteRun(log.Origin):
 
     trial = None
     status = None
+    start_timestamp = None
+    duration = None
     resources_pool = None
     reserved_resources = None
     objects_to_clean_up = None

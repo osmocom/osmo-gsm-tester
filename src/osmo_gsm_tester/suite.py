@@ -31,16 +31,6 @@ from . import test
 class Timeout(Exception):
     pass
 
-class Failure(Exception):
-    '''Test failure exception, provided to be raised by tests. fail_type is
-       usually a keyword used to quickly identify the type of failure that
-       occurred. fail_msg is a more extensive text containing information about
-       the issue.'''
-
-    def __init__(self, fail_type, fail_msg):
-        self.fail_type = fail_type
-        self.fail_msg = fail_msg
-
 class SuiteDefinition(log.Origin):
     '''A test suite reserves resources for a number of tests.
        Each test requires a specific number of modems, BTSs etc., which are
@@ -65,43 +55,32 @@ class SuiteDefinition(log.Origin):
         self.read_conf()
 
     def read_conf(self):
-        with self:
-            self.dbg('reading %s' % SuiteDefinition.CONF_FILENAME)
-            if not os.path.isdir(self.suite_dir):
-                raise RuntimeError('No such directory: %r' % self.suite_dir)
-            self.conf = config.read(os.path.join(self.suite_dir,
-                                                 SuiteDefinition.CONF_FILENAME),
-                                    SuiteDefinition.CONF_SCHEMA)
-            self.load_tests()
+        self.dbg('reading %s' % SuiteDefinition.CONF_FILENAME)
+        if not os.path.isdir(self.suite_dir):
+            raise RuntimeError('No such directory: %r' % self.suite_dir)
+        self.conf = config.read(os.path.join(self.suite_dir,
+                                             SuiteDefinition.CONF_FILENAME),
+                                SuiteDefinition.CONF_SCHEMA)
+        self.load_test_basenames()
 
-    def load_tests(self):
-        with self:
-            self.tests = []
-            for basename in sorted(os.listdir(self.suite_dir)):
-                if not basename.endswith('.py'):
-                    continue
-                self.tests.append(Test(self, basename))
+    def load_test_basenames(self):
+        self.test_basenames = []
+        for basename in sorted(os.listdir(self.suite_dir)):
+            if not basename.endswith('.py'):
+                continue
+            self.test_basenames.append(basename)
 
-    def add_test(self, test):
-        with self:
-            if not isinstance(test, Test):
-                raise ValueError('add_test(): pass a Test() instance, not %s' % type(test))
-            if test.suite is None:
-                test.suite = self
-            if test.suite is not self:
-                raise ValueError('add_test(): test already belongs to another suite')
-            self.tests.append(test)
 
 class Test(log.Origin):
     UNKNOWN = 'UNKNOWN'
-    SKIP = 'SKIP'
-    PASS = 'PASS'
+    SKIP = 'skip'
+    PASS = 'pass'
     FAIL = 'FAIL'
 
-    def __init__(self, suite, test_basename):
-        self.suite = suite
+    def __init__(self, suite_run, test_basename):
+        self.suite_run = suite_run
         self.basename = test_basename
-        self.path = os.path.join(self.suite.suite_dir, self.basename)
+        self.path = os.path.join(self.suite_run.definition.suite_dir, self.basename)
         super().__init__(self.path)
         self.set_name(self.basename)
         self.set_log_category(log.C_TST)
@@ -111,38 +90,38 @@ class Test(log.Origin):
         self.fail_type = None
         self.fail_message = None
 
-    def run(self, suite_run):
-        assert self.suite is suite_run.definition
+    def run(self):
         try:
             with self:
+                log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
                 self.status = Test.UNKNOWN
                 self.start_timestamp = time.time()
-                test.setup(suite_run, self, ofono_client, sys.modules[__name__], event_loop)
-                self.log('START')
+                test.setup(self.suite_run, self, ofono_client, sys.modules[__name__], event_loop)
                 with self.redirect_stdout():
-                    util.run_python_file('%s.%s' % (self.suite.name(), self.name()),
+                    util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
                                          self.path)
                 if self.status == Test.UNKNOWN:
                      self.set_pass()
         except Exception as e:
-            self.log_exn()
-            if isinstance(e, Failure):
-                ftype = e.fail_type
-                fmsg =  e.fail_msg + '\n' + traceback.format_exc().rstrip()
+            if hasattr(e, 'msg'):
+                msg = e.msg
             else:
-                ftype = type(e).__name__
-                fmsg = repr(e) + '\n' + traceback.format_exc().rstrip()
-                if isinstance(e, resource.NoResourceExn):
-                    fmsg += suite_run.resource_status_str()
-
-            self.set_fail(ftype, fmsg, False)
-
-        finally:
-            if self.status == Test.PASS or self.status == Test.SKIP:
-                self.log(self.status)
-            else:
-                self.log('%s (%s)' % (self.status, self.fail_type))
-        return self.status
+                msg = str(e)
+            if isinstance(e, AssertionError):
+                # AssertionError lacks further information on what was
+                # asserted. Find the line where the code asserted:
+                msg += log.get_src_from_tb(sys.exc_info()[2])
+            # add source file information to failure report
+            if hasattr(e, 'origins'):
+                msg += ' [%s]' % e.origins
+            tb_str = traceback.format_exc()
+            if isinstance(e, resource.NoResourceExn):
+                tb_str += self.suite_run.resource_status_str()
+            self.set_fail(type(e).__name__, msg, tb_str)
+        except BaseException as e:
+            # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
+            self.err('TEST RUN ABORTED: %s' % type(e).__name__)
+            raise
 
     def name(self):
         l = log.get_line_for_src(self.path)
@@ -150,17 +129,26 @@ class Test(log.Origin):
             return '%s:%s' % (self._name, l)
         return super().name()
 
-    def set_fail(self, fail_type, fail_message, tb=True):
+    def set_fail(self, fail_type, fail_message, tb_str=None):
         self.status = Test.FAIL
         self.duration = time.time() - self.start_timestamp
         self.fail_type = fail_type
         self.fail_message = fail_message
-        if tb:
-            self.fail_message += '\n' + ''.join(traceback.format_stack()[:-1]).rstrip()
+
+        if tb_str is None:
+            # populate an exception-less call to set_fail() with traceback info
+            tb_str = ''.join(traceback.format_stack()[:-1])
+
+        self.fail_tb = tb_str
+        self.err('%s: %s' % (self.fail_type, self.fail_message))
+        if self.fail_tb:
+            self.trace(self.fail_tb)
+        self.log('Test FAILED (%.1f sec)' % self.duration)
 
     def set_pass(self):
         self.status = Test.PASS
         self.duration = time.time() - self.start_timestamp
+        self.log('Test passed (%.1f sec)' % self.duration)
 
     def set_skip(self):
         self.status = Test.SKIP
@@ -172,6 +160,7 @@ class SuiteRun(log.Origin):
     FAIL = 'FAIL'
 
     trial = None
+    status = None
     resources_pool = None
     reserved_resources = None
     objects_to_clean_up = None
@@ -179,13 +168,20 @@ class SuiteRun(log.Origin):
     _config = None
     _processes = None
 
-    def __init__(self, current_trial, suite_scenario_str, suite_definition, scenarios=[]):
-        self.trial = current_trial
+    def __init__(self, trial, suite_scenario_str, suite_definition, scenarios=[]):
+        self.trial = trial
         self.definition = suite_definition
         self.scenarios = scenarios
         self.set_name(suite_scenario_str)
         self.set_log_category(log.C_TST)
         self.resources_pool = resource.ResourcesPool()
+        self.status = SuiteRun.UNKNOWN
+        self.load_tests()
+
+    def load_tests(self):
+        self.tests = []
+        for test_basename in self.definition.test_basenames:
+            self.tests.append(Test(self, test_basename))
 
     def register_for_cleanup(self, *obj):
         assert all([hasattr(o, 'cleanup') for o in obj])
@@ -198,11 +194,8 @@ class SuiteRun(log.Origin):
             obj.cleanup()
 
     def mark_start(self):
-        self.tests = []
         self.start_timestamp = time.time()
         self.duration = 0
-        self.test_failed_ctr = 0
-        self.test_skipped_ctr = 0
         self.status = SuiteRun.UNKNOWN
 
     def combined(self, conf_name):
@@ -233,27 +226,27 @@ class SuiteRun(log.Origin):
         if self.reserved_resources:
             raise RuntimeError('Attempt to reserve resources twice for a SuiteRun')
         self.log('reserving resources in', self.resources_pool.state_dir, '...')
-        with self:
-            self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
+        self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
 
     def run_tests(self, names=None):
-        self.log('Suite run start')
         try:
-            self.mark_start()
-            event_loop.register_poll_func(self.poll)
-            if not self.reserved_resources:
-                self.reserve_resources()
-            for test in self.definition.tests:
-                if names and not test.name() in names:
-                    test.set_skip()
-                    self.test_skipped_ctr += 1
-                    self.tests.append(test)
-                    continue
-                with self:
-                    st = test.run(self)
-                    if st == Test.FAIL:
-                        self.test_failed_ctr += 1
-                    self.tests.append(test)
+            with self:
+                log.large_separator(self.trial.name(), self.name(), sublevel=2)
+                self.mark_start()
+                event_loop.register_poll_func(self.poll)
+                if not self.reserved_resources:
+                    self.reserve_resources()
+                for test in self.tests:
+                    if names and not test.name() in names:
+                        test.set_skip()
+                        continue
+                    test.run()
+        except Exception:
+            self.log_exn()
+        except BaseException as e:
+            # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
+            self.err('SUITE RUN ABORTED: %s' % type(e).__name__)
+            raise
         finally:
             # if sys.exit() called from signal handler (e.g. SIGINT), SystemExit
             # base exception is raised. Make sure to stop processes in this
@@ -261,14 +254,33 @@ class SuiteRun(log.Origin):
             self.stop_processes()
             self.objects_cleanup()
             self.free_resources()
-        event_loop.unregister_poll_func(self.poll)
-        self.duration = time.time() - self.start_timestamp
-        if self.test_failed_ctr:
-            self.status = SuiteRun.FAIL
-        else:
-            self.status = SuiteRun.PASS
-        self.log(self.status)
-        return self.status
+            event_loop.unregister_poll_func(self.poll)
+            self.duration = time.time() - self.start_timestamp
+
+            passed, skipped, failed = self.count_test_results()
+            # if no tests ran, count it as failure
+            if passed and not failed:
+                self.status = SuiteRun.PASS
+            else:
+                self.status = SuiteRun.FAIL
+
+            log.large_separator(self.trial.name(), self.name(), self.status, sublevel=2, space_above=False)
+
+    def passed(self):
+        return self.status == SuiteRun.PASS
+
+    def count_test_results(self):
+        passed = 0
+        skipped = 0
+        failed = 0
+        for test in self.tests:
+            if test.status == Test.PASS:
+                passed += 1
+            elif test.status == Test.FAIL:
+                failed += 1
+            else:
+                skipped += 1
+        return (passed, skipped, failed)
 
     def remember_to_stop(self, process):
         if self._processes is None:

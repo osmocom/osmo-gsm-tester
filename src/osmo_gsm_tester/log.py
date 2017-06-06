@@ -206,13 +206,16 @@ class LogTarget:
             log_str = log_str + '\n'
         self.log_write_func(log_str)
 
-    def large_separator(self, *msgs):
+    def large_separator(self, *msgs, sublevel=1, space_above=True):
+        sublevel = max(1, min(3, sublevel))
         msg = ' '.join(msgs)
+        sep = '-' * int(23 * (5 - sublevel))
         if not msg:
-            msg = '------------------------------------------'
-        self.log_write_func('------------------------------------------\n'
-                            '%s\n'
-                            '------------------------------------------\n' % msg)
+            msg = sep
+        lines = [sep, msg, sep, '']
+        if space_above:
+            lines.insert(0, '')
+        self.log_write_func('\n'.join(lines))
 
 def level_str(level):
     if level == L_TRACEBACK:
@@ -231,9 +234,9 @@ def _log_all_targets(origin, category, level, src, messages, named_items=None):
     for target in LogTarget.all_targets:
         target.log(origin, category, level, src, messages, named_items)
 
-def large_separator(*msgs):
+def large_separator(*msgs, sublevel=1, space_above=True):
     for target in LogTarget.all_targets:
-        target.large_separator(*msgs)
+        target.large_separator(*msgs, sublevel=sublevel, space_above=space_above)
 
 def get_src_from_caller(levels_up=1):
     caller = getframeinfo(stack()[levels_up][0])
@@ -327,6 +330,9 @@ class Origin:
     def err(self, *messages, **named_items):
         self._log(L_ERR, messages, named_items)
 
+    def trace(self, *messages, **named_items):
+        self._log(L_TRACEBACK, messages, named_items)
+
     def log_exn(self, exc_info=None):
         log_exn(self, self._log_category, exc_info)
 
@@ -373,10 +379,8 @@ class Origin:
 
     def set_child_of(self, parent_origin):
         # avoid loops
-        if self._parent_origin is not None:
-            return False
-        if parent_origin == self:
-            return False
+        assert self._parent_origin is None
+        assert parent_origin is not self
         self._parent_origin = parent_origin
         return True
 

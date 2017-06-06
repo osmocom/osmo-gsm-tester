@@ -98,7 +98,7 @@ def main():
     # is easiest to maintain.
     parser.add_argument('-V', '--version', action='store_true',
             help='Show version')
-    parser.add_argument('trial_package', nargs='+',
+    parser.add_argument('trial_package',
             help='Directory containing binaries to test')
     parser.add_argument('-s', '--suite-scenario', dest='suite_scenario', action='append',
             help='''A suite-scenarios combination
@@ -128,7 +128,7 @@ OSMO_GSM_TESTER_CONF env and default locations)''')
 
     print('combinations:', repr(args.suite_scenario))
     print('series:', repr(args.series))
-    print('trials:', repr(args.trial_package))
+    print('trial:', repr(args.trial_package))
     print('tests:', repr(args.test))
 
     # create a default log to stdout
@@ -157,72 +157,52 @@ OSMO_GSM_TESTER_CONF env and default locations)''')
     if not combination_strs:
         raise RuntimeError('Need at least one suite:scenario or series to run')
 
+    # make sure all suite:scenarios exist
     suite_scenarios = []
     for combination_str in combination_strs:
         suite_scenarios.append(suite.load_suite_scenario_str(combination_str))
 
+    # pick tests and make sure they exist
     test_names = []
     for test_name in (args.test or []):
         found = False
         if test_name.startswith('=') and not test_name.endswith('.py'):
             test_name = test_name + '.py'
         for suite_scenario_str, suite_def, scenarios in suite_scenarios:
-            for test in suite_def.tests:
+            for def_test_name in suite_def.test_basenames:
                 if test_name.startswith('='):
-                    match = test_name[1:] == test.name()
+                    match = test_name[1:] == def_test_name
                 else:
-                    match = test_name in test.name()
+                    match = test_name in def_test_name
                 if match:
                     found = True
-                    test_names.append(test.name())
+                    test_names.append(def_test_name)
         if not found:
             raise RuntimeError('No test found for %r' % test_name)
     if test_names:
+        test_names = sorted(set(test_names))
         print(repr(test_names))
 
-    trials = []
-    for trial_package in args.trial_package:
-        t = trial.Trial(trial_package)
-        t.verify()
-        trials.append(t)
+    with trial.Trial(args.trial_package) as current_trial:
+        current_trial.verify()
+        for suite_scenario_str, suite_def, scenarios in suite_scenarios:
+            current_trial.add_suite_run(suite_scenario_str, suite_def, scenarios)
+        current_trial.run_suites(test_names)
 
-    trials_run = []
-    any_failed = False
-
-    for current_trial in trials:
-        try:
-            with current_trial:
-                for suite_scenario_str, suite_def, scenarios in suite_scenarios:
-                    suite_run = suite.SuiteRun(current_trial, suite_scenario_str, suite_def, scenarios)
-                    current_trial.add_suite(suite_run)
-
-                status = current_trial.run_suites(test_names)
-                if status == trial.Trial.FAIL:
-                    any_failed = True
-                trials_run.append(current_trial)
-        except Exception:
-            # Do not catch here subclasses of BaseException such as SystemExit, let them finish the program
-            any_failed = True
-            current_trial.log_exn()
-
-    sys.stderr.flush()
-    sys.stdout.flush()
-    if not any_failed:
-            log.large_separator('All trials passed:\n  ' + ('\n  '.join(mytrial.name() for mytrial in trials_run)))
-    else:
-        for mytrial in trials_run:
-            log.large_separator('Trial Report for %s' % mytrial.name())
-            mytrial.log_report()
-        exit(1)
+        if current_trial.status != trial.Trial.PASS:
+            return 1
+        return 0
 
 if __name__ == '__main__':
+    rc = 2
     try:
-        main()
+        rc = main()
     except:
         # Tell the log to show the exception, then terminate the program with the exception anyway.
         # Since exceptions within test runs should be caught and evaluated, this is basically about
         # exceptions during command line parsing and such, so it's appropriate to abort immediately.
         log.log_exn()
         raise
+    exit(rc)
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -152,10 +152,13 @@ except Exception:
     log.log_exn()
 
 print('- Enter the same Origin context twice')
-with Thing('level1'):
-    l2 = Thing('level2')
-    with l2:
-        with l2:
-            l2.log('nested log')
+try:
+    t = Thing('foo')
+    with t:
+        with t:
+            raise RuntimeError('this should not be reached')
+except AssertionError:
+    print('disallowed successfully')
+    pass
 
 # vim: expandtab tabstop=4 shiftwidth=4

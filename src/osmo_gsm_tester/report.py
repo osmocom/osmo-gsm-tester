@@ -41,7 +41,7 @@ def suite_to_junit(suite):
     testsuite.set('timestamp', datetime.fromtimestamp(round(suite.start_timestamp)).isoformat())
     testsuite.set('time', str(math.ceil(suite.duration)))
     testsuite.set('tests', str(len(suite.tests)))
-    testsuite.set('failures', str(suite.test_failed_ctr))
+    testsuite.set('failures', str(suite.count_test_results()[2]))
     for test in suite.tests:
         testcase = test_to_junit(test)
         testsuite.append(testcase)
@@ -54,31 +54,56 @@ def test_to_junit(test):
     if test.status == suite.Test.SKIP:
         skip = et.SubElement(testcase, 'skipped')
     elif test.status == suite.Test.FAIL:
-            failure = et.SubElement(testcase, 'failure')
-            failure.set('type', test.fail_type)
-            failure.text = test.fail_message
+        failure = et.SubElement(testcase, 'failure')
+        failure.set('type', test.fail_type or 'failure')
+        failure.text = test.fail_message
+        if test.fail_tb:
+            system_err = et.SubElement(testcase, 'system-err')
+            system_err.text = test.fail_tb
     return testcase
 
 def trial_to_text(trial):
-    msg =  '\n%s [%s]\n  ' % (trial.status, trial.name())
-    msg += '\n  '.join(suite_to_text(result) for result in trial.suites)
-    return msg
+    suite_failures = []
+    count_fail = 0
+    count_pass = 0
+    for suite in trial.suites:
+        if suite.passed():
+            count_pass += 1
+        else:
+            count_fail += 1
+            suite_failures.append(suite_to_text(suite))
+
+    summary = ['%s: %s' % (trial.name(), trial.status)]
+    if count_fail:
+        summary.append('%d suites failed' % count_fail)
+    if count_pass:
+        summary.append('%d suites passed' % count_pass)
+    msg = [', '.join(summary)]
+    msg.extend(suite_failures)
+    return '\n'.join(msg)
 
 def suite_to_text(suite):
-    if suite.test_failed_ctr:
-        return 'FAIL: [%s] %d failed out of %d tests run (%d skipped):\n    %s' % (
-               suite.name(), suite.test_failed_ctr, len(suite.tests), suite.test_skipped_ctr,
-               '\n    '.join([test_to_text(t) for t in suite.tests]))
     if not suite.tests:
         return 'no tests were run.'
-    return 'pass: all %d tests passed (%d skipped).' % (len(suite.tests), suite.test_skipped_ctr)
+
+    passed, skipped, failed = suite.count_test_results()
+    details = []
+    if failed:
+        details.append('fail: %d' % failed)
+    if passed:
+        details.append('pass: %d' % passed)
+    if skipped:
+        details.append('skip: %d' % skipped)
+    msgs = ['%s: %s (%s)' % (suite.status, suite.name(), ', '.join(details))]
+    msgs.extend([test_to_text(t) for t in suite.tests])
+    return '\n    '.join(msgs)
 
 def test_to_text(test):
-    ret = "%s: [%s]" % (test.status, test.name())
-    if test.status != suite.Test.SKIP:
-        ret += " (%s, %d sec)" % (datetime.fromtimestamp(round(test.start_timestamp)).isoformat(), test.duration)
+    msgs = ['%s: %s' % (test.status, test.name())]
+    if test.start_timestamp:
+        msgs.append('(%.1f sec)' % test.duration)
     if test.status == suite.Test.FAIL:
-        ret += " type:'%s' message: %s" % (test.fail_type, test.fail_message.replace('\n', '\n        '))
-    return ret
+        msgs.append('%s: %s' % (test.fail_type, test.fail_message))
+    return ' '.join(msgs)
 
 # vim: expandtab tabstop=4 shiftwidth=4

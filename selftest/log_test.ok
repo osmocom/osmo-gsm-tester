@@ -38,4 +38,4 @@ nested print just prints
 01:02:03 tst level2: nested l2 log() from within l3 scope  [level1↪level2]  [log_test.py:146]
 01:02:03 tst level3: ERR: ValueError: bork  [level1↪level2↪level3]  [log_test.py:147: raise ValueError('bork')]
 - Enter the same Origin context twice
-01:02:03 tst level2: nested log  [level1↪level2]  [log_test.py:159]
+disallowed successfully

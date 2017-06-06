@@ -2,4 +2,4 @@
 from osmo_gsm_tester.test import *
 
 # This can be used to verify that a test failure is reported properly.
-test.set_fail('EpicFail', 'This failure is expected')
+test.set_fail('ExpectedFail', 'This failure is expected')

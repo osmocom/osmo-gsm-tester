@@ -20,7 +20,8 @@ assert(isinstance(s_def, suite.SuiteDefinition))
 print(config.tostr(s_def.conf))
 
 print('- run hello world test')
-s = suite.SuiteRun(None, 'test_suite', s_def)
+trial = log.Origin('trial')
+s = suite.SuiteRun(trial, 'test_suite', s_def)
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
 
@@ -29,26 +30,17 @@ log.style_change(src=True)
 print('\n- a test with an error')
 results = s.run_tests('test_error.py')
 output = report.suite_to_text(s)
-assert 'FAIL: [test_suite] 1 failed ' in output
-assert 'FAIL: [test_error.py]' in output
-assert "type:'AssertionError' message: AssertionError()" in output
-assert 'assert False' in output
+print(output)
 
 print('\n- a test with a failure')
 results = s.run_tests('test_fail.py')
 output = report.suite_to_text(s)
-assert 'FAIL: [test_suite] 1 failed ' in output
-assert 'FAIL: [test_fail.py]' in output
-assert "type:'EpicFail' message: This failure is expected" in output
-assert "test.set_fail('EpicFail', 'This failure is expected')" in output
+print(output)
 
 print('\n- a test with a raised failure')
 results = s.run_tests('test_fail_raise.py')
 output = report.suite_to_text(s)
-assert 'FAIL: [test_suite] 1 failed ' in output
-assert 'FAIL: [test_fail_raise.py]' in output
-assert "type:'EpicFail' message: This failure is expected" in output
-assert "raise Failure('EpicFail', 'This failure is expected')" in output
+print(output)
 
 print('\n- graceful exit.')
 # vim: expandtab tabstop=4 shiftwidth=4

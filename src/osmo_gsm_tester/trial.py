@@ -79,15 +79,15 @@ class Trial(log.Origin):
             log.FileLogTarget(run_dir.new_child(FILE_LOG_BRIEF))
               .style_change(src=False, all_origins_on_levels=(log.L_ERR, log.L_TRACEBACK))
             ]
-        self.log('Trial start')
+        log.large_separator(self.name(), sublevel=1)
         self.log('Detailed log at', detailed_log)
         self.take()
         super().__enter__()
+        return self
 
     def __exit__(self, *exc_info):
         super().__exit__(*exc_info)
-        self.log('Trial end')
-
+        self.log_report()
         for lt in self.log_targets:
             lt.remove()
         self.log_targets = None
@@ -182,25 +182,30 @@ class Trial(log.Origin):
                 except:
                     pass
 
-    def add_suite(self, suite_run):
+    def add_suite_run(self, suite_scenario_str, suite_def, scenarios):
+        suite_run = suite.SuiteRun(self, suite_scenario_str, suite_def, scenarios)
         self.suites.append(suite_run)
 
     def run_suites(self, names=None):
         self.status = Trial.UNKNOWN
-        for suite_run in  self.suites:
-            log.large_separator(self.name(), suite_run.name())
-            st = suite_run.run_tests(names)
-            if st == suite.SuiteRun.FAIL:
-                self.status = Trial.FAIL
-            elif self.status == Trial.UNKNOWN:
-                self.status = Trial.PASS
-        self.log(self.status)
+        for suite_run in self.suites:
+            try:
+                suite_run.run_tests(names)
+            except BaseException as e:
+                # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
+                self.err('TRIAL RUN ABORTED: %s' % type(e).__name__)
+                raise
+            finally:
+                if suite_run.status != suite.SuiteRun.PASS:
+                    self.status = Trial.FAIL
+        if self.status == Trial.UNKNOWN:
+            self.status = Trial.PASS
         junit_path = self.get_run_dir().new_file(self.name()+'.xml')
         self.log('Storing JUnit report in', junit_path)
         report.trial_to_junit_write(self, junit_path)
-        return self.status
 
     def log_report(self):
+        log.large_separator(self.name(), self.status)
         self.log(report.trial_to_text(self))
 
 # vim: expandtab tabstop=4 shiftwidth=4

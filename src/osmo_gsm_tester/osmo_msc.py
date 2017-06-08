@@ -72,6 +72,7 @@ class OsmoMsc(log.Origin):
         config.overlay(values, self.suite_run.config())
         config.overlay(values, dict(msc=dict(ip_address=self.ip_address)))
         config.overlay(values, self.mgcpgw.conf_for_msc())
+        config.overlay(values, self.hlr.conf_for_msc())
 
         self.dbg('MSC CONFIG:\n' + pprint.pformat(values))
 

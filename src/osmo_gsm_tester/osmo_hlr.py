@@ -126,4 +126,7 @@ class OsmoHlr(log.Origin):
             % (subscriber_id, modem.imsi(), modem.msisdn))
         return subscriber_id
 
+    def conf_for_msc(self):
+        return dict(hlr=dict(ip_address=self.ip_address))
+
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -95,7 +95,7 @@ def _get_config_file(basename, fail_if_missing=True):
         real_l = os.path.realpath(l)
         p = os.path.realpath(os.path.join(real_l, basename))
         if os.path.isfile(p):
-            log.dbg(None, log.C_CNF, 'Found config file', basename, 'as', p, 'in', l, 'which is', real_l)
+            log.dbg('Found config file', basename, 'as', p, 'in', l, 'which is', real_l, _category=log.C_CNF)
             return (p, real_l)
     if not fail_if_missing:
         return None, None
@@ -122,7 +122,7 @@ def get_configured_path(label, allow_unset=False):
     env_path = os.getenv(env_name)
     if env_path:
         real_env_path = os.path.realpath(env_path)
-        log.dbg(None, log.C_CNF, 'Found path', label, 'as', env_path, 'in', '$' + env_name, 'which is', real_env_path)
+        log.dbg('Found path', label, 'as', env_path, 'in', '$' + env_name, 'which is', real_env_path, _category=log.C_CNF)
         return real_env_path
 
     if PATHS is None:
@@ -132,15 +132,15 @@ def get_configured_path(label, allow_unset=False):
         for key, path in sorted(PATHS.items()):
             if not path.startswith(os.pathsep):
                 PATHS[key] = os.path.realpath(os.path.join(found_in, path))
-                log.dbg(None, log.C_CNF, paths_file + ': relative path', path, 'is', PATHS[key])
+                log.dbg(paths_file + ': relative path', path, 'is', PATHS[key], _category=log.C_CNF)
     p = PATHS.get(label)
     if p is None and not allow_unset:
         raise RuntimeError('missing configuration in %s: %r' % (PATHS_CONF, label))
 
-    log.dbg(None, log.C_CNF, 'Found path', label, 'as', p)
+    log.dbg('Found path', label, 'as', p, _category=log.C_CNF)
     if p.startswith(PATHS_TEMPDIR_STR):
         p = os.path.join(get_tempdir(), p[len(PATHS_TEMPDIR_STR):])
-        log.dbg(None, log.C_CNF, 'Path', label, 'contained', PATHS_TEMPDIR_STR, 'and becomes', p)
+        log.dbg('Path', label, 'contained', PATHS_TEMPDIR_STR, 'and becomes', p, _category=log.C_CNF)
     return p
 
 def get_state_dir():
@@ -153,20 +153,20 @@ def get_scenarios_dir():
     return Dir(get_configured_path(PATH_SCENARIOS_DIR))
 
 def read(path, validation_schema=None, if_missing_return=False):
-    with log.Origin(path):
-        if not os.path.isfile(path) and if_missing_return is not False:
-            return if_missing_return
-        with open(path, 'r') as f:
-            config = yaml.safe_load(f)
-        config = _standardize(config)
-        if validation_schema:
-            schema.validate(config, validation_schema)
-        return config
+    log_ctx = path
+    if not os.path.isfile(path) and if_missing_return is not False:
+        return if_missing_return
+    with open(path, 'r') as f:
+        config = yaml.safe_load(f)
+    config = _standardize(config)
+    if validation_schema:
+        schema.validate(config, validation_schema)
+    return config
 
 def write(path, config):
-    with log.Origin(path):
-        with open(path, 'w') as f:
-            f.write(tostr(config))
+    log_ctx = path
+    with open(path, 'w') as f:
+        f.write(tostr(config))
 
 def tostr(config):
     return _tostr(_standardize(config))
@@ -191,8 +191,7 @@ def get_defaults(for_kind):
 
 class Scenario(log.Origin, dict):
     def __init__(self, name, path):
-        self.set_name(name)
-        self.set_log_category(log.C_TST)
+        super().__init__(log.C_TST, name)
         self.path = path
 
 def get_scenario(name, validation_schema=None):
@@ -216,8 +215,8 @@ def add(dest, src):
             if dest_val is None:
                 dest[key] = val
             else:
-                with log.Origin(key=key):
-                    add(dest_val, val)
+                log_ctx = 'key=%r' % key
+                add(dest_val, val)
         return
     if is_list(dest):
         if not is_list(src):
@@ -235,19 +234,19 @@ def combine(dest, src):
             raise ValueError('cannot combine dict with a value of type: %r' % type(src))
 
         for key, val in src.items():
+            log_ctx = 'key=%r' % key
             dest_val = dest.get(key)
             if dest_val is None:
                 dest[key] = val
             else:
-                with log.Origin(key=key):
-                    combine(dest_val, val)
+                combine(dest_val, val)
         return
     if is_list(dest):
         if not is_list(src):
             raise ValueError('cannot combine list with a value of type: %r' % type(src))
         for i in range(len(src)):
-            with log.Origin(idx=i):
-                combine(dest[i], src[i])
+            log_ctx = 'idx=%r' % i
+            combine(dest[i], src[i])
         return
     if dest == src:
         return
@@ -260,16 +259,16 @@ def overlay(dest, src):
             raise ValueError('cannot combine dict with a value of type: %r' % type(src))
 
         for key, val in src.items():
+            log_ctx = 'key=%r' % key
             dest_val = dest.get(key)
-            with log.Origin(key=key):
-                dest[key] = overlay(dest_val, val)
+            dest[key] = overlay(dest_val, val)
         return dest
     if is_list(dest):
         if not is_list(src):
             raise ValueError('cannot combine list with a value of type: %r' % type(src))
         for i in range(len(src)):
-            with log.Origin(idx=i):
-                dest[i] = overlay(dest[i], src[i])
+            log_ctx = 'key=%r' % key
+            dest[i] = overlay(dest[i], src[i])
         return dest
     return src
 

@@ -26,7 +26,7 @@ from . import log
 from .util import dict2obj
 
 _lookup = None
-_logger = log.Origin('no templates dir set')
+_logger = log.Origin(log.C_CNF, 'no templates dir set')
 
 def set_templates_dir(*templates_dirs):
     global _lookup
@@ -39,7 +39,7 @@ def set_templates_dir(*templates_dirs):
             raise RuntimeError('templates dir is not a dir: %r'
                                % os.path.abspath(d))
     _lookup = TemplateLookup(directories=templates_dirs)
-    _logger = log.Origin('Templates', category=log.C_CNF)
+    _logger = log.Origin(log.C_CNF, 'Templates')
 
 def render(name, values):
     '''feed values dict into template and return rendered result.
@@ -48,11 +48,11 @@ def render(name, values):
     if _lookup is None:
         set_templates_dir()
     tmpl_name = name + '.tmpl'
-    with log.Origin(tmpl_name):
-        template = _lookup.get_template(tmpl_name)
-        _logger.dbg('rendering', tmpl_name)
+    log_ctx = tmpl_name
+    template = _lookup.get_template(tmpl_name)
+    _logger.dbg('rendering', tmpl_name)
 
-        line_info_name = tmpl_name.replace('-', '_').replace('.', '_')
-        return template.render(**dict2obj(values))
+    line_info_name = tmpl_name.replace('-', '_').replace('.', '_')
+    return template.render(**dict2obj(values))
 
 # vim: expandtab tabstop=4 shiftwidth=4

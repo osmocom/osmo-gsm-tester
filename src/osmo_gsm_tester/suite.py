@@ -49,9 +49,8 @@ class SuiteDefinition(log.Origin):
 
 
     def __init__(self, suite_dir):
-        self.set_log_category(log.C_CNF)
         self.suite_dir = suite_dir
-        self.set_name(os.path.basename(self.suite_dir))
+        super().__init__(log.C_CNF, os.path.basename(self.suite_dir))
         self.read_conf()
 
     def read_conf(self):
@@ -78,12 +77,10 @@ class Test(log.Origin):
     FAIL = 'FAIL'
 
     def __init__(self, suite_run, test_basename):
-        self.suite_run = suite_run
         self.basename = test_basename
+        super().__init__(log.C_TST, self.basename)
+        self.suite_run = suite_run
         self.path = os.path.join(self.suite_run.definition.suite_dir, self.basename)
-        super().__init__(self.path)
-        self.set_name(self.basename)
-        self.set_log_category(log.C_TST)
         self.status = Test.UNKNOWN
         self.start_timestamp = 0
         self.duration = 0
@@ -92,16 +89,15 @@ class Test(log.Origin):
 
     def run(self):
         try:
-            with self:
-                log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
-                self.status = Test.UNKNOWN
-                self.start_timestamp = time.time()
-                test.setup(self.suite_run, self, ofono_client, sys.modules[__name__], event_loop)
-                with self.redirect_stdout():
-                    util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
-                                         self.path)
-                if self.status == Test.UNKNOWN:
-                     self.set_pass()
+            log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
+            self.status = Test.UNKNOWN
+            self.start_timestamp = time.time()
+            test.setup(self.suite_run, self, ofono_client, sys.modules[__name__], event_loop)
+            with self.redirect_stdout():
+                util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
+                                     self.path)
+            if self.status == Test.UNKNOWN:
+                 self.set_pass()
         except Exception as e:
             if hasattr(e, 'msg'):
                 msg = e.msg
@@ -142,7 +138,7 @@ class Test(log.Origin):
         self.fail_tb = tb_str
         self.err('%s: %s' % (self.fail_type, self.fail_message))
         if self.fail_tb:
-            self.trace(self.fail_tb)
+            self.log(self.fail_tb, _level=log.L_TRACEBACK)
         self.log('Test FAILED (%.1f sec)' % self.duration)
 
     def set_pass(self):
@@ -171,11 +167,10 @@ class SuiteRun(log.Origin):
     _processes = None
 
     def __init__(self, trial, suite_scenario_str, suite_definition, scenarios=[]):
+        super().__init__(log.C_TST, suite_scenario_str)
         self.trial = trial
         self.definition = suite_definition
         self.scenarios = scenarios
-        self.set_name(suite_scenario_str)
-        self.set_log_category(log.C_TST)
         self.resources_pool = resource.ResourcesPool()
         self.status = SuiteRun.UNKNOWN
         self.load_tests()
@@ -201,18 +196,18 @@ class SuiteRun(log.Origin):
         self.status = SuiteRun.UNKNOWN
 
     def combined(self, conf_name):
-        self.dbg(combining=conf_name)
-        with log.Origin(combining_scenarios=conf_name):
-            combination = copy.deepcopy(self.definition.conf.get(conf_name) or {})
-            self.dbg(definition_conf=combination)
-            for scenario in self.scenarios:
-                with scenario:
-                    c = scenario.get(conf_name)
-                    self.dbg(scenario=scenario.name(), conf=c)
-                    if c is None:
-                        continue
-                    config.combine(combination, c)
-            return combination
+        log.dbg(combining=conf_name)
+        log_ctx = 'combining_scenarios=%r' % conf_name
+        combination = copy.deepcopy(self.definition.conf.get(conf_name) or {})
+        self.dbg(definition_conf=combination)
+        for scenario in self.scenarios:
+            log_ctx = '{combining_scenarios=%r, %s}' % (conf_name, scenario.name())
+            c = scenario.get(conf_name)
+            self.dbg(scenario=scenario.name(), conf=c)
+            if c is None:
+                continue
+            config.combine(combination, c)
+        return combination
 
     def resource_requirements(self):
         if self._resource_requirements is None:
@@ -232,17 +227,16 @@ class SuiteRun(log.Origin):
 
     def run_tests(self, names=None):
         try:
-            with self:
-                log.large_separator(self.trial.name(), self.name(), sublevel=2)
-                self.mark_start()
-                event_loop.register_poll_func(self.poll)
-                if not self.reserved_resources:
-                    self.reserve_resources()
-                for test in self.tests:
-                    if names and not test.name() in names:
-                        test.set_skip()
-                        continue
-                    test.run()
+            log.large_separator(self.trial.name(), self.name(), sublevel=2)
+            self.mark_start()
+            event_loop.register_poll_func(self.poll)
+            if not self.reserved_resources:
+                self.reserve_resources()
+            for test in self.tests:
+                if names and not test.name() in names:
+                    test.set_skip()
+                    continue
+                test.run()
         except Exception:
             self.log_exn()
         except BaseException as e:
@@ -355,7 +349,8 @@ class SuiteRun(log.Origin):
                 if process.terminated():
                     process.log_stdout_tail()
                     process.log_stderr_tail()
-                    process.raise_exn('Process ended prematurely')
+                    log_ctx = process
+                    raise log.Error('Process ended prematurely')
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

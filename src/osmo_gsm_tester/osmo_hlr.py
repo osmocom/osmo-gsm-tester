@@ -32,10 +32,9 @@ class OsmoHlr(log.Origin):
     next_subscriber_id = 1
 
     def __init__(self, suite_run, ip_address):
+        super().__init__(log.C_RUN, 'osmo-hlr_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
-        self.set_log_category(log.C_RUN)
-        self.set_name('osmo-hlr_%s' % ip_address.get('addr'))
         self.bts = []
 
     def start(self):
@@ -47,16 +46,16 @@ class OsmoHlr(log.Origin):
 
         binary = inst.child('bin', 'osmo-hlr')
         if not os.path.isfile(binary):
-            self.raise_exn('Binary missing:', binary)
+            raise log.Error('Binary missing:', binary)
         lib = inst.child('lib')
         if not os.path.isdir(lib):
-            self.raise_exn('No lib/ in', inst)
+            raise log.Error('No lib/ in', inst)
 
         # bootstrap an empty hlr.db
         self.db_file = self.run_dir.new_file('hlr.db')
         sql_input = inst.child('share/doc/osmo-hlr/hlr.sql')
         if not os.path.isfile(sql_input):
-            self.raise_exn('hlr.sql missing:', sql_input)
+            raise log.Error('hlr.sql missing:', sql_input)
         self.run_local('create_hlr_db', ('/bin/sh', '-c', 'sqlite3 %r < %r' % (self.db_file, sql_input)))
 
         iface = util.ip_to_iface(self.addr())
@@ -96,13 +95,13 @@ class OsmoHlr(log.Origin):
         return not self.process.terminated()
 
     def run_local(self, name, popen_args):
-        with self:
-            run_dir = self.run_dir.new_dir(name)
-            proc = process.Process(name, run_dir, popen_args)
-            proc.launch()
-            proc.wait()
-            if proc.result != 0:
-                proc.raise_exn('Exited in error')
+        run_dir = self.run_dir.new_dir(name)
+        proc = process.Process(name, run_dir, popen_args)
+        proc.launch()
+        proc.wait()
+        if proc.result != 0:
+            log_ctx = proc
+            raise log.Error('Exited in error')
 
     def run_sql_file(self, name, sql_file):
         self.run_local(name, ('/bin/sh', '-c', 'sqlite3 %r < %r' % (self.db_file, sql_file)))

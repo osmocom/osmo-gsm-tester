@@ -30,10 +30,9 @@ class OsmoMgcpgw(log.Origin):
     process = None
 
     def __init__(self, suite_run, ip_address, bts_ip):
+        super().__init__(log.C_RUN, 'osmo-mgcpgw_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
-        self.set_log_category(log.C_RUN)
-        self.set_name('osmo-mgcpgw_%s' % ip_address.get('addr'))
         # hack: so far mgcpgw needs one specific BTS IP.
         self.bts_ip = bts_ip
 

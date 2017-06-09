@@ -82,12 +82,14 @@ class ModemDbusInteraction(log.Origin):
     Related: https://github.com/LEW21/pydbus/issues/56
     '''
 
+    modem_path = None
+    watch_props_subscription = None
+    _dbus_obj = None
+    interfaces = None
+
     def __init__(self, modem_path):
         self.modem_path = modem_path
-        self.set_name(self.modem_path)
-        self.set_log_category(log.C_BUS)
-        self.watch_props_subscription = None
-        self._dbus_obj = None
+        super().__init__(log.C_BUS, self.modem_path)
         self.interfaces = set()
 
         # A dict listing signal handlers to connect, e.g.
@@ -118,7 +120,7 @@ class ModemDbusInteraction(log.Origin):
         try:
             return self.dbus_obj()[interface_name]
         except KeyError:
-            self.raise_exn('Modem interface is not available:', interface_name)
+            raise RuntimeError('Modem interface is not available:', interface_name)
 
     def signal(self, interface_name, signal):
         return getattr(self.interface(interface_name), signal)
@@ -253,8 +255,7 @@ class Modem(log.Origin):
     def __init__(self, conf):
         self.conf = conf
         self.path = conf.get('path')
-        self.set_name(self.path)
-        self.set_log_category(log.C_TST)
+        super().__init__(log.C_TST, self.path)
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.path)
         self.dbus.required_signals = {
@@ -312,8 +313,7 @@ class Modem(log.Origin):
     def imsi(self):
         imsi = self.conf.get('imsi')
         if not imsi:
-            with self:
-                raise RuntimeError('No IMSI')
+            raise RuntimeError('No IMSI')
         return imsi
 
     def ki(self):

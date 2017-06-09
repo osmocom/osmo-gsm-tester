@@ -31,10 +31,9 @@ class OsmoBsc(log.Origin):
     bts = None
 
     def __init__(self, suite_run, msc, ip_address):
+        super().__init__(log.C_RUN, 'osmo-bsc_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
-        self.set_log_category(log.C_RUN)
-        self.set_name('osmo-bsc_%s' % ip_address.get('addr'))
         self.bts = []
         self.msc = msc
 

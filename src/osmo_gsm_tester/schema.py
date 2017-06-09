@@ -124,9 +124,9 @@ def validate(config, schema):
                 validate_item(path, list_v, schema)
             return
 
-        with log.Origin(item=path):
-            type_validator = SCHEMA_TYPES.get(want_type)
-            type_validator(value)
+        log_ctx = path
+        type_validator = SCHEMA_TYPES.get(want_type)
+        type_validator(value)
 
     def nest(parent_path, config, schema):
         if parent_path:

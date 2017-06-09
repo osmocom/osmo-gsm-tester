@@ -57,8 +57,7 @@ class Trial(log.Origin):
 
     def __init__(self, trial_dir):
         self.path = os.path.abspath(trial_dir)
-        self.set_name(os.path.basename(self.path))
-        self.set_log_category(log.C_TST)
+        super().__init__(log.C_TST, os.path.basename(self.path))
         self.dir = util.Dir(self.path)
         self.inst_dir = util.Dir(self.dir.child('inst'))
         self.bin_tars = []
@@ -69,7 +68,8 @@ class Trial(log.Origin):
         return self.name()
 
     def __enter__(self):
-        # add a log target to log to the run dir
+        '''add a log target to log to the run dir, write taken marker, log a
+        starting separator.'''
         run_dir = self.get_run_dir()
         detailed_log = run_dir.new_child(FILE_LOG)
         self.log_targets = [
@@ -82,11 +82,10 @@ class Trial(log.Origin):
         log.large_separator(self.name(), sublevel=1)
         self.log('Detailed log at', detailed_log)
         self.take()
-        super().__enter__()
         return self
 
     def __exit__(self, *exc_info):
-        super().__exit__(*exc_info)
+        '''log a report, then remove log file targets for this trial'''
         self.log_report()
         for lt in self.log_targets:
             lt.remove()
@@ -195,6 +194,8 @@ class Trial(log.Origin):
                 except BaseException as e:
                     # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
                     self.err('TRIAL RUN ABORTED: %s' % type(e).__name__)
+                    # log the traceback before the trial's logging is ended
+                    log.log_exn()
                     raise
                 finally:
                     if suite_run.status != suite.SuiteRun.PASS:

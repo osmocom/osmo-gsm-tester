@@ -83,7 +83,7 @@ class ResourcesPool(log.Origin):
     def __init__(self):
         self.config_path = config.get_config_file(RESOURCES_CONF)
         self.state_dir = config.get_state_dir()
-        self.set_name(conf=self.config_path, state=self.state_dir.path)
+        super().__init__(log.C_CNF, conf=self.config_path, state=self.state_dir.path)
         self.read_conf()
 
     def read_conf(self):
@@ -158,6 +158,7 @@ class ResourcesPool(log.Origin):
             return ReservedResources(self, origin, to_be_reserved)
 
     def free(self, origin, to_be_freed):
+        log.ctx(origin)
         with self.state_dir.lock(origin.origin_id()):
             rrfile_path = self.state_dir.mk_parentdir(RESERVED_RESOURCES_FILE)
             reserved = Resources(config.read(rrfile_path, if_missing_return={}))
@@ -202,19 +203,19 @@ class ResourcesPool(log.Origin):
 
         with self.state_dir.lock(origin_id):
             msisdn_path = self.state_dir.child(LAST_USED_MSISDN_FILE)
-            with log.Origin(msisdn_path):
-                last_msisdn = '1000'
-                if os.path.exists(msisdn_path):
-                    if not os.path.isfile(msisdn_path):
-                        raise RuntimeError('path should be a file but is not: %r' % msisdn_path)
-                    with open(msisdn_path, 'r') as f:
-                        last_msisdn = f.read().strip()
-                    schema.msisdn(last_msisdn)
+            log.ctx(msisdn_path)
+            last_msisdn = '1000'
+            if os.path.exists(msisdn_path):
+                if not os.path.isfile(msisdn_path):
+                    raise RuntimeError('path should be a file but is not: %r' % msisdn_path)
+                with open(msisdn_path, 'r') as f:
+                    last_msisdn = f.read().strip()
+                schema.msisdn(last_msisdn)
 
-                next_msisdn = util.msisdn_inc(last_msisdn)
-                with open(msisdn_path, 'w') as f:
-                    f.write(next_msisdn)
-                return next_msisdn
+            next_msisdn = util.msisdn_inc(last_msisdn)
+            with open(msisdn_path, 'w') as f:
+                f.write(next_msisdn)
+            return next_msisdn
 
 
 class NoResourceExn(Exception):

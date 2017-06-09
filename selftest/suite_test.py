@@ -20,7 +20,7 @@ assert(isinstance(s_def, suite.SuiteDefinition))
 print(config.tostr(s_def.conf))
 
 print('- run hello world test')
-trial = log.Origin('trial')
+trial = log.Origin(log.C_TST, 'trial')
 s = suite.SuiteRun(trial, 'test_suite', s_def)
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))

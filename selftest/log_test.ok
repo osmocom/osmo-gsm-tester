@@ -32,10 +32,9 @@ but no time format
 01:02:03 ---                 LogTest: hello log, no category nor name set  [log_test.py:110]
 01:02:03 ---                 LogTest: DBG: debug message, no category nor name set  [log_test.py:113]
 - Testing logging of Exceptions, tracing origins
-Not throwing an exception in 'with:' works.
 nested print just prints
-01:02:03 tst level3: nested log()  [level1↪level2↪level3]  [log_test.py:145]
-01:02:03 tst level2: nested l2 log() from within l3 scope  [level1↪level2]  [log_test.py:146]
-01:02:03 tst level3: ERR: ValueError: bork  [level1↪level2↪level3]  [log_test.py:147: raise ValueError('bork')]
-- Enter the same Origin context twice
+01:02:03 tst level3: nested log()  [level1↪level2↪level3]  [log_test.py:135]
+01:02:03 tst level2: nested l2 log() from within l3 scope  [level1↪level2]  [log_test.py:136]
+01:02:03 tst level3: ERR: ValueError: bork  [level1↪level2↪level3]  [log_test.py:137: raise ValueError('bork')]
+- Disallow origin loops
 disallowed successfully

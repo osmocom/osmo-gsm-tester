@@ -54,42 +54,42 @@ Validation: Error
 --- -: ERR: ValueError: config item not known: 'a_dict[]'
 Validation: Error
 - unknown band:
---- (item='bts[].trx[].band'): ERR: ValueError: Unknown GSM band: 'what'
+--- bts[].trx[].band: ERR: ValueError: Unknown GSM band: 'what'
 Validation: Error
 - invalid v4 addrs:
---- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: '1.2.3'
+--- addr[]: ERR: ValueError: Invalid IPv4 address: '1.2.3'
 Validation: Error
---- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: '1.2.3 .4'
+--- addr[]: ERR: ValueError: Invalid IPv4 address: '1.2.3 .4'
 Validation: Error
---- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: '91.2.3'
+--- addr[]: ERR: ValueError: Invalid IPv4 address: '91.2.3'
 Validation: Error
---- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: 'go away'
+--- addr[]: ERR: ValueError: Invalid IPv4 address: 'go away'
 Validation: Error
---- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: ''
+--- addr[]: ERR: ValueError: Invalid IPv4 address: ''
 Validation: Error
---- (item='addr[]'): ERR: ValueError: Invalid IPv4 address: None
+--- addr[]: ERR: ValueError: Invalid IPv4 address: None
 Validation: Error
 - invalid hw addrs:
---- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: '1.2.3'
+--- hwaddr[]: ERR: ValueError: Invalid hardware address: '1.2.3'
 Validation: Error
---- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: '0b:0c:0d:0e:0f:0g'
+--- hwaddr[]: ERR: ValueError: Invalid hardware address: '0b:0c:0d:0e:0f:0g'
 Validation: Error
---- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: '0b:0c:0d:0e : 0f:0f'
+--- hwaddr[]: ERR: ValueError: Invalid hardware address: '0b:0c:0d:0e : 0f:0f'
 Validation: Error
---- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: 'go away'
+--- hwaddr[]: ERR: ValueError: Invalid hardware address: 'go away'
 Validation: Error
---- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: ''
+--- hwaddr[]: ERR: ValueError: Invalid hardware address: ''
 Validation: Error
---- (item='hwaddr[]'): ERR: ValueError: Invalid hardware address: None
+--- hwaddr[]: ERR: ValueError: Invalid hardware address: None
 Validation: Error
 - invalid imsis:
---- (item='imsi[]'): ERR: ValueError: Invalid IMSI: '99999999x9'
+--- imsi[]: ERR: ValueError: Invalid IMSI: '99999999x9'
 Validation: Error
---- (item='imsi[]'): ERR: ValueError: Invalid IMSI: '123 456 789 123'
+--- imsi[]: ERR: ValueError: Invalid IMSI: '123 456 789 123'
 Validation: Error
---- (item='imsi[]'): ERR: ValueError: Invalid IMSI: 'go away'
+--- imsi[]: ERR: ValueError: Invalid IMSI: 'go away'
 Validation: Error
---- (item='imsi[]'): ERR: ValueError: Invalid IMSI: ''
+--- imsi[]: ERR: ValueError: Invalid IMSI: ''
 Validation: Error
---- (item='imsi[]'): ERR: ValueError: Invalid IMSI: None
+--- imsi[]: ERR: ValueError: Invalid IMSI: None
 Validation: Error

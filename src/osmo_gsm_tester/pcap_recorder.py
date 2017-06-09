@@ -27,14 +27,13 @@ from . import log, util, config, template, process, osmo_ctrl
 class PcapRecorder(log.Origin):
 
     def __init__(self, suite_run, run_dir, iface=None, filters=''):
-        self.suite_run = suite_run
-        self.run_dir = run_dir
         self.iface = iface
         if not self.iface:
             self.iface = "any"
         self.filters = filters
-        self.set_log_category(log.C_RUN)
-        self.set_name('pcap-recorder_%s' % self.iface)
+        super().__init__(log.C_RUN, 'pcap-recorder_%s' % self.iface, filters=self.filters)
+        self.suite_run = suite_run
+        self.run_dir = run_dir
         self.start()
 
     def start(self):

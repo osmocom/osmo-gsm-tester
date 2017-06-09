@@ -45,6 +45,41 @@ C_CNF = 'cnf'
 C_BUS = 'bus'
 C_DEFAULT = '---'
 
+LOG_CTX_VAR = '_log_ctx_'
+
+def dbg(*messages, _origin=None, _category=None, _src=None, **named_items):
+    '''Log on debug level. See also log()'''
+    _log(messages, named_items, origin=_origin, category=_category, level=L_DBG, src=_src)
+
+def log(*messages, _origin=None, _category=None, _level=L_LOG, _src=None, **named_items):
+    '''Log a message. The origin, an Origin class instance, is normally
+    determined by stack magic, only pass _origin to override. The category is
+    taken from the origin. _src is normally an integer indicating how many
+    levels up the stack sits the interesting source file to log about, can also
+    be a string. The log message is composed of all *messages and
+    **named_items, for example:
+      log('frobnicate:', thing, key=current_key, prop=erty)
+    '''
+    _log(messages, named_items, origin=_origin, category=_category, level=_level, src=_src)
+
+def err(*messages, _origin=None, _category=None, _src=None, **named_items):
+    '''Log on error level. See also log()'''
+    _log(messages, named_items, origin=_origin, category=_category, level=L_ERR, src=_src)
+
+def _log(messages=[], named_items={}, origin=None, category=None, level=L_LOG, src=None):
+    if origin is None:
+        origin = Origin.find_on_stack()
+    if category is None and isinstance(origin, Origin):
+        category = origin._log_category
+    if src is None:
+        # two levels up
+        src = 2
+    if isinstance(src, int):
+        src = get_src_from_caller(src + 1)
+    for target in LogTarget.all_targets:
+        target.log(origin, category, level, src, messages, named_items)
+
+
 LONG_DATEFMT = '%Y-%m-%d_%H:%M:%S'
 DATEFMT = '%H:%M:%S'
 
@@ -52,7 +87,8 @@ DATEFMT = '%H:%M:%S'
 get_process_id = lambda: '%d-%d' % (os.getpid(), time.time())
 
 class Error(Exception):
-    pass
+    def __init__(self, *messages, **named_items):
+        super().__init__(compose_message(messages, named_items))
 
 class LogTarget:
     all_targets = []
@@ -153,7 +189,7 @@ class LogTarget:
 
     def log(self, origin, category, level, src, messages, named_items):
         if category and len(category) != 3:
-            self.log_write_func('WARNING: INVALID LOG SUBSYSTEM %r\n' % category)
+            self.log_write_func('WARNING: INVALID LOGGING CATEGORY %r\n' % category)
             self.log_write_func('origin=%r category=%r level=%r\n' % (origin, category, level));
 
         if not category:
@@ -172,14 +208,13 @@ class LogTarget:
         if self.do_log_origin:
             if origin is None:
                 name = '-'
-            elif isinstance(origin, Origins):
-                name = origin[-1]
-                if len(origin) > 1:
-                    deeper_origins = str(origin)
+            elif isinstance(origin, Origin):
+                name = origin.name()
+                # only log ancestry when there is more than one
+                if origin._parent is not None:
+                    deeper_origins = origin.ancestry_str()
             elif isinstance(origin, str):
                 name = origin or None
-            elif hasattr(origin, 'name'):
-                name = origin.name()
             if not name:
                 name = str(origin.__class__.__name__)
             log_pre.append(self.origin_fmt.format(name))
@@ -228,7 +263,7 @@ def level_str(level):
 
 def _log_all_targets(origin, category, level, src, messages, named_items=None):
     if origin is None:
-        origin = Origin._global_current_origin
+        origin = Origin.find_on_stack()
     if isinstance(src, int):
         src = get_src_from_caller(src + 1)
     for target in LogTarget.all_targets:
@@ -242,13 +277,17 @@ def get_src_from_caller(levels_up=1):
     caller = getframeinfo(stack()[levels_up][0])
     return '%s:%d' % (os.path.basename(caller.filename), caller.lineno)
 
-def get_src_from_tb(tb, levels_up=1):
-    ftb = traceback.extract_tb(tb)
+def get_src_from_exc_info(exc_info=None, levels_up=1):
+    if exc_info is None:
+        exc_info = sys.exc_info()
+    ftb = traceback.extract_tb(exc_info[2])
     f,l,m,c = ftb[-levels_up]
     f = os.path.basename(f)
     return '%s:%s: %s' % (f, l, c)
 
 def get_line_for_src(src_path):
+    '''find a given source file on the stack and return the line number for
+    that file. (Used to indicate the position in a test script.)'''
     etype, exception, tb = sys.exc_info()
     if tb:
         ftb = traceback.extract_tb(tb)
@@ -262,31 +301,112 @@ def get_line_for_src(src_path):
             return caller.lineno
     return None
 
+def ctx(*name_items, **detail_items):
+    '''Store log context in the current frame. This string will appear as
+    origin information for exceptions thrown within the calling scope.'''
+    if not name_items and not detail_items:
+        ctx_obj(None)
+    if not detail_items and len(name_items) == 1 and isinstance(name_items[0], Origin):
+        ctx_obj(name_items[0])
+    else:
+        ctx_obj(compose_message(name_items, detail_items))
+
+def ctx_obj(origin_or_str):
+    f = sys._getframe(2)
+    if origin_or_str is None:
+        f.f_locals.pop(LOG_CTX_VAR, None)
+    else:
+        f.f_locals[LOG_CTX_VAR] = origin_or_str
+
+class OriginLoopError(Error):
+    pass
 
 class Origin:
     '''
-    Base class for all classes that want to log,
-    and to add an origin string to a code path:
-    with log.Origin('my name'):
-        raise Problem()
-    This will log 'my name' as an origin for the Problem.
+    Base class for all classes that want to appear in the log.
+    It is a simple named marker to find in the stack frames.
+    This depends on the object instance named 'self' in each member class.
+
+    In addition, it provides a logging category and a globally unique ID for
+    each instance.
+
+    Each child class *must* call super().__init__(category, name), to allow
+    noting its parent origins.
     '''
 
-    _global_current_origin = None
     _global_id = None
 
-    _log_category = None
-    _src = None
     _name = None
     _origin_id = None
+    _log_category = None
+    _parent = None
 
-    _parent_origin = None
+    @staticmethod
+    def find_on_stack(except_obj=None, f=None):
+        if f is None:
+            f = sys._getframe(2)
+        log_ctx_obj = None
+        origin = None
+        while f is not None:
+            l = f.f_locals
 
-    def __init__(self, *name_items, category=None, **detail_items):
-        self.set_log_category(category)
+            # if there is a log_ctx in the scope, add it, pointing to the next
+            # actual Origin class in the stack
+            log_ctx = l.get(LOG_CTX_VAR)
+            if log_ctx:
+                if isinstance(log_ctx, Origin):
+                    new_log_ctx_obj = log_ctx
+                else:
+                    new_log_ctx_obj = Origin(None, log_ctx, find_parent=False)
+                if log_ctx_obj is None:
+                    log_ctx_obj = new_log_ctx_obj
+                else:
+                    log_ctx_obj.highest_ancestor()._set_parent(new_log_ctx_obj)
+
+            obj = l.get('self')
+            if obj and isinstance(obj, Origin) and (except_obj is not obj):
+                origin = obj
+                break
+            f = f.f_back
+
+        if (origin is not None) and (log_ctx_obj is not None):
+            log_ctx_obj.highest_ancestor()._set_parent(origin)
+            p = log_ctx_obj
+            while p:
+                p._set_log_category(origin._log_category)
+                p = p._parent
+        if log_ctx_obj is not None:
+            return log_ctx_obj
+        # may return None
+        return origin
+
+    @staticmethod
+    def find_in_exc_info(exc_info):
+        tb = exc_info[2]
+        # get last tb ... I hope that's right
+        while tb.tb_next:
+            tb = tb.tb_next
+        return Origin.find_on_stack(f=tb.tb_frame)
+
+    def __init__(self, category, *name_items, find_parent=True, **detail_items):
+        self._set_log_category(category)
         self.set_name(*name_items, **detail_items)
+        if find_parent:
+            self._set_parent(Origin.find_on_stack(except_obj=self))
+
+    def _set_parent(self, parent):
+        # make sure to avoid loops
+        p = parent
+        while p:
+            if p is self:
+                raise OriginLoopError('Origin parent loop')
+            p = p._parent
+        self._parent = parent
 
     def set_name(self, *name_items, **detail_items):
+        '''Change the origin's name for log output; rather use the constructor.
+        This function can be used to change the name in case naming info
+        becomes available only after class creation (like a pid)'''
         if name_items:
             name = '-'.join([str(i) for i in name_items])
         elif not detail_items:
@@ -313,87 +433,43 @@ class Origin:
             self._origin_id = '%s-%s' % (self.name(), Origin._global_id)
         return self._origin_id
 
-    def set_log_category(self, category):
+    def _set_log_category(self, category):
         self._log_category = category
-
-    def _log(self, level, messages, named_items=None, src_levels_up=3, origins=None):
-        src = self._src or src_levels_up
-        origin = origins or self.gather_origins()
-        _log_all_targets(origin, self._log_category, level, src, messages, named_items)
-
-    def dbg(self, *messages, **named_items):
-        self._log(L_DBG, messages, named_items)
-
-    def log(self, *messages, **named_items):
-        self._log(L_LOG, messages, named_items)
-
-    def err(self, *messages, **named_items):
-        self._log(L_ERR, messages, named_items)
-
-    def trace(self, *messages, **named_items):
-        self._log(L_TRACEBACK, messages, named_items)
-
-    def log_exn(self, exc_info=None):
-        log_exn(self, self._log_category, exc_info)
-
-    def __enter__(self):
-        if not self.set_child_of(Origin._global_current_origin):
-            return self
-        Origin._global_current_origin = self
-        return self
-
-    def __exit__(self, *exc_info):
-        rc = None
-        if exc_info[0] is not None:
-            rc = exn_add_info(exc_info, self)
-        Origin._global_current_origin, self._parent_origin = self._parent_origin, None
-        return rc
-
-    def raise_exn(self, *messages, exn_class=Error, **named_items):
-        with self:
-            raise exn_class(compose_message(messages, named_items))
 
     def redirect_stdout(self):
         return contextlib.redirect_stdout(SafeRedirectStdout(self))
 
-    def gather_origins(self):
-        origins = Origins()
-        # this object shall always be seen as the immediate origin of the log message.
-        origins.add(self)
-        # now go through the parents of this object.
-        origin = self._parent_origin
-        # but if this object is "loose" and not set up with cascaded 'with' statements,
-        # take the last seen 'with' statement's object as next parent:
-        if origin is None and Origin._global_current_origin is not None:
-            origin = Origin._global_current_origin
-            # if this object is currently the _global_current_origin, we don't
-            # need to add it twice.
-            if origin is self:
-                origin = origin._parent_origin
-        # whichever we determined to be the parent above, go up through all its
-        # ancestors.
-        while origin is not None:
-            origins.add(origin)
-            origin = origin._parent_origin
+    def ancestry(self):
+        origins = []
+        n = 10
+        origin = self
+        while origin:
+            origins.insert(0, origin)
+            origin = origin._parent
+            n -= 1
+            if n < 0:
+                break
         return origins
 
-    def set_child_of(self, parent_origin):
-        # avoid loops
-        assert self._parent_origin is None
-        assert parent_origin is not self
-        self._parent_origin = parent_origin
-        return True
+    def ancestry_str(self):
+        return '↪'.join([o.name() for o in self.ancestry()])
 
-class LineInfo(Origin):
-    def __init__(self, src_file, *name_items, **detail_items):
-        self.src_file = src_file
-        self.set_name(*name_items, **detail_items)
+    def highest_ancestor(self):
+        if self._parent:
+            return self._parent.highest_ancestor()
+        return self
 
-    def name(self):
-        l = get_line_for_src(self.src_file)
-        if l is not None:
-            return '%s:%s' % (self._name, l)
-        return super().name()
+    def log(self, *messages, _src=3, **named_items):
+        '''same as log.log() but passes this object to skip looking up an origin'''
+        log(*messages, _origin=self, _src=_src, **named_items)
+
+    def dbg(self, *messages, _src=3, **named_items):
+        '''same as log.dbg() but passes this object to skip looking up an origin'''
+        dbg(*messages, _origin=self, _src=_src, **named_items)
+
+    def err(self, *messages, _src=3, **named_items):
+        '''same as log.err() but passes this object to skip looking up an origin'''
+        err(*messages, _origin=self, _src=_src, **named_items)
 
 class SafeRedirectStdout:
     '''
@@ -407,7 +483,7 @@ class SafeRedirectStdout:
     _log_line_buf = None
 
     def __init__(self, origin):
-        self._origin = origin
+        self.origin = origin
 
     def write(self, message):
         lines = message.splitlines()
@@ -419,93 +495,34 @@ class SafeRedirectStdout:
         if not message.endswith('\n'):
             self._log_line_buf = lines[-1]
             lines = lines[:-1]
-        origins = self._origin.gather_origins()
         for line in lines:
-            self._origin._log(L_LOG, (line,), origins=origins)
+            _log(messages=(line,),
+                 origin=self.origin, level=L_LOG, src=2)
 
     def __getattr__(self, name):
         return sys.__stdout__.__getattribute__(name)
 
-
-def dbg(origin, category, *messages, **named_items):
-    _log_all_targets(origin, category, L_DBG, 2, messages, named_items)
-
-def log(origin, category, *messages, **named_items):
-    _log_all_targets(origin, category, L_LOG, 2, messages, named_items)
-
-def err(origin, category, *messages, **named_items):
-    _log_all_targets(origin, category, L_ERR, 2, messages, named_items)
-
-def trace(origin, category, exc_info):
-    _log_all_targets(origin, category, L_TRACEBACK, None,
-                     traceback.format_exception(*exc_info))
-
-def resolve_category(origin, category):
-    if category is not None:
-        return category
-    if not hasattr(origin, '_log_category'):
-        return None
-    return origin._log_category
-
-def exn_add_info(exc_info, origin, category=None):
-    etype, exception, tb = exc_info
-    if not hasattr(exception, 'origins'):
-        exception.origins = Origins()
-    if not hasattr(exception, 'category'):
-        # only remember the deepest category
-        exception.category = resolve_category(origin, category)
-    if not hasattr(exception, 'src'):
-        exception.src = get_src_from_tb(tb)
-    exception.origins.add(origin)
-    return False
-
-def log_exn(origin=None, category=None, exc_info=None):
-    if not (exc_info is not None and len(exc_info) == 3):
+def trace(exc_info=None, origin=None):
+    if exc_info is None:
         exc_info = sys.exc_info()
-        if not (exc_info is not None and len(exc_info) == 3):
-            raise RuntimeError('invalid call to log_exn() -- no valid exception info')
+    if origin is None:
+        origin = Origin.find_in_exc_info(exc_info)
+    _log(messages=traceback.format_exception(*exc_info),
+         origin=origin, level=L_TRACEBACK)
+
+def log_exn():
+    exc_info = sys.exc_info()
+    origin = Origin.find_in_exc_info(exc_info)
 
     etype, exception, tb = exc_info
-
-    # if there are origins recorded with the Exception, prefer that
-    if hasattr(exception, 'origins'):
-        origin = exception.origins
-
-    # if there is a category recorded with the Exception, prefer that
-    if hasattr(exception, 'category'):
-        category = exception.category
-
     if hasattr(exception, 'msg'):
         msg = exception.msg
     else:
         msg = str(exception)
 
-    if hasattr(exception, 'src'):
-        src = exception.src
-    else:
-        src = 2
-
-    trace(origin, category, exc_info)
-    _log_all_targets(origin, category, L_ERR, src,
-                     ('%s:' % str(etype.__name__), msg))
-
-
-class Origins(list):
-    def __init__(self, origin=None):
-        if origin is not None:
-            self.add(origin)
-
-    def add(self, origin):
-        if hasattr(origin, 'name'):
-            origin_str = origin.name()
-        else:
-            origin_str = repr(origin)
-        if origin_str is None:
-            raise RuntimeError('origin_str is None for %r' % origin)
-        self.insert(0, origin_str)
-
-    def __str__(self):
-        return '↪'.join(self)
+    trace(exc_info, origin=origin)
+    _log(messages=('%s:' % str(etype.__name__), msg),
+         origin=origin, level=L_ERR, src=get_src_from_exc_info(exc_info))
 
 
 def set_all_levels(level):

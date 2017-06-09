@@ -7,7 +7,7 @@ cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
 - no suite.conf
 cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
 cnf empty_dir: DBG: reading suite.conf
---- [PATH]/selftest/suite_test/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/empty_dir/suite.conf'
+cnf [PATH]/selftest/suite_test/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/empty_dir/suite.conf'  [empty_dir↪[PATH]/selftest/suite_test/empty_dir/suite.conf]
 - valid suite dir
 cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
 cnf test_suite: DBG: reading suite.conf
@@ -22,15 +22,15 @@ resources:
   - times: '2'
 
 - run hello world test
-cnf -: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test
-cnf -: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test
+cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir
 
 ---------------------------------------------------------------------
 trial test_suite
 ---------------------------------------------------------------------
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...
 tst test_suite: DBG: {combining='resources'}
-tst test_suite: DBG: {definition_conf={bts=[{'times': '1'}], ip_address=[{'times': '1'}], modem=[{'times': '2'}]}}  [test_suite↪(combining_scenarios='resources')↪test_suite]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'times': '1'}], ip_address=[{'times': '1'}], modem=[{'times': '2'}]}}  [test_suite↪{combining_scenarios='resources'}]
 tst test_suite: Reserving 1 x bts (candidates: 3)
 tst test_suite: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
@@ -83,7 +83,7 @@ trial test_suite
 trial test_suite test_error.py
 ----------------------------------------------
 tst test_error.py:[LINENR]: I am 'test_suite' / 'test_error.py:[LINENR]'  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]]
-tst test_error.py:[LINENR]: ERR: AssertionError: test_error.py:[LINENR]: assert False [test_error.py:[LINENR]]  [test_suite↪test_error.py:[LINENR]]  [suite.py:[LINENR]]
+tst test_error.py:[LINENR]: ERR: AssertionError: test_error.py:[LINENR]: assert False  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]: assert False]
 tst test_error.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_error.py:[LINENR]]  [suite.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite FAIL
@@ -92,7 +92,7 @@ FAIL: test_suite (fail: 1, skip: 5)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
-    FAIL: test_error.py (N.N sec) AssertionError: test_error.py:[LINENR]: assert False [test_error.py:[LINENR]]
+    FAIL: test_error.py (N.N sec) AssertionError: test_error.py:[LINENR]: assert False
     skip: test_fail.py
     skip: test_fail_raise.py
 
@@ -106,7 +106,7 @@ trial test_suite
 trial test_suite test_fail.py
 ----------------------------------------------
 tst test_fail.py:[LINENR]: I am 'test_suite' / 'test_fail.py:[LINENR]'  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
-tst test_fail.py:[LINENR]: ERR: EpicFail: This failure is expected  [test_suite↪test_fail.py:[LINENR]]  [suite.py:[LINENR]]
+tst test_fail.py:[LINENR]: ERR: EpicFail: This failure is expected  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
 tst test_fail.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail.py:[LINENR]]  [suite.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite FAIL
@@ -128,7 +128,7 @@ trial test_suite
 ----------------------------------------------
 trial test_suite test_fail_raise.py
 ----------------------------------------------
-tst test_fail_raise.py:[LINENR]: ERR: ExpectedFail: This failure is expected [test_fail_raise.py:[LINENR]]  [test_suite↪test_fail_raise.py:[LINENR]]  [suite.py:[LINENR]]
+tst test_fail_raise.py:[LINENR]: ERR: ExpectedFail: This failure is expected  [test_suite↪test_fail_raise.py:[LINENR]]  [test_fail_raise.py:[LINENR]: raise ExpectedFail('This failure is expected')]
 tst test_fail_raise.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail_raise.py:[LINENR]]  [suite.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite FAIL
@@ -139,6 +139,6 @@ FAIL: test_suite (fail: 1, skip: 5)
     skip: mo_sms.py
     skip: test_error.py (N.N sec)
     skip: test_fail.py (N.N sec)
-    FAIL: test_fail_raise.py (N.N sec) ExpectedFail: This failure is expected [test_fail_raise.py:[LINENR]]
+    FAIL: test_fail_raise.py (N.N sec) ExpectedFail: This failure is expected
 
 - graceful exit.

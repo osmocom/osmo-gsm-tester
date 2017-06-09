@@ -21,6 +21,8 @@
 # A test script can thus establish its context by doing:
 # from osmo_gsm_tester.test import *
 import time
+from . import log
+
 poll_funcs = []
 
 def register_poll_func(func):
@@ -38,7 +40,8 @@ def poll():
 
 def wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout, timestep):
     if not timeout or timeout < 0:
-        log_obj.raise_exn('wait() *must* time out at some point. timeout=%r' % timeout)
+        self = log_obj
+        raise log.Error('wait() *must* time out at some point.', timeout=timeout)
     if timestep < 0.1:
         timestep = 0.1
 
@@ -54,7 +57,8 @@ def wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout,
 
 def wait(log_obj, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
     if not wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout, timestep):
-        log_obj.raise_exn('Wait timeout')
+        log.ctx(log_obj)
+        raise log.Error('Wait timeout')
 
 def sleep(log_obj, seconds):
     assert seconds > 0.

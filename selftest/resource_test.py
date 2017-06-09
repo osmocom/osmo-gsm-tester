@@ -78,7 +78,7 @@ want = {
        'modem': [ { 'times': 2 } ],
      }
 
-origin = log.Origin('testowner')
+origin = log.Origin(None, 'testowner')
 
 resources = pool.reserve(origin, want)
 

@@ -29,8 +29,7 @@ class CtrlInterfaceExn(Exception):
 class OsmoCtrl(log.Origin):
 
     def __init__(self, host, port):
-        self.set_name('Ctrl', host=host, port=port)
-        self.set_log_category(log.C_BUS)
+        super().__init__(log.C_BUS, 'Ctrl', host=host, port=port)
         self.host = host
         self.port = port
         self.sck = None
@@ -79,12 +78,10 @@ class OsmoCtrl(log.Origin):
         self._send(getmsg)
 
     def __enter__(self):
-        super().__enter__()
         self.connect()
         return self
 
     def __exit__(self, *exc_info):
         self.disconnect()
-        super().__exit__(*exc_info)
 
 # vim: expandtab tabstop=4 shiftwidth=4

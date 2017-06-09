@@ -36,10 +36,9 @@ class OsmoBtsTrx(log.Origin):
     CONF_BTS_TRX = 'osmo-bts-trx.cfg'
 
     def __init__(self, suite_run, conf):
+        super().__init__(log.C_RUN, OsmoBtsTrx.BIN_BTS_TRX)
         self.suite_run = suite_run
         self.conf = conf
-        self.set_name(OsmoBtsTrx.BIN_BTS_TRX)
-        self.set_log_category(log.C_RUN)
         self.env = {}
 
     def remote_addr(self):

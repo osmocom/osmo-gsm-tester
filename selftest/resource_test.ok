@@ -13,8 +13,8 @@ cnf -: DBG: Found config file paths.conf as [PATH]/selftest/conf/paths.conf in .
 cnf -: DBG: [PATH]/selftest/conf/paths.conf: relative path ./test_work/state_dir is [PATH]/selftest/conf/test_work/state_dir
 cnf -: DBG: [PATH]/selftest/conf/paths.conf: relative path ./suite_test is [PATH]/selftest/conf/suite_test
 cnf -: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/state_dir
-cnf -: DBG: Found config file resources.conf as [PATH]/selftest/conf/resources.conf in ./conf which is [PATH]/selftest/conf
-cnf -: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/state_dir
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/conf/resources.conf in ./conf which is [PATH]/selftest/conf
+cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/state_dir
 *** all resources:
 {'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df063c',
             'arfcn': '512',

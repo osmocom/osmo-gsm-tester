@@ -1,5 +1,5 @@
 - Testing: fill a config file with values
-cnf Templates: DBG: rendering osmo-nitb.cfg.tmpl  [osmo-nitb.cfg.tmpl↪Templates]
+cnf Templates: DBG: rendering osmo-nitb.cfg.tmpl
 ! Configuration rendered by osmo-gsm-tester
 password foo
 !

@@ -32,10 +32,9 @@ class OsmoMsc(log.Origin):
     config = None
 
     def __init__(self, suite_run, hlr, mgcpgw, ip_address):
+        super().__init__(log.C_RUN, 'osmo-msc_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
-        self.set_log_category(log.C_RUN)
-        self.set_name('osmo-msc_%s' % ip_address.get('addr'))
         self.hlr = hlr
         self.mgcpgw = mgcpgw
 
@@ -100,12 +99,11 @@ class OsmoMsc(log.Origin):
 
     def imsi_attached(self, *imsis):
         attached = self.imsi_list_attached()
-        self.dbg('attached:', attached)
+        log.dbg('attached:', attached)
         return all([(imsi in attached) for imsi in imsis])
 
     def imsi_list_attached(self):
-        with self:
-            return OsmoMscCtrl(self).subscriber_list_active()
+        return OsmoMscCtrl(self).subscriber_list_active()
 
     def running(self):
         return not self.process.terminated()
@@ -117,8 +115,7 @@ class OsmoMscCtrl(log.Origin):
 
     def __init__(self, msc):
         self.msc = msc
-        self.set_name('CTRL(%s:%d)' % (self.msc.addr(), self.PORT))
-        self.set_child_of(msc)
+        super().__init__(log.C_BUS, 'CTRL(%s:%d)' % (self.msc.addr(), self.PORT))
 
     def ctrl(self):
         return osmo_ctrl.OsmoCtrl(self.msc.addr(), self.PORT)

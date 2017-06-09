@@ -33,9 +33,8 @@ class Process(log.Origin):
     killed = None
 
     def __init__(self, name, run_dir, popen_args, **popen_kwargs):
+        super().__init__(log.C_RUN, name)
         self.name_str = name
-        self.set_name(name)
-        self.set_log_category(log.C_RUN)
         self.run_dir = run_dir
         self.popen_args = popen_args
         self.popen_kwargs = popen_kwargs
@@ -62,23 +61,21 @@ class Process(log.Origin):
         return f
 
     def launch(self):
-        with self:
+        log.dbg('cd %r; %s %s' % (
+                os.path.abspath(str(self.run_dir)),
+                ' '.join(['%s=%r'%(k,v) for k,v in self.popen_kwargs.get('env', {}).items()]),
+                ' '.join(self.popen_args)))
 
-            self.dbg('cd %r; %s %s' % (
-                    os.path.abspath(str(self.run_dir)),
-                    ' '.join(['%s=%r'%(k,v) for k,v in self.popen_kwargs.get('env', {}).items()]),
-                    ' '.join(self.popen_args)))
-
-            self.process_obj = subprocess.Popen(
-                self.popen_args,
-                stdout=self.make_output_log('stdout'),
-                stderr=self.make_output_log('stderr'),
-                stdin=subprocess.PIPE,
-                shell=False,
-                cwd=self.run_dir.path,
-                **self.popen_kwargs)
-            self.set_name(self.name_str, pid=self.process_obj.pid)
-            self.log('Launched')
+        self.process_obj = subprocess.Popen(
+            self.popen_args,
+            stdout=self.make_output_log('stdout'),
+            stderr=self.make_output_log('stderr'),
+            stdin=subprocess.PIPE,
+            shell=False,
+            cwd=self.run_dir.path,
+            **self.popen_kwargs)
+        self.set_name(self.name_str, pid=self.process_obj.pid)
+        self.log('Launched')
 
     def _poll_termination(self, time_to_wait_for_term=5):
         wait_step = 0.001

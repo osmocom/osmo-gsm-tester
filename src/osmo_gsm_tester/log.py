@@ -309,7 +309,7 @@ class Origin:
     _name = None
     _origin_id = None
     _log_category = None
-    _parent_origin = None
+    _parent = None
 
     @staticmethod
     def find_on_stack(except_obj=None, f=None):
@@ -331,7 +331,7 @@ class Origin:
                 if log_ctx_obj is None:
                     log_ctx_obj = new_log_ctx_obj
                 else:
-                    log_ctx_obj.highest_ancestor()._parent_origin = new_log_ctx_obj
+                    log_ctx_obj.highest_ancestor()._set_parent(new_log_ctx_obj)
 
             obj = l.get('self')
             if obj and isinstance(obj, Origin) and (except_obj is not obj):
@@ -340,7 +340,7 @@ class Origin:
             f = f.f_back
 
         if (origin is not None) and (log_ctx_obj is not None):
-            log_ctx_obj.highest_ancestor()._parent_origin = origin
+            log_ctx_obj.highest_ancestor()._set_parent(origin)
         if log_ctx_obj is not None:
             return log_ctx_obj
         # may return None
@@ -358,7 +358,16 @@ class Origin:
         self._set_log_category(category)
         self._set_name(*name_items, **detail_items)
         if find_parent:
-            self._parent_origin = Origin.find_on_stack(except_obj=self)
+            self._set_parent(Origin.find_on_stack(except_obj=self))
+
+    def _set_parent(self, parent):
+        # make sure to avoid loops
+        p = parent
+        while p:
+            if p is self:
+                raise RuntimeError('Origin parent loop')
+            p = p._parent
+        self._parent = parent
 
     def _set_name(self, *name_items, **detail_items):
         if name_items:
@@ -399,7 +408,7 @@ class Origin:
         origin = self
         while origin:
             origins.insert(0, origin)
-            origin = origin._parent_origin
+            origin = origin._parent
             n -= 1
             if n < 0:
                 break
@@ -409,8 +418,8 @@ class Origin:
         return '↪'.join([o.name() for o in self.ancestry()])
 
     def highest_ancestor(self):
-        if self._parent_origin:
-            return self._parent_origin.highest_ancestor()
+        if self._parent:
+            return self._parent.highest_ancestor()
         return self
 
     def log(self, *messages, **named_items):

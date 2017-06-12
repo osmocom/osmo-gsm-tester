@@ -39,6 +39,7 @@ I_NETREG = 'org.ofono.NetworkRegistration'
 I_SMS = 'org.ofono.MessageManager'
 I_CALLMGR = 'org.ofono.VoiceCallManager'
 I_CALL = 'org.ofono.VoiceCall'
+I_SS = 'org.ofono.SupplementaryServices'
 
 # See https://github.com/intgr/ofono/blob/master/doc/network-api.txt#L78
 NETREG_ST_REGISTERED = 'registered'
@@ -644,5 +645,10 @@ class Modem(log.Origin):
 
     def log_info(self, *args, **kwargs):
         self.log(self.info(*args, **kwargs))
+
+    def ussd_send(self, command):
+        ss = self.dbus.interface(I_SS)
+        service_type, response = ss.Initiate(command)
+        return response
 
 # vim: expandtab tabstop=4 shiftwidth=4

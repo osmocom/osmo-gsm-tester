@@ -35,7 +35,7 @@ prompt = None
 Timeout = None
 
 def setup(suite_run, _test, ofono_client, suite_module, event_module):
-    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Failure, Timeout
+    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Timeout
     trial = suite_run.trial
     suite = suite_run
     test = _test

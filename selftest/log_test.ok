@@ -12,29 +12,29 @@
 tst: only category
 DBG: only level
         some-name(some='detail'): only origin
-only src  [log_test.py:70]
+only src  [log_test.py:69]
 - Testing log.style_change()
 no log format
 01:02:03: add time
 but no time format
 01:02:03: DBG: add level
 01:02:03 tst: DBG: add category
-01:02:03 tst: DBG: add src  [log_test.py:85]
-01:02:03 tst         some-name(some='detail'): DBG: add origin  [log_test.py:87]
+01:02:03 tst: DBG: add src  [log_test.py:84]
+01:02:03 tst         some-name(some='detail'): DBG: add origin  [log_test.py:86]
 - Testing origin_width
-01:02:03 tst               shortname: origin str set to 23 chars  [log_test.py:94]
-01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): long origin str  [log_test.py:96]
-01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): DBG: long origin str dbg  [log_test.py:97]
-01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): ERR: long origin str err  [log_test.py:98]
+01:02:03 tst               shortname: origin str set to 23 chars  [log_test.py:91]
+01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): long origin str  [log_test.py:93]
+01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): DBG: long origin str dbg  [log_test.py:94]
+01:02:03 tst very long name(and_some=(3, 'things', 'in a tuple'), some='details'): ERR: long origin str err  [log_test.py:95]
 - Testing log.Origin with omitted info
-01:02:03 tst                 LogTest: hello log, name implicit from class name  [log_test.py:103]
-01:02:03 ---           explicit_name: hello log, no category set  [log_test.py:107]
-01:02:03 ---                 LogTest: hello log, no category nor name set  [log_test.py:110]
-01:02:03 ---                 LogTest: DBG: debug message, no category nor name set  [log_test.py:113]
+01:02:03 tst                 LogTest: hello log, name implicit from class name  [log_test.py:99]
+01:02:03 ---           explicit_name: hello log, no category set  [log_test.py:103]
+01:02:03 ---                 LogTest: hello log, no category nor name set  [log_test.py:107]
+01:02:03 ---                 LogTest: DBG: debug message, no category nor name set  [log_test.py:110]
 - Testing logging of Exceptions, tracing origins
 nested print just prints
-01:02:03 tst level3: nested log()  [level1↪level2↪level3]  [log_test.py:135]
-01:02:03 tst level2: nested l2 log() from within l3 scope  [level1↪level2]  [log_test.py:136]
-01:02:03 tst level3: ERR: ValueError: bork  [level1↪level2↪level3]  [log_test.py:137: raise ValueError('bork')]
+01:02:03 tst level3: nested log()  [level1↪level2↪level3]  [log_test.py:132]
+01:02:03 tst level2: nested l2 log() from within l3 scope  [level1↪level2]  [log_test.py:133]
+01:02:03 tst level3: ERR: ValueError: bork  [level1↪level2↪level3]  [log_test.py:134: raise ValueError('bork')]
 - Disallow origin loops
 disallowed successfully

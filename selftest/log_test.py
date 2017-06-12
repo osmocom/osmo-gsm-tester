@@ -45,7 +45,6 @@ class LogTest(log.Origin):
         super().__init__(log.C_TST, *name_items, **detail_items)
 
 t = LogTest('some', 'name', some="detail")
-
 	
 t.log("hello log")
 t.err("hello err")
@@ -86,8 +85,6 @@ t.dbg("add src")
 log.style_change(origin=True)
 t.dbg("add origin")
 
-# some space to keep source line numbers identical to previous code
-
 print('- Testing origin_width')
 t = LogTest('shortname')
 log.style(origin_width=23, time_fmt=fake_time)
@@ -97,7 +94,6 @@ t.log("long origin str")
 t.dbg("long origin str dbg")
 t.err("long origin str err")
 
-
 print('- Testing log.Origin with omitted info')
 t = LogTest()
 t.log("hello log, name implicit from class name")
@@ -105,6 +101,7 @@ t.log("hello log, name implicit from class name")
 t = LogTest('explicit_name')
 t._set_log_category(None)
 t.log("hello log, no category set")
+
 t = LogTest()
 t._set_log_category(None)
 t.log("hello log, no category nor name set")

@@ -4,7 +4,7 @@ base="$PWD"
 name="osmo-msc"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-build_repo libosmocore
+build_repo libosmocore neels/aoip # TEMPORARY BRANCH
 build_repo libosmo-abis
 build_repo libosmo-netif
 build_repo openggsn

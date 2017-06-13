@@ -398,7 +398,7 @@ class Modem(log.Origin):
 
     def schedule_scan_register(self, mcc_mnc):
         if self.register_attempts > NETREG_MAX_REGISTER_ATTEMPTS:
-            self.raise_exn('Failed to find Network Operator', mcc_mnc=mcc_mnc, attempts=self.register_attempts)
+            raise log.Error('Failed to find Network Operator', mcc_mnc=mcc_mnc, attempts=self.register_attempts)
         self.register_attempts += 1
         netreg = self.dbus.interface(I_NETREG)
         self.dbg('Scanning for operators...')
@@ -473,7 +473,7 @@ class Modem(log.Origin):
     def connect(self, mcc_mnc=None):
         'Connect to MCC+MNC'
         if (mcc_mnc is not None) and (len(mcc_mnc) != 2 or None in mcc_mnc):
-            self.raise_exn('mcc_mnc value is invalid. It should be None or contain both valid mcc and mnc values:', mcc_mnc=mcc_mnc)
+            raise log.Error('mcc_mnc value is invalid. It should be None or contain both valid mcc and mnc values:', mcc_mnc=mcc_mnc)
         self.power_cycle()
         self.register_attempts = 0
         if self.is_connected(mcc_mnc):

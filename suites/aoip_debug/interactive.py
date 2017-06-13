@@ -5,9 +5,11 @@ bts = suite.bts()
 mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
 msc = suite.msc(hlr, mgcpgw)
 bsc = suite.bsc(msc)
+stp = suite.stp()
 modems = suite.modems(int(prompt('How many modems?')))
 
 hlr.start()
+stp.start()
 msc.start()
 mgcpgw.start()
 

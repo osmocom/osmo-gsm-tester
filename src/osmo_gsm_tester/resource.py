@@ -508,11 +508,11 @@ class ReservedResources(log.Origin):
                     my_item.pop(USED_KEY)
 
     def put_all(self):
+        if not self.reserved:
+            return
         for key, item_list in self.reserved.items():
-            my_list = self.get(key)
-            for my_item in my_list:
-                if my_item.get(USED_KEY):
-                    my_item.pop(USED_KEY)
+            for item in item_list:
+                item.pop(USED_KEY, None)
 
     def free(self):
         if self.reserved:

@@ -256,6 +256,9 @@ class SuiteRun(log.Origin):
                     continue
                 self.current_test = test
                 test.run()
+                self.stop_processes()
+                self.objects_cleanup()
+                self.reserved_resources.put_all()
         except Exception:
             log.log_exn()
         except BaseException as e:
@@ -303,10 +306,8 @@ class SuiteRun(log.Origin):
         self._processes.insert(0, process)
 
     def stop_processes(self):
-        if not self._processes:
-            return
-        for process in self._processes:
-            process.terminate()
+        while self._processes:
+            self._processes.pop().terminate()
 
     def free_resources(self):
         if self.reserved_resources is None:

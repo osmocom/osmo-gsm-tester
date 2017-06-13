@@ -418,9 +418,11 @@ class Modem(log.Origin):
         # the registering succeeds while we are still waiting for Scan() to finsih.
         # So far the easiest seems to check if we are now registered and
         # otherwise schedule a scan again.
-        self.err('Scan() failed:', e)
+        self.err('Scan() failed, retrying if needed:', e)
         if not self.is_connected(mcc_mnc):
             self.schedule_scan_register(mcc_mnc)
+        else:
+            self.log('Already registered with network', mcc_mnc)
 
     def scan_cb_register_automatic(self, scanned_operators, mcc_mnc):
         self.dbg('scanned operators: ', scanned_operators);

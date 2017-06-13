@@ -385,6 +385,7 @@ class Modem(log.Origin):
         netreg = self.dbus.interface(I_NETREG)
         prop = netreg.GetProperties()
         status = prop.get('Status')
+        self.dbg('status:', status)
         if not (status == NETREG_ST_REGISTERED or status == NETREG_ST_ROAMING):
             return False
         if mcc_mnc is None: # Any network is fine and we are registered.
@@ -406,9 +407,20 @@ class Modem(log.Origin):
         # finished.
         register_func = self.scan_cb_register_automatic if mcc_mnc is None else self.scan_cb_register
         result_handler = lambda obj, result, user_data: defer(register_func, result, user_data)
-        error_handler = lambda obj, e, user_data: defer(self.raise_exn, 'Scan() failed:', e)
+        error_handler = lambda obj, e, user_data: defer(self.scan_cb_error_handler, e, mcc_mnc)
         dbus_async_call(netreg, netreg.Scan, timeout=30, result_handler=result_handler,
                         error_handler=error_handler, user_data=mcc_mnc)
+
+    def scan_cb_error_handler(self, e, mcc_mnc):
+        # It was detected that Scan() method can fail for some modems on some
+        # specific circumstances. For instance it fails with org.ofono.Error.Failed
+        # if the modem starts to register internally after we started Scan() and
+        # the registering succeeds while we are still waiting for Scan() to finsih.
+        # So far the easiest seems to check if we are now registered and
+        # otherwise schedule a scan again.
+        self.err('Scan() failed:', e)
+        if not self.is_connected(mcc_mnc):
+            self.schedule_scan_register(mcc_mnc)
 
     def scan_cb_register_automatic(self, scanned_operators, mcc_mnc):
         self.dbg('scanned operators: ', scanned_operators);

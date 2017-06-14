@@ -36,7 +36,7 @@ class OsmoStp(log.Origin):
 
     def start(self):
         self.log('Starting osmo-stp')
-        self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
         # NOTE: libosmo-sccp provides osmo-stp and is built as a dependency of

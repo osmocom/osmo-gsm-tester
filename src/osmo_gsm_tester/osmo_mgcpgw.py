@@ -38,7 +38,7 @@ class OsmoMgcpgw(log.Origin):
 
     def start(self):
         self.log('Starting osmo-mgcpgw')
-        self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-msc')))
         binary = inst.child('bin', 'osmo-bsc_mgcp')

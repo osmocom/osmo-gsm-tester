@@ -39,7 +39,7 @@ class OsmoBsc(log.Origin):
 
     def start(self):
         self.log('Starting osmo-bsc')
-        self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
         # NOTE: While OsmoMSC and OsmoBSC live in the same git repository, the

@@ -45,7 +45,7 @@ class SysmoBts(log.Origin):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         log.log('Starting sysmoBTS to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(SysmoBts.BTS_SYSMO_BIN)))

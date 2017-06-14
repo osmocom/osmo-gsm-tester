@@ -76,6 +76,8 @@ class Test(log.Origin):
     PASS = 'pass'
     FAIL = 'FAIL'
 
+    _run_dir = None
+
     def __init__(self, suite_run, test_basename):
         self.basename = test_basename
         super().__init__(log.C_TST, self.basename)
@@ -86,6 +88,11 @@ class Test(log.Origin):
         self.duration = 0
         self.fail_type = None
         self.fail_message = None
+
+    def get_run_dir(self):
+        if self._run_dir is None:
+            self._run_dir = util.Dir(self.suite_run.get_run_dir().new_dir(self._name))
+        return self._run_dir
 
     def run(self):
         try:
@@ -165,6 +172,7 @@ class SuiteRun(log.Origin):
     _resource_requirements = None
     _config = None
     _processes = None
+    _run_dir = None
 
     def __init__(self, trial, suite_scenario_str, suite_definition, scenarios=[]):
         super().__init__(log.C_TST, suite_scenario_str)
@@ -209,6 +217,16 @@ class SuiteRun(log.Origin):
             config.combine(combination, c)
         return combination
 
+    def get_run_dir(self):
+        if self._run_dir is None:
+            self._run_dir = util.Dir(self.trial.get_run_dir().new_dir(self.name()))
+        return self._run_dir
+
+    def get_test_run_dir(self):
+        if self.current_test:
+            return self.current_test.get_run_dir()
+        return self.get_run_dir()
+
     def resource_requirements(self):
         if self._resource_requirements is None:
             self._resource_requirements = self.combined('resources')
@@ -236,6 +254,7 @@ class SuiteRun(log.Origin):
                 if names and not test.name() in names:
                     test.set_skip()
                     continue
+                self.current_test = test
                 test.run()
         except Exception:
             log.log_exn()

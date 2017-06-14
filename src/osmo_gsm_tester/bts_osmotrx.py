@@ -51,7 +51,7 @@ class OsmoBtsTrx(log.Origin):
         self.suite_run.poll()
 
         self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.trial.get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoBtsTrx.BIN_BTS_TRX)))

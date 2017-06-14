@@ -24,6 +24,11 @@ import time
 import pprint
 import sys
 
+# Required for Gio.Cancellable.
+# See https://lazka.github.io/pgi-docs/Gio-2.0/classes/Cancellable.html#Gio.Cancellable
+from gi.module import get_introspection_module
+Gio = get_introspection_module('Gio')
+
 from gi.repository import GLib
 glib_main_loop = GLib.MainLoop()
 glib_main_ctx = glib_main_loop.get_context()
@@ -90,7 +95,10 @@ def _async_result_handler(obj, result, user_data):
     try:
         ret = obj.call_finish(result)
     except Exception as e:
-        # return exception as value
+        if isinstance(e, GLib.Error) and e.code == Gio.IOErrorEnum.CANCELLED:
+            log.dbg('DBus method cancelled')
+            return
+
         if error_callback:
             error_callback(obj, e, real_user_data)
         else:
@@ -108,7 +116,7 @@ def _async_result_handler(obj, result, user_data):
 
 def dbus_async_call(instance, proxymethod, *proxymethod_args,
                     result_handler=None, error_handler=None,
-                    user_data=None, timeout=30,
+                    user_data=None, timeout=30, cancellable=None,
                     **proxymethod_kwargs):
     '''pydbus doesn't support asynchronous methods. This method adds support for
     it until pydbus implements it'''
@@ -122,12 +130,13 @@ def dbus_async_call(instance, proxymethod, *proxymethod_args,
     timeout = timeout * 1000
     user_data = (result_handler, error_handler, user_data)
 
+    # See https://lazka.github.io/pgi-docs/Gio-2.0/classes/DBusProxy.html#Gio.DBusProxy.call
     ret = instance._bus.con.call(
         instance._bus_name, instance._path,
         proxymethod._iface_name, proxymethod.__name__,
         GLib.Variant(proxymethod._sinargs, proxymethod_args),
         GLib.VariantType.new(proxymethod._soutargs),
-        0, timeout, None,
+        0, timeout, cancellable,
         _async_result_handler, user_data)
 
 class ModemDbusInteraction(log.Origin):
@@ -316,6 +325,8 @@ class Modem(log.Origin):
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.path)
         self.register_attempts = 0
+        # one Cancellable can handle several concurrent methods.
+        self.cancellable = Gio.Cancellable.new()
         self.dbus.required_signals = {
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
                 I_NETREG: ( ('PropertyChanged', self._on_netreg_property_changed), ),
@@ -323,6 +334,13 @@ class Modem(log.Origin):
         self.dbus.watch_interfaces()
 
     def cleanup(self):
+        self.dbg('cleanup')
+        if self.cancellable:
+            self.cancellable.cancel()
+            # Cancel op is applied as a signal coming from glib mainloop, so we
+            # need to run it and wait for the callbacks to handle cancellations.
+            poll_glib()
+            self.cancellable = None
         self.dbus.cleanup()
         self.dbus = None
 
@@ -408,8 +426,9 @@ class Modem(log.Origin):
         register_func = self.scan_cb_register_automatic if mcc_mnc is None else self.scan_cb_register
         result_handler = lambda obj, result, user_data: defer(register_func, result, user_data)
         error_handler = lambda obj, e, user_data: defer(self.scan_cb_error_handler, e, mcc_mnc)
-        dbus_async_call(netreg, netreg.Scan, timeout=30, result_handler=result_handler,
-                        error_handler=error_handler, user_data=mcc_mnc)
+        dbus_async_call(netreg, netreg.Scan, timeout=30, cancellable=self.cancellable,
+                        result_handler=result_handler, error_handler=error_handler,
+                        user_data=mcc_mnc)
 
     def scan_cb_error_handler(self, e, mcc_mnc):
         # It was detected that Scan() method can fail for some modems on some

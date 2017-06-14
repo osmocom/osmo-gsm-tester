@@ -422,7 +422,7 @@ def load_suite_scenario_str(suite_scenario_str):
 
 def bts_obj(suite_run, conf):
     bts_type = conf.get('type')
-    log.dbg(None, None, 'create BTS object', type=bts_type)
+    log.dbg('create BTS object', type=bts_type)
     bts_class = resource.KNOWN_BTS_TYPES.get(bts_type)
     if bts_class is None:
         raise RuntimeError('No such BTS type is defined: %r' % bts_type)

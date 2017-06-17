@@ -64,6 +64,9 @@ class OsmoBtsTrx(log.Origin):
         self.log('Waiting for osmo-trx to start up...')
         event_loop.wait(self, self.trx_ready)
         self.proc_trx.log(self.proc_trx.get_stdout_tail(1))
+        self.log('Give some grace time (hopefully to avoid clock skews)')
+        event_loop.sleep(self, 5)
+
         self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr())

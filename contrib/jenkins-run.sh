@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e -x
+base="$PWD"
 
 # remove older trial dirs and *-run.tgz, if any
 trial_dir_prefix="trial-"
@@ -26,6 +27,8 @@ fi
 rm -rf "$trial_dir/inst" || true
 
 # tar up all results for archiving (optional)
-tar czf "$trial_dir"-run.tgz "$trial_dir"
+cd "$trial_dir"
+tar czf "$base/${trial_dir}-run.tgz" "$(readlink last_run)"
+tar czf "$base/${trial_dir}-bin.tgz" *.md5 *.tgz
 
 exit $exit_code

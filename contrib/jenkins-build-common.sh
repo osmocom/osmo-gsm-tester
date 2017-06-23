@@ -73,18 +73,17 @@ have_repo() {
   fi
 
   cd "$base"
-  if [ ! -d "$repo" ]; then
-    git clone "$git_url/$repo" "$repo"
-  fi
-  cd "$repo"
-  git fetch origin
+  rm -rf "$repo"
+  git clone "$git_url/$repo" "$repo"
 
-  # Figure out whether we need to prepend origin/ to find branches in upstream
+  cd "$repo"
+
+  # Figure out whether we need to prepend origin/ to find branches in upstream.
+  # Doing this allows using git hashes instead of a branch name.
   if git rev-parse "origin/$branch"; then
     branch="origin/$branch"
   fi
 
-  git branch -D build_branch || true
   git checkout -b build_branch "$branch"
   rm -rf *
   git reset --hard "$branch"

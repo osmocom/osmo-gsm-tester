@@ -77,7 +77,6 @@ have_repo() {
     git clone "$git_url/$repo" "$repo"
   fi
   cd "$repo"
-  rm -rf *
   git fetch origin
 
   # Figure out whether we need to prepend origin/ to find branches in upstream
@@ -87,6 +86,7 @@ have_repo() {
 
   git branch -D build_branch || true
   git checkout -b build_branch "$branch"
+  rm -rf *
   git reset --hard "$branch"
 
   git rev-parse HEAD

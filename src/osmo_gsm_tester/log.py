@@ -23,6 +23,7 @@ import time
 import traceback
 import contextlib
 import atexit
+from datetime import datetime # we need this for strftime as the one from time doesn't carry microsecond info
 from inspect import getframeinfo, stack
 
 from .util import is_dict
@@ -80,8 +81,8 @@ def _log(messages=[], named_items={}, origin=None, category=None, level=L_LOG, s
         target.log(origin, category, level, src, messages, named_items)
 
 
-LONG_DATEFMT = '%Y-%m-%d_%H:%M:%S'
-DATEFMT = '%H:%M:%S'
+LONG_DATEFMT = '%Y-%m-%d_%H:%M:%S.%f'
+DATEFMT = '%H:%M:%S.%f'
 
 # may be overridden by regression tests
 get_process_id = lambda: '%d-%d' % (os.getpid(), time.time())
@@ -105,7 +106,7 @@ class LogTarget:
     all_levels = None
 
     # redirected by logging test
-    get_time_str = lambda self: time.strftime(self.log_time_fmt)
+    get_time_str = lambda self: datetime.now().strftime(self.log_time_fmt)
 
     # sink that gets each complete logging line
     log_write_func = None

@@ -21,6 +21,7 @@ import os
 import time
 import subprocess
 import signal
+from datetime import datetime
 
 from . import log, test, event_loop
 from .util import Dir
@@ -55,7 +56,7 @@ class Process(log.Origin):
         path = self.run_dir.new_child(name)
         f = open(path, 'w')
         self.dbg(path)
-        f.write('(launched: %s)\n' % time.strftime(log.LONG_DATEFMT))
+        f.write('(launched: %s)\n' % datetime.now().strftime(log.LONG_DATEFMT))
         f.flush()
         self.outputs[name] = (path, f)
         return f

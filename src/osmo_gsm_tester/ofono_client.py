@@ -167,6 +167,7 @@ class ModemDbusInteraction(log.Origin):
         self.connected_signals = util.listdict()
 
     def cleanup(self):
+        self.set_powered(False)
         self.unwatch_interfaces()
         for interface_name in list(self.connected_signals.keys()):
             self.remove_signals(interface_name)

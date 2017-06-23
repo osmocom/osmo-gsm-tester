@@ -81,10 +81,12 @@ have_repo() {
   git fetch origin
 
   # Figure out whether we need to prepend origin/ to find branches in upstream
-  if ! git rev-parse "$branch"; then
+  if git rev-parse "origin/$branch"; then
     branch="origin/$branch"
   fi
 
+  git branch -D build_branch || true
+  git checkout -b build_branch "$branch"
   git reset --hard "$branch"
 
   git rev-parse HEAD

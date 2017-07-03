@@ -394,7 +394,7 @@ class SuiteRun(log.Origin):
         sys.__stdout__.write(msg)
         sys.__stdout__.write('\n')
         sys.__stdout__.flush()
-        entered = util.input_polling('> ', self.poll)
+        entered = util.input_polling('> ', event_loop.poll)
         self.log('prompt entered:', repr(entered))
         return entered
 

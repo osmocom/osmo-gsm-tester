@@ -379,7 +379,7 @@ class SuiteRun(log.Origin):
                     process.log_stdout_tail()
                     process.log_stderr_tail()
                     log.ctx(process)
-                    raise log.Error('Process ended prematurely')
+                    raise log.Error('Process ended prematurely: %s' % process.name())
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

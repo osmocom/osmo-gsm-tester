@@ -3,7 +3,8 @@
 # This test checks following use-cases:
 # * SMPP interface of SMSC accepts SMPP clients (ESMEs) with password previously
 #   defined in its configuration file.
-# * ESME can send an SMS to an already registered MS when SMSC is in 'forward' mode.
+# * When SMS is sent in 'transaction' mode, ESME can send an SMS to an already registered MS.
+# * When SMS is sent in 'transaction' mode, ESME fails to send an SMS to non registered MS.
 
 from osmo_gsm_tester.test import *
 
@@ -31,19 +32,17 @@ wait(nitb.subscriber_attached, ms)
 
 print('sending first sms...')
 msg = Sms(esme.msisdn, ms.msisdn, 'smpp send message')
-esme.sms_send(msg)
+esme.sms_send(msg, esme.MSGMODE_TRANSACTION)
 wait(ms.sms_was_received, msg)
 
 print('sending second sms (unicode chars not in gsm aplhabet)...')
 msg = Sms(esme.msisdn, ms.msisdn, 'chars:[кизаçйж]')
-esme.sms_send(msg)
+esme.sms_send(msg, esme.MSGMODE_TRANSACTION)
 wait(ms.sms_was_received, msg)
 
-
-# FIXME: This test is not failing with error but succeeds, need to check why: (forward vs store policy?)
-# wrong_msisdn = ms.msisdn + esme.msisdn
-# print('sending third sms (with wrong msisdn %s)' % wrong_msisdn)
-# msg = Sms(esme.msisdn, wrong_msisdn, 'smpp message with wrong dest')
-# esme.run_method_expect_failure(SMPP_ESME_RINVDSTADR, esme.sms_send, msg)
+wrong_msisdn = ms.msisdn + esme.msisdn
+print('sending third sms (with wrong msisdn %s)' % wrong_msisdn)
+msg = Sms(esme.msisdn, wrong_msisdn, 'smpp message with wrong dest')
+esme.run_method_expect_failure(SMPP_ESME_RINVDSTADR, esme.sms_send_wait_resp, msg, esme.MSGMODE_TRANSACTION)
 
 esme.disconnect()

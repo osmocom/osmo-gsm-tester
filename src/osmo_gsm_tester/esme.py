@@ -19,6 +19,7 @@
 
 import smpplib.gsm
 import smpplib.client
+import smpplib.command
 import smpplib.consts
 import smpplib.exceptions
 
@@ -35,6 +36,9 @@ class Esme(log.Origin):
     client = None
     smsc = None
 
+    MSGMODE_TRANSACTION = smpplib.consts.SMPP_MSGMODE_FORWARD
+    MSGMODE_STOREFORWARD = smpplib.consts.SMPP_MSGMODE_STOREFORWARD
+
     def __init__(self, msisdn):
         self.msisdn = msisdn
         # Get last characters of msisdn to stay inside MAX_SYS_ID_LEN. Similar to modulus operator.
@@ -44,6 +48,8 @@ class Esme(log.Origin):
         self.connected = False
         self.bound = False
         self.listening = False
+        self.references_pending_receipt = []
+        self.next_user_message_reference = 1
 
     def __del__(self):
         try:
@@ -89,9 +95,8 @@ class Esme(log.Origin):
             self.disconnect()
         self.client = smpplib.client.Client(host, port, timeout=None)
         self.client.set_message_sent_handler(
-            lambda pdu: self.dbg('message sent:', repr(pdu)) )
-        self.client.set_message_received_handler(
-            lambda pdu: self.dbg('message received:', repr(pdu)) )
+            lambda pdu: self.dbg('Unhandled submit_sm_resp message:', pdu.sequence) )
+        self.client.set_message_received_handler(self._message_received_handler)
         self.client.connect()
         self.connected = True
         self.client.bind_transceiver(system_id=self.system_id, password=self.password)
@@ -108,6 +113,19 @@ class Esme(log.Origin):
             self.client.disconnect()
             self.connected = False
 
+    def _message_received_handler(self, pdu, *args):
+        self.dbg('message received:', seq=pdu.sequence)
+        if isinstance(pdu, smpplib.command.AlertNotification):
+            self.dbg('message received:  AlertNotification:', ms_availability_status=pdu.ms_availability_status)
+        elif isinstance(pdu, smpplib.command.DeliverSM):
+            self.dbg('message received:', user_message_reference=pdu.user_message_reference, references_pending_receipt=self.references_pending_receipt)
+            self.references_pending_receipt.remove(pdu.user_message_reference)
+
+    def receipt_was_received(self, umref):
+        # return umref not in self.references_pending_receipt
+        self.log('FIXME: wait_receipt disabled because receipts are not received, see OsmoNITB #2353')
+        return True
+
     def run_method_expect_failure(self, errcode, method, *args):
         try:
             method(*args)
@@ -116,11 +134,14 @@ class Esme(log.Origin):
         except smpplib.exceptions.PDUError as e:
             if e.args[1] != errcode:
                 raise e
+            self.dbg('Expected failure triggered: %d' % errcode)
 
-    def sms_send(self, sms_obj):
+    def sms_send(self, sms_obj, mode, receipt=False):
         parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(str(sms_obj))
-
+        seqs = []
         self.log('Sending SMS "%s" to %s' % (str(sms_obj), sms_obj.dst_msisdn()))
+        umref = self.next_user_message_reference
+        self.next_user_message_reference += 1
         for part in parts:
             pdu = self.client.send_message(
                 source_addr_ton=smpplib.consts.SMPP_TON_INTL,
@@ -131,8 +152,30 @@ class Esme(log.Origin):
                 destination_addr=sms_obj.dst_msisdn(),
                 short_message=part,
                 data_coding=encoding_flag,
-                esm_class=smpplib.consts.SMPP_MSGMODE_FORWARD,
-                registered_delivery=False,
+                esm_class=mode,
+                registered_delivery=receipt,
+                user_message_reference=umref,
                 )
+
+            self.dbg('sent part with seq', pdu.sequence)
+            seqs.append(pdu.sequence)
+        if receipt:
+            self.references_pending_receipt.append(umref)
+        return umref, seqs
+
+    def _process_pdus_pending(self, pdu, **kwargs):
+        self.dbg('message sent resp with seq', pdu.sequence, ', pdus_pending:', self.pdus_pending)
+        self.pdus_pending.remove(pdu.sequence)
+
+    def sms_send_wait_resp(self, sms_obj, mode, receipt=False):
+        old_func = self.client.message_sent_handler
+        try:
+            umref, self.pdus_pending = self.sms_send(sms_obj, mode, receipt)
+            self.dbg('pdus_pending:', self.pdus_pending)
+            self.client.set_message_sent_handler(self._process_pdus_pending)
+            event_loop.wait(self, lambda: len(self.pdus_pending) == 0, timeout=10)
+            return umref
+        finally:
+            self.client.set_message_sent_handler(old_func)
 
 # vim: expandtab tabstop=4 shiftwidth=4

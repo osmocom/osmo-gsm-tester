@@ -139,10 +139,6 @@ build_repo() {
 }
 
 create_bin_tgz() {
-  # don't package documentation -- the libosmocore docs can be up to 16 Mb large,
-  # a significant amount compared to the binaries
-  rm -rf "$prefix_real/share/doc/"{libosmocore,libosmo-sccp} || true
-
   # build the archive that is going to be copied to the tester
   cd "$prefix_real"
   this="$name.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"

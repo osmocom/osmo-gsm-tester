@@ -7,7 +7,7 @@ name="osmo-bts-trx"
 # for gsm_data_shared.*
 have_repo openbsc
 
-build_repo libosmocore
+build_repo libosmocore --disable-doxygen
 build_repo libosmo-abis
 build_repo osmo-trx --without-sse
 build_repo osmo-bts --enable-trx --with-openbsc=$base/openbsc/openbsc/include

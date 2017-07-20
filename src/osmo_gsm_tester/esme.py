@@ -165,7 +165,8 @@ class Esme(log.Origin):
 
     def _process_pdus_pending(self, pdu, **kwargs):
         self.dbg('message sent resp with seq', pdu.sequence, ', pdus_pending:', self.pdus_pending)
-        self.pdus_pending.remove(pdu.sequence)
+        if pdu.sequence in self.pdus_pending:
+            self.pdus_pending.remove(pdu.sequence)
 
     def sms_send_wait_resp(self, sms_obj, mode, receipt=False):
         old_func = self.client.message_sent_handler

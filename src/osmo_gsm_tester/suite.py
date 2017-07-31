@@ -196,7 +196,10 @@ class SuiteRun(log.Origin):
     def objects_cleanup(self):
         while self.objects_to_clean_up:
             obj = self.objects_to_clean_up.pop()
-            obj.cleanup()
+            try:
+                obj.cleanup()
+            except Exception:
+                log.log_exn()
 
     def mark_start(self):
         self.start_timestamp = time.time()

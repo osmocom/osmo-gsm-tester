@@ -101,7 +101,7 @@ class Esme(log.Origin):
         self.connected = True
         self.client.bind_transceiver(system_id=self.system_id, password=self.password)
         self.bound = True
-        self.log('Connected and bound successfully. Starting to listen')
+        self.log('Connected and bound successfully to %s (%s:%d). Starting to listen.' % (self.system_id, host, port))
         self.start_listening()
 
     def disconnect(self):

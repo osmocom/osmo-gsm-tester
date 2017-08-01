@@ -13,6 +13,14 @@ ctrl
 e1_input
  e1_line 0 driver ipa
  ipa bind ${bsc.ip_address.addr}
+cs7 instance 1
+ point-code 0.0.2
+ sccp-address bsc_local
+  point-code 0.0.2
+  routing-indicator PC
+ sccp-address msc_remote
+  point-code 0.0.1
+  routing-indicator PC
 network
  network country code ${bsc.net.mcc}
  mobile network code ${bsc.net.mnc}
@@ -79,3 +87,5 @@ msc
  amr-config 5_90k allowed
  amr-config 5_15k forbidden
  amr-config 4_75k forbidden
+ msc-addr msc_remote
+ bsc-addr bsc_local

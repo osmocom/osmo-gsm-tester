@@ -16,9 +16,13 @@ network
  auth policy ${msc.net.auth_policy}
  location updating reject cause 13
  encryption ${msc.net.encryption}
+cs7 instance 0
+ point-code 0.0.1
 msc
   mgcpgw remote-ip ${mgcpgw.ip_address.addr}
   assign-tmsi
+ cs7-instance-iu 0
+ cs7-instance-a 0
 ctrl
  bind ${msc.ip_address.addr}
 smpp

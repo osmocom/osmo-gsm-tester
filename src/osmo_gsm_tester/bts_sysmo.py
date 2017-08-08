@@ -119,7 +119,12 @@ class SysmoBts(log.Origin):
 
         values = { 'osmo_bts_sysmo': config.get_defaults('osmo_bts_sysmo') }
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, { 'osmo_bts_sysmo': { 'oml_remote_ip': self.bsc.addr() } })
+        config.overlay(values, {
+                        'osmo_bts_sysmo': {
+                            'oml_remote_ip': self.bsc.addr(),
+                            'pcu_socket_path': os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
+                        }
+        })
         config.overlay(values, { 'osmo_bts_sysmo': self.conf })
 
         self.dbg('SYSMOBTS CONFIG:\n' + pprint.pformat(values))

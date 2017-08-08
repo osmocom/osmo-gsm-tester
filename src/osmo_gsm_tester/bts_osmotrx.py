@@ -95,8 +95,13 @@ class OsmoBtsTrx(log.Origin):
 
         values = dict(osmo_bts_trx=config.get_defaults('osmo_bts_trx'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(osmo_bts_trx=dict(oml_remote_ip=self.bsc.addr())))
-        config.overlay(values, dict(osmo_bts_trx=self.conf))
+        config.overlay(values, {
+                        'osmo_bts_trx': {
+                            'oml_remote_ip': self.bsc.addr(),
+                            'pcu_socket_path': os.path.join(str(self.run_dir), 'pcu_bts')
+                        }
+        })
+        config.overlay(values, { 'osmo_bts_trx': self.conf })
 
         self.dbg('OSMO-BTS-TRX CONFIG:\n' + pprint.pformat(values))
 

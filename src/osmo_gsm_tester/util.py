@@ -44,7 +44,7 @@ def ip_to_iface(ip):
             proc = subprocess.Popen(['ip', 'addr', 'show', 'dev', iface], stdout=subprocess.PIPE, universal_newlines=True)
             for line in proc.stdout.readlines():
                 if 'inet' in line and ' ' + ip + '/' in line:
-                    return iface
+                    return line.split()[-1]
     except Exception as e:
         pass
     return None

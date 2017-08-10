@@ -52,6 +52,9 @@ class Esme(log.Origin):
         self.next_user_message_reference = 1
 
     def __del__(self):
+        self.cleanup()
+
+    def cleanup(self):
         try:
             self.disconnect()
         except smpplib.exceptions.ConnectionError:

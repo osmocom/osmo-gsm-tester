@@ -368,6 +368,7 @@ class SuiteRun(log.Origin):
 
     def esme(self):
         esme_obj = esme.Esme(self.msisdn())
+        self.register_for_cleanup(esme_obj)
         return esme_obj
 
     def msisdn(self):

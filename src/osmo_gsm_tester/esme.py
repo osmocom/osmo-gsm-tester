@@ -121,8 +121,9 @@ class Esme(log.Origin):
         if isinstance(pdu, smpplib.command.AlertNotification):
             self.dbg('message received:  AlertNotification:', ms_availability_status=pdu.ms_availability_status)
         elif isinstance(pdu, smpplib.command.DeliverSM):
-            self.dbg('message received:', user_message_reference=pdu.user_message_reference, references_pending_receipt=self.references_pending_receipt)
-            self.references_pending_receipt.remove(pdu.user_message_reference)
+            umref = int(pdu.user_message_reference)
+            self.dbg('message received: DeliverSM', references_pending_receipt=self.references_pending_receipt, user_message_reference=umref)
+            self.references_pending_receipt.remove(umref)
 
     def receipt_was_received(self, umref):
         # return umref not in self.references_pending_receipt

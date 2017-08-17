@@ -145,7 +145,7 @@ class Esme(log.Origin):
         seqs = []
         self.log('Sending SMS "%s" to %s' % (str(sms_obj), sms_obj.dst_msisdn()))
         umref = self.next_user_message_reference
-        self.next_user_message_reference += 1
+        self.next_user_message_reference = (self.next_user_message_reference + 1) % (1 << 8)
         for part in parts:
             pdu = self.client.send_message(
                 source_addr_ton=smpplib.consts.SMPP_TON_INTL,

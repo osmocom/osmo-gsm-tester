@@ -126,9 +126,7 @@ class Esme(log.Origin):
             self.references_pending_receipt.remove(umref)
 
     def receipt_was_received(self, umref):
-        # return umref not in self.references_pending_receipt
-        self.log('FIXME: wait_receipt disabled because receipts are not received, see OsmoNITB #2353')
-        return True
+        return umref not in self.references_pending_receipt
 
     def run_method_expect_failure(self, errcode, method, *args):
         try:

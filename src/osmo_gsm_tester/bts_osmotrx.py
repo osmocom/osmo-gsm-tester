@@ -132,6 +132,8 @@ class OsmoTrx(log.Origin):
     def start(self):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoTrx.BIN_TRX)))
+        lib = self.inst.child('lib')
+        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
         self.proc_trx = self.launch_process(OsmoTrx.BIN_TRX, '-x')
 
     def launch_process(self, binary_name, *args):

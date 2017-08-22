@@ -31,6 +31,10 @@ class OsmoHlr(log.Origin):
     process = None
     next_subscriber_id = 1
 
+    AUTH_ALGO_NONE = 0
+    AUTH_ALGO_XOR = 1
+    AUTH_ALGO_COMP128v1 = 2
+
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'osmo-hlr_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
@@ -113,16 +117,21 @@ class OsmoHlr(log.Origin):
             f.write(sql)
         self.run_sql_file(name, sql_file)
 
-    def subscriber_add(self, modem, msisdn=None):
+    def subscriber_add(self, modem, msisdn=None, algo=None):
         if msisdn is None:
             msisdn = self.suite_run.resources_pool.next_msisdn(modem)
         modem.set_msisdn(msisdn)
         subscriber_id = self.next_subscriber_id
         self.next_subscriber_id += 1
-        self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id)
+        if not algo:
+            algo = self.AUTH_ALGO_COMP128v1 if modem.ki() else self.AUTH_ALGO_NONE
+        self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id, algo=algo)
         self.run_sql('add_subscriber',
             'insert into subscriber (id, imsi, msisdn) values (%r, %r, %r);'
             % (subscriber_id, modem.imsi(), modem.msisdn))
+        self.run_sql('add_subscriber',
+            'insert into auc_2g (subscriber_id, algo_id_2g, ki) values (%r, %r, %r);'
+            % (subscriber_id, algo, modem.ki()))
         return subscriber_id
 
     def conf_for_msc(self):

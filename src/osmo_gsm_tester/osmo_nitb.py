@@ -31,6 +31,7 @@ class OsmoNitb(log.Origin):
     process = None
     bts = None
     smsc = None
+    encryption = None
 
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'osmo-nitb_%s' % ip_address.get('addr'))
@@ -78,6 +79,11 @@ class OsmoNitb(log.Origin):
             bts_list.append(bts.conf_for_bsc())
         config.overlay(values, dict(nitb=dict(net=dict(bts_list=bts_list))))
         config.overlay(values, self.smsc.get_config())
+
+        # runtime parameters:
+        if self.encryption is not None:
+            config.overlay(values, dict(nitb=dict(net=dict(encryption=self.encryption))))
+
         self.config = values
 
         self.dbg('NITB CONFIG:\n' + pprint.pformat(values))
@@ -93,6 +99,9 @@ class OsmoNitb(log.Origin):
     def bts_add(self, bts):
         self.bts.append(bts)
         bts.set_bsc(self)
+
+    def set_encryption(self, val):
+        self.encryption = val
 
     def mcc(self):
         return self.config['nitb']['net']['mcc']

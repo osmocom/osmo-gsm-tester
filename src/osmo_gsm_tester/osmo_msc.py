@@ -31,6 +31,7 @@ class OsmoMsc(log.Origin):
     hlr = None
     config = None
     smsc = None
+    encryption = None
 
     def __init__(self, suite_run, hlr, mgcpgw, ip_address):
         super().__init__(log.C_RUN, 'osmo-msc_%s' % ip_address.get('addr'))
@@ -76,6 +77,11 @@ class OsmoMsc(log.Origin):
         config.overlay(values, self.mgcpgw.conf_for_msc())
         config.overlay(values, self.hlr.conf_for_msc())
         config.overlay(values, self.smsc.get_config())
+
+        # runtime parameters:
+        if self.encryption is not None:
+            config.overlay(values, dict(msc=dict(net=dict(encryption=self.encryption))))
+
         self.config = values
 
         self.dbg('MSC CONFIG:\n' + pprint.pformat(values))
@@ -87,6 +93,9 @@ class OsmoMsc(log.Origin):
 
     def addr(self):
         return self.ip_address.get('addr')
+
+    def set_encryption(self, val):
+        self.encryption = val
 
     def mcc(self):
         return self.config['msc']['net']['mcc']

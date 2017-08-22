@@ -318,6 +318,7 @@ class Modem(log.Origin):
     'convenience for ofono Modem interaction'
     msisdn = None
     sms_received_list = None
+    _ki = None
 
     def __init__(self, conf):
         self.conf = conf
@@ -394,7 +395,12 @@ class Modem(log.Origin):
             raise log.Error('No IMSI')
         return imsi
 
+    def set_ki(self, ki):
+        self._ki = ki
+
     def ki(self):
+        if self._ki is not None:
+            return self._ki
         return self.conf.get('ki')
 
     def _on_netreg_property_changed(self, name, value):

@@ -20,7 +20,7 @@
 import re
 
 from . import log
-from .util import is_dict, is_list
+from .util import is_dict, is_list, str2bool
 
 KEY_RE = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
 IPV4_RE = re.compile('([0-9]{1,3}.){3}[0-9]{1,3}')
@@ -63,21 +63,25 @@ def msisdn(val):
 
 INT = 'int'
 STR = 'str'
+BOOL_STR = 'bool_str'
 BAND = 'band'
 IPV4 = 'ipv4'
 HWADDR = 'hwaddr'
 IMSI = 'imsi'
 KI = 'ki'
 MSISDN = 'msisdn'
+TRX_REMOTE_IP = 'trx_remote_ip'
 SCHEMA_TYPES = {
         INT: int,
         STR: str,
+        BOOL_STR: str2bool,
         BAND: band,
         IPV4: ipv4,
         HWADDR: hwaddr,
         IMSI: imsi,
         KI: ki,
         MSISDN: msisdn,
+        TRX_REMOTE_IP: ipv4,
     }
 
 def validate(config, schema):

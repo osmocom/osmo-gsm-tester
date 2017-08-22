@@ -54,6 +54,8 @@ RESOURCES_SCHEMA = {
         'bts[].ipa_unit_id': schema.INT,
         'bts[].addr': schema.IPV4,
         'bts[].band': schema.BAND,
+        'bts[].trx_remote_ip': schema.IPV4,
+        'bts[].launch_trx': schema.BOOL_STR,
         'bts[].trx_list[].hw_addr': schema.HWADDR,
         'bts[].trx_list[].net_device': schema.STR,
         'arfcn[].arfcn': schema.INT,

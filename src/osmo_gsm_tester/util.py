@@ -305,4 +305,13 @@ def input_polling(prompt, poll_func):
     input_thread.join()
     return input_thread.result
 
+def str2bool(val):
+    if val is None or not val:
+        return False
+    if val.upper() in ['FALSE', 'NO', 'OFF']:
+        return False
+    if val.upper() in ['TRUE','YES', 'ON']:
+        return True
+    raise ValueError('Invalid BOOL field: %r' % val)
+
 # vim: expandtab tabstop=4 shiftwidth=4

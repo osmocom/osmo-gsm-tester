@@ -41,8 +41,17 @@ class OsmoBtsTrx(log.Origin):
         self.env = {}
 
     def remote_addr(self):
-        # FIXME
-        return '127.0.0.1'
+        return self.conf.get('addr')
+
+    def trx_remote_ip(self):
+        conf_ip = self.conf.get('trx_remote_ip', None)
+        if conf_ip is not None:
+            return conf_ip
+        # if 'trx_remote_ip' is not configured, use same IP as BTS
+        return self.remote_addr()
+
+    def launch_trx_enabled(self):
+        return util.str2bool(self.conf.get('launch_trx'))
 
     def start(self):
         if self.bsc is None:
@@ -53,10 +62,11 @@ class OsmoBtsTrx(log.Origin):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.trx = OsmoTrx(self.suite_run)
-        self.trx.start()
-        self.log('Waiting for osmo-trx to start up...')
-        event_loop.wait(self, self.trx.trx_ready)
+        if self.launch_trx_enabled():
+            self.trx = OsmoTrx(self.suite_run, self.trx_remote_ip(), self.remote_addr())
+            self.trx.start()
+            self.log('Waiting for osmo-trx to start up...')
+            event_loop.wait(self, self.trx.trx_ready)
 
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoBtsTrx.BIN_BTS_TRX)))
         lib = self.inst.child('lib')
@@ -93,6 +103,8 @@ class OsmoBtsTrx(log.Origin):
         config.overlay(values, {
                         'osmo_bts_trx': {
                             'oml_remote_ip': self.bsc.addr(),
+                            'trx_local_ip': self.remote_addr(),
+                            'trx_remote_ip': self.trx_remote_ip(),
                             'pcu_socket_path': os.path.join(str(self.run_dir), 'pcu_bts')
                         }
         })
@@ -124,17 +136,19 @@ class OsmoTrx(log.Origin):
 
     BIN_TRX = 'osmo-trx'
 
-    def __init__(self, suite_run):
+    def __init__(self, suite_run, listen_ip, bts_ip):
         super().__init__(log.C_RUN, OsmoTrx.BIN_TRX)
         self.suite_run = suite_run
         self.env = {}
+        self.listen_ip = listen_ip
+        self.bts_ip = bts_ip
 
     def start(self):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoTrx.BIN_TRX)))
         lib = self.inst.child('lib')
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-        self.proc_trx = self.launch_process(OsmoTrx.BIN_TRX, '-x')
+        self.proc_trx = self.launch_process(OsmoTrx.BIN_TRX, '-x', '-j', self.listen_ip, '-i', self.bts_ip)
 
     def launch_process(self, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))

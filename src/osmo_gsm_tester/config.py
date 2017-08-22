@@ -271,5 +271,4 @@ def overlay(dest, src):
             dest[i] = overlay(dest[i], src[i])
         return dest
     return src
-
 # vim: expandtab tabstop=4 shiftwidth=4

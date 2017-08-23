@@ -67,7 +67,9 @@ class OsmoCtrl(log.Origin):
         self.sck.send(data)
 
     def receive(self, length = 1024):
-        return self.sck.recv(length)
+        data = self.sck.recv(length)
+        self.dbg('Receiving', data=data)
+        return data
 
     def do_set(self, var, value, id=0):
         setmsg = "SET %s %s %s" %(id, var, value)

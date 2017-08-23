@@ -166,7 +166,6 @@ class OsmoNitbCtrl(log.Origin):
             if not res:
                 raise RuntimeError('Cannot create subscriber %r (answer=%r)' % (imsi, answer_str))
             self.dbg('Created subscriber', imsi=imsi, msisdn=msisdn)
-            return True
 
     def subscriber_list_active(self):
         aslist_str = ""

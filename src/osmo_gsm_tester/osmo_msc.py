@@ -32,6 +32,7 @@ class OsmoMsc(log.Origin):
     config = None
     smsc = None
     encryption = None
+    authentication = None
 
     def __init__(self, suite_run, hlr, mgcpgw, ip_address):
         super().__init__(log.C_RUN, 'osmo-msc_%s' % ip_address.get('addr'))
@@ -81,6 +82,9 @@ class OsmoMsc(log.Origin):
         # runtime parameters:
         if self.encryption is not None:
             config.overlay(values, dict(msc=dict(net=dict(encryption=self.encryption))))
+        if self.authentication is not None:
+            config.overlay(values, dict(msc=dict(net=dict(authentication=self.authentication))))
+
 
         self.config = values
 
@@ -96,6 +100,12 @@ class OsmoMsc(log.Origin):
 
     def set_encryption(self, val):
         self.encryption = val
+
+    def set_authentication(self, val):
+        if val is None:
+            self.authroziation = None
+            return
+        self.authentication = "required" if val else "optional"
 
     def mcc(self):
         return self.config['msc']['net']['mcc']

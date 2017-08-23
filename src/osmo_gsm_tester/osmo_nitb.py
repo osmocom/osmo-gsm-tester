@@ -119,6 +119,10 @@ class OsmoNitb(log.Origin):
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi())
         OsmoNitbCtrl(self).subscriber_add(modem.imsi(), msisdn, modem.ki())
 
+    def subscriber_delete(self, modem):
+        self.log('Delete subscriber', imsi=modem.imsi())
+        OsmoNitbCtrl(self).subscriber_delete(modem.imsi())
+
     def subscriber_attached(self, *modems):
         return self.imsi_attached(*[m.imsi() for m in modems])
 
@@ -138,6 +142,8 @@ class OsmoNitbCtrl(log.Origin):
     PORT = 4249
     SUBSCR_MODIFY_VAR = 'subscriber-modify-v1'
     SUBSCR_MODIFY_REPLY_RE = re.compile("SET_REPLY (\d+) %s OK" % SUBSCR_MODIFY_VAR)
+    SUBSCR_DELETE_VAR = 'subscriber-delete-v1'
+    SUBSCR_DELETE_REPLY_RE = re.compile("SET_REPLY (\d+) %s Removed" % SUBSCR_DELETE_VAR)
     SUBSCR_LIST_ACTIVE_VAR = 'subscriber-list-active-v1'
 
     def __init__(self, nitb):
@@ -166,6 +172,17 @@ class OsmoNitbCtrl(log.Origin):
             if not res:
                 raise RuntimeError('Cannot create subscriber %r (answer=%r)' % (imsi, answer_str))
             self.dbg('Created subscriber', imsi=imsi, msisdn=msisdn)
+
+    def subscriber_delete(self, imsi):
+        with self.ctrl() as ctrl:
+            ctrl.do_set(OsmoNitbCtrl.SUBSCR_DELETE_VAR, imsi)
+            data = ctrl.receive()
+            (answer, data) = ctrl.remove_ipa_ctrl_header(data)
+            answer_str = answer.decode('utf-8')
+            res = OsmoNitbCtrl.SUBSCR_DELETE_REPLY_RE.match(answer_str)
+            if not res:
+                raise RuntimeError('Cannot delete subscriber %r (answer=%r)' % (imsi, answer_str))
+            self.dbg('Deleted subscriber', imsi=imsi)
 
     def subscriber_list_active(self):
         aslist_str = ""

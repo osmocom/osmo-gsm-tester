@@ -129,6 +129,19 @@ class OsmoHlr(log.Origin):
             conn.close()
         return subscriber_id
 
+    def subscriber_delete(self, modem):
+        self.log('Add subscriber', imsi=modem.imsi())
+        conn = sqlite3.connect(self.db_file)
+        try:
+            c = conn.cursor()
+            c.execute('select id from subscriber where imsi = ?', (modem.imsi(),))
+            subscriber_id = c.fetchone()[0]
+            c.execute('delete from subscriber where id = ?', (subscriber_id,))
+            c.execute('delete from auc_2g where subscriber_id = ?', (subscriber_id,))
+            conn.commit()
+        finally:
+            conn.close()
+
     def conf_for_msc(self):
         return dict(hlr=dict(ip_address=self.ip_address))
 

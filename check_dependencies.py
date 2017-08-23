@@ -23,5 +23,6 @@ import time
 import traceback
 import yaml
 import pydbus
+import sqlite3
 
 print('dependencies ok')

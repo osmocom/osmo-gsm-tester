@@ -20,6 +20,7 @@
 import os
 import re
 import pprint
+import sqlite3
 
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
@@ -107,16 +108,6 @@ class OsmoHlr(log.Origin):
             log.ctx(proc)
             raise log.Error('Exited in error')
 
-    def run_sql_file(self, name, sql_file):
-        self.run_local(name, ('/bin/sh', '-c', 'sqlite3 %r < %r' % (self.db_file, sql_file)))
-
-    def run_sql(self, name, sql):
-        self.dbg('SQL:', repr(sql))
-        sql_file = self.run_dir.new_file(name + '.sql')
-        with open(sql_file, 'w') as f:
-            f.write(sql)
-        self.run_sql_file(name, sql_file)
-
     def subscriber_add(self, modem, msisdn=None, algo=None):
         if msisdn is None:
             msisdn = self.suite_run.resources_pool.next_msisdn(modem)
@@ -126,12 +117,16 @@ class OsmoHlr(log.Origin):
         if not algo:
             algo = self.AUTH_ALGO_COMP128v1 if modem.ki() else self.AUTH_ALGO_NONE
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id, algo=algo)
-        self.run_sql('add_subscriber',
-            'insert into subscriber (id, imsi, msisdn) values (%r, %r, %r);'
-            % (subscriber_id, modem.imsi(), modem.msisdn))
-        self.run_sql('add_subscriber',
-            'insert into auc_2g (subscriber_id, algo_id_2g, ki) values (%r, %r, %r);'
-            % (subscriber_id, algo, modem.ki()))
+        conn = sqlite3.connect(self.db_file)
+        try:
+            c = conn.cursor()
+            c.execute('insert into subscriber (id, imsi, msisdn) values (?, ?, ?)',
+                        (subscriber_id, modem.imsi(), modem.msisdn,))
+            c.execute('insert into auc_2g (subscriber_id, algo_id_2g, ki) values (?, ?, ?)',
+                        (subscriber_id, algo, modem.ki(),))
+            conn.commit()
+        finally:
+            conn.close()
         return subscriber_id
 
     def conf_for_msc(self):

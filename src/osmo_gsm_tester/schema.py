@@ -75,7 +75,6 @@ HWADDR = 'hwaddr'
 IMSI = 'imsi'
 KI = 'ki'
 MSISDN = 'msisdn'
-TRX_REMOTE_IP = 'trx_remote_ip'
 AUTH_ALGO = 'auth_algo'
 SCHEMA_TYPES = {
         INT: int,
@@ -87,7 +86,6 @@ SCHEMA_TYPES = {
         IMSI: imsi,
         KI: ki,
         MSISDN: msisdn,
-        TRX_REMOTE_IP: ipv4,
         AUTH_ALGO: auth_algo,
     }
 

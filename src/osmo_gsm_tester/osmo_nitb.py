@@ -112,12 +112,24 @@ class OsmoNitb(log.Origin):
     def mcc_mnc(self):
         return (self.mcc(), self.mnc())
 
-    def subscriber_add(self, modem, msisdn=None):
+    def subscriber_add(self, modem, msisdn=None, algo=None):
         if msisdn is None:
             msisdn = self.suite_run.resources_pool.next_msisdn(modem)
         modem.set_msisdn(msisdn)
+
+        if not algo:
+            alg_str = modem.auth_algo()
+            if not alg_str or alg_str == 'none':
+                algo = None
+            elif alg_str == 'comp128v1':
+                algo = 'comp128v1'
+            elif alg_str == 'xor':
+                algo = 'xor'
+        if algo is not None and not modem.ki():
+            raise log.Error("Auth algo %r selected and no KI specified" % algo)
+
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi())
-        OsmoNitbCtrl(self).subscriber_add(modem.imsi(), msisdn, modem.ki())
+        OsmoNitbCtrl(self).subscriber_add(modem.imsi(), msisdn, modem.ki(), algo)
 
     def subscriber_delete(self, modem):
         self.log('Delete subscriber', imsi=modem.imsi())
@@ -155,8 +167,6 @@ class OsmoNitbCtrl(log.Origin):
 
     def subscriber_add(self, imsi, msisdn, ki=None, algo=None):
         created = False
-        if ki and not algo:
-            algo = 'comp128v1'
 
         if algo:
             value = '%s,%s,%s,%s' % (imsi,msisdn,algo,ki)

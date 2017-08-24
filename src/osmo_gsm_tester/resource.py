@@ -64,6 +64,7 @@ RESOURCES_SCHEMA = {
         'modem[].path': schema.STR,
         'modem[].imsi': schema.IMSI,
         'modem[].ki': schema.KI,
+        'modem[].auth_algo': schema.AUTH_ALGO,
     }
 
 WANT_SCHEMA = util.dict_add(

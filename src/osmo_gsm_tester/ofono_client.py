@@ -403,6 +403,9 @@ class Modem(log.Origin):
             return self._ki
         return self.conf.get('ki')
 
+    def auth_algo(self):
+        return self.conf.get('auth_algo', None)
+
     def _on_netreg_property_changed(self, name, value):
         self.dbg('%r.PropertyChanged() -> %s=%s' % (I_NETREG, name, value))
 

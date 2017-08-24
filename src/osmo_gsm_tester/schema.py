@@ -61,6 +61,11 @@ def ki(val):
 def msisdn(val):
     match_re('MSISDN', MSISDN_RE, val)
 
+def auth_algo(val):
+    if val in ('none', 'xor', 'comp128v1'):
+        return
+    raise ValueError('Unknown Authentication Algorithm: %r' % val)
+
 INT = 'int'
 STR = 'str'
 BOOL_STR = 'bool_str'
@@ -71,6 +76,7 @@ IMSI = 'imsi'
 KI = 'ki'
 MSISDN = 'msisdn'
 TRX_REMOTE_IP = 'trx_remote_ip'
+AUTH_ALGO = 'auth_algo'
 SCHEMA_TYPES = {
         INT: int,
         STR: str,
@@ -82,6 +88,7 @@ SCHEMA_TYPES = {
         KI: ki,
         MSISDN: msisdn,
         TRX_REMOTE_IP: ipv4,
+        AUTH_ALGO: auth_algo,
     }
 
 def validate(config, schema):

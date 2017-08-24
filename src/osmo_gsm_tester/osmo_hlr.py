@@ -114,8 +114,18 @@ class OsmoHlr(log.Origin):
         modem.set_msisdn(msisdn)
         subscriber_id = self.next_subscriber_id
         self.next_subscriber_id += 1
+
         if not algo:
-            algo = self.AUTH_ALGO_COMP128v1 if modem.ki() else self.AUTH_ALGO_NONE
+            alg_str = modem.auth_algo()
+            if alg_str is None or alg_str == 'none':
+                algo = self.AUTH_ALGO_NONE
+            elif alg_str == 'comp128v1':
+                algo = self.AUTH_ALGO_COMP128v1
+            elif alg_str == 'xor':
+                algo = self.AUTH_ALGO_XOR
+        if algo != self.AUTH_ALGO_NONE and not modem.ki():
+            raise log.Error("Auth algo %r selected and no KI specified" % algo)
+
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id, algo=algo)
         conn = sqlite3.connect(self.db_file)
         try:

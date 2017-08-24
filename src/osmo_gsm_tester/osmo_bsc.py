@@ -29,6 +29,7 @@ class OsmoBsc(log.Origin):
     config_file = None
     process = None
     bts = None
+    encryption = None
 
     def __init__(self, suite_run, msc, ip_address):
         super().__init__(log.C_RUN, 'osmo-bsc_%s' % ip_address.get('addr'))
@@ -81,6 +82,10 @@ class OsmoBsc(log.Origin):
             bts_list.append(bts.conf_for_bsc())
         config.overlay(values, dict(bsc=dict(net=dict(bts_list=bts_list))))
 
+        # runtime parameters:
+        if self.encryption is not None:
+            config.overlay(values, dict(bsc=dict(net=dict(encryption=self.encryption))))
+
         self.dbg('BSC CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:
@@ -90,6 +95,9 @@ class OsmoBsc(log.Origin):
 
     def addr(self):
         return self.ip_address.get('addr')
+
+    def set_encryption(self, val):
+        self.encryption = val
 
     def bts_add(self, bts):
         self.bts.append(bts)

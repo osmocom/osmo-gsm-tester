@@ -139,6 +139,15 @@ def dbus_async_call(instance, proxymethod, *proxymethod_args,
         0, timeout, cancellable,
         _async_result_handler, user_data)
 
+def dbus_call_dismiss_error(log_obj, err_str, method):
+    try:
+        method()
+    except Exception as e:
+        if isinstance(e, GLib.Error) and err_str in e.domain:
+            log_obj.log('Dismissed Dbus method error: %r' % e)
+            return
+        raise log.Error('dbus_call_dismiss_error raised error %r' % e)
+
 class ModemDbusInteraction(log.Origin):
     '''Work around inconveniences specific to pydbus and ofono.
     ofono adds and removes DBus interfaces and notifies about them.
@@ -463,7 +472,8 @@ class Modem(log.Origin):
                 return
         self.log('Registering with the default network')
         netreg = self.dbus.interface(I_NETREG)
-        netreg.Register()
+        dbus_call_dismiss_error(self, 'org.ofono.Error.InProgress', netreg.Register)
+
 
     def scan_cb_register(self, scanned_operators, mcc_mnc):
         self.dbg('scanned operators: ', scanned_operators);
@@ -486,7 +496,7 @@ class Modem(log.Origin):
             return
         dbus_op = systembus_get(matching_op_path)
         self.log('Registering with operator', matching_op_path, mcc_mnc)
-        dbus_op.Register()
+        dbus_call_dismiss_error(self, 'org.ofono.Error.InProgress', dbus_op.Register)
 
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'

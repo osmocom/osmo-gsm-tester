@@ -56,6 +56,7 @@ RESOURCES_SCHEMA = {
         'bts[].band': schema.BAND,
         'bts[].trx_remote_ip': schema.IPV4,
         'bts[].launch_trx': schema.BOOL_STR,
+        'bts[].ciphers[]': schema.CIPHER,
         'bts[].trx_list[].hw_addr': schema.HWADDR,
         'bts[].trx_list[].net_device': schema.STR,
         'bts[].trx_list[].nominal_power': schema.UINT,
@@ -67,6 +68,7 @@ RESOURCES_SCHEMA = {
         'modem[].imsi': schema.IMSI,
         'modem[].ki': schema.KI,
         'modem[].auth_algo': schema.AUTH_ALGO,
+        'modem[].ciphers[]': schema.CIPHER,
     }
 
 WANT_SCHEMA = util.dict_add(

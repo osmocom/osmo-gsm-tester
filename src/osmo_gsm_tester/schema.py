@@ -76,6 +76,11 @@ def times(val):
     if n < 1:
         raise ValueError('Positive value >0 expected instead of %d' % n)
 
+def cipher(val):
+    if val in ('a5_0', 'a5_1', 'a5_2', 'a5_3', 'a5_4', 'a5_5', 'a5_6', 'a5_7'):
+        return
+    raise ValueError('Unknown Cipher value: %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -88,6 +93,7 @@ KI = 'ki'
 MSISDN = 'msisdn'
 AUTH_ALGO = 'auth_algo'
 TIMES='times'
+CIPHER = 'cipher'
 SCHEMA_TYPES = {
         INT: int,
         STR: str,
@@ -101,6 +107,7 @@ SCHEMA_TYPES = {
         MSISDN: msisdn,
         AUTH_ALGO: auth_algo,
         TIMES: times,
+        CIPHER: cipher,
     }
 
 def validate(config, schema):

@@ -441,9 +441,12 @@ def item_matches(item, wanted_item, ignore_keys=None):
         return True
 
     if is_list(wanted_item):
-        # multiple possible values
-        if item not in wanted_item:
+        if not is_list(item):
             return False
+        # multiple possible values
+        for val in wanted_item:
+            if val not in item:
+                return False
         return True
 
     return item == wanted_item

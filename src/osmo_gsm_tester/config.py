@@ -268,7 +268,7 @@ def overlay(dest, src):
         if not is_list(src):
             raise ValueError('cannot combine list with a value of type: %r' % type(src))
         for i in range(len(src)):
-            log.ctx(key=key)
+            log.ctx(idx=i)
             dest[i] = overlay(dest[i], src[i])
         return dest
     return src

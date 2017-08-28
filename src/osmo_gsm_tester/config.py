@@ -245,9 +245,23 @@ def combine(dest, src):
     if is_list(dest):
         if not is_list(src):
             raise ValueError('cannot combine list with a value of type: %r' % type(src))
-        for i in range(len(src)):
-            log.ctx(idx=i)
-            combine(dest[i], src[i])
+        # Validate that all elements in both lists are of the same type:
+        t = util.list_validate_same_elem_type(src + dest)
+        if t is None:
+            return # both lists are empty, return
+        # For lists of complex objects, we expect them to be sorted lists:
+        if t in (dict, list, tuple):
+            for i in range(len(dest)):
+                log.ctx(idx=i)
+                src_it = src[i] if i < len(src) else util.empty_instance_type(t)
+                combine(dest[i], src_it)
+            for i in range(len(dest), len(src)):
+                log.ctx(idx=i)
+                dest.append(src[i])
+        else: # for lists of basic elements, we handle them as unsorted sets:
+            for elem in src:
+                if elem not in dest:
+                    dest.append(elem)
         return
     if dest == src:
         return

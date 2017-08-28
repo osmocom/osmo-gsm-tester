@@ -246,6 +246,11 @@ class SuiteRun(log.Origin):
         self.log('reserving resources in', self.resources_pool.state_dir, '...')
         self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
 
+    def reserve_resources_append(self,  requirements):
+        new_reserved = self.resources_pool.reserve(self, requirements)
+        self.dbg('reserving new resources %r' %  new_reserved)
+        self.reserved_resources.add(new_reserved)
+
     def run_tests(self, names=None):
         try:
             log.large_separator(self.trial.name(), self.name(), sublevel=2)
@@ -317,6 +322,14 @@ class SuiteRun(log.Origin):
             return
         self.reserved_resources.free()
 
+    def reserve_arfcn(self, band, arfcn=None):
+        '''To be used by tests. Returned resource can be passed when requested a bts object'''
+
+        if arfcn is None:
+            return self._try_reserve_arfcn((band,))
+        else:
+            return self.reserve_resources_append({ 'arfcn': [{'band': band, 'arfcn': arfcn, 'times': '1'}] })
+
     def ip_address(self, specifics=None):
         return self.reserved_resources.get(resource.R_IP_ADDRESS, specifics=specifics)
 
@@ -350,10 +363,20 @@ class SuiteRun(log.Origin):
             ip_address = self.ip_address()
         return osmo_stp.OsmoStp(self, ip_address)
 
-    def bts(self, specifics=None):
-        bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
+    def bts(self, arfcn=None, specifics=None):
+        bts = bts_obj(self, arfcn, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
         self.register_for_cleanup(bts)
         return bts
+
+    def _try_reserve_arfcn(self, supported_bands):
+        for band in supported_bands:
+            try:
+                self.reserve_resources_append({ 'arfcn': [{'band': band, 'times': '1'}] })
+            except resource.NoResourceExn as e:
+               self.dbg('Band %s has no available arfcns' % band)
+               continue
+            return self.reserved_resources.get(resource.R_ARFCN)
+        raise resource.NoResourceExn("No free arfcns in any of bands", bands=supported_bands)
 
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
@@ -450,12 +473,17 @@ def load_suite_scenario_str(suite_scenario_str):
     scenarios = [config.get_scenario(scenario_name) for scenario_name in scenario_names]
     return (suite_scenario_str, suite, scenarios)
 
-def bts_obj(suite_run, conf):
+def bts_obj(suite_run, arfcn, conf):
     bts_type = conf.get('type')
     log.dbg('create BTS object', type=bts_type)
     bts_class = resource.KNOWN_BTS_TYPES.get(bts_type)
     if bts_class is None:
         raise RuntimeError('No such BTS type is defined: %r' % bts_type)
-    return bts_class(suite_run, conf)
+    bts_inst = bts_class(suite_run, conf)
+    if arfcn is None:
+        supported_bands = bts_inst.supported_bands()
+        arfcn = suite_run._try_reserve_arfcn(supported_bands)
+    bts_inst.set_arfcn_resource(arfcn)
+    return bts_inst
 
 # vim: expandtab tabstop=4 shiftwidth=4

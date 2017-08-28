@@ -53,7 +53,7 @@ RESOURCES_SCHEMA = {
         'bts[].type': schema.STR,
         'bts[].ipa_unit_id': schema.UINT,
         'bts[].addr': schema.IPV4,
-        'bts[].band': schema.BAND,
+        'bts[].bands[]': schema.BAND,
         'bts[].trx_remote_ip': schema.IPV4,
         'bts[].launch_trx': schema.BOOL_STR,
         'bts[].ciphers[]': schema.CIPHER,
@@ -532,6 +532,11 @@ class ReservedResources(log.Origin):
         for key, item_list in self.reserved.items():
             for item in item_list:
                 item.pop(USED_KEY, None)
+
+    def add(self, more):
+        if more is self or more is self.reserved:
+            raise RuntimeError('adding a list of reserved resources to itself')
+        config.add(self.reserved, copy.deepcopy(more.reserved))
 
     def free(self):
         if self.reserved:

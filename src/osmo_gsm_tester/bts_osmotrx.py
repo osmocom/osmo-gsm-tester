@@ -59,6 +59,18 @@ class OsmoBtsTrx(log.Origin):
     def remote_addr(self):
         return self.conf.get('addr')
 
+    def supported_bands(self):
+        return self.conf.get('bands', [])
+
+    def set_arfcn_resource(self, band_arfcn):
+        self.band_arfcn = band_arfcn
+
+    def band(self):
+        return self.band_arfcn.get('band')
+
+    def arfcn(self):
+        return int(self.band_arfcn.get('arfcn'))
+
     def trx_remote_ip(self):
         conf_ip = self.conf.get('trx_remote_ip', None)
         if conf_ip is not None:
@@ -122,6 +134,7 @@ class OsmoBtsTrx(log.Origin):
                             'trx_local_ip': self.remote_addr(),
                             'trx_remote_ip': self.trx_remote_ip(),
                             'pcu_socket_path': self.pcu_socket_path(),
+                            'band': self.band(),
                         }
         })
         config.overlay(values, { 'osmo_bts_trx': self.conf })
@@ -137,6 +150,10 @@ class OsmoBtsTrx(log.Origin):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_trx'))
         config.overlay(values, self.conf)
+        config.overlay(values, {
+                    'band': self.band(),
+                    'trx_list': [ { 'arfcn': self.arfcn() } ]
+                    })
         self.dbg(conf=values)
         return values
 

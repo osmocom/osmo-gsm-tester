@@ -29,6 +29,7 @@ class SysmoBts(log.Origin):
     remote_inst = None
     remote_env = None
     remote_dir = None
+    band_arfcn = None
 
     REMOTE_DIR = '/osmo-gsm-tester'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
@@ -116,6 +117,22 @@ class SysmoBts(log.Origin):
     def remote_addr(self):
         return self.conf.get('addr')
 
+    def supported_bands(self):
+        return self.conf.get('bands', [])
+
+    def set_arfcn_resource(self, band_arfcn):
+        self.band_arfcn = band_arfcn
+
+    def band(self):
+        if not self.band_arfcn:
+            return None
+        return self.band_arfcn.get('band')
+
+    def arfcn(self):
+        if not self.band_arfcn:
+            return None
+        return int(self.band_arfcn.get('arfcn'))
+
     def configure(self):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be configured')
@@ -129,6 +146,7 @@ class SysmoBts(log.Origin):
                         'osmo_bts_sysmo': {
                             'oml_remote_ip': self.bsc.addr(),
                             'pcu_socket_path': self.pcu_socket_path(),
+                            'band': self.band(),
                         }
         })
         config.overlay(values, { 'osmo_bts_sysmo': self.conf })
@@ -144,6 +162,10 @@ class SysmoBts(log.Origin):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
         config.overlay(values, self.conf)
+        config.overlay(values, {
+                    'band': self.band(),
+                    'trx_list': [ { 'arfcn': self.arfcn() } ]
+                    })
         self.dbg(conf=values)
         return values
 

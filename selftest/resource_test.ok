@@ -46,16 +46,16 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
            {'_hash': 'dc9ce027a257da087f31a5bc1ee6b4abd2637369',
             'arfcn': '548',
             'band': 'GSM-1900'}],
- 'bts': [{'_hash': '377ac78d5404b826d40c84efd04b4a9fd4e62b7e',
+ 'bts': [{'_hash': '2769d8f6cfe22f15e7dbd14f7ce929db2e56bdf3',
           'addr': '10.42.42.114',
-          'band': 'GSM-1800',
+          'bands': ['GSM-850', 'GSM-900', 'GSM-1800', 'GSM-1900'],
           'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '1',
           'label': 'sysmoBTS 1002',
           'type': 'osmo-bts-sysmo'},
          {'_hash': '6a9c9fbd364e1563a5b9f0826030a7888fd19575',
           'addr': '10.42.42.50',
-          'band': 'GSM-1800',
+          'bands': ['GSM-1800'],
           'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '6',
           'label': 'Ettus B200',
@@ -63,7 +63,7 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
           'type': 'osmo-bts-trx'},
          {'_hash': 'e50fd38e3bfe8039ac13bc315bc84f46110b7443',
           'addr': '10.42.42.51',
-          'band': 'GSM-1800',
+          'bands': ['GSM-1800'],
           'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '7',
           'label': 'sysmoCell 5000',
@@ -118,9 +118,13 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   arfcn: '514'
   band: GSM-1800
 --- testowner: Reserving 2 x bts (candidates: 3)
---- testowner: DBG: Picked - _hash: 377ac78d5404b826d40c84efd04b4a9fd4e62b7e
+--- testowner: DBG: Picked - _hash: 2769d8f6cfe22f15e7dbd14f7ce929db2e56bdf3
   addr: 10.42.42.114
-  band: GSM-1800
+  bands:
+  - GSM-850
+  - GSM-900
+  - GSM-1800
+  - GSM-1900
   ciphers:
   - a5_0
   - a5_1
@@ -129,7 +133,8 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   type: osmo-bts-sysmo
 - _hash: 6a9c9fbd364e1563a5b9f0826030a7888fd19575
   addr: 10.42.42.50
-  band: GSM-1800
+  bands:
+  - GSM-1800
   ciphers:
   - a5_0
   - a5_1
@@ -170,10 +175,14 @@ arfcn:
   arfcn: '514'
   band: GSM-1800
 bts:
-- _hash: 377ac78d5404b826d40c84efd04b4a9fd4e62b7e
+- _hash: 2769d8f6cfe22f15e7dbd14f7ce929db2e56bdf3
   _reserved_by: testowner-123-1490837279
   addr: 10.42.42.114
-  band: GSM-1800
+  bands:
+  - GSM-850
+  - GSM-900
+  - GSM-1800
+  - GSM-1900
   ciphers:
   - a5_0
   - a5_1
@@ -183,7 +192,8 @@ bts:
 - _hash: 6a9c9fbd364e1563a5b9f0826030a7888fd19575
   _reserved_by: testowner-123-1490837279
   addr: 10.42.42.50
-  band: GSM-1800
+  bands:
+  - GSM-1800
   ciphers:
   - a5_0
   - a5_1

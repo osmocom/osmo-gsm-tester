@@ -93,3 +93,20 @@ Validation: Error
 Validation: Error
 --- imsi[]: ERR: ValueError: Invalid IMSI: None
 Validation: Error
+- Combine dicts:
+- Combine dicts 2:
+- Combine lists:
+- Combine lists 2:
+- Combine lists 3:
+ValueError expected
+- Combine lists 4:
+ValueError expected
+- Combine lists 5:
+ValueError expected
+- Combine lists 6:
+- Combine lists 7:
+- Combine lists 8:
+- Combine lists 9:
+- Combine lists 10:
+- Combine lists 13:
+- Combine lists 14:

@@ -314,4 +314,27 @@ def str2bool(val):
         return True
     raise ValueError('Invalid BOOL field: %r' % val)
 
+def list_validate_same_elem_type(li):
+    '''
+    Checks that all elements in the list are of the same type and returns that type.
+    If the list is empty, returns None
+    If one of the elements is not of the same type, it throws a ValueError exception.
+    '''
+    if len(li) == 0:
+        return None
+    t = type(li[0])
+    for elem in li:
+        if type(elem) != t:
+            raise ValueError('List contains elements of different types: %r vs %r' % (t, type(elem)))
+    return t
+
+def empty_instance_type(t):
+    if t == dict:
+        return {}
+    elif t == list:
+        return []
+    elif t == tuple:
+        return ()
+    raise ValueError('type %r not supported!' % t)
+
 # vim: expandtab tabstop=4 shiftwidth=4

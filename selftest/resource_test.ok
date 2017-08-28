@@ -46,112 +46,67 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
            {'_hash': 'dc9ce027a257da087f31a5bc1ee6b4abd2637369',
             'arfcn': '548',
             'band': 'GSM-1900'}],
- 'bts': [{'_hash': '07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9',
+ 'bts': [{'_hash': '377ac78d5404b826d40c84efd04b4a9fd4e62b7e',
           'addr': '10.42.42.114',
           'band': 'GSM-1800',
+          'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '1',
           'label': 'sysmoBTS 1002',
-          'type': 'sysmo'},
-         {'_hash': '76c8d2f459113cd6c99ed62d1a94bbe9a291ba94',
-          'addr': '10.42.42.115',
+          'type': 'osmo-bts-sysmo'},
+         {'_hash': '6a9c9fbd364e1563a5b9f0826030a7888fd19575',
+          'addr': '10.42.42.50',
           'band': 'GSM-1800',
-          'ipa_unit_id': '5',
-          'label': 'octBTS 3000',
-          'trx_list': [{'hw_addr': '00:0c:90:32:b5:8a'}],
-          'type': 'oct'},
-         {'_hash': '0b7fabd512b36aec43d7d496abd00af4e193b0f8',
-          'addr': '10.42.42.190',
-          'band': 'GSM-1900',
-          'ipa_unit_id': '1902',
-          'label': 'nanoBTS 1900',
-          'trx_list': [{'hw_addr': '00:02:95:00:41:b3'}],
-          'type': 'nanobts'}],
- 'ip_address': [{'_hash': 'cde1debf28f07f94f92c761b4b7c6bf35785ced4',
-                 'addr': '10.42.42.1'},
-                {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
+          'ciphers': ['a5_0', 'a5_1'],
+          'ipa_unit_id': '6',
+          'label': 'Ettus B200',
+          'launch_trx': 'True',
+          'type': 'osmo-bts-trx'},
+         {'_hash': 'e50fd38e3bfe8039ac13bc315bc84f46110b7443',
+          'addr': '10.42.42.51',
+          'band': 'GSM-1800',
+          'ciphers': ['a5_0', 'a5_1'],
+          'ipa_unit_id': '7',
+          'label': 'sysmoCell 5000',
+          'trx_remote_ip': '10.42.42.112',
+          'type': 'osmo-bts-trx'}],
+ 'ip_address': [{'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
                  'addr': '10.42.42.2'},
                 {'_hash': '1c614d6210c551d142aadca8f25e1534ebb2a70f',
-                 'addr': '10.42.42.3'}],
- 'modem': [{'_hash': '19c69e45aa090fb511446bd00797690aa82ff52f',
-            'imsi': '901700000007801',
-            'ki': 'D620F48487B1B782DA55DF6717F08FF9',
-            'label': 'm7801',
-            'path': '/wavecom_0'},
-           {'_hash': 'e1a46516a1fb493b2617ab14fc1693a9a45ec254',
-            'imsi': '901700000007802',
-            'ki': '47FDB2D55CE6A10A85ABDAD034A5B7B3',
-            'label': 'm7802',
-            'path': '/wavecom_1'},
-           {'_hash': '4fe91500a309782bb0fd8ac6fc827834089f8b00',
-            'imsi': '901700000007803',
-            'ki': 'ABBED4C91417DF710F60675B6EE2C8D2',
-            'label': 'm7803',
-            'path': '/wavecom_2'},
-           {'_hash': 'c895badf0c2faaa4a997cd9f2313b5ebda7486e4',
-            'imsi': '901700000007804',
-            'ki': '8BA541179156F2BF0918CA3CFF9351B0',
-            'label': 'm7804',
-            'path': '/wavecom_3'},
-           {'_hash': '60f182abed05adb530e3d06d88cc47703b65d7d8',
-            'imsi': '901700000007805',
-            'ki': '82BEC24B5B50C9FAA69D17DEC0883A23',
-            'label': 'm7805',
-            'path': '/wavecom_4'},
-           {'_hash': 'd1f0fbf089a4bf32dd566af956d23b89e3d60821',
-            'imsi': '901700000007806',
-            'ki': 'DAF6BD6A188F7A4F09866030BF0F723D',
-            'label': 'm7806',
-            'path': '/wavecom_5'},
-           {'_hash': '2445e3b5949d15f4351c0db1d3f3f593f9d73aa5',
-            'imsi': '901700000007807',
-            'ki': 'AEB411CFE39681A6352A1EAE4DDC9DBA',
-            'label': 'm7807',
-            'path': '/wavecom_6'},
-           {'_hash': '80247388b2ca382382c4aec678102355b7922965',
-            'imsi': '901700000007808',
-            'ki': 'F5DEF8692B305D7A65C677CA9EEE09C4',
-            'label': 'm7808',
-            'path': '/wavecom_7'},
-           {'_hash': '5b9e4e117a8889430542d22a9693e7b999362856',
-            'imsi': '901700000007809',
-            'ki': 'A644F4503E812FD75329B1C8D625DA44',
-            'label': 'm7809',
-            'path': '/wavecom_8'},
-           {'_hash': '219a7abb057050eef3ce4b99c487f32bbaae9a41',
-            'imsi': '901700000007810',
-            'ki': 'EF663BDF3477DCD18D3D2293A2BAED67',
-            'label': 'm7810',
-            'path': '/wavecom_9'},
-           {'_hash': '75d45c2d975b893da34c7cae827c25a2039cecd2',
-            'imsi': '901700000007811',
-            'ki': 'E88F37F048A86A9BC4D652539228C039',
-            'label': 'm7811',
-            'path': '/wavecom_10'},
-           {'_hash': '1777362f556b249a5c1d6a83110704dbd037bc20',
-            'imsi': '901700000007812',
-            'ki': 'E8D940DD66FCF6F1CD2C0F8F8C45633D',
-            'label': 'm7812',
-            'path': '/wavecom_11'},
-           {'_hash': '21d7eb4b0c782e004821a9f7f778891c93956924',
-            'imsi': '901700000007813',
-            'ki': 'DBF534700C10141C49F699B0419107E3',
-            'label': 'm7813',
-            'path': '/wavecom_12'},
-           {'_hash': 'f53e4e79bdbc63eb2845de671007d4f733f28409',
-            'imsi': '901700000007814',
-            'ki': 'B36021DEB90C4EA607E408A92F3B024D',
-            'label': 'm7814',
-            'path': '/wavecom_13'},
-           {'_hash': 'df1abec7704ebc89b2c062a69bd299cf3663ed9e',
-            'imsi': '901700000007815',
-            'ki': '1E209F6F839F9195778C4F96BE281A24',
-            'label': 'm7815',
-            'path': '/wavecom_14'},
-           {'_hash': '11df1e4c7708157e5b89020c757763f58d6e610b',
-            'imsi': '901700000007816',
-            'ki': 'BF827D219E739DD189F6F59E60D6455C',
-            'label': 'm7816',
-            'path': '/wavecom_15'}]}
+                 'addr': '10.42.42.3'},
+                {'_hash': '862b529c701adf302477bc126a8032cfc2ec4753',
+                 'addr': '10.42.42.4'},
+                {'_hash': '05feb6e1e24ca4235889eb28d0a8d5cedac6e5d1',
+                 'addr': '10.42.42.5'},
+                {'_hash': 'e780ac7581ad29f8f46e637b61d0c38898c4c52c',
+                 'addr': '10.42.42.6'}],
+ 'modem': [{'_hash': 'f392ed391f9d39abb6ae01431b26b4f44079a447',
+            'auth_algo': 'xor',
+            'ciphers': ['a5_0', 'a5_1'],
+            'imsi': '901700000009031',
+            'ki': '80A37E6FDEA931EAC92FFA5F671EFEAD',
+            'label': 'sierra_1',
+            'path': '/sierra_1'},
+           {'_hash': '1b3cf2a04bde791a84fcc462c29f73391b1f7313',
+            'auth_algo': 'xor',
+            'ciphers': ['a5_0', 'a5_1'],
+            'imsi': '901700000009029',
+            'ki': '00969E283349D354A8239E877F2E0866',
+            'label': 'sierra_2',
+            'path': '/sierra_2'},
+           {'_hash': '83f7b4a07c355487d31db6f068146e48bb1ed118',
+            'auth_algo': 'xor',
+            'ciphers': ['a5_0', 'a5_1'],
+            'imsi': '901700000009030',
+            'ki': 'BB70807226393CDBAC8DD3439FF54252',
+            'label': 'gobi_0',
+            'path': '/gobi_0'},
+           {'_hash': 'a5f8f08a24df0eca067c5b51d55c3c4fd8721908',
+            'auth_algo': 'xor',
+            'ciphers': ['a5_0', 'a5_1'],
+            'imsi': '901700000009032',
+            'ki': '2F70DCA43C45ACB97E947FDD0C7CA30A',
+            'label': 'gobi_3',
+            'path': '/gobi_3'}]}
 *** end: all resources
 
 - request some resources
@@ -163,34 +118,47 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   arfcn: '514'
   band: GSM-1800
 --- testowner: Reserving 2 x bts (candidates: 3)
---- testowner: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+--- testowner: DBG: Picked - _hash: 377ac78d5404b826d40c84efd04b4a9fd4e62b7e
   addr: 10.42.42.114
   band: GSM-1800
+  ciphers:
+  - a5_0
+  - a5_1
   ipa_unit_id: '1'
   label: sysmoBTS 1002
-  type: sysmo
-- _hash: 76c8d2f459113cd6c99ed62d1a94bbe9a291ba94
-  addr: 10.42.42.115
+  type: osmo-bts-sysmo
+- _hash: 6a9c9fbd364e1563a5b9f0826030a7888fd19575
+  addr: 10.42.42.50
   band: GSM-1800
-  ipa_unit_id: '5'
-  label: octBTS 3000
-  trx_list:
-  - hw_addr: 00:0c:90:32:b5:8a
-  type: oct
---- testowner: Reserving 1 x ip_address (candidates: 3)
---- testowner: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
-  addr: 10.42.42.1
---- testowner: Reserving 2 x modem (candidates: 16)
---- testowner: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
-  imsi: '901700000007801'
-  ki: D620F48487B1B782DA55DF6717F08FF9
-  label: m7801
-  path: /wavecom_0
-- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
-  imsi: '901700000007802'
-  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
-  label: m7802
-  path: /wavecom_1
+  ciphers:
+  - a5_0
+  - a5_1
+  ipa_unit_id: '6'
+  label: Ettus B200
+  launch_trx: 'True'
+  type: osmo-bts-trx
+--- testowner: Reserving 1 x ip_address (candidates: 5)
+--- testowner: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
+  addr: 10.42.42.2
+--- testowner: Reserving 2 x modem (candidates: 4)
+--- testowner: DBG: Picked - _hash: f392ed391f9d39abb6ae01431b26b4f44079a447
+  auth_algo: xor
+  ciphers:
+  - a5_0
+  - a5_1
+  imsi: '901700000009031'
+  ki: 80A37E6FDEA931EAC92FFA5F671EFEAD
+  label: sierra_1
+  path: /sierra_1
+- _hash: 1b3cf2a04bde791a84fcc462c29f73391b1f7313
+  auth_algo: xor
+  ciphers:
+  - a5_0
+  - a5_1
+  imsi: '901700000009029'
+  ki: 00969E283349D354A8239E877F2E0866
+  label: sierra_2
+  path: /sierra_2
 ~~~ currently reserved:
 arfcn:
 - _hash: e620569450f8259b3f0212ec19c285dd07df063c
@@ -202,39 +170,52 @@ arfcn:
   arfcn: '514'
   band: GSM-1800
 bts:
-- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+- _hash: 377ac78d5404b826d40c84efd04b4a9fd4e62b7e
   _reserved_by: testowner-123-1490837279
   addr: 10.42.42.114
   band: GSM-1800
+  ciphers:
+  - a5_0
+  - a5_1
   ipa_unit_id: '1'
   label: sysmoBTS 1002
-  type: sysmo
-- _hash: 76c8d2f459113cd6c99ed62d1a94bbe9a291ba94
+  type: osmo-bts-sysmo
+- _hash: 6a9c9fbd364e1563a5b9f0826030a7888fd19575
   _reserved_by: testowner-123-1490837279
-  addr: 10.42.42.115
+  addr: 10.42.42.50
   band: GSM-1800
-  ipa_unit_id: '5'
-  label: octBTS 3000
-  trx_list:
-  - hw_addr: 00:0c:90:32:b5:8a
-  type: oct
+  ciphers:
+  - a5_0
+  - a5_1
+  ipa_unit_id: '6'
+  label: Ettus B200
+  launch_trx: 'True'
+  type: osmo-bts-trx
 ip_address:
-- _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+- _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
   _reserved_by: testowner-123-1490837279
-  addr: 10.42.42.1
+  addr: 10.42.42.2
 modem:
-- _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+- _hash: f392ed391f9d39abb6ae01431b26b4f44079a447
   _reserved_by: testowner-123-1490837279
-  imsi: '901700000007801'
-  ki: D620F48487B1B782DA55DF6717F08FF9
-  label: m7801
-  path: /wavecom_0
-- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  auth_algo: xor
+  ciphers:
+  - a5_0
+  - a5_1
+  imsi: '901700000009031'
+  ki: 80A37E6FDEA931EAC92FFA5F671EFEAD
+  label: sierra_1
+  path: /sierra_1
+- _hash: 1b3cf2a04bde791a84fcc462c29f73391b1f7313
   _reserved_by: testowner-123-1490837279
-  imsi: '901700000007802'
-  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
-  label: m7802
-  path: /wavecom_1
+  auth_algo: xor
+  ciphers:
+  - a5_0
+  - a5_1
+  imsi: '901700000009029'
+  ki: 00969E283349D354A8239E877F2E0866
+  label: sierra_2
+  path: /sierra_2
 
 ~~~ end: currently reserved
 

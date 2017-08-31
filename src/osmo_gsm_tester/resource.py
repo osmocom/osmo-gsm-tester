@@ -69,6 +69,7 @@ RESOURCES_SCHEMA = {
         'modem[].ki': schema.KI,
         'modem[].auth_algo': schema.AUTH_ALGO,
         'modem[].ciphers[]': schema.CIPHER,
+        'modem[].features[]': schema.MODEM_FEATURE,
     }
 
 WANT_SCHEMA = util.dict_add(

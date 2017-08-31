@@ -81,6 +81,11 @@ def cipher(val):
         return
     raise ValueError('Unknown Cipher value: %r' % val)
 
+def modem_feature(val):
+    if val in ('sms', 'gprs', 'voicecall', 'ussd'):
+        return
+    raise ValueError('Unknown Modem Feature: %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -94,6 +99,8 @@ MSISDN = 'msisdn'
 AUTH_ALGO = 'auth_algo'
 TIMES='times'
 CIPHER = 'cipher'
+MODEM_FEATURE = 'modem_feature'
+
 SCHEMA_TYPES = {
         INT: int,
         STR: str,
@@ -108,6 +115,7 @@ SCHEMA_TYPES = {
         AUTH_ALGO: auth_algo,
         TIMES: times,
         CIPHER: cipher,
+        MODEM_FEATURE: modem_feature,
     }
 
 def validate(config, schema):

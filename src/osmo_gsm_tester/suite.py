@@ -22,7 +22,7 @@ import sys
 import time
 import pprint
 from . import config, log, template, util, resource, schema, event_loop, test
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, modem, esme
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, modem, esme
 
 class Timeout(Exception):
     pass
@@ -229,6 +229,11 @@ class SuiteRun(log.Origin):
         if ip_address is None:
             ip_address = self.ip_address()
         return osmo_hlr.OsmoHlr(self, ip_address)
+
+    def ggsn(self, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_ggsn.OsmoGgsn(self, ip_address)
 
     def mgcpgw(self, ip_address=None, bts_ip=None):
         if ip_address is None:

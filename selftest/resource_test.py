@@ -37,7 +37,7 @@ print('- expect failure to solve:')
 try:
     resource.solve([ [0, 2],
                      [2],
-                     [0, 2] ]) 
+                     [0, 2] ])
     assert False
 except resource.NotSolvable as e:
     print(e)

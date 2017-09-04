@@ -39,9 +39,7 @@ class OsmoStp(log.Origin):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
-        # NOTE: libosmo-sccp provides osmo-stp and is built as a dependency of
-        # OsmoMSC.
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-msc')))
+        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-stp')))
 
         binary = inst.child('bin', 'osmo-stp')
         if not os.path.isfile(binary):

@@ -40,7 +40,7 @@ class OsmoMgcpgw(log.Origin):
         self.log('Starting osmo-mgcpgw')
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-msc')))
+        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-mgw')))
         binary = inst.child('bin', 'osmo-bsc_mgcp')
         if not os.path.isfile(binary):
             raise RuntimeError('Binary missing: %r' % binary)

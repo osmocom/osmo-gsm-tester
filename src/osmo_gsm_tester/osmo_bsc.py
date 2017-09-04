@@ -43,10 +43,7 @@ class OsmoBsc(log.Origin):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
-        # NOTE: While OsmoMSC and OsmoBSC live in the same git repository, the
-        # osmo-msc build will also provide the OsmoBSC binary. As soon as the
-        # repositories are separate, there shall be a separate artifact.
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-msc')))
+        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bsc')))
 
         binary = inst.child('bin', 'osmo-bsc')
         if not os.path.isfile(binary):

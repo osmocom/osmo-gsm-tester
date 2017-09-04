@@ -14,4 +14,4 @@ build_repo libasn1c
 build_repo osmo-iuh neels/sigtran # TEMPORARY BRANCH
 build_repo openbsc aoip --enable-smpp --enable-osmo-bsc --enable-nat --enable-iu
 
-create_bin_tgz
+create_bin_tgz osmo-msc

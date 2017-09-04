@@ -140,6 +140,22 @@ build_repo() {
 
 create_bin_tgz() {
   # build the archive that is going to be copied to the tester
+
+  wanted_binaries="$@"
+
+  if [ -z "$wanted_binaries" ]; then
+    set +x; echo "ERROR: create_bin_tgz needs a list of permitted binaries"; set -x
+    exit 1
+  fi
+
+  # remove binaries not intended to originate from this build
+  cd "$prefix_real"/bin
+  for f in * ; do
+    if [ -z "$(echo "_ $wanted_binaries _" | grep " $f ")" ]; then
+      rm "$f"
+    fi
+  done
+
   cd "$prefix_real"
   this="$name.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
   tar="${this}.tgz"

@@ -8,4 +8,4 @@ build_repo libosmocore --disable-doxygen
 build_repo libosmo-abis
 build_repo osmo-hlr
 
-create_bin_tgz
+create_bin_tgz osmo-hlr

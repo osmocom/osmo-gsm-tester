@@ -6,4 +6,4 @@ name="osmo-trx"
 
 build_repo osmo-trx --without-sse
 
-create_bin_tgz
+create_bin_tgz osmo-trx

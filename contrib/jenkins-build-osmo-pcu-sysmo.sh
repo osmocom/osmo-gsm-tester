@@ -16,4 +16,4 @@ prefix_real="$DESTDIR$prefix"
 build_repo libosmocore --disable-pcsc --disable-doxygen
 build_repo osmo-pcu --enable-sysmocom-dsp
 
-create_bin_tgz
+create_bin_tgz osmo-pcu

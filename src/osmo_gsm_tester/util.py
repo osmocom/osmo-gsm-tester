@@ -337,4 +337,8 @@ def empty_instance_type(t):
         return ()
     raise ValueError('type %r not supported!' % t)
 
+def encryption2osmovty(val):
+    assert val[:3] == 'a5_'
+    return 'a5 ' + val[3:]
+
 # vim: expandtab tabstop=4 shiftwidth=4

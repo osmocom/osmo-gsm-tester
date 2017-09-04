@@ -81,7 +81,10 @@ class OsmoMsc(log.Origin):
 
         # runtime parameters:
         if self.encryption is not None:
-            config.overlay(values, dict(msc=dict(net=dict(encryption=self.encryption))))
+            encryption_vty = util.encryption2osmovty(self.encryption)
+        else:
+            encryption_vty = util.encryption2osmovty(values['msc']['net']['encryption'])
+        config.overlay(values, dict(msc=dict(net=dict(encryption=encryption_vty))))
         if self.authentication is not None:
             config.overlay(values, dict(msc=dict(net=dict(authentication=self.authentication))))
 

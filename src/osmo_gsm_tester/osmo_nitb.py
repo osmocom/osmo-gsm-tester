@@ -82,7 +82,10 @@ class OsmoNitb(log.Origin):
 
         # runtime parameters:
         if self.encryption is not None:
-            config.overlay(values, dict(nitb=dict(net=dict(encryption=self.encryption))))
+            encryption_vty = util.encryption2osmovty(self.encryption)
+        else:
+            encryption_vty = util.encryption2osmovty(values['nitb']['net']['encryption'])
+        config.overlay(values, dict(nitb=dict(net=dict(encryption=encryption_vty))))
 
         self.config = values
 

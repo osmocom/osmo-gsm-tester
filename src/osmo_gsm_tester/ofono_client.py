@@ -224,6 +224,8 @@ class ModemDbusInteraction(log.Origin):
     def on_property_change(self, name, value):
         if name == 'Interfaces':
             self.on_interfaces_change(value)
+        else:
+            self.dbg('%r.PropertyChanged() -> %s=%s' % (I_MODEM, name, value))
 
     def on_interfaces_change(self, interfaces_now):
         # First some logging.

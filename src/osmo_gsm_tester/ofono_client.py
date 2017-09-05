@@ -549,7 +549,7 @@ class Modem(log.Origin):
                 return True
         return False
 
-    def info(self, keys=('Manufacturer', 'Model', 'Revision')):
+    def info(self, keys=('Manufacturer', 'Model', 'Revision', 'Serial')):
         props = self.properties()
         return ', '.join(['%s: %r'%(k,props.get(k)) for k in keys])
 

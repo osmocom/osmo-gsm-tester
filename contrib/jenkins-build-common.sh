@@ -156,6 +156,15 @@ create_bin_tgz() {
     fi
   done
 
+  # ensure requested binaries indeed exist
+  for b in $wanted_binaries ; do
+    if [ ! -f "$b" ]; then
+      set +x; echo "ERROR: no such binary: $b in $prefix_real/bin/"; set -x
+      ls -1 "$prefix_real/bin"
+      exit 1
+    fi
+  done
+
   cd "$prefix_real"
   this="$name.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
   tar="${this}.tgz"

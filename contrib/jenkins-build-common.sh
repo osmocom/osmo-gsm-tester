@@ -56,7 +56,7 @@ export LD_LIBRARY_PATH="$prefix_real/lib:$LD_LIBRARY_PATH"
 env | grep -v "^LESS" | sort
 
 # clean the workspace
-rm -f "$base/${name}"*.tgz rm -f "$base/${name}"*.md5
+rm -f "$base"/*.build-*.{tgz,md5}
 rm -rf "$prefix_real"
 mkdir -p "$prefix_real"
 

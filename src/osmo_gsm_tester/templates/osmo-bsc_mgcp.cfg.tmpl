@@ -7,11 +7,11 @@ log stderr
  logging level all debug
 line vty
   no login
-  bind ${mgcpgw.ip_address.addr}
+  bind ${osmo_bsc_mgcp.ip_address.addr}
 mgcp
-  local ip ${mgcpgw.ip_address.addr}
-  bts ip ${mgcpgw.bts_ip}
-  bind ip ${mgcpgw.ip_address.addr}
+  local ip ${osmo_bsc_mgcp.ip_address.addr}
+  bts ip ${osmo_bsc_mgcp.bts_ip}
+  bind ip ${osmo_bsc_mgcp.ip_address.addr}
   bind port 2427
   rtp base 4000
   rtp force-ptime 20

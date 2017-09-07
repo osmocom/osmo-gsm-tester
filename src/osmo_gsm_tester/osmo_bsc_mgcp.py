@@ -1,4 +1,4 @@
-# osmo_gsm_tester: specifics for running an osmo-mgcp-gw (osmo-bsc_mgcp)
+# osmo_gsm_tester: specifics for running an osmo-mgw (osmo-bsc_mgcp)
 #
 # Copyright (C) 2017 by sysmocom - s.f.m.c. GmbH
 #
@@ -22,7 +22,7 @@ import pprint
 
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
-class OsmoMgcpgw(log.Origin):
+class OsmoBscMgcp(log.Origin):
     suite_run = None
     ip_address = None
     run_dir = None
@@ -30,14 +30,14 @@ class OsmoMgcpgw(log.Origin):
     process = None
 
     def __init__(self, suite_run, ip_address, bts_ip):
-        super().__init__(log.C_RUN, 'osmo-mgcpgw_%s' % ip_address.get('addr'))
+        super().__init__(log.C_RUN, 'osmo-bsc_mgcp_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
-        # hack: so far mgcpgw needs one specific BTS IP.
+        # hack: so far osmo-bsc_mgcp needs one specific BTS IP.
         self.bts_ip = bts_ip
 
     def start(self):
-        self.log('Starting osmo-mgcpgw')
+        self.log('Starting osmo-bsc_mgcp')
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-mgw')))
@@ -63,17 +63,17 @@ class OsmoMgcpgw(log.Origin):
         self.process.launch()
 
     def configure(self):
-        self.config_file = self.run_dir.new_file('osmo-mgcpgw.cfg')
+        self.config_file = self.run_dir.new_file('osmo-bsc_mgcp.cfg')
         self.dbg(config_file=self.config_file)
 
-        values = dict(mgcpgw=config.get_defaults('mgcpgw'))
+        values = dict(mgw=config.get_defaults('osmo_bsc_mgcp'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(mgcpgw=dict(ip_address=self.ip_address, bts_ip=self.bts_ip)))
+        config.overlay(values, dict(osmo_bsc_mgcp=dict(ip_address=self.ip_address, bts_ip=self.bts_ip)))
 
         self.dbg('MGCPGW CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:
-            r = template.render('osmo-mgcpgw.cfg', values)
+            r = template.render('osmo-bsc_mgcp.cfg', values)
             self.dbg(r)
             f.write(r)
 
@@ -81,7 +81,7 @@ class OsmoMgcpgw(log.Origin):
         return self.ip_address.get('addr')
 
     def conf_for_msc(self):
-        return dict(mgcpgw=dict(ip_address=self.ip_address))
+        return dict(mgw=dict(ip_address=self.ip_address))
 
     def running(self):
         return not self.process.terminated()

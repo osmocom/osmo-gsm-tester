@@ -7,9 +7,9 @@
 from osmo_gsm_tester.test import *
 
 hlr = suite.hlr()
-bts = suite.bts() # bts not started, only needed for mgcpgw
-mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
-msc = suite.msc(hlr, mgcpgw)
+bts = suite.bts() # bts not started, only needed for mgw
+mgw = suite.mgw(bts_ip=bts.remote_addr())
+msc = suite.msc(hlr, mgw)
 smsc = msc.smsc
 esme = suite.esme()
 
@@ -20,7 +20,7 @@ esme.set_smsc(smsc)
 
 hlr.start()
 msc.start()
-mgcpgw.start()
+mgw.start()
 
 # Due to accept-all policy, connect() should work even if we didn't previously
 # configure the esme in the smsc, no matter the system_id / password we use.

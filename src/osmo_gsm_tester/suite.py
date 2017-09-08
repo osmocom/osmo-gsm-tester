@@ -351,7 +351,9 @@ class SuiteRun(log.Origin):
         return osmo_stp.OsmoStp(self, ip_address)
 
     def bts(self, specifics=None):
-        return bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
+        bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
+        self.register_for_cleanup(bts)
+        return bts
 
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)

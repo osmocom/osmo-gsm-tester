@@ -80,6 +80,12 @@ class SysmoBts(log.Origin):
              '-i', self.bsc.addr()),
             remote_cwd=remote_run_dir)
 
+    def cleanup(self):
+        pass
+
+    def pcu_socket_path(self):
+        return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
+
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
         return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
@@ -122,7 +128,7 @@ class SysmoBts(log.Origin):
         config.overlay(values, {
                         'osmo_bts_sysmo': {
                             'oml_remote_ip': self.bsc.addr(),
-                            'pcu_socket_path': os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
+                            'pcu_socket_path': self.pcu_socket_path(),
                         }
         })
         config.overlay(values, { 'osmo_bts_sysmo': self.conf })

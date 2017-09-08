@@ -19,6 +19,7 @@
 
 import os
 import pprint
+import tempfile
 from . import log, config, util, template, process, event_loop
 
 class OsmoBtsTrx(log.Origin):
@@ -28,6 +29,7 @@ class OsmoBtsTrx(log.Origin):
     inst = None
     env = None
     trx = None
+    pcu_sk_tmp_dir = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -39,6 +41,20 @@ class OsmoBtsTrx(log.Origin):
         self.suite_run = suite_run
         self.conf = conf
         self.env = {}
+        self.pcu_sk_tmp_dir = tempfile.mkdtemp(None, 'ogtpcusk', None)
+        if len(self.pcu_socket_path().encode()) > 107:
+            raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
+
+    def cleanup(self):
+        if self.pcu_sk_tmp_dir:
+            try:
+                os.remove(self.pcu_socket_path())
+            except OSError:
+                pass
+            os.rmdir(self.pcu_sk_tmp_dir)
+
+    def pcu_socket_path(self):
+        return os.path.join(self.pcu_sk_tmp_dir, 'pcu_bts')
 
     def remote_addr(self):
         return self.conf.get('addr')
@@ -105,7 +121,7 @@ class OsmoBtsTrx(log.Origin):
                             'oml_remote_ip': self.bsc.addr(),
                             'trx_local_ip': self.remote_addr(),
                             'trx_remote_ip': self.trx_remote_ip(),
-                            'pcu_socket_path': os.path.join(str(self.run_dir), 'pcu_bts')
+                            'pcu_socket_path': self.pcu_socket_path(),
                         }
         })
         config.overlay(values, { 'osmo_bts_trx': self.conf })

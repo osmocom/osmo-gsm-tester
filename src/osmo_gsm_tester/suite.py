@@ -209,11 +209,11 @@ class SuiteRun(log.Origin):
     def combined(self, conf_name):
         log.dbg(combining=conf_name)
         log.ctx(combining_scenarios=conf_name)
-        combination = copy.deepcopy(self.definition.conf.get(conf_name) or {})
+        combination = config.replicate_times(self.definition.conf.get(conf_name, {}))
         log.dbg(definition_conf=combination)
         for scenario in self.scenarios:
             log.ctx(combining_scenarios=conf_name, scenario=scenario.name())
-            c = scenario.get(conf_name)
+            c = config.replicate_times(scenario.get(conf_name, {}))
             log.dbg(scenario=scenario.name(), conf=c)
             if c is None:
                 continue

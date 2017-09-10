@@ -42,5 +42,21 @@ results = s.run_tests('test_fail_raise.py')
 output = report.suite_to_text(s)
 print(output)
 
+print('- test with half empty scenario')
+trial = log.Origin(log.C_TST, 'trial')
+scenario = config.Scenario('foo', 'bar')
+scenario['resources'] = { 'bts': [{'type': 'sysmo'}] }
+s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+results = s.run_tests('hello_world.py')
+print(report.suite_to_text(s))
+
+print('- test with scenario')
+trial = log.Origin(log.C_TST, 'trial')
+scenario = config.Scenario('foo', 'bar')
+scenario['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
+s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+results = s.run_tests('hello_world.py')
+print(report.suite_to_text(s))
+
 print('\n- graceful exit.')
 # vim: expandtab tabstop=4 shiftwidth=4

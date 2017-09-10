@@ -1,3 +1,4 @@
 /[^ ]*/selftest/	[PATH]/selftest/
 \.py:[0-9]*	.py:[LINENR]
 \([0-9.]+ sec\)	(N.N sec)
+{combining_scenarios='resources', scenario='foo'}:.*	{combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]

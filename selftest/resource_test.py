@@ -80,7 +80,7 @@ want = {
 
 origin = log.Origin(None, 'testowner')
 
-resources = pool.reserve(origin, want)
+resources = pool.reserve(origin, config.replicate_times(want))
 
 print('~~~ currently reserved:')
 with open(rrfile, 'r') as f:

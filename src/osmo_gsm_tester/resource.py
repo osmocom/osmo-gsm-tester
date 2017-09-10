@@ -73,6 +73,10 @@ WANT_SCHEMA = util.dict_add(
     dict([('%s[].times' % r, schema.TIMES) for r in R_ALL]),
     RESOURCES_SCHEMA)
 
+CONF_SCHEMA = util.dict_add(
+    { 'defaults.timeout': schema.STR },
+    dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
+
 KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
         'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
@@ -107,11 +111,9 @@ class ResourcesPool(log.Origin):
 
         'origin' should be an Origin() instance.
 
-        'want' is a dict matching WANT_SCHEMA, which is the same as
-        the RESOURCES_SCHEMA, except each entity that can be reserved has a 'times'
-        field added, to indicate how many of those should be reserved.
+        'want' is a dict matching RESOURCES_SCHEMA.
 
-        If an entry has only a 'times' set, any of the resources may be
+        If an entry has no attribute set, any of the resources may be
         reserved without further limitations.
 
         ResourcesPool may also be selected with narrowed down constraints.
@@ -119,24 +121,13 @@ class ResourcesPool(log.Origin):
         sysmo and one of type trx, plus 2 ARFCNs in the 1800 band:
 
          {
-           'ip_address': [ { 'times': 1 } ],
-           'bts': [ { 'type': 'sysmo', 'times': 1 }, { 'type': 'trx', 'times': 1 } ],
-           'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
-           'modem': [ { 'times': 2 } ],
-         }
-
-        A times=1 value is implicit, so the above is equivalent to:
-
-         {
            'ip_address': [ {} ],
            'bts': [ { 'type': 'sysmo' }, { 'type': 'trx' } ],
-           'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
-           'modem': [ { 'times': 2 } ],
+           'arfcn': [ { 'band': 'GSM-1800' }, { 'band': 'GSM-1800' } ],
+           'modem': [ {}, {} ],
          }
         '''
-        schema.validate(want, WANT_SCHEMA)
-
-        want = config.replicate_times(want)
+        schema.validate(want, RESOURCES_SCHEMA)
 
         origin_id = origin.origin_id()
 
@@ -271,10 +262,10 @@ class Resources(dict):
         Pass a dict of resource requirements, e.g.:
           want = {
             'bts': [ {'type': 'osmo-bts-sysmo',}, {} ],
-            'modem': [ {'times': 3} ]
+            'modem': [ {}, {}, {} ]
           }
         This function tries to find a combination from the available resources that
-        matches these requiremens. The returnvalue is a dict (wrapped in a Resources class)
+        matches these requirements. The return value is a dict (wrapped in a Resources class)
         that contains the matching resources in the order of 'want' dict: in above
         example, the returned dict would have a 'bts' list with the first item being
         a sysmoBTS, the second item being any other available BTS.
@@ -290,6 +281,10 @@ class Resources(dict):
 
         If raise_if_missing is False, this will return an empty item for any
         resource that had no match, instead of immediately raising an exception.
+
+        This function expects input dictionaries whose contents have already
+        been replicated based on its the 'times' attributes. See
+        config.replicate_times() for more details.
         '''
         matches = {}
         for key, want_list in sorted(want.items()): # sorted for deterministic test results
@@ -314,7 +309,7 @@ class Resources(dict):
                     my_item = my_list[i]
                     if skip_if_marked and my_item.get(skip_if_marked):
                         continue
-                    if item_matches(my_item, want_item, ignore_keys=('times',)):
+                    if item_matches(my_item, want_item):
                         item_match_list.append(i)
                 if not item_match_list:
                     if raise_if_missing:

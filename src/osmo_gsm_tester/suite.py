@@ -40,14 +40,6 @@ class SuiteDefinition(log.Origin):
 
     CONF_FILENAME = 'suite.conf'
 
-    CONF_SCHEMA = util.dict_add(
-        {
-            'defaults.timeout': schema.STR,
-        },
-        dict([('resources.%s' % k, t) for k,t in resource.WANT_SCHEMA.items()])
-        )
-
-
     def __init__(self, suite_dir):
         self.suite_dir = suite_dir
         super().__init__(log.C_CNF, os.path.basename(self.suite_dir))
@@ -59,7 +51,7 @@ class SuiteDefinition(log.Origin):
             raise RuntimeError('No such directory: %r' % self.suite_dir)
         self.conf = config.read(os.path.join(self.suite_dir,
                                              SuiteDefinition.CONF_FILENAME),
-                                SuiteDefinition.CONF_SCHEMA)
+                                resource.CONF_SCHEMA)
         self.load_test_basenames()
 
     def load_test_basenames(self):
@@ -209,11 +201,11 @@ class SuiteRun(log.Origin):
     def combined(self, conf_name):
         log.dbg(combining=conf_name)
         log.ctx(combining_scenarios=conf_name)
-        combination = copy.deepcopy(self.definition.conf.get(conf_name) or {})
+        combination = config.replicate_times(self.definition.conf.get(conf_name, {}))
         log.dbg(definition_conf=combination)
         for scenario in self.scenarios:
             log.ctx(combining_scenarios=conf_name, scenario=scenario.name())
-            c = scenario.get(conf_name)
+            c = config.replicate_times(scenario.get(conf_name, {}))
             log.dbg(scenario=scenario.name(), conf=c)
             if c is None:
                 continue
@@ -447,7 +439,7 @@ def parse_suite_scenario_str(suite_scenario_str):
 def load_suite_scenario_str(suite_scenario_str):
     suite_name, scenario_names = parse_suite_scenario_str(suite_scenario_str)
     suite = load(suite_name)
-    scenarios = [config.get_scenario(scenario_name) for scenario_name in scenario_names]
+    scenarios = [config.get_scenario(scenario_name, resource.CONF_SCHEMA) for scenario_name in scenario_names]
     return (suite_scenario_str, suite, scenarios)
 
 def bts_obj(suite_run, conf):

@@ -274,7 +274,13 @@ def overlay(dest, src):
     return src
 
 def replicate_times(d):
-    'replicate items that have a "times" > 1'
+    '''
+    replicate items that have a "times" > 1
+
+    'd' is a dict matching WANT_SCHEMA, which is the same as
+    the RESOURCES_SCHEMA, except each entity that can be reserved has a 'times'
+    field added, to indicate how many of those should be reserved.
+    '''
     d = copy.deepcopy(d)
     for key, item_list in d.items():
         idx = 0

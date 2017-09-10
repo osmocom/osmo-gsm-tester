@@ -31,7 +31,7 @@ hlr.subscriber_add(ms)
 print('Attempt connection with wrong KI...')
 ms.connect(msc.mcc_mnc())
 
-sleep(30) # TODO: read pcap or CTRL interface and look for Rejected? (gsm_a.dtap.msg_mm_type == 0x04)
+sleep(40) # TODO: read pcap or CTRL interface and look for Rejected? (gsm_a.dtap.msg_mm_type == 0x04)
 print('Asserting modem did not register')
 # FIXME: this can fail because ofono qmi signals registered before being accepted by network. See OS#2458
 # assert not ms.is_connected(msc.mcc_mnc())

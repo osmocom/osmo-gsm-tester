@@ -349,10 +349,7 @@ class Modem(log.Origin):
     def cleanup(self):
         self.dbg('cleanup')
         if self.cancellable:
-            self.cancellable.cancel()
-            # Cancel op is applied as a signal coming from glib mainloop, so we
-            # need to run it and wait for the callbacks to handle cancellations.
-            poll_glib()
+            self.cancel_pending_dbus_methods()
             self.cancellable = None
         self.dbus.cleanup()
         self.dbus = None
@@ -500,6 +497,12 @@ class Modem(log.Origin):
         self.log('Registering with operator', matching_op_path, mcc_mnc)
         dbus_call_dismiss_error(self, 'org.ofono.Error.InProgress', dbus_op.Register)
 
+    def cancel_pending_dbus_methods(self):
+        self.cancellable.cancel()
+        # Cancel op is applied as a signal coming from glib mainloop, so we
+        # need to run it and wait for the callbacks to handle cancellations.
+        poll_glib()
+
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'
         if self.is_powered():
@@ -517,6 +520,8 @@ class Modem(log.Origin):
         'Connect to MCC+MNC'
         if (mcc_mnc is not None) and (len(mcc_mnc) != 2 or None in mcc_mnc):
             raise log.Error('mcc_mnc value is invalid. It should be None or contain both valid mcc and mnc values:', mcc_mnc=mcc_mnc)
+        # if test called connect() before and async scanning has not finished, we need to get rid of it:
+        self.cancel_pending_dbus_methods()
         self.power_cycle()
         self.register_attempts = 0
         if self.is_connected(mcc_mnc):

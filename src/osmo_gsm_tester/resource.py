@@ -134,16 +134,7 @@ class ResourcesPool(log.Origin):
         '''
         schema.validate(want, WANT_SCHEMA)
 
-        # replicate items that have a 'times' > 1
-        want = copy.deepcopy(want)
-        for key, item_list in want.items():
-            more_items = []
-            for item in item_list:
-                times = int(item.pop('times'))
-                if times and times > 1:
-                    for i in range(times - 1):
-                        more_items.append(copy.deepcopy(item))
-            item_list.extend(more_items)
+        want = config.replicate_times(want)
 
         origin_id = origin.origin_id()
 

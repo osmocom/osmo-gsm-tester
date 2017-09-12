@@ -277,13 +277,13 @@ def replicate_times(d):
     'replicate items that have a "times" > 1'
     d = copy.deepcopy(d)
     for key, item_list in d.items():
-        more_items = []
-        for item in item_list:
-            times = int(item.pop('times'))
-            if times and times > 1:
-                for i in range(times - 1):
-                    more_items.append(copy.deepcopy(item))
-        item_list.extend(more_items)
+        idx = 0
+        while idx < len(item_list):
+            item = item_list[idx]
+            times = int(item.pop('times', 1))
+            for j in range(1, times):
+                item_list.insert(idx + j, copy.deepcopy(item))
+            idx += times
     return d
 
 # vim: expandtab tabstop=4 shiftwidth=4

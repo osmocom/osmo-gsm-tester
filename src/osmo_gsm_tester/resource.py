@@ -51,7 +51,7 @@ RESOURCES_SCHEMA = {
         'ip_address[].addr': schema.IPV4,
         'bts[].label': schema.STR,
         'bts[].type': schema.STR,
-        'bts[].ipa_unit_id': schema.INT,
+        'bts[].ipa_unit_id': schema.UINT,
         'bts[].addr': schema.IPV4,
         'bts[].band': schema.BAND,
         'bts[].trx_remote_ip': schema.IPV4,

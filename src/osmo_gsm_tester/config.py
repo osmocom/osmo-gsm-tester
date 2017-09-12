@@ -52,6 +52,7 @@
 
 import yaml
 import os
+import copy
 
 from . import log, schema, util
 from .util import is_dict, is_list, Dir, get_tempdir
@@ -271,4 +272,18 @@ def overlay(dest, src):
             dest[i] = overlay(dest[i], src[i])
         return dest
     return src
+
+def replicate_times(d):
+    'replicate items that have a "times" > 1'
+    d = copy.deepcopy(d)
+    for key, item_list in d.items():
+        more_items = []
+        for item in item_list:
+            times = int(item.pop('times'))
+            if times and times > 1:
+                for i in range(times - 1):
+                    more_items.append(copy.deepcopy(item))
+        item_list.extend(more_items)
+    return d
+
 # vim: expandtab tabstop=4 shiftwidth=4

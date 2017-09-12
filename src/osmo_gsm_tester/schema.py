@@ -71,6 +71,11 @@ def uint(val):
     if n < 0:
         raise ValueError('Positive value expected instead of %d' % n)
 
+def times(val):
+    n = int(val)
+    if n < 1:
+        raise ValueError('Positive value >0 expected instead of %d' % n)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -82,6 +87,7 @@ IMSI = 'imsi'
 KI = 'ki'
 MSISDN = 'msisdn'
 AUTH_ALGO = 'auth_algo'
+TIMES='times'
 SCHEMA_TYPES = {
         INT: int,
         STR: str,
@@ -94,6 +100,7 @@ SCHEMA_TYPES = {
         KI: ki,
         MSISDN: msisdn,
         AUTH_ALGO: auth_algo,
+        TIMES: times,
     }
 
 def validate(config, schema):

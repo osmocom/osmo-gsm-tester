@@ -68,7 +68,7 @@ RESOURCES_SCHEMA = {
     }
 
 WANT_SCHEMA = util.dict_add(
-    dict([('%s[].times' % r, schema.INT) for r in R_ALL]),
+    dict([('%s[].times' % r, schema.TIMES) for r in R_ALL]),
     RESOURCES_SCHEMA)
 
 KNOWN_BTS_TYPES = {

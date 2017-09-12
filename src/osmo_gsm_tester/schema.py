@@ -66,8 +66,14 @@ def auth_algo(val):
         return
     raise ValueError('Unknown Authentication Algorithm: %r' % val)
 
+def uint(val):
+    n = int(val)
+    if n < 0:
+        raise ValueError('Positive value expected instead of %d' % n)
+
 INT = 'int'
 STR = 'str'
+UINT = 'uint'
 BOOL_STR = 'bool_str'
 BAND = 'band'
 IPV4 = 'ipv4'
@@ -79,6 +85,7 @@ AUTH_ALGO = 'auth_algo'
 SCHEMA_TYPES = {
         INT: int,
         STR: str,
+        UINT: uint,
         BOOL_STR: str2bool,
         BAND: band,
         IPV4: ipv4,

@@ -84,7 +84,7 @@ class OsmoBtsTrx(log.Origin):
             self.log('Waiting for osmo-trx to start up...')
             event_loop.wait(self, self.trx.trx_ready)
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoBtsTrx.BIN_BTS_TRX)))
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)

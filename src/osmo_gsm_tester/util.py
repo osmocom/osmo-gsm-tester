@@ -101,7 +101,7 @@ class FileLock:
     def __enter__(self):
         if self.f is not None:
             return
-        self.fd = os.open(self.path, os.O_CREAT | os.O_WRONLY | os.O_TRUNC)
+        self.fd = os.open(self.path, os.O_CREAT | os.O_WRONLY)
         fcntl.flock(self.fd, fcntl.LOCK_EX)
         os.truncate(self.fd, 0)
         os.write(self.fd, str(self.owner).encode('utf-8'))

@@ -1,4 +1,14 @@
+creating files
+launch a program that locks a given file, it will create $dir/lock_test
+wait until this lock_test lock file was created by program
+expecting the lock file to reflect "long name"
 launched first, locked by: 'long name'
+launching second program, should find the lock intact and wait
 launched second, locked by: 'long name'
+drop the first lock, $f1 removal signals the first process to stop locking
+wait for first program to carry out the lock release
+now expecting second program to lock
 waited, locked by: 'shorter'
+release the second program also
+expecting the lock to be gone
 waited more, locked by: ''

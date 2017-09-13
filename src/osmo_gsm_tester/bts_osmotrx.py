@@ -41,7 +41,7 @@ class OsmoBtsTrx(log.Origin):
         self.suite_run = suite_run
         self.conf = conf
         self.env = {}
-        self.pcu_sk_tmp_dir = tempfile.mkdtemp(None, 'ogtpcusk', None)
+        self.pcu_sk_tmp_dir = tempfile.mkdtemp('', 'ogtpcusk')
         if len(self.pcu_socket_path().encode()) > 107:
             raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
 

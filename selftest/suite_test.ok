@@ -240,24 +240,27 @@ tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{}, {}, {}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
-tst test_suite: DBG: Picked - _hash: f1cab48db5b9004986e2030cb71730a5c55e823e
+tst test_suite: DBG: Picked - _hash: 89e45aaea42027162cc33f4389f055077338c82b
   addr: 10.42.42.52
   band: GSM-1800
   ipa_unit_id: '6'
   label: Ettus B200
   launch_trx: 'True'
   trx_list:
-  - nominal_power: '10'
+  - max_power_red: '2'
+    nominal_power: '10'
   - nominal_power: '12'
   type: osmo-bts-trx
-- _hash: 1d00bd0d6643db5590cdbefff3152e70500abefc
+- _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
   addr: 10.42.42.53
   band: GSM-1800
   ipa_unit_id: '7'
   label: sysmoCell 5000
   trx_list:
-  - nominal_power: '10'
-  - nominal_power: '12'
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
   trx_remote_ip: 10.42.42.112
   type: osmo-bts-trx
 - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9

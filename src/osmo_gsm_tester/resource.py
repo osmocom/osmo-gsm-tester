@@ -436,10 +436,22 @@ def item_matches(item, wanted_item, ignore_keys=None):
     if is_list(wanted_item):
         if not is_list(item):
             return False
-        # multiple possible values
-        for val in wanted_item:
-            if val not in item:
-                return False
+        # Validate that all elements in both lists are of the same type:
+        t = util.list_validate_same_elem_type(wanted_item + item)
+        if t is None:
+            return True # both lists are empty, return
+        # For lists of complex objects, we expect them to be sorted lists:
+        if t in (dict, list, tuple):
+            for i in range(max(len(wanted_item), len(item))):
+                log.ctx(idx=i)
+                subitem = item[i] if i < len(item) else util.empty_instance_type(t)
+                wanted_subitem = wanted_item[i] if i < len(wanted_item) else util.empty_instance_type(t)
+                if not item_matches(subitem, wanted_subitem, ignore_keys=ignore_keys):
+                    return False
+        else: # for lists of basic elements, we handle them as unsorted sets:
+            for val in wanted_item:
+                if val not in item:
+                    return False
         return True
 
     return item == wanted_item

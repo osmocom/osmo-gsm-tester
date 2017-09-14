@@ -15,8 +15,10 @@ defaults:
   timeout: 60s
 resources:
   bts:
+  - label: sysmoCell 5000
+    times: '2'
   - times: '1'
-  - times: '2'
+    type: sysmo
   ip_address:
   - times: '1'
   modem:
@@ -31,30 +33,37 @@ trial test_suite
 ---------------------------------------------------------------------
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...
 tst test_suite: DBG: {combining='resources'}
-tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{}, {}, {}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]
 tst test_suite: Reserving 3 x bts (candidates: 6)
-tst test_suite: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 9eaa928b04ce04b19dbae972f9bfc3eea6f5e249
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
   band: GSM-1800
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: sysmo
-- _hash: 76c8d2f459113cd6c99ed62d1a94bbe9a291ba94
-  addr: 10.42.42.115
-  band: GSM-1800
-  ipa_unit_id: '5'
-  label: octBTS 3000
-  trx_list:
-  - hw_addr: 00:0c:90:32:b5:8a
-  type: oct
-- _hash: 0b7fabd512b36aec43d7d496abd00af4e193b0f8
-  addr: 10.42.42.190
-  band: GSM-1900
-  ipa_unit_id: '1902'
-  label: nanoBTS 1900
-  trx_list:
-  - hw_addr: 00:02:95:00:41:b3
-  type: nanobts
 tst test_suite: Reserving 1 x ip_address (candidates: 3)
 tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
   addr: 10.42.42.1
@@ -166,31 +175,38 @@ trial test_suite
 ---------------------------------------------------------------------
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
-tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{}, {}, {}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
-tst test_suite: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 9eaa928b04ce04b19dbae972f9bfc3eea6f5e249
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
   band: GSM-1800
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: sysmo
-- _hash: 76c8d2f459113cd6c99ed62d1a94bbe9a291ba94
-  addr: 10.42.42.115
-  band: GSM-1800
-  ipa_unit_id: '5'
-  label: octBTS 3000
-  trx_list:
-  - hw_addr: 00:0c:90:32:b5:8a
-  type: oct
-- _hash: 0b7fabd512b36aec43d7d496abd00af4e193b0f8
-  addr: 10.42.42.190
-  band: GSM-1900
-  ipa_unit_id: '1902'
-  label: nanoBTS 1900
-  trx_list:
-  - hw_addr: 00:02:95:00:41:b3
-  type: nanobts
   [resource.py:[LINENR]]
 tst test_suite: Reserving 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
@@ -237,21 +253,10 @@ trial test_suite
 ---------------------------------------------------------------------
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
-tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{}, {}, {}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
-tst test_suite: DBG: Picked - _hash: 89e45aaea42027162cc33f4389f055077338c82b
-  addr: 10.42.42.52
-  band: GSM-1800
-  ipa_unit_id: '6'
-  label: Ettus B200
-  launch_trx: 'True'
-  trx_list:
-  - max_power_red: '2'
-    nominal_power: '10'
-  - nominal_power: '12'
-  type: osmo-bts-trx
-- _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
+tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
   addr: 10.42.42.53
   band: GSM-1800
   ipa_unit_id: '7'
@@ -260,6 +265,17 @@ tst test_suite: DBG: Picked - _hash: 89e45aaea42027162cc33f4389f055077338c82b
   - max_power_red: '3'
     nominal_power: '10'
   - max_power_red: '0'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 9eaa928b04ce04b19dbae972f9bfc3eea6f5e249
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
     nominal_power: '12'
   trx_remote_ip: 10.42.42.112
   type: osmo-bts-trx

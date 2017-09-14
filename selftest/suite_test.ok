@@ -31,7 +31,7 @@ trial test_suite
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...
 tst test_suite: DBG: {combining='resources'}
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'times': '1'}], ip_address=[{'times': '1'}], modem=[{'times': '2'}]}}  [test_suite↪{combining_scenarios='resources'}]
-tst test_suite: Reserving 1 x bts (candidates: 3)
+tst test_suite: Reserving 1 x bts (candidates: 6)
 tst test_suite: DBG: Picked - _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
   addr: 10.42.42.114
   band: GSM-1800

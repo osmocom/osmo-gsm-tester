@@ -54,7 +54,7 @@ network
   trx 0
    rf_locked 0
    arfcn val_trx_arfcn_trx0
-   nominal power 23
+   nominal power val_trx_nominal_power_trx0
    max_power_red val_trx_max_power_red_trx0
    rsl e1 tei 0
    timeslot 0
@@ -68,7 +68,7 @@ network
   trx 1
    rf_locked 0
    arfcn val_trx_arfcn_trx1
-   nominal power 23
+   nominal power val_trx_nominal_power_trx1
    max_power_red val_trx_max_power_red_trx1
    rsl e1 tei 0
    timeslot 0
@@ -98,7 +98,7 @@ network
   trx 0
    rf_locked 0
    arfcn val_trx_arfcn_trx0
-   nominal power 23
+   nominal power val_trx_nominal_power_trx0
    max_power_red val_trx_max_power_red_trx0
    rsl e1 tei 0
    timeslot 0
@@ -112,7 +112,7 @@ network
   trx 1
    rf_locked 0
    arfcn val_trx_arfcn_trx1
-   nominal power 23
+   nominal power val_trx_nominal_power_trx1
    max_power_red val_trx_max_power_red_trx1
    rsl e1 tei 0
    timeslot 0

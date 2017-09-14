@@ -58,6 +58,8 @@ RESOURCES_SCHEMA = {
         'bts[].launch_trx': schema.BOOL_STR,
         'bts[].trx_list[].hw_addr': schema.HWADDR,
         'bts[].trx_list[].net_device': schema.STR,
+        'bts[].trx_list[].nominal_power': schema.UINT,
+        'bts[].trx_list[].max_power_red': schema.UINT,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].label': schema.STR,

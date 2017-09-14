@@ -208,7 +208,7 @@ class ResourcesPool(log.Origin):
             return next_msisdn
 
 
-class NoResourceExn(Exception):
+class NoResourceExn(log.Error):
     pass
 
 class Resources(dict):

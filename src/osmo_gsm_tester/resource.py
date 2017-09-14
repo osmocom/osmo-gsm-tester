@@ -218,7 +218,8 @@ class ResourcesPool(log.Origin):
 
 
 class NoResourceExn(Exception):
-    pass
+    def __init__(self, *messages, **named_items):
+        super().__init__(log.compose_message(messages, named_items))
 
 class Resources(dict):
 

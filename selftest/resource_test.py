@@ -94,4 +94,27 @@ with open(rrfile, 'r') as f:
     print(f.read())
 print('~~~ end: currently reserved\n')
 
+print('- item_matches:')
+superset = { 'hello': 'world', 'foo': 'bar', 'ordered_list': [{'xkey': 'xvalue'},{'ykey': 'yvalue'}], 'unordered_list_set': [1, 2, 3]}
+
+subset =  { 'foo': 'bar', 'ordered_list': [{'xkey': 'xvalue'},{'ykey': 'yvalue'}], 'unordered_list_set': [2, 1] }
+if resource.item_matches(superset, subset):
+    print('1st subset matches correctly, pass')
+
+subset =  { 'ordered_list': [{},{'ykey': 'yvalue'}], 'unordered_list_set': [] }
+if resource.item_matches(superset, subset):
+    print('2nd subset matches correctly, pass')
+
+subset =  { 'ordered_list': [{'ykey': 'yvalue'}, {'xkey': 'xvalue'}] }
+if not resource.item_matches(superset, subset):
+    print('3rd subset should not match, pass')
+
+subset =  { 'ordered_list': [{'xkey': 'xvalue'}, {'ykey': 'yvalue'}, {'zkey': 'zvalue'}] }
+if not resource.item_matches(superset, subset):
+    print('3rd subset should not match, pass')
+
+subset =  { 'unordered_list_set': [4] }
+if not resource.item_matches(superset, subset):
+    print('4th subset should not match, pass')
+
 # vim: expandtab tabstop=4 shiftwidth=4

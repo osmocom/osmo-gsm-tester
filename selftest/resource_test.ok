@@ -243,3 +243,9 @@ modem:
 
 ~~~ end: currently reserved
 
+- item_matches:
+1st subset matches correctly, pass
+2nd subset matches correctly, pass
+3rd subset should not match, pass
+3rd subset should not match, pass
+4th subset should not match, pass

@@ -45,7 +45,7 @@ print(output)
 print('- test with half empty scenario')
 trial = log.Origin(log.C_TST, 'trial')
 scenario = config.Scenario('foo', 'bar')
-scenario['resources'] = { 'bts': [{'type': 'sysmo'}] }
+scenario['resources'] = { 'bts': [{'type': 'osmo-bts-trx'}] }
 s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))

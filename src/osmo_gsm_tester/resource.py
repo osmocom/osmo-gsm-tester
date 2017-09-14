@@ -139,7 +139,7 @@ class ResourcesPool(log.Origin):
         '''
         schema.validate(want, WANT_SCHEMA)
 
-        want = config.replicate_times(want)
+        want = copy.deepcopy(want)
 
         origin_id = origin.origin_id()
 
@@ -275,10 +275,10 @@ class Resources(dict):
         Pass a dict of resource requirements, e.g.:
           want = {
             'bts': [ {'type': 'osmo-bts-sysmo',}, {} ],
-            'modem': [ {'times': 3} ]
+            'modem': [ {}, {}, {} ]
           }
         This function tries to find a combination from the available resources that
-        matches these requiremens. The returnvalue is a dict (wrapped in a Resources class)
+        matches these requirements. The return value is a dict (wrapped in a Resources class)
         that contains the matching resources in the order of 'want' dict: in above
         example, the returned dict would have a 'bts' list with the first item being
         a sysmoBTS, the second item being any other available BTS.
@@ -294,6 +294,10 @@ class Resources(dict):
 
         If raise_if_missing is False, this will return an empty item for any
         resource that had no match, instead of immediately raising an exception.
+
+        This function expects input dictionaries whose contents have already
+        been replicated based on its the 'times' attributes. See
+        config.replicate_times() for more details.
         '''
         matches = {}
         for key, want_list in sorted(want.items()): # sorted for deterministic test results
@@ -318,7 +322,7 @@ class Resources(dict):
                     my_item = my_list[i]
                     if skip_if_marked and my_item.get(skip_if_marked):
                         continue
-                    if item_matches(my_item, want_item, ignore_keys=('times',)):
+                    if item_matches(my_item, want_item):
                         item_match_list.append(i)
                 if not item_match_list:
                     if raise_if_missing:

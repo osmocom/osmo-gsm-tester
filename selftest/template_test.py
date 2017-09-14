@@ -27,9 +27,11 @@ mock_bts = {
     'stream_id': 'val_bts.stream_id',
     'trx_list': (
             dict(arfcn='val_trx_arfcn_trx0',
+                nominal_power='val_trx_nominal_power_trx0',
                 max_power_red='val_trx_max_power_red_trx0',
                 timeslot_list=mock_timeslot_list),
             dict(arfcn='val_trx_arfcn_trx1',
+                nominal_power='val_trx_nominal_power_trx1',
                 max_power_red='val_trx_max_power_red_trx1',
                 timeslot_list=mock_timeslot_list),
             )

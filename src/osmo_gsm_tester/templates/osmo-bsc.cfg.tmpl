@@ -61,7 +61,7 @@ network
   trx ${loop.index}
    rf_locked 0
    arfcn ${trx.arfcn}
-   nominal power 23
+   nominal power ${trx.nominal_power}
    max_power_red ${trx.max_power_red}
    rsl e1 tei 0
 %  for ts in trx.timeslot_list:

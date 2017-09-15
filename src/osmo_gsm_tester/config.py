@@ -281,9 +281,12 @@ def overlay(dest, src):
     if is_list(dest):
         if not is_list(src):
             raise ValueError('cannot combine list with a value of type: %r' % type(src))
-        for i in range(len(src)):
+        copy_len = min(len(src),len(dest))
+        for i in range(copy_len):
             log.ctx(idx=i)
             dest[i] = overlay(dest[i], src[i])
+        for i in range(copy_len, len(src)):
+            dest.append(src[i])
         return dest
     return src
 

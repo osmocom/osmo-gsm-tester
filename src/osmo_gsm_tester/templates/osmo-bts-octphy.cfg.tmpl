@@ -1,0 +1,48 @@
+! Configuration rendered by osmo-gsm-tester
+log stderr
+  logging color 1
+  logging print extended-timestamp 1
+  logging print category 1
+  logging level abis debug
+  logging level oml debug
+  logging level pag debug
+  logging level rll debug
+  logging level rr debug
+  logging level rsl debug
+!
+
+%for phy in osmo_bts_octphy.phy_list:
+phy ${loop.index}
+ octphy hw-addr ${phy.hw_addr}
+ octphy net-device ${phy.net_device}
+ octphy rx-gain 70
+ %for inst in range(phy.num_instances):
+ instance ${loop.index}
+ %endfor
+%endfor
+bts 0
+ band ${osmo_bts_octphy.band}
+ ipa unit-id ${osmo_bts_octphy.ipa_unit_id} 0
+ oml remote-ip ${osmo_bts_octphy.oml_remote_ip}
+ pcu-socket ${osmo_bts_octphy.pcu_socket_path}
+ gsmtap-sapi bcch
+ gsmtap-sapi ccch
+ gsmtap-sapi rach
+ gsmtap-sapi agch
+ gsmtap-sapi pch
+ gsmtap-sapi sdcch
+ gsmtap-sapi tch/f
+ gsmtap-sapi tch/h
+ gsmtap-sapi pacch
+ gsmtap-sapi pdtch
+ gsmtap-sapi ptcch
+ gsmtap-sapi cbch
+ gsmtap-sapi sacch
+%for trx in osmo_bts_octphy.trx_list:
+ trx ${loop.index}
+  power-ramp max-initial 23000 mdBm
+  power-ramp step-size 2000 mdB
+  power-ramp step-interval 1
+  ms-power-control dsp
+  phy ${trx.phy_idx} instance ${trx.instance_idx}
+%endfor

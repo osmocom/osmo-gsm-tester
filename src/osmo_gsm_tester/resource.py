@@ -29,7 +29,7 @@ from . import util
 from . import schema
 from . import ofono_client
 from . import osmo_nitb
-from . import bts_sysmo, bts_osmotrx
+from . import bts_sysmo, bts_osmotrx, bts_octphy
 
 from .util import is_dict, is_list
 
@@ -83,6 +83,7 @@ CONF_SCHEMA = util.dict_add(
 KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
         'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
+        'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
     }
 
 def register_bts_type(name, clazz):

@@ -15,10 +15,10 @@ log stderr
 !
 phy 0
  instance 0
- osmotrx rx-gain 25
- osmotrx tx-attenuation oml
- osmotrx ip local ${osmo_bts_trx.trx_local_ip}
- osmotrx ip remote ${osmo_bts_trx.trx_remote_ip}
+  osmotrx rx-gain 25
+  osmotrx tx-attenuation oml
+  osmotrx ip local ${osmo_bts_trx.trx_local_ip}
+  osmotrx ip remote ${osmo_bts_trx.trx_remote_ip}
 bts 0
  band ${osmo_bts_trx.band}
  ipa unit-id ${osmo_bts_trx.ipa_unit_id} 0

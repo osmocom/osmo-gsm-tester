@@ -502,6 +502,8 @@ class Modem(log.Origin):
         # Cancel op is applied as a signal coming from glib mainloop, so we
         # need to run it and wait for the callbacks to handle cancellations.
         poll_glib()
+        # once it has been triggered, create a new one for next operation:
+        self.cancellable = Gio.Cancellable.new()
 
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'

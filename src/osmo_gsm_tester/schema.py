@@ -82,7 +82,7 @@ def cipher(val):
     raise ValueError('Unknown Cipher value: %r' % val)
 
 def modem_feature(val):
-    if val in ('sms', 'gprs', 'voicecall', 'ussd'):
+    if val in ('sms', 'gprs', 'voice', 'ussd'):
         return
     raise ValueError('Unknown Modem Feature: %r' % val)
 

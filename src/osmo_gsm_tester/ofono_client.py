@@ -37,6 +37,8 @@ bus = SystemBus()
 I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
 I_SMS = 'org.ofono.MessageManager'
+I_CALLMGR = 'org.ofono.VoiceCallManager'
+I_CALL = 'org.ofono.VoiceCall'
 
 # See https://github.com/intgr/ofono/blob/master/doc/network-api.txt#L78
 NETREG_ST_REGISTERED = 'registered'
@@ -338,11 +340,15 @@ class Modem(log.Origin):
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.path)
         self.register_attempts = 0
+        self.call_list = []
         # one Cancellable can handle several concurrent methods.
         self.cancellable = Gio.Cancellable.new()
         self.dbus.required_signals = {
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
                 I_NETREG: ( ('PropertyChanged', self._on_netreg_property_changed), ),
+                I_CALLMGR: ( ('PropertyChanged', self._on_callmgr_property_changed),
+                              ('CallAdded', self._on_callmgr_call_added),
+                              ('CallRemoved', self._on_callmgr_call_removed), ),
             }
         self.dbus.watch_interfaces()
 
@@ -557,6 +563,80 @@ class Modem(log.Origin):
                 self.dbg(info=info)
                 return True
         return False
+
+    def call_id_list(self):
+        self.dbg('call_id_list: %r' % self.call_list)
+        return self.call_list
+
+    def call_dial(self, to_msisdn_or_modem):
+        if isinstance(to_msisdn_or_modem, Modem):
+            to_msisdn = to_msisdn_or_modem.msisdn
+        else:
+            to_msisdn = str(to_msisdn_or_modem)
+        self.dbg('Dialing:', to_msisdn)
+        cmgr = self.dbus.interface(I_CALLMGR)
+        call_obj_path = cmgr.Dial(to_msisdn, 'default')
+        if call_obj_path not in self.call_list:
+            self.dbg('Adding %s to call list' % call_obj_path)
+            self.call_list.append(call_obj_path)
+        else:
+            self.dbg('Dial returned already existing call')
+        return call_obj_path
+
+    def _find_call_msisdn_state(self, msisdn, state):
+        cmgr = self.dbus.interface(I_CALLMGR)
+        ret = cmgr.GetCalls()
+        for obj_path, props in ret:
+            if props['LineIdentification'] == msisdn and props['State'] == state:
+                return obj_path
+        return None
+
+    def call_wait_incoming(self, caller_msisdn_or_modem, timeout=60):
+        if isinstance(caller_msisdn_or_modem, Modem):
+            caller_msisdn = caller_msisdn_or_modem.msisdn
+        else:
+            caller_msisdn = str(caller_msisdn_or_modem)
+        self.dbg('Waiting for incoming call from:', caller_msisdn)
+        event_loop.wait(self, lambda: self._find_call_msisdn_state(caller_msisdn, 'incoming') is not None, timeout=timeout)
+        return self._find_call_msisdn_state(caller_msisdn, 'incoming')
+
+    def call_answer(self, call_id):
+        self.dbg('Answer call %s' % call_id)
+        assert self.call_state(call_id) == 'incoming'
+        call_dbus_obj = systembus_get(call_id)
+        call_dbus_obj.Answer()
+
+    def call_hangup(self, call_id):
+        self.dbg('Hang up call %s' % call_id)
+        call_dbus_obj = systembus_get(call_id)
+        call_dbus_obj.Hangup()
+
+    def call_is_active(self, call_id):
+        return self.call_state(call_id) == 'active'
+
+    def call_state(self, call_id):
+        call_dbus_obj = systembus_get(call_id)
+        props = call_dbus_obj.GetProperties()
+        state = props.get('State')
+        self.dbg('call state: %s' % state)
+        return state
+
+    def _on_callmgr_call_added(self, obj_path, properties):
+        self.dbg('%r.CallAdded() -> %s=%r' % (I_CALLMGR, obj_path, repr(properties)))
+        if obj_path not in self.call_list:
+            self.call_list.append(obj_path)
+        else:
+            self.dbg('Call already exists %r' % obj_path)
+
+    def _on_callmgr_call_removed(self, obj_path):
+        self.dbg('%r.CallRemoved() -> %s' % (I_CALLMGR, obj_path))
+        if obj_path in self.call_list:
+            self.call_list.remove(obj_path)
+        else:
+            self.dbg('Trying to remove non-existing call %r' % obj_path)
+
+    def _on_callmgr_property_changed(self, name, value):
+        self.dbg('%r.PropertyChanged() -> %s=%s' % (I_CALLMGR, name, value))
 
     def info(self, keys=('Manufacturer', 'Model', 'Revision', 'Serial')):
         props = self.properties()

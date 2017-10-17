@@ -2,6 +2,8 @@
 set -e -x
 base="$PWD"
 
+time_start="$(date '+%F %T')"
+
 # remove older trial dirs and *-run.tgz, if any
 trial_dir_prefix="trial-"
 rm -rf "$trial_dir_prefix"* || true
@@ -28,6 +30,7 @@ rm -rf "$trial_dir/inst" || true
 
 # tar up all results for archiving (optional)
 cd "$trial_dir"
+journalctl -u ofono -o short-precise --since "${time_start}" > "$(readlink last_run)/ofono.log"
 tar czf "$base/${trial_dir}-run.tgz" "$(readlink last_run)"
 tar czf "$base/${trial_dir}-bin.tgz" *.md5 *.tgz
 

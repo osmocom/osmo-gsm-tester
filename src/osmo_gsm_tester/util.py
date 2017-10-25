@@ -38,6 +38,19 @@ def prepend_library_path(path):
         return path
     return path + ':' + lp
 
+def change_elf_rpath(binary, paths, run_dir):
+    '''
+    Change RPATH field in ELF executable binary.
+    This feature can be used to tell the loaded to load the trial libraries, as
+    LD_LIBRARY_PATH is disabled for paths with modified capabilities.
+    '''
+    from .process import Process
+    proc = Process('patchelf', run_dir, ['patchelf', '--set-rpath', paths, binary])
+    proc.launch()
+    proc.wait()
+    if proc.result != 0:
+        raise RuntimeError('patchelf finished with err code %d' % proc.result)
+
 def ip_to_iface(ip):
     try:
         for iface in os.listdir('/sys/class/net'):

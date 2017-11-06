@@ -81,7 +81,7 @@ class OsmoMgcpgw(log.Origin):
         return self.ip_address.get('addr')
 
     def conf_for_msc(self):
-        return dict(mgcpgw=dict(ip_address=self.ip_address))
+        return dict(mgw=dict(ip_address=self.ip_address))
 
     def running(self):
         return not self.process.terminated()

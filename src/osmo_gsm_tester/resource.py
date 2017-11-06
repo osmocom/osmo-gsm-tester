@@ -38,7 +38,6 @@ RESERVED_KEY = '_reserved_by'
 USED_KEY = '_used'
 
 RESOURCES_CONF = 'resources.conf'
-LAST_USED_MSISDN_FILE = 'last_used_msisdn.state'
 RESERVED_RESOURCES_FILE = 'reserved_resources.state'
 
 R_IP_ADDRESS = 'ip_address'
@@ -189,24 +188,27 @@ class ResourcesPool(log.Origin):
         if not self._remember_to_free:
             self.unregister_exit_handler()
 
-    def next_msisdn(self, origin):
+    def next_persistent_value(self, token, first_val, validate_func, inc_func, origin):
         origin_id = origin.origin_id()
 
         with self.state_dir.lock(origin_id):
-            msisdn_path = self.state_dir.child(LAST_USED_MSISDN_FILE)
-            log.ctx(msisdn_path)
-            last_msisdn = '1000'
-            if os.path.exists(msisdn_path):
-                if not os.path.isfile(msisdn_path):
-                    raise RuntimeError('path should be a file but is not: %r' % msisdn_path)
-                with open(msisdn_path, 'r') as f:
-                    last_msisdn = f.read().strip()
-                schema.msisdn(last_msisdn)
+            token_path = self.state_dir.child('last_used_%s.state' % token)
+            log.ctx(token_path)
+            last_value = first_val
+            if os.path.exists(token_path):
+                if not os.path.isfile(token_path):
+                    raise RuntimeError('path should be a file but is not: %r' % token_path)
+                with open(token_path, 'r') as f:
+                    last_value = f.read().strip()
+                validate_func(last_value)
 
-            next_msisdn = util.msisdn_inc(last_msisdn)
-            with open(msisdn_path, 'w') as f:
-                f.write(next_msisdn)
-            return next_msisdn
+            next_value = inc_func(last_value)
+            with open(token_path, 'w') as f:
+                f.write(next_value)
+            return next_value
+
+    def next_msisdn(self, origin):
+        return self.next_persistent_value('msisdn', '1000', schema.msisdn, util.msisdn_inc, origin)
 
 
 class NoResourceExn(log.Error):

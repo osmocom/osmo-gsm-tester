@@ -71,6 +71,13 @@ def uint(val):
     if n < 0:
         raise ValueError('Positive value expected instead of %d' % n)
 
+def uint16(val):
+    n = int(val)
+    if n < 0:
+        raise ValueError('Positive value expected instead of %d' % n)
+    if n > 65535: # 2^16 - 1
+        raise ValueError('Value %d too big, max value is 65535' % n)
+
 def times(val):
     n = int(val)
     if n < 1:

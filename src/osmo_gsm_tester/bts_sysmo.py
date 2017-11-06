@@ -29,6 +29,7 @@ class SysmoBts(log.Origin):
     remote_inst = None
     remote_env = None
     remote_dir = None
+    lac = None
 
     REMOTE_DIR = '/osmo-gsm-tester'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
@@ -143,11 +144,16 @@ class SysmoBts(log.Origin):
     def conf_for_bsc(self):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
+        if self.lac is not None:
+            config.overlay(values, { 'location_area_code': self.lac })
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
 
     def set_bsc(self, bsc):
         self.bsc = bsc
+
+    def set_lac(self, lac):
+        self.lac = lac
 
 # vim: expandtab tabstop=4 shiftwidth=4

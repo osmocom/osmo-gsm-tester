@@ -30,6 +30,7 @@ class OsmoBtsTrx(log.Origin):
     env = None
     trx = None
     pcu_sk_tmp_dir = None
+    lac = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -136,12 +137,17 @@ class OsmoBtsTrx(log.Origin):
     def conf_for_bsc(self):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_trx'))
+        if self.lac is not None:
+            config.overlay(values, { 'location_area_code': self.lac })
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
 
     def set_bsc(self, bsc):
         self.bsc = bsc
+
+    def set_lac(self, lac):
+        self.lac = lac
 
 class OsmoTrx(log.Origin):
     suite_run = None

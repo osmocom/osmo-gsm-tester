@@ -344,6 +344,7 @@ class SuiteRun(log.Origin):
 
     def bts(self, specifics=None):
         bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
+        bts.set_lac(self.lac())
         self.register_for_cleanup(bts)
         return bts
 
@@ -369,6 +370,11 @@ class SuiteRun(log.Origin):
         msisdn = self.resources_pool.next_msisdn(self)
         self.log('using MSISDN', msisdn)
         return msisdn
+
+    def lac(self):
+        lac = self.resources_pool.next_lac(self)
+        self.log('using LAC', lac)
+        return lac
 
     def poll(self):
         if self._processes:

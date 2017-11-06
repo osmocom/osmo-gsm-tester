@@ -30,6 +30,7 @@ class OsmoBtsOctphy(log.Origin):
     env = None
     pcu_sk_tmp_dir = None
     values = None
+    lac = None
 
     BIN_BTS_OCTPHY = 'osmo-bts-octphy'
 
@@ -158,11 +159,16 @@ class OsmoBtsOctphy(log.Origin):
     def conf_for_bsc(self):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_octphy'))
+        if self.lac is not None:
+            config.overlay(values, { 'location_area_code': self.lac })
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
 
     def set_bsc(self, bsc):
         self.bsc = bsc
+
+    def set_lac(self, lac):
+        self.lac = lac
 
 # vim: expandtab tabstop=4 shiftwidth=4

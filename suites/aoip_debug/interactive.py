@@ -23,7 +23,7 @@ for m in modems:
   m.connect(msc.mcc_mnc())
 
 while True:
-  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>')
+  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>')
   cmd = cmd.strip().lower()
 
   if not cmd:
@@ -102,6 +102,16 @@ while True:
       if str(ms.msisdn) == ms_msisdn:
         print('hanging up %s %r' % (ms.name(), call_id))
         ms.call_hangup(call_id)
+
+  elif cmd.startswith('ussd'):
+    if len(params) != 2:
+      print('wrong format')
+      continue
+    ussd_cmd = params[1]
+    for ms in modems:
+        print('modem %s: ussd %s' % (ms.name(), ussd_cmd))
+        response = ms.ussd_send(ussd_cmd)
+        print('modem %s: response=%r' % (ms.name(), response))
 
   else:
       print('Unknown command: %s' % cmd)

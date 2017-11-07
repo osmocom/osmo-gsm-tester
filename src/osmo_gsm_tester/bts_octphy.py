@@ -31,6 +31,7 @@ class OsmoBtsOctphy(log.Origin):
     pcu_sk_tmp_dir = None
     values = None
     lac = None
+    cellid = None
 
     BIN_BTS_OCTPHY = 'osmo-bts-octphy'
 
@@ -161,6 +162,8 @@ class OsmoBtsOctphy(log.Origin):
         config.overlay(values, config.get_defaults('osmo_bts_octphy'))
         if self.lac is not None:
             config.overlay(values, { 'location_area_code': self.lac })
+        if self.cellid is not None:
+            config.overlay(values, { 'cell_identity': self.cellid })
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
@@ -170,5 +173,8 @@ class OsmoBtsOctphy(log.Origin):
 
     def set_lac(self, lac):
         self.lac = lac
+
+    def set_cellid(self, cellid):
+        self.cellid = cellid
 
 # vim: expandtab tabstop=4 shiftwidth=4

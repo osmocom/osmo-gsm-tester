@@ -213,6 +213,9 @@ class ResourcesPool(log.Origin):
     def next_lac(self, origin):
         return self.next_persistent_value('lac', '1', schema.uint16, lambda x: str((int(x)+1) % pow(2,16)), origin)
 
+    def next_cellid(self, origin):
+        return self.next_persistent_value('cellid', '1', schema.uint16, lambda x: str((int(x)+1) % pow(2,16)), origin)
+
 class NoResourceExn(log.Error):
     pass
 

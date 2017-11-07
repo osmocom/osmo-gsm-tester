@@ -38,7 +38,7 @@ network
  bts 0
   type val_type_bts0
   band val_band_bts0
-  cell_identity 0
+  cell_identity val_bts.cell_identity_bts0
   location_area_code val_bts.location_area_code_bts0
   training_sequence_code 7
   base_station_id_code val_bts.base_station_id_code_bts0
@@ -82,7 +82,7 @@ network
  bts 1
   type val_type_bts1
   band val_band_bts1
-  cell_identity 0
+  cell_identity val_bts.cell_identity_bts1
   location_area_code val_bts.location_area_code_bts1
   training_sequence_code 7
   base_station_id_code val_bts.base_station_id_code_bts1

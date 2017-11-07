@@ -345,6 +345,7 @@ class SuiteRun(log.Origin):
     def bts(self, specifics=None):
         bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
         bts.set_lac(self.lac())
+        bts.set_cellid(self.cellid())
         self.register_for_cleanup(bts)
         return bts
 
@@ -375,6 +376,11 @@ class SuiteRun(log.Origin):
         lac = self.resources_pool.next_lac(self)
         self.log('using LAC', lac)
         return lac
+
+    def cellid(self):
+        cellid = self.resources_pool.next_cellid(self)
+        self.log('using CellId', cellid)
+        return cellid
 
     def poll(self):
         if self._processes:

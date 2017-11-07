@@ -30,6 +30,7 @@ class SysmoBts(log.Origin):
     remote_env = None
     remote_dir = None
     lac = None
+    cellid = None
 
     REMOTE_DIR = '/osmo-gsm-tester'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
@@ -146,6 +147,8 @@ class SysmoBts(log.Origin):
         config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
         if self.lac is not None:
             config.overlay(values, { 'location_area_code': self.lac })
+        if self.cellid is not None:
+            config.overlay(values, { 'cell_identity': self.cellid })
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
@@ -155,5 +158,8 @@ class SysmoBts(log.Origin):
 
     def set_lac(self, lac):
         self.lac = lac
+
+    def set_cellid(self, cellid):
+        self.cellid = cellid
 
 # vim: expandtab tabstop=4 shiftwidth=4

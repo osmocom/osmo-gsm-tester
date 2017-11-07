@@ -31,6 +31,7 @@ class OsmoBtsTrx(log.Origin):
     trx = None
     pcu_sk_tmp_dir = None
     lac = None
+    cellid = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -139,6 +140,8 @@ class OsmoBtsTrx(log.Origin):
         config.overlay(values, config.get_defaults('osmo_bts_trx'))
         if self.lac is not None:
             config.overlay(values, { 'location_area_code': self.lac })
+        if self.cellid is not None:
+            config.overlay(values, { 'cell_identity': self.cellid })
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
@@ -148,6 +151,9 @@ class OsmoBtsTrx(log.Origin):
 
     def set_lac(self, lac):
         self.lac = lac
+
+    def set_cellid(self, cellid):
+        self.cellid = cellid
 
 class OsmoTrx(log.Origin):
     suite_run = None

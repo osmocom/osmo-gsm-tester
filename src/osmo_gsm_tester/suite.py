@@ -23,7 +23,7 @@ import time
 import copy
 import traceback
 import pprint
-from . import config, log, template, util, resource, schema, ofono_client, event_loop, esme, sms
+from . import config, log, template, util, resource, schema, modem, event_loop, esme, sms
 from . import osmo_nitb
 from . import osmo_hlr, osmo_mgcpgw, osmo_msc, osmo_bsc, osmo_stp
 from . import test
@@ -352,9 +352,9 @@ class SuiteRun(log.Origin):
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
         self.dbg('create Modem object', conf=conf)
-        modem = ofono_client.Modem(conf)
-        self.register_for_cleanup(modem)
-        return modem
+        ms = modem.Modem(conf)
+        self.register_for_cleanup(ms)
+        return ms
 
     def modems(self, count):
         l = []

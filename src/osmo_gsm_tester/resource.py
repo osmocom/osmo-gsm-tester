@@ -27,7 +27,7 @@ from . import log
 from . import config
 from . import util
 from . import schema
-from . import ofono_client
+from . import modem
 from . import osmo_nitb
 from . import bts_sysmo, bts_osmotrx, bts_octphy
 

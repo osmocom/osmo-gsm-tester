@@ -502,7 +502,14 @@ class Modem(log.Origin):
             return
         dbus_op = systembus_get(matching_op_path)
         self.log('Registering with operator', matching_op_path, mcc_mnc)
-        dbus_call_dismiss_error(self, 'org.ofono.Error.InProgress', dbus_op.Register)
+        try:
+            dbus_call_dismiss_error(self, 'org.ofono.Error.InProgress', dbus_op.Register)
+        except GLib.Error as e:
+            if Gio.DBusError.is_remote_error(e) and Gio.DBusError.get_remote_error(e) == 'org.ofono.Error.NotSupported':
+                self.log('modem does not support manual registering, attempting automatic registering')
+                self.scan_cb_register_automatic(scanned_operators, mcc_mnc)
+                return
+            raise e
 
     def cancel_pending_dbus_methods(self):
         self.cancellable.cancel()

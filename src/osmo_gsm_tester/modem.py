@@ -145,11 +145,11 @@ def dbus_async_call(instance, proxymethod, *proxymethod_args,
 def dbus_call_dismiss_error(log_obj, err_str, method):
     try:
         method()
-    except Exception as e:
-        if isinstance(e, GLib.Error) and err_str in e.domain:
+    except GLib.Error as e:
+        if Gio.DBusError.is_remote_error(e) and Gio.DBusError.get_remote_error(e) == err_str:
             log_obj.log('Dismissed Dbus method error: %r' % e)
             return
-        raise log.Error('dbus_call_dismiss_error raised error %r' % e)
+        raise e
 
 class ModemDbusInteraction(log.Origin):
     '''Work around inconveniences specific to pydbus and ofono.

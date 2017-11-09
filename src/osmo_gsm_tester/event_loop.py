@@ -17,9 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# These will be initialized before each test run.
-# A test script can thus establish its context by doing:
-# from osmo_gsm_tester.test import *
 import time
 from . import log
 

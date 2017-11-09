@@ -23,9 +23,8 @@ import time
 import copy
 import traceback
 import pprint
-from . import config, log, template, util, resource, schema, modem, event_loop, esme, sms
-from . import osmo_nitb
-from . import osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp
+from . import config, log, template, util, resource, schema, event_loop
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, modem, esme, sms
 from . import test
 
 class Timeout(Exception):

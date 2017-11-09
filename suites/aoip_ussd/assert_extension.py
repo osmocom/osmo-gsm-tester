@@ -6,8 +6,9 @@ USSD_COMMAND_GET_EXTENSION = '*#100#'
 hlr = suite.hlr()
 bts = suite.bts()
 mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
+mgw_bsc = suite.mgw()
 msc = suite.msc(hlr, mgcpgw)
-bsc = suite.bsc(msc)
+bsc = suite.bsc(msc, mgw_bsc)
 stp = suite.stp()
 ms = suite.modem()
 
@@ -15,6 +16,7 @@ hlr.start()
 stp.start()
 msc.start()
 mgcpgw.start()
+mgw_bsc.start()
 
 bsc.bts_add(bts)
 bsc.start()

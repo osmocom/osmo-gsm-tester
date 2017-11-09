@@ -74,7 +74,10 @@ msc
  token msc_token_23_42
  core-mobile-country-code ${bsc.net.mcc}
  core-mobile-network-code ${bsc.net.mnc}
- ip.access rtp-base 8000
+ ip.access rtp-base 25000
+ mgw remote-ip ${mgw.ip_address.addr}
+ mgw remote-port 2427
+ mgw endpoint-range 1 31
  timeout-ping 1800
  timeout-ping advanced
  timeout-pong 60

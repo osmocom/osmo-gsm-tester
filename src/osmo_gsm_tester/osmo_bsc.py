@@ -30,13 +30,15 @@ class OsmoBsc(log.Origin):
     process = None
     bts = None
     encryption = None
+    mgw = None
 
-    def __init__(self, suite_run, msc, ip_address):
+    def __init__(self, suite_run, msc, mgw, ip_address):
         super().__init__(log.C_RUN, 'osmo-bsc_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
         self.bts = []
         self.msc = msc
+        self.mgw = mgw
 
     def start(self):
         self.log('Starting osmo-bsc')
@@ -73,6 +75,7 @@ class OsmoBsc(log.Origin):
         values = dict(bsc=config.get_defaults('bsc'))
         config.overlay(values, self.suite_run.config())
         config.overlay(values, dict(bsc=dict(ip_address=self.ip_address)))
+        config.overlay(values, self.mgw.conf_for_client())
 
         bts_list = []
         for bts in self.bts:

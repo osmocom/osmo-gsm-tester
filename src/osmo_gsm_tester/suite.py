@@ -20,7 +20,6 @@
 import os
 import sys
 import time
-import copy
 import traceback
 import pprint
 from . import config, log, template, util, resource, schema, event_loop

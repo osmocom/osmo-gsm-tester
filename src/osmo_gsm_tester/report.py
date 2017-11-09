@@ -21,7 +21,7 @@ import os
 import math
 from datetime import datetime
 import xml.etree.ElementTree as et
-from . import log, suite
+from . import log, suite, test
 
 def trial_to_junit_write(trial, junit_path):
     elements = et.ElementTree(element=trial_to_junit(trial))
@@ -48,20 +48,20 @@ def suite_to_junit(suite):
         testsuite.append(testcase)
     return testsuite
 
-def test_to_junit(test):
+def test_to_junit(t):
     testcase = et.Element('testcase')
-    testcase.set('name', test.name())
-    testcase.set('time', str(math.ceil(test.duration)))
-    if test.status == suite.Test.SKIP:
+    testcase.set('name', t.name())
+    testcase.set('time', str(math.ceil(t.duration)))
+    if t.status == test.Test.SKIP:
         skip = et.SubElement(testcase, 'skipped')
-    elif test.status == suite.Test.FAIL:
+    elif t.status == test.Test.FAIL:
         failure = et.SubElement(testcase, 'failure')
-        failure.set('type', test.fail_type or 'failure')
-        failure.text = test.fail_message
-        if test.fail_tb:
+        failure.set('type', t.fail_type or 'failure')
+        failure.text = t.fail_message
+        if t.fail_tb:
             system_err = et.SubElement(testcase, 'system-err')
-            system_err.text = test.fail_tb
-    elif test.status != suite.Test.PASS:
+            system_err.text = t.fail_tb
+    elif t.status != test.Test.PASS:
         error = et.SubElement(testcase, 'error')
         error.text = 'could not run'
     return testcase
@@ -102,12 +102,12 @@ def suite_to_text(suite):
     msgs.extend([test_to_text(t) for t in suite.tests])
     return '\n    '.join(msgs)
 
-def test_to_text(test):
-    msgs = ['%s: %s' % (test.status, test.name())]
-    if test.start_timestamp:
-        msgs.append('(%.1f sec)' % test.duration)
-    if test.status == suite.Test.FAIL:
-        msgs.append('%s: %s' % (test.fail_type, test.fail_message))
+def test_to_text(t):
+    msgs = ['%s: %s' % (t.status, t.name())]
+    if t.start_timestamp:
+        msgs.append('(%.1f sec)' % t.duration)
+    if t.status == test.Test.FAIL:
+        msgs.append('%s: %s' % (t.fail_type, t.fail_message))
     return ' '.join(msgs)
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -23,7 +23,7 @@ import subprocess
 import signal
 from datetime import datetime
 
-from . import log, test, event_loop
+from . import log, event_loop
 from .util import Dir
 
 class Process(log.Origin):

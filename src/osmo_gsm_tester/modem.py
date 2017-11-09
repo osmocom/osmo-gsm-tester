@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, test, util, event_loop, sms
+from . import log, util, event_loop, sms
 
 from pydbus import SystemBus, Variant
 import time

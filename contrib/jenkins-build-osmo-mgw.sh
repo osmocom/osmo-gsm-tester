@@ -9,4 +9,4 @@ build_repo libosmo-abis
 build_repo libosmo-netif --disable-doxygen
 build_repo osmo-mgw
 
-create_bin_tgz osmo-bsc_mgcp
+create_bin_tgz osmo-bsc_mgcp osmo-mgw

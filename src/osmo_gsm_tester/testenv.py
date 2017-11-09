@@ -19,7 +19,7 @@
 
 # These will be initialized before each test run.
 # A test script can thus establish its context by doing:
-# from osmo_gsm_tester.test import *
+# from osmo_gsm_tester.testenv import *
 trial = None
 suite = None
 test = None

@@ -4,7 +4,7 @@
 # * SMPP interface of SMSC accepts SMPP clients (ESMEs) which do not appear on
 #   the config file
 
-from osmo_gsm_tester.test import *
+from osmo_gsm_tester.testenv import *
 
 hlr = suite.hlr()
 bts = suite.bts() # bts not started, only needed for mgcpgw

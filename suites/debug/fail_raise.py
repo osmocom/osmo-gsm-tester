@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from osmo_gsm_tester.test import *
+from osmo_gsm_tester.testenv import *
 
 class ExpectedExn(Exception):
     pass

@@ -6,7 +6,7 @@
 # * SMPP interface of SMSC rejects ESMEs with known system id but wrong password.
 # * SMPP interface of SMSC rejects ESEMs with unknown system id
 
-from osmo_gsm_tester.test import *
+from osmo_gsm_tester.testenv import *
 
 SMPP_ESME_RINVPASWD = 0x0000000E
 SMPP_ESME_RINVSYSID = 0x0000000F

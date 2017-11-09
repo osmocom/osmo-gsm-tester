@@ -8,7 +8,7 @@
 # * When SMS is sent in 'store & forward' mode, ESME can send an SMS to an already registered MS.
 # * When SMS is sent in 'store & forward' mode, ESME receives a SMS receipt if it asked for it.
 
-from osmo_gsm_tester.test import *
+from osmo_gsm_tester.testenv import *
 
 SMPP_ESME_RINVDSTADR = 0x0000000B
 

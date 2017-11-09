@@ -24,7 +24,7 @@ import traceback
 import pprint
 from . import config, log, template, util, resource, schema, event_loop
 from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, modem, esme, sms
-from . import test
+from . import testenv
 
 class Timeout(Exception):
     pass
@@ -89,7 +89,7 @@ class Test(log.Origin):
             log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
-            test.setup(self.suite_run, self, sys.modules[__name__], event_loop, sms)
+            testenv.setup(self.suite_run, self, sys.modules[__name__], event_loop, sms)
             with self.redirect_stdout():
                 util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
                                      self.path)

@@ -6,7 +6,7 @@
 # * When SMS is sent in 'transaction' mode, ESME can send an SMS to an already registered MS.
 # * When SMS is sent in 'transaction' mode, ESME fails to send an SMS to non registered MS.
 
-from osmo_gsm_tester.test import *
+from osmo_gsm_tester.testenv import *
 
 SMPP_ESME_RINVDSTADR = 0x0000000B
 

@@ -1,0 +1,16 @@
+!
+! MGCP configuration example
+!
+line vty
+ no login
+ bind ${mgw.ip_address.addr}
+mgcp
+ bind ip ${mgw.ip_address.addr}
+ bind port 2427
+ rtp net-range 4002 16000
+ rtp force-ptime 20
+ sdp audio payload number 98
+ sdp audio payload name AMR/8000
+ number endpoints 31
+ rtcp-omit
+ rtp-accept-all 1

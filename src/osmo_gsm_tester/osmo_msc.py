@@ -31,15 +31,17 @@ class OsmoMsc(log.Origin):
     hlr = None
     config = None
     smsc = None
+    stp = None
     encryption = None
     authentication = None
 
-    def __init__(self, suite_run, hlr, mgcpgw, ip_address):
+    def __init__(self, suite_run, hlr, mgcpgw, stp, ip_address):
         super().__init__(log.C_RUN, 'osmo-msc_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
         self.ip_address = ip_address
         self.hlr = hlr
         self.mgcpgw = mgcpgw
+        self.stp = stp
         self.smsc = smsc.Smsc((ip_address.get('addr'), 2775))
 
     def start(self):
@@ -77,6 +79,7 @@ class OsmoMsc(log.Origin):
         config.overlay(values, dict(msc=dict(ip_address=self.ip_address)))
         config.overlay(values, self.mgcpgw.conf_for_msc())
         config.overlay(values, self.hlr.conf_for_msc())
+        config.overlay(values, self.stp.conf_for_client())
         config.overlay(values, self.smsc.get_config())
 
         # runtime parameters:

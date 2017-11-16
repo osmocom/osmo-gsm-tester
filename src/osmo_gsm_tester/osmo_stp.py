@@ -48,10 +48,9 @@ class OsmoStp(log.Origin):
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
 
-        # TODO: osmo-stp is not yet configurable to a specific IP address
-        #iface = util.ip_to_iface(self.addr())
-        #pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), iface,
-        #                           'host %s and port not 22' % self.addr())
+        iface = util.ip_to_iface(self.addr())
+        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), iface,
+                                   'host %s and port not 22' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
@@ -77,6 +76,9 @@ class OsmoStp(log.Origin):
             r = template.render('osmo-stp.cfg', values)
             self.dbg(r)
             f.write(r)
+
+    def conf_for_client(self):
+        return dict(stp=dict(ip_address=self.ip_address))
 
     def addr(self):
         return self.ip_address.get('addr')

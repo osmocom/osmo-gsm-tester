@@ -15,6 +15,11 @@ e1_input
  ipa bind ${bsc.ip_address.addr}
 cs7 instance 1
  point-code 0.0.2
+ asp asp0 2905 0 m3ua
+  remote-ip ${stp.ip_address.addr}
+ as as0 m3ua
+  asp asp0
+  routing-key 2 0.0.2
  sccp-address bsc_local
   point-code 0.0.2
   routing-indicator PC

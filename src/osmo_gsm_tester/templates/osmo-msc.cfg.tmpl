@@ -19,6 +19,11 @@ network
  authentication ${msc.net.authentication}
 cs7 instance 0
  point-code 0.0.1
+ asp asp0 2905 0 m3ua
+  remote-ip ${stp.ip_address.addr}
+ as as0 m3ua
+  asp asp0
+  routing-key 1 0.0.1
 msc
  mgw remote-ip ${mgw.ip_address.addr}
  assign-tmsi

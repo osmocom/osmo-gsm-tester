@@ -14,7 +14,8 @@ SMPP_ESME_RINVSYSID = 0x0000000F
 hlr = suite.hlr()
 bts = suite.bts()
 mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
-msc = suite.msc(hlr, mgcpgw)
+stp = suite.stp()
+msc = suite.msc(hlr, mgcpgw, stp)
 smsc = msc.smsc
 
 esme = suite.esme()
@@ -25,6 +26,7 @@ smsc.set_smsc_policy(smsc.SMSC_POLICY_CLOSED)
 smsc.esme_add(esme)
 smsc.esme_add(esme_no_pwd)
 
+stp.start()
 hlr.start()
 msc.start()
 mgcpgw.start()

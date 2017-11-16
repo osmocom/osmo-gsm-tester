@@ -9,7 +9,8 @@ from osmo_gsm_tester.testenv import *
 hlr = suite.hlr()
 bts = suite.bts() # bts not started, only needed for mgcpgw
 mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
-msc = suite.msc(hlr, mgcpgw)
+stp = suite.stp()
+msc = suite.msc(hlr, mgcpgw, stp)
 smsc = msc.smsc
 esme = suite.esme()
 
@@ -18,6 +19,7 @@ esme = suite.esme()
 smsc.set_smsc_policy(smsc.SMSC_POLICY_ACCEPT_ALL)
 esme.set_smsc(smsc)
 
+stp.start()
 hlr.start()
 msc.start()
 mgcpgw.start()

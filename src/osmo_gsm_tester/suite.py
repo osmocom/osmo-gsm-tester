@@ -240,15 +240,15 @@ class SuiteRun(log.Origin):
             ip_address = self.ip_address()
         return osmo_mgw.OsmoMgw(self, ip_address)
 
-    def msc(self, hlr, mgcpgw, ip_address=None):
+    def msc(self, hlr, mgcpgw, stp, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_msc.OsmoMsc(self, hlr, mgcpgw, ip_address)
+        return osmo_msc.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
 
-    def bsc(self, msc, mgw, ip_address=None):
+    def bsc(self, msc, mgw, stp, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_bsc.OsmoBsc(self, msc, mgw, ip_address)
+        return osmo_bsc.OsmoBsc(self, msc, mgw, stp, ip_address)
 
     def stp(self, ip_address=None):
         if ip_address is None:

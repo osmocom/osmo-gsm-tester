@@ -63,8 +63,7 @@ class OsmoHlr(log.Origin):
             raise log.Error('hlr.sql missing:', sql_input)
         self.run_local('create_hlr_db', ('/bin/sh', '-c', 'sqlite3 %r < %r' % (self.db_file, sql_input)))
 
-        iface = util.ip_to_iface(self.addr())
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), iface,
+        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }

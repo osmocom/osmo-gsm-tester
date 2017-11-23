@@ -151,7 +151,7 @@ class OsmoHlr(log.Origin):
         finally:
             conn.close()
 
-    def conf_for_msc(self):
+    def conf_for_client(self):
         return dict(hlr=dict(ip_address=self.ip_address))
 
 # vim: expandtab tabstop=4 shiftwidth=4

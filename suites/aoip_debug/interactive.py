@@ -2,30 +2,40 @@
 from osmo_gsm_tester.testenv import *
 hlr = suite.hlr()
 bts = suite.bts()
+pcu = bts.pcu()
 mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
 mgw_bsc = suite.mgw()
 stp = suite.stp()
+ggsn = suite.ggsn()
+sgsn = suite.sgsn(hlr, ggsn)
 msc = suite.msc(hlr, mgcpgw, stp)
 bsc = suite.bsc(msc, mgw_bsc, stp)
+
 modems = suite.modems(int(prompt('How many modems?')))
+
+bsc.bts_add(bts)
+sgsn.bts_add(bts)
 
 hlr.start()
 stp.start()
+ggsn.start()
+sgsn.start()
 msc.start()
 mgcpgw.start()
 mgw_bsc.start()
-
-bsc.bts_add(bts)
 bsc.start()
 
 bts.start()
+print('Waiting for bts to be ready...')
+wait(bts.ready_for_pcu)
+pcu.start()
 
 for m in modems:
   hlr.subscriber_add(m)
   m.connect(msc.mcc_mnc())
 
 while True:
-  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>')
+  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>, data-attach, data-wait, data-detach, data-activate')
   cmd = cmd.strip().lower()
 
   if not cmd:
@@ -113,6 +123,35 @@ while True:
     for ms in modems:
         print('modem %s: ussd %s' % (ms.name(), ussd_cmd))
         response = ms.ussd_send(ussd_cmd)
+        print('modem %s: response=%r' % (ms.name(), response))
+
+  elif cmd.startswith('data-attach'):
+    if len(params) != 1:
+      print('wrong format')
+      continue
+    for ms in modems:
+        print('modem %s: attach' % ms.name())
+        ms.attach()
+        wait(ms.is_attached)
+        print('modem %s: attached' % ms.name())
+
+  elif cmd.startswith('data-detach'):
+    if len(params) != 1:
+      print('wrong format')
+      continue
+    for ms in modems:
+        print('modem %s: detach' % ms.name())
+        ms.attach()
+        wait(lambda: not ms.is_attached())
+        print('modem %s: detached' % ms.name())
+
+  elif cmd.startswith('data-activate'):
+    if len(params) != 1:
+      print('wrong format')
+      continue
+    for ms in modems:
+        print('modem %s: activate' % ms.name())
+        response = ms.activate_context()
         print('modem %s: response=%r' % (ms.name(), response))
 
   else:

@@ -421,6 +421,15 @@ class Modem(log.Origin):
     def auth_algo(self):
         return self.conf.get('auth_algo', None)
 
+    def features(self):
+        return self.conf.get('features', [])
+
+    def _required_ifaces(self):
+        req_ifaces = (I_NETREG,)
+        req_ifaces += (I_SMS,) if 'sms' in self.features() else ()
+        req_ifaces += (I_SS,) if 'ussd' in self.features() else ()
+        return req_ifaces
+
     def _on_netreg_property_changed(self, name, value):
         self.dbg('%r.PropertyChanged() -> %s=%s' % (I_NETREG, name, value))
 
@@ -521,16 +530,18 @@ class Modem(log.Origin):
 
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'
+        req_ifaces = self._required_ifaces()
         if self.is_powered():
             self.dbg('Power cycling')
             self.set_online(False)
             self.set_powered(False)
-            event_loop.wait(self, lambda: not self.dbus.has_interface(I_NETREG, I_SMS), timeout=10)
+            for iface in req_ifaces:
+                event_loop.wait(self, lambda: not self.dbus.has_interface(iface), timeout=10)
         else:
             self.dbg('Powering on')
         self.set_powered()
         self.set_online()
-        event_loop.wait(self, self.dbus.has_interface, I_NETREG, I_SMS, timeout=10)
+        event_loop.wait(self, self.dbus.has_interface, *req_ifaces, timeout=10)
 
     def connect(self, mcc_mnc=None):
         'Connect to MCC+MNC'

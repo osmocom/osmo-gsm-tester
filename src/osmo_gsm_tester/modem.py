@@ -37,6 +37,7 @@ bus = SystemBus()
 I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
 I_SMS = 'org.ofono.MessageManager'
+I_CONNMGR = 'org.ofono.ConnectionManager'
 I_CALLMGR = 'org.ofono.VoiceCallManager'
 I_CALL = 'org.ofono.VoiceCall'
 I_SS = 'org.ofono.SupplementaryServices'
@@ -334,6 +335,10 @@ class Modem(log.Origin):
     sms_received_list = None
     _ki = None
 
+    CTX_PROT_IPv4 = 'ip'
+    CTX_PROT_IPv6 = 'ipv6'
+    CTX_PROT_IPv46 = 'dual'
+
     def __init__(self, conf):
         self.conf = conf
         self.path = conf.get('path')
@@ -347,6 +352,7 @@ class Modem(log.Origin):
         self.dbus.required_signals = {
                 I_SMS: ( ('IncomingMessage', self._on_incoming_message), ),
                 I_NETREG: ( ('PropertyChanged', self._on_netreg_property_changed), ),
+                I_CONNMGR: ( ('PropertyChanged', self._on_connmgr_property_changed), ),
                 I_CALLMGR: ( ('PropertyChanged', self._on_callmgr_property_changed),
                               ('CallAdded', self._on_callmgr_call_added),
                               ('CallRemoved', self._on_callmgr_call_removed), ),
@@ -430,6 +436,7 @@ class Modem(log.Origin):
         req_ifaces = (I_NETREG,)
         req_ifaces += (I_SMS,) if 'sms' in self.features() else ()
         req_ifaces += (I_SS,) if 'ussd' in self.features() else ()
+        req_ifaces += (I_CONNMGR,) if 'gprs' in self.features() else ()
         return req_ifaces
 
     def _on_netreg_property_changed(self, name, value):
@@ -531,6 +538,8 @@ class Modem(log.Origin):
         self.cancellable = Gio.Cancellable.new()
 
     def power_off(self):
+        if self.dbus.has_interface(I_CONNMGR) and self.is_attached():
+            self.detach()
         self.set_online(False)
         self.set_powered(False)
         req_ifaces = self._required_ifaces()
@@ -562,6 +571,53 @@ class Modem(log.Origin):
         else:
             self.log('Connect to', mcc_mnc if mcc_mnc else 'default network')
             self.schedule_scan_register(mcc_mnc)
+
+    def is_attached(self):
+        connmgr = self.dbus.interface(I_CONNMGR)
+        prop = connmgr.GetProperties()
+        attached = prop.get('Attached')
+        self.dbg('attached:', attached)
+        return attached
+
+    def attach(self, allow_roaming=False):
+        self.dbg('attach')
+        if self.is_attached():
+            self.detach()
+        connmgr = self.dbus.interface(I_CONNMGR)
+        prop = connmgr.SetProperty('RoamingAllowed', Variant('b', allow_roaming))
+        prop = connmgr.SetProperty('Powered', Variant('b', True))
+
+    def detach(self):
+        self.dbg('detach')
+        connmgr = self.dbus.interface(I_CONNMGR)
+        prop = connmgr.SetProperty('RoamingAllowed', Variant('b', False))
+        prop = connmgr.SetProperty('Powered', Variant('b', False))
+        connmgr.DeactivateAll()
+        connmgr.ResetContexts() # Requires Powered=false
+
+    def activate_context(self, apn='internet', user='ogt', pwd='', protocol='ip'):
+        self.dbg('activate_context', apn=apn, user=user)
+
+        connmgr = self.dbus.interface(I_CONNMGR)
+        ctx_path = connmgr.AddContext('internet')
+
+        ctx = systembus_get(ctx_path)
+        ctx.SetProperty('AccessPointName', Variant('s', apn))
+        ctx.SetProperty('Username', Variant('s', user))
+        ctx.SetProperty('Password', Variant('s', pwd))
+        ctx.SetProperty('Protocol', Variant('s', protocol))
+
+        # Activate can only be called after we are attached
+        ctx.SetProperty('Active', Variant('b', True))
+        event_loop.wait(self, lambda: ctx.GetProperties()['Active'] == True)
+        self.log('context activated', path=ctx_path, apn=apn, user=user, properties=ctx.GetProperties())
+        return ctx_path
+
+    def deactivate_context(self, ctx_id):
+        self.dbg('activate_context', path=ctx_id)
+        ctx = systembus_get(ctx_id)
+        ctx.SetProperty('Active', Variant('b', False))
+        event_loop.wait(self, lambda: ctx.GetProperties()['Active'] == False)
 
     def sms_send(self, to_msisdn_or_modem, *tokens):
         if isinstance(to_msisdn_or_modem, Modem):
@@ -662,6 +718,9 @@ class Modem(log.Origin):
 
     def _on_callmgr_property_changed(self, name, value):
         self.dbg('%r.PropertyChanged() -> %s=%s' % (I_CALLMGR, name, value))
+
+    def _on_connmgr_property_changed(self, name, value):
+        self.dbg('%r.PropertyChanged() -> %s=%s' % (I_CONNMGR, name, value))
 
     def info(self, keys=('Manufacturer', 'Model', 'Revision', 'Serial')):
         props = self.properties()

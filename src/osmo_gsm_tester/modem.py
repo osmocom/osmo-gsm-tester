@@ -358,6 +358,8 @@ class Modem(log.Origin):
         if self.cancellable:
             self.cancel_pending_dbus_methods()
             self.cancellable = None
+        if self.is_powered():
+            self.power_off()
         self.dbus.cleanup()
         self.dbus = None
 
@@ -528,15 +530,19 @@ class Modem(log.Origin):
         # once it has been triggered, create a new one for next operation:
         self.cancellable = Gio.Cancellable.new()
 
+    def power_off(self):
+        self.set_online(False)
+        self.set_powered(False)
+        req_ifaces = self._required_ifaces()
+        for iface in req_ifaces:
+            event_loop.wait(self, lambda: not self.dbus.has_interface(iface), timeout=10)
+
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'
         req_ifaces = self._required_ifaces()
         if self.is_powered():
             self.dbg('Power cycling')
-            self.set_online(False)
-            self.set_powered(False)
-            for iface in req_ifaces:
-                event_loop.wait(self, lambda: not self.dbus.has_interface(iface), timeout=10)
+            self.power_off()
         else:
             self.dbg('Powering on')
         self.set_powered()

@@ -20,11 +20,12 @@
 import os
 import pprint
 import tempfile
-from . import log, config, util, template, process, event_loop
+from . import log, config, util, template, process, event_loop, pcu_osmo
 
 class OsmoBtsTrx(log.Origin):
     suite_run = None
     bsc = None
+    sgsn = None
     run_dir = None
     inst = None
     env = None
@@ -33,6 +34,7 @@ class OsmoBtsTrx(log.Origin):
     lac = None
     cellid = None
     proc_bts = None
+    _pcu = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -55,6 +57,11 @@ class OsmoBtsTrx(log.Origin):
             except OSError:
                 pass
             os.rmdir(self.pcu_sk_tmp_dir)
+
+    def pcu(self):
+        if self._pcu is None:
+            self._pcu = pcu_osmo.OsmoPcu(self.suite_run, self, self.conf)
+        return self._pcu
 
     def pcu_socket_path(self):
         return os.path.join(self.pcu_sk_tmp_dir, 'pcu_bts')
@@ -143,6 +150,10 @@ class OsmoBtsTrx(log.Origin):
         if self.cellid is not None:
             config.overlay(values, { 'cell_identity': self.cellid })
         config.overlay(values, self.conf)
+
+        sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
+        config.overlay(values, sgsn_conf)
+
         self.dbg(conf=values)
         return values
 
@@ -153,6 +164,9 @@ class OsmoBtsTrx(log.Origin):
 
     def set_bsc(self, bsc):
         self.bsc = bsc
+
+    def set_sgsn(self, sgsn):
+        self.sgsn = sgsn
 
     def set_lac(self, lac):
         self.lac = lac

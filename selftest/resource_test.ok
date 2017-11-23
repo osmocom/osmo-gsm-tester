@@ -46,10 +46,11 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
            {'_hash': 'dc9ce027a257da087f31a5bc1ee6b4abd2637369',
             'arfcn': '548',
             'band': 'GSM-1900'}],
- 'bts': [{'_hash': '377ac78d5404b826d40c84efd04b4a9fd4e62b7e',
+ 'bts': [{'_hash': 'd2aa7c1124943de352351b650ca0c751784da6b6',
           'addr': '10.42.42.114',
           'band': 'GSM-1800',
           'ciphers': ['a5_0', 'a5_1'],
+          'direct_pcu': 'True',
           'ipa_unit_id': '1',
           'label': 'sysmoBTS 1002',
           'type': 'osmo-bts-sysmo'},
@@ -118,12 +119,13 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   arfcn: '514'
   band: GSM-1800
 --- testowner: Reserving 2 x bts (candidates: 3)
---- testowner: DBG: Picked - _hash: 377ac78d5404b826d40c84efd04b4a9fd4e62b7e
+--- testowner: DBG: Picked - _hash: d2aa7c1124943de352351b650ca0c751784da6b6
   addr: 10.42.42.114
   band: GSM-1800
   ciphers:
   - a5_0
   - a5_1
+  direct_pcu: 'True'
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: osmo-bts-sysmo
@@ -170,13 +172,14 @@ arfcn:
   arfcn: '514'
   band: GSM-1800
 bts:
-- _hash: 377ac78d5404b826d40c84efd04b4a9fd4e62b7e
+- _hash: d2aa7c1124943de352351b650ca0c751784da6b6
   _reserved_by: testowner-123-1490837279
   addr: 10.42.42.114
   band: GSM-1800
   ciphers:
   - a5_0
   - a5_1
+  direct_pcu: 'True'
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: osmo-bts-sysmo

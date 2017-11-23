@@ -49,7 +49,38 @@ network
   rach max transmission 7
   ip.access unit_id ${bts.ipa_unit_id} 0
   oml ip.access stream_id ${bts.stream_id} line 0
+% if bts.get('sgsn', False):
+  gprs mode gprs
+  gprs routing area 0
+  gprs network-control-order nc1
+  gprs cell bvci 1800
+  gprs cell timer blocking-timer 3
+  gprs cell timer blocking-retries 3
+  gprs cell timer unblocking-retries 3
+  gprs cell timer reset-timer 3
+  gprs cell timer reset-retries 3
+  gprs cell timer suspend-timer 10
+  gprs cell timer suspend-retries 3
+  gprs cell timer resume-timer 10
+  gprs cell timer resume-retries 3
+  gprs cell timer capability-update-timer 10
+  gprs cell timer capability-update-retries 3
+  gprs nsei 1800
+  gprs ns timer tns-block 3
+  gprs ns timer tns-block-retries 3
+  gprs ns timer tns-reset 3
+  gprs ns timer tns-reset-retries 3
+  gprs ns timer tns-test 30
+  gprs ns timer tns-alive 3
+  gprs ns timer tns-alive-retries 10
+  gprs nsvc 0 nsvci 1800
+  gprs nsvc 0 local udp port 23020
+  gprs nsvc 0 remote udp port 23000
+  gprs nsvc 0 remote ip ${bts.sgsn.ip_address.addr}
+  no force-combined-si
+% else:
   gprs mode none
+% endif
 % for trx in bts.trx_list:
   trx ${loop.index}
    rf_locked 0

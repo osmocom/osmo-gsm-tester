@@ -91,4 +91,7 @@ class OsmoSgsn(log.Origin):
     def running(self):
         return not self.process.terminated()
 
+    def bts_add(self, bts):
+        bts.set_sgsn(self)
+
 # vim: expandtab tabstop=4 shiftwidth=4

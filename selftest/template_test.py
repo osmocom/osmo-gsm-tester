@@ -26,6 +26,7 @@ mock_bts = {
     'base_station_id_code': 'val_bts.base_station_id_code',
     'ipa_unit_id': 'val_bts.unit_id',
     'stream_id': 'val_bts.stream_id',
+    'sgsn': (dict(ip_address=dict(addr='val_bts.sgsn_ip_addr'))),
     'trx_list': (
             dict(arfcn='val_trx_arfcn_trx0',
                 nominal_power='val_trx_nominal_power_trx0',

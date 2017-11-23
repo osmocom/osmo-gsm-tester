@@ -19,11 +19,12 @@
 
 import os
 import pprint
-from . import log, config, util, template, process
+from . import log, config, util, template, process, pcu_sysmo
 
 class SysmoBts(log.Origin):
     suite_run = None
     bsc = None
+    sgsn = None
     run_dir = None
     inst = None
     remote_inst = None
@@ -32,8 +33,9 @@ class SysmoBts(log.Origin):
     lac = None
     cellid = None
     proc_bts = None
+    _pcu = None
 
-    REMOTE_DIR = '/osmo-gsm-tester'
+    REMOTE_DIR = '/osmo-gsm-tester-bts'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
     BTS_SYSMO_CFG = 'osmo-bts-sysmo.cfg'
 
@@ -77,14 +79,21 @@ class SysmoBts(log.Origin):
 
         remote_lib = self.remote_inst.child('lib')
         remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
-        self.proc_bts =  self.launch_remote('osmo-bts-sysmo',
-                            ('LD_LIBRARY_PATH=%s' % remote_lib,
-                             remote_binary, '-c', remote_config_file, '-r', '1',
-                             '-i', self.bsc.addr()),
-                            remote_cwd=remote_run_dir)
+
+        args = ('LD_LIBRARY_PATH=%s' % remote_lib,
+         remote_binary, '-c', remote_config_file, '-r', '1',
+         '-i', self.bsc.addr())
+
+        if self._direct_pcu_enabled():
+            args += ('-M',)
+
+        self.proc_bts = self.launch_remote('osmo-bts-sysmo', args, remote_cwd=remote_run_dir)
 
     def cleanup(self):
         pass
+
+    def _direct_pcu_enabled(self):
+        return util.str2bool(self.conf.get('direct_pcu'))
 
     def pcu_socket_path(self):
         return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
@@ -117,8 +126,16 @@ class SysmoBts(log.Origin):
             log.ctx(proc)
             raise log.Error('Exited in error')
 
+    def pcu(self):
+        if self._pcu is None:
+            self._pcu = pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
+        return self._pcu
+
     def remote_addr(self):
         return self.conf.get('addr')
+
+    def pcu_socket_path(self):
+        return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
 
     def configure(self):
         if self.bsc is None:
@@ -152,6 +169,10 @@ class SysmoBts(log.Origin):
         if self.cellid is not None:
             config.overlay(values, { 'cell_identity': self.cellid })
         config.overlay(values, self.conf)
+
+        sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
+        config.overlay(values, sgsn_conf)
+
         self.dbg(conf=values)
         return values
 
@@ -162,6 +183,9 @@ class SysmoBts(log.Origin):
 
     def set_bsc(self, bsc):
         self.bsc = bsc
+
+    def set_sgsn(self, sgsn):
+        self.sgsn = sgsn
 
     def set_lac(self, lac):
         self.lac = lac

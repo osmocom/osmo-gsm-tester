@@ -211,7 +211,8 @@ class ResourcesPool(log.Origin):
         return self.next_persistent_value('msisdn', '1000', schema.msisdn, util.msisdn_inc, origin)
 
     def next_lac(self, origin):
-        return self.next_persistent_value('lac', '1', schema.uint16, lambda x: str((int(x)+1) % pow(2,16)), origin)
+        # LAC=0 has special meaning (MS detached), avoid it
+        return self.next_persistent_value('lac', '1', schema.uint16, lambda x: str(((int(x)+1) % pow(2,16)) or 1), origin)
 
     def next_cellid(self, origin):
         return self.next_persistent_value('cellid', '1', schema.uint16, lambda x: str((int(x)+1) % pow(2,16)), origin)

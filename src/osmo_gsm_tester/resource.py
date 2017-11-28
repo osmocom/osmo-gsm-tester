@@ -215,8 +215,15 @@ class ResourcesPool(log.Origin):
         # LAC=0 has special meaning (MS detached), avoid it
         return self.next_persistent_value('lac', '1', schema.uint16, lambda x: str(((int(x)+1) % pow(2,16)) or 1), origin)
 
+    def next_rac(self, origin):
+        return self.next_persistent_value('rac', '1', schema.uint8, lambda x: str((int(x)+1) % pow(2,8) or 1), origin)
+
     def next_cellid(self, origin):
         return self.next_persistent_value('cellid', '1', schema.uint16, lambda x: str((int(x)+1) % pow(2,16)), origin)
+
+    def next_bvci(self, origin):
+        # BVCI=0 and =1 are reserved, avoid them.
+        return self.next_persistent_value('bvci', '2', schema.uint16, lambda x: str(int(x)+1) if int(x) < pow(2,16) - 1 else '2', origin)
 
 class NoResourceExn(log.Error):
     pass

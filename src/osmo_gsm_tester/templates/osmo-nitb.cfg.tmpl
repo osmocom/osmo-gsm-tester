@@ -51,9 +51,9 @@ network
   oml ip.access stream_id ${bts.stream_id} line 0
 % if bts.get('sgsn', False):
   gprs mode gprs
-  gprs routing area 0
+  gprs routing area ${bts.routing_area_code}
   gprs network-control-order nc1
-  gprs cell bvci 1800
+  gprs cell bvci ${bts.bvci}
   gprs cell timer blocking-timer 3
   gprs cell timer blocking-retries 3
   gprs cell timer unblocking-retries 3
@@ -65,7 +65,7 @@ network
   gprs cell timer resume-retries 3
   gprs cell timer capability-update-timer 10
   gprs cell timer capability-update-retries 3
-  gprs nsei 1800
+  gprs nsei ${bts.bvci}
   gprs ns timer tns-block 3
   gprs ns timer tns-block-retries 3
   gprs ns timer tns-reset 3
@@ -73,7 +73,7 @@ network
   gprs ns timer tns-test 30
   gprs ns timer tns-alive 3
   gprs ns timer tns-alive-retries 10
-  gprs nsvc 0 nsvci 1800
+  gprs nsvc 0 nsvci ${bts.bvci}
   gprs nsvc 0 local udp port 23020
   gprs nsvc 0 remote udp port 23000
   gprs nsvc 0 remote ip ${bts.sgsn.ip_address.addr}

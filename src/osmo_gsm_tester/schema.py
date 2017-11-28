@@ -71,6 +71,13 @@ def uint(val):
     if n < 0:
         raise ValueError('Positive value expected instead of %d' % n)
 
+def uint8(val):
+    n = int(val)
+    if n < 0:
+        raise ValueError('Positive value expected instead of %d' % n)
+    if n > 255: # 2^8 - 1
+        raise ValueError('Value %d too big, max value is 255' % n)
+
 def uint16(val):
     n = int(val)
     if n < 0:

@@ -31,7 +31,9 @@ class SysmoBts(log.Origin):
     remote_env = None
     remote_dir = None
     lac = None
+    rac = None
     cellid = None
+    bvci = None
     proc_bts = None
     _pcu = None
 
@@ -166,8 +168,12 @@ class SysmoBts(log.Origin):
         config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
         if self.lac is not None:
             config.overlay(values, { 'location_area_code': self.lac })
+        if self.rac is not None:
+            config.overlay(values, { 'routing_area_code': self.rac })
         if self.cellid is not None:
             config.overlay(values, { 'cell_identity': self.cellid })
+        if self.bvci is not None:
+            config.overlay(values, { 'bvci': self.bvci })
         config.overlay(values, self.conf)
 
         sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
@@ -190,7 +196,13 @@ class SysmoBts(log.Origin):
     def set_lac(self, lac):
         self.lac = lac
 
+    def set_rac(self, rac):
+        self.rac = rac
+
     def set_cellid(self, cellid):
         self.cellid = cellid
+
+    def set_bvci(self, bvci):
+        self.bvci = bvci
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -268,7 +268,9 @@ class SuiteRun(log.Origin):
     def bts(self, specifics=None):
         bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
         bts.set_lac(self.lac())
+        bts.set_rac(self.rac())
         bts.set_cellid(self.cellid())
+        bts.set_bvci(self.bvci())
         self.register_for_cleanup(bts)
         return bts
 
@@ -300,10 +302,20 @@ class SuiteRun(log.Origin):
         self.log('using LAC', lac)
         return lac
 
+    def rac(self):
+        rac = self.resources_pool.next_rac(self)
+        self.log('using RAC', rac)
+        return rac
+
     def cellid(self):
         cellid = self.resources_pool.next_cellid(self)
         self.log('using CellId', cellid)
         return cellid
+
+    def bvci(self):
+        bvci = self.resources_pool.next_bvci(self)
+        self.log('using BVCI', bvci)
+        return bvci
 
     def poll(self):
         if self._processes:

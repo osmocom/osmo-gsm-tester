@@ -31,6 +31,7 @@ class SysmoBts(log.Origin):
     remote_dir = None
     lac = None
     cellid = None
+    proc_bts = None
 
     REMOTE_DIR = '/osmo-gsm-tester'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
@@ -76,11 +77,11 @@ class SysmoBts(log.Origin):
 
         remote_lib = self.remote_inst.child('lib')
         remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
-        self.launch_remote('osmo-bts-sysmo',
-            ('LD_LIBRARY_PATH=%s' % remote_lib,
-             remote_binary, '-c', remote_config_file, '-r', '1',
-             '-i', self.bsc.addr()),
-            remote_cwd=remote_run_dir)
+        self.proc_bts =  self.launch_remote('osmo-bts-sysmo',
+                            ('LD_LIBRARY_PATH=%s' % remote_lib,
+                             remote_binary, '-c', remote_config_file, '-r', '1',
+                             '-i', self.bsc.addr()),
+                            remote_cwd=remote_run_dir)
 
     def cleanup(self):
         pass
@@ -105,6 +106,7 @@ class SysmoBts(log.Origin):
         proc = self._process_remote(name, popen_args, remote_cwd)
         self.suite_run.remember_to_stop(proc)
         proc.launch()
+        return proc
 
     def run_local(self, name, popen_args):
         run_dir = self.run_dir.new_dir(name)
@@ -152,6 +154,11 @@ class SysmoBts(log.Origin):
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
+
+    def ready_for_pcu(self):
+        if not self.proc_bts or not self.proc_bts.is_running:
+            return False
+        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
 
     def set_bsc(self, bsc):
         self.bsc = bsc

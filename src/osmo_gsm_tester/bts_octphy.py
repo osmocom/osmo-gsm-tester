@@ -32,6 +32,7 @@ class OsmoBtsOctphy(log.Origin):
     values = None
     lac = None
     cellid = None
+    proc_bts = None
 
     BIN_BTS_OCTPHY = 'osmo-bts-octphy'
 
@@ -83,10 +84,9 @@ class OsmoBtsOctphy(log.Origin):
         self.log('Applying CAP_NET_RAW capability to', OsmoBtsOctphy.BIN_BTS_OCTPHY)
         util.setcap_net_raw(btsoct_path, self.run_dir.new_dir('setcap_net_raw'))
 
-        self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1',
+        self.proc_bts = self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr(), '-t', str(self.num_trx()))
-        #self.launch_process(OsmoBtsOctphy.BIN_PCU, '-r', '1')
         self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
@@ -167,6 +167,11 @@ class OsmoBtsOctphy(log.Origin):
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
+
+    def ready_for_pcu(self):
+        if not self.proc_bts or not self.proc_bts.is_running:
+            return False
+        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
 
     def set_bsc(self, bsc):
         self.bsc = bsc

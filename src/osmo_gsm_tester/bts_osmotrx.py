@@ -32,6 +32,7 @@ class OsmoBtsTrx(log.Origin):
     pcu_sk_tmp_dir = None
     lac = None
     cellid = None
+    proc_bts = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -92,10 +93,9 @@ class OsmoBtsTrx(log.Origin):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
-        self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
+        self.proc_bts = self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr())
-        #self.launch_process(OsmoBtsTrx.BIN_PCU, '-r', '1')
         self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
@@ -145,6 +145,11 @@ class OsmoBtsTrx(log.Origin):
         config.overlay(values, self.conf)
         self.dbg(conf=values)
         return values
+
+    def ready_for_pcu(self):
+        if not self.proc_bts or not self.proc_bts.is_running:
+            return False
+        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
 
     def set_bsc(self, bsc):
         self.bsc = bsc

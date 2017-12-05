@@ -62,7 +62,7 @@ class OsmoBtsOctphy(log.Origin):
 
     def pcu(self):
         if self._pcu is None:
-            self._pcu = pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
+            self._pcu = pcu_osmo.OsmoPcu(self.suite_run, self, self.conf)
         return self._pcu
 
     def pcu_socket_path(self):

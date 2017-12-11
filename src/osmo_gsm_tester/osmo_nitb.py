@@ -114,6 +114,13 @@ class OsmoNitb(log.Origin):
     def mcc_mnc(self):
         return (self.mcc(), self.mnc())
 
+    def bts_num(self, bts):
+        'Provide number id used by OsmoNITB to identify configured BTS'
+        # We take advantage from the fact that VTY code assigns VTY in ascending
+        # order through the bts nodes found. As we populate the config iterating
+        # over this list, we have a 1:1 match in indexes.
+        return self.bts.index(bts)
+
     def subscriber_add(self, modem, msisdn=None, algo=None):
         if msisdn is None:
             msisdn = self.suite_run.resources_pool.next_msisdn(modem)
@@ -148,6 +155,9 @@ class OsmoNitb(log.Origin):
     def imsi_list_attached(self):
         return OsmoNitbCtrl(self).subscriber_list_active()
 
+    def bts_is_connected(self, bts):
+        return OsmoNitbCtrl(self).bts_is_connected(self.bts_num(bts))
+
     def running(self):
         return not self.process.terminated()
 
@@ -159,6 +169,8 @@ class OsmoNitbCtrl(log.Origin):
     SUBSCR_DELETE_VAR = 'subscriber-delete-v1'
     SUBSCR_DELETE_REPLY_RE = re.compile("SET_REPLY (\d+) %s Removed" % SUBSCR_DELETE_VAR)
     SUBSCR_LIST_ACTIVE_VAR = 'subscriber-list-active-v1'
+    BTS_OML_STATE_VAR = "bts.%d.oml-connection-state"
+    BTS_OML_STATE_RE = re.compile("GET_REPLY (\d+) bts.\d+.oml-connection-state (?P<oml_state>\w+)")
 
     def __init__(self, nitb):
         self.nitb = nitb
@@ -209,5 +221,20 @@ class OsmoNitbCtrl(log.Origin):
                 answer_str = answer_str.replace('\n', ' ')
                 aslist_str = answer_str
             return aslist_str
+
+    def bts_is_connected(self, bts_num):
+        with self.ctrl() as ctrl:
+            ctrl.do_get(OsmoNitbCtrl.BTS_OML_STATE_VAR % bts_num)
+            data = ctrl.receive()
+            while (len(data) > 0):
+                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
+                answer_str = answer.decode('utf-8')
+                answer_str = answer_str.replace('\n', ' ')
+                res = OsmoNitbCtrl.BTS_OML_STATE_RE.match(answer_str)
+                if res:
+                    oml_state = str(res.group('oml_state'))
+                    if oml_state == 'connected':
+                        return True
+        return False
 
 # vim: expandtab tabstop=4 shiftwidth=4

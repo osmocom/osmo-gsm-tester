@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 import pprint
 
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
@@ -108,7 +109,45 @@ class OsmoBsc(log.Origin):
         self.bts.append(bts)
         bts.set_bsc(self)
 
+    def bts_num(self, bts):
+        'Provide number id used by OsmoNITB to identify configured BTS'
+        # We take advantage from the fact that VTY code assigns VTY in ascending
+        # order through the bts nodes found. As we populate the config iterating
+        # over this list, we have a 1:1 match in indexes.
+        return self.bts.index(bts)
+
+    def bts_is_connected(self, bts):
+        return OsmoBscCtrl(self).bts_is_connected(self.bts_num(bts))
+
     def running(self):
         return not self.process.terminated()
+
+
+class OsmoBscCtrl(log.Origin):
+    PORT = 4249
+    BTS_OML_STATE_VAR = "bts.%d.oml-connection-state"
+    BTS_OML_STATE_RE = re.compile("GET_REPLY (\d+) bts.\d+.oml-connection-state (?P<oml_state>\w+)")
+
+    def __init__(self, bsc):
+        self.bsc = bsc
+        super().__init__(log.C_BUS, 'CTRL(%s:%d)' % (self.bsc.addr(), OsmoBscCtrl.PORT))
+
+    def ctrl(self):
+        return osmo_ctrl.OsmoCtrl(self.bsc.addr(), OsmoBscCtrl.PORT)
+
+    def bts_is_connected(self, bts_num):
+        with self.ctrl() as ctrl:
+            ctrl.do_get(OsmoBscCtrl.BTS_OML_STATE_VAR % bts_num)
+            data = ctrl.receive()
+            while (len(data) > 0):
+                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
+                answer_str = answer.decode('utf-8')
+                answer_str = answer_str.replace('\n', ' ')
+                res = OsmoBscCtrl.BTS_OML_STATE_RE.match(answer_str)
+                if res:
+                    oml_state = str(res.group('oml_state'))
+                    if oml_state == 'connected':
+                        return True
+        return False
 
 # vim: expandtab tabstop=4 shiftwidth=4

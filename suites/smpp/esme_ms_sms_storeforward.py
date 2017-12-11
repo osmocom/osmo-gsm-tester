@@ -22,6 +22,7 @@ nitb.bts_add(bts)
 nitb.smsc.esme_add(esme)
 nitb.start()
 bts.start()
+wait(nitb.bts_is_connected, bts)
 
 esme.connect()
 nitb.subscriber_add(ms)

@@ -27,6 +27,7 @@ mgw_bsc.start()
 bsc.start()
 
 bts.start()
+wait(bsc.bts_is_connected, bts)
 print('Waiting for bts to be ready...')
 wait(bts.ready_for_pcu)
 pcu.start()

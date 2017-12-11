@@ -11,6 +11,7 @@ print('start nitb and bts...')
 nitb.bts_add(bts)
 nitb.start()
 bts.start()
+wait(nitb.bts_is_connected, bts)
 
 nitb.subscriber_add(ms)
 

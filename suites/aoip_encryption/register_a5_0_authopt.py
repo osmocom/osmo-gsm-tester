@@ -22,6 +22,7 @@ mgw_bsc.start()
 bsc.bts_add(bts)
 bsc.start()
 bts.start()
+wait(bsc.bts_is_connected, bts)
 
 ms.log_info()
 good_ki = ms.ki()

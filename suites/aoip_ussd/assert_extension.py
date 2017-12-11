@@ -22,6 +22,7 @@ bsc.bts_add(bts)
 bsc.start()
 
 bts.start()
+wait(bsc.bts_is_connected, bts)
 
 hlr.subscriber_add(ms)
 

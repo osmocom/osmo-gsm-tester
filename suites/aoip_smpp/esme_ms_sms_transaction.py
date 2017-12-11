@@ -30,6 +30,7 @@ mgcpgw.start()
 mgw_bsc.start()
 bsc.start()
 bts.start()
+wait(bsc.bts_is_connected, bts)
 
 esme.connect()
 hlr.subscriber_add(ms)

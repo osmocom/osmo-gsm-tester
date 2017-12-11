@@ -10,6 +10,7 @@ print('start nitb and bts...')
 nitb.bts_add(bts)
 nitb.start()
 bts.start()
+wait(nitb.bts_is_connected, bts)
 
 for m in modems:
   nitb.subscriber_add(m)

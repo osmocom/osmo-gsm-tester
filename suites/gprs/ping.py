@@ -44,11 +44,21 @@ wait(msc.subscriber_attached, ms)
 
 print('waiting for modems to attach to data services...')
 wait(ms.is_attached)
-ctx_id_v4 = ms.activate_context(apn='internet', protocol=ms.CTX_PROT_IPv4)
-# IPv6 no supported in EC20: org.ofono.Error.NotImplemented: Implementation not provided (36)
-# ctx_id_v6 = ms.activate_context(apn='inet6', protocol=ms.CTX_PROT_IPv6)
-# IPv46 (dual) not supported in EC20: org.ofono.Error.Failed: Operation failed (36)
-# ctx_id_v46 = ms.activate_context(apn='inet6', protocol=ms.CTX_PROT_IPv46)
+
+# We need to use inet46 since ofono qmi only uses ipv4v6 eua (OS#2713)
+ctx_id_v4 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv4)
 sleep(5)
 # TODO: send ping to server or open TCP conn with a socket in python
 ms.deactivate_context(ctx_id_v4)
+
+# We need to use inet46 since ofono qmi only uses ipv4v6 eua (OS#2713)
+ctx_id_v6 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv6)
+sleep(5)
+# TODO: send ping to server or open TCP conn with a socket in python
+ms.deactivate_context(ctx_id_v6)
+
+# IPv46 (dual) not supported in ofono qmi: org.ofono.Error.Failed: Operation failed (36)
+# ctx_id_v46 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv46)
+# sleep(5)
+# TODO: send ping to server or open TCP conn with a socket in python
+# ms.deactivate_context(ctx_id_v46)

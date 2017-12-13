@@ -52,11 +52,12 @@ sleep(5)
 # TODO: send ping to server or open TCP conn with a socket in python
 ms.deactivate_context(ctx_id_v4)
 
+# We disable ipv6 for now as osmo-ggsn is failing to create tun ipv6 device in Prod main unit (OS#2746)
 # We need to use inet46 since ofono qmi only uses ipv4v6 eua (OS#2713)
-ctx_id_v6 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv6)
-sleep(5)
+# ctx_id_v6 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv6)
+# sleep(5)
 # TODO: send ping to server or open TCP conn with a socket in python
-ms.deactivate_context(ctx_id_v6)
+# ms.deactivate_context(ctx_id_v6)
 
 # IPv46 (dual) not supported in ofono qmi: org.ofono.Error.Failed: Operation failed (36)
 # ctx_id_v46 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv46)

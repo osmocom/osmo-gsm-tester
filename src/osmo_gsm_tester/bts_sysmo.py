@@ -19,33 +19,20 @@
 
 import os
 import pprint
-from . import log, config, util, template, process, pcu_sysmo
+from . import log, config, util, template, process, pcu_sysmo, bts_osmo
 
-class SysmoBts(log.Origin):
-    suite_run = None
-    bsc = None
-    sgsn = None
+class SysmoBts(bts_osmo.OsmoBts):
     run_dir = None
     inst = None
     remote_inst = None
-    remote_env = None
     remote_dir = None
-    lac = None
-    rac = None
-    cellid = None
-    bvci = None
-    proc_bts = None
-    _pcu = None
 
     REMOTE_DIR = '/osmo-gsm-tester-bts'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
     BTS_SYSMO_CFG = 'osmo-bts-sysmo.cfg'
 
     def __init__(self, suite_run, conf):
-        super().__init__(log.C_RUN, self.BTS_SYSMO_BIN)
-        self.suite_run = suite_run
-        self.conf = conf
-        self.remote_env = {}
+        super().__init__(suite_run, conf, SysmoBts.BTS_SYSMO_BIN)
         self.remote_user = 'root'
 
     def start(self):
@@ -91,14 +78,8 @@ class SysmoBts(log.Origin):
 
         self.proc_bts = self.launch_remote('osmo-bts-sysmo', args, remote_cwd=remote_run_dir)
 
-    def cleanup(self):
-        pass
-
     def _direct_pcu_enabled(self):
         return util.str2bool(self.conf.get('direct_pcu'))
-
-    def pcu_socket_path(self):
-        return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
@@ -128,13 +109,8 @@ class SysmoBts(log.Origin):
             log.ctx(proc)
             raise log.Error('Exited in error')
 
-    def pcu(self):
-        if self._pcu is None:
-            self._pcu = pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
-        return self._pcu
-
-    def remote_addr(self):
-        return self.conf.get('addr')
+    def create_pcu(self):
+        return pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
 
     def pcu_socket_path(self):
         return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
@@ -181,28 +157,5 @@ class SysmoBts(log.Origin):
 
         self.dbg(conf=values)
         return values
-
-    def ready_for_pcu(self):
-        if not self.proc_bts or not self.proc_bts.is_running:
-            return False
-        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
-
-    def set_bsc(self, bsc):
-        self.bsc = bsc
-
-    def set_sgsn(self, sgsn):
-        self.sgsn = sgsn
-
-    def set_lac(self, lac):
-        self.lac = lac
-
-    def set_rac(self, rac):
-        self.rac = rac
-
-    def set_cellid(self, cellid):
-        self.cellid = cellid
-
-    def set_bvci(self, bvci):
-        self.bvci = bvci
 
 # vim: expandtab tabstop=4 shiftwidth=4

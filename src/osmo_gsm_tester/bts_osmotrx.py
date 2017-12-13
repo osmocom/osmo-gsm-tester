@@ -20,23 +20,13 @@
 import os
 import pprint
 import tempfile
-from . import log, config, util, template, process, event_loop, pcu_osmo
+from . import log, config, util, template, process, event_loop, pcu_osmo, bts_osmo
 
-class OsmoBtsTrx(log.Origin):
-    suite_run = None
-    bsc = None
-    sgsn = None
+class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
     run_dir = None
     inst = None
     env = None
     trx = None
-    pcu_sk_tmp_dir = None
-    lac = None
-    rac = None
-    cellid = None
-    bvci = None
-    proc_bts = None
-    _pcu = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -44,32 +34,8 @@ class OsmoBtsTrx(log.Origin):
     CONF_BTS_TRX = 'osmo-bts-trx.cfg'
 
     def __init__(self, suite_run, conf):
-        super().__init__(log.C_RUN, OsmoBtsTrx.BIN_BTS_TRX)
-        self.suite_run = suite_run
-        self.conf = conf
+        super().__init__(suite_run, conf, OsmoBtsTrx.BIN_BTS_TRX)
         self.env = {}
-        self.pcu_sk_tmp_dir = tempfile.mkdtemp('', 'ogtpcusk')
-        if len(self.pcu_socket_path().encode()) > 107:
-            raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
-
-    def cleanup(self):
-        if self.pcu_sk_tmp_dir:
-            try:
-                os.remove(self.pcu_socket_path())
-            except OSError:
-                pass
-            os.rmdir(self.pcu_sk_tmp_dir)
-
-    def pcu(self):
-        if self._pcu is None:
-            self._pcu = pcu_osmo.OsmoPcu(self.suite_run, self, self.conf)
-        return self._pcu
-
-    def pcu_socket_path(self):
-        return os.path.join(self.pcu_sk_tmp_dir, 'pcu_bts')
-
-    def remote_addr(self):
-        return self.conf.get('addr')
 
     def trx_remote_ip(self):
         conf_ip = self.conf.get('trx_remote_ip', None)
@@ -162,29 +128,6 @@ class OsmoBtsTrx(log.Origin):
 
         self.dbg(conf=values)
         return values
-
-    def ready_for_pcu(self):
-        if not self.proc_bts or not self.proc_bts.is_running:
-            return False
-        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
-
-    def set_bsc(self, bsc):
-        self.bsc = bsc
-
-    def set_sgsn(self, sgsn):
-        self.sgsn = sgsn
-
-    def set_lac(self, lac):
-        self.lac = lac
-
-    def set_rac(self, rac):
-        self.rac = rac
-
-    def set_cellid(self, cellid):
-        self.cellid = cellid
-
-    def set_bvci(self, bvci):
-        self.bvci = bvci
 
 class OsmoTrx(log.Origin):
     suite_run = None

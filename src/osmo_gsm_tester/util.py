@@ -68,12 +68,25 @@ def setcap_net_raw(binary, run_dir):
     osmo-gsm-tester. See osmo-gsm-tester manual for more information.
     '''
     from .process import Process
-    SETCAP_NET_BIN = 'osmo-gsm-tester_setcap_net_raw.sh'
-    proc = Process(SETCAP_NET_BIN, run_dir, ['sudo', 'osmo-gsm-tester_setcap_net_raw.sh', binary])
+    SETCAP_NET_RAW_BIN = 'osmo-gsm-tester_setcap_net_raw.sh'
+    proc = Process(SETCAP_NET_RAW_BIN, run_dir, ['sudo', SETCAP_NET_RAW_BIN, binary])
     proc.launch()
     proc.wait()
     if proc.result != 0:
-        raise RuntimeError('%s finished with err code %d' % (SETCAP_NET_BIN, proc.result))
+        raise RuntimeError('%s finished with err code %d' % (SETCAP_NET_RAW_BIN, proc.result))
+
+def setcap_net_admin(binary, run_dir):
+    '''
+    This functionality requires specific setup on the host running
+    osmo-gsm-tester. See osmo-gsm-tester manual for more information.
+    '''
+    from .process import Process
+    SETCAP_NET_ADMIN_BIN = 'osmo-gsm-tester_setcap_net_admin.sh'
+    proc = Process(SETCAP_NET_ADMIN_BIN, run_dir, ['sudo', SETCAP_NET_ADMIN_BIN, binary])
+    proc.launch()
+    proc.wait()
+    if proc.result != 0:
+        raise RuntimeError('%s finished with err code %d' % (SETCAP_NET_ADMIN_BIN, proc.result))
 
 class listdict(dict):
     'a dict of lists { "a": [1, 2, 3],  "b": [1, 2] }'

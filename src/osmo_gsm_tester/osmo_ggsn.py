@@ -51,7 +51,14 @@ class OsmoGgsn(log.Origin):
         pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s' % self.addr())
 
-        env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+        env = {}
+
+        # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
+        self.log('Setting RPATH for osmo-ggsn')
+        util.change_elf_rpath(binary, util.prepend_library_path(lib), self.run_dir.new_dir('patchelf'))
+        # osmo-ggsn requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
+        self.log('Applying CAP_NET_ADMIN capability to osmo-ggsn')
+        util.setcap_net_admin(binary, self.run_dir.new_dir('setcap_net_admin'))
 
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir,

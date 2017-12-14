@@ -22,6 +22,9 @@ import pprint
 from . import log, config, util, template, process, pcu_sysmo, bts_osmo
 
 class SysmoBts(bts_osmo.OsmoBts):
+##############
+# PROTECTED
+##############
     run_dir = None
     inst = None
     remote_inst = None
@@ -35,6 +38,92 @@ class SysmoBts(bts_osmo.OsmoBts):
         super().__init__(suite_run, conf, SysmoBts.BTS_SYSMO_BIN)
         self.remote_user = 'root'
 
+    def _direct_pcu_enabled(self):
+        return util.str2bool(self.conf.get('direct_pcu'))
+
+    def _process_remote(self, name, popen_args, remote_cwd=None):
+        run_dir = self.run_dir.new_dir(name)
+        return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
+                                     popen_args)
+
+    def run_remote(self, name, popen_args, remote_cwd=None):
+        proc = self._process_remote(name, popen_args, remote_cwd)
+        proc.launch()
+        proc.wait()
+        if proc.result != 0:
+            log.ctx(proc)
+            raise log.Error('Exited in error')
+
+    def launch_remote(self, name, popen_args, remote_cwd=None):
+        proc = self._process_remote(name, popen_args, remote_cwd)
+        self.suite_run.remember_to_stop(proc)
+        proc.launch()
+        return proc
+
+    def run_local(self, name, popen_args):
+        run_dir = self.run_dir.new_dir(name)
+        proc = process.Process(name, run_dir, popen_args)
+        proc.launch()
+        proc.wait()
+        if proc.result != 0:
+            log.ctx(proc)
+            raise log.Error('Exited in error')
+
+    def create_pcu(self):
+        return pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
+
+    def configure(self):
+        if self.bsc is None:
+            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be configured')
+
+        self.config_file = self.run_dir.new_file(SysmoBts.BTS_SYSMO_CFG)
+        self.dbg(config_file=self.config_file)
+
+        values = { 'osmo_bts_sysmo': config.get_defaults('osmo_bts_sysmo') }
+        config.overlay(values, self.suite_run.config())
+        config.overlay(values, {
+                        'osmo_bts_sysmo': {
+                            'oml_remote_ip': self.bsc.addr(),
+                            'pcu_socket_path': self.pcu_socket_path(),
+                        }
+        })
+        config.overlay(values, { 'osmo_bts_sysmo': self.conf })
+
+        self.dbg('SYSMOBTS CONFIG:\n' + pprint.pformat(values))
+
+        with open(self.config_file, 'w') as f:
+            r = template.render(SysmoBts.BTS_SYSMO_CFG, values)
+            self.dbg(r)
+            f.write(r)
+
+########################
+# PUBLIC - INTERNAL API
+########################
+    def pcu_socket_path(self):
+        return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
+
+    def conf_for_bsc(self):
+        values = config.get_defaults('bsc_bts')
+        config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
+        if self.lac is not None:
+            config.overlay(values, { 'location_area_code': self.lac })
+        if self.rac is not None:
+            config.overlay(values, { 'routing_area_code': self.rac })
+        if self.cellid is not None:
+            config.overlay(values, { 'cell_identity': self.cellid })
+        if self.bvci is not None:
+            config.overlay(values, { 'bvci': self.bvci })
+        config.overlay(values, self.conf)
+
+        sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
+        config.overlay(values, sgsn_conf)
+
+        self.dbg(conf=values)
+        return values
+
+###################
+# PUBLIC (test API included)
+###################
     def start(self):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
@@ -77,85 +166,5 @@ class SysmoBts(bts_osmo.OsmoBts):
             args += ('-M',)
 
         self.proc_bts = self.launch_remote('osmo-bts-sysmo', args, remote_cwd=remote_run_dir)
-
-    def _direct_pcu_enabled(self):
-        return util.str2bool(self.conf.get('direct_pcu'))
-
-    def _process_remote(self, name, popen_args, remote_cwd=None):
-        run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
-                                     popen_args)
-
-    def run_remote(self, name, popen_args, remote_cwd=None):
-        proc = self._process_remote(name, popen_args, remote_cwd)
-        proc.launch()
-        proc.wait()
-        if proc.result != 0:
-            log.ctx(proc)
-            raise log.Error('Exited in error')
-
-    def launch_remote(self, name, popen_args, remote_cwd=None):
-        proc = self._process_remote(name, popen_args, remote_cwd)
-        self.suite_run.remember_to_stop(proc)
-        proc.launch()
-        return proc
-
-    def run_local(self, name, popen_args):
-        run_dir = self.run_dir.new_dir(name)
-        proc = process.Process(name, run_dir, popen_args)
-        proc.launch()
-        proc.wait()
-        if proc.result != 0:
-            log.ctx(proc)
-            raise log.Error('Exited in error')
-
-    def create_pcu(self):
-        return pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
-
-    def pcu_socket_path(self):
-        return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
-
-    def configure(self):
-        if self.bsc is None:
-            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be configured')
-
-        self.config_file = self.run_dir.new_file(SysmoBts.BTS_SYSMO_CFG)
-        self.dbg(config_file=self.config_file)
-
-        values = { 'osmo_bts_sysmo': config.get_defaults('osmo_bts_sysmo') }
-        config.overlay(values, self.suite_run.config())
-        config.overlay(values, {
-                        'osmo_bts_sysmo': {
-                            'oml_remote_ip': self.bsc.addr(),
-                            'pcu_socket_path': self.pcu_socket_path(),
-                        }
-        })
-        config.overlay(values, { 'osmo_bts_sysmo': self.conf })
-
-        self.dbg('SYSMOBTS CONFIG:\n' + pprint.pformat(values))
-
-        with open(self.config_file, 'w') as f:
-            r = template.render(SysmoBts.BTS_SYSMO_CFG, values)
-            self.dbg(r)
-            f.write(r)
-
-    def conf_for_bsc(self):
-        values = config.get_defaults('bsc_bts')
-        config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
-        if self.lac is not None:
-            config.overlay(values, { 'location_area_code': self.lac })
-        if self.rac is not None:
-            config.overlay(values, { 'routing_area_code': self.rac })
-        if self.cellid is not None:
-            config.overlay(values, { 'cell_identity': self.cellid })
-        if self.bvci is not None:
-            config.overlay(values, { 'bvci': self.bvci })
-        config.overlay(values, self.conf)
-
-        sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
-        config.overlay(values, sgsn_conf)
-
-        self.dbg(conf=values)
-        return values
 
 # vim: expandtab tabstop=4 shiftwidth=4

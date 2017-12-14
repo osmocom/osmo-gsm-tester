@@ -80,29 +80,29 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
                  'addr': '10.42.42.5'},
                 {'_hash': 'e780ac7581ad29f8f46e637b61d0c38898c4c52c',
                  'addr': '10.42.42.6'}],
- 'modem': [{'_hash': 'f392ed391f9d39abb6ae01431b26b4f44079a447',
-            'auth_algo': 'xor',
+ 'modem': [{'_hash': '0b538cb6ad799fbd7c2953fd3b4463a76c7cc9c0',
+            'auth_algo': 'comp128v1',
             'ciphers': ['a5_0', 'a5_1'],
             'imsi': '901700000009031',
             'ki': '80A37E6FDEA931EAC92FFA5F671EFEAD',
             'label': 'sierra_1',
             'path': '/sierra_1'},
-           {'_hash': '1b3cf2a04bde791a84fcc462c29f73391b1f7313',
-            'auth_algo': 'xor',
+           {'_hash': '3a6e7747dfe7dfdf817bd3351031bd08051605c3',
+            'auth_algo': 'comp128v1',
             'ciphers': ['a5_0', 'a5_1'],
             'imsi': '901700000009029',
             'ki': '00969E283349D354A8239E877F2E0866',
             'label': 'sierra_2',
             'path': '/sierra_2'},
-           {'_hash': '83f7b4a07c355487d31db6f068146e48bb1ed118',
-            'auth_algo': 'xor',
+           {'_hash': 'f6ba17db2ad13da5ba5c54b5385a774f5351bb5a',
+            'auth_algo': 'comp128v1',
             'ciphers': ['a5_0', 'a5_1'],
             'imsi': '901700000009030',
             'ki': 'BB70807226393CDBAC8DD3439FF54252',
             'label': 'gobi_0',
             'path': '/gobi_0'},
-           {'_hash': 'a5f8f08a24df0eca067c5b51d55c3c4fd8721908',
-            'auth_algo': 'xor',
+           {'_hash': 'fbff2e4f06b727fc8a70da23e1d134f9cd763919',
+            'auth_algo': 'comp128v1',
             'ciphers': ['a5_0', 'a5_1'],
             'imsi': '901700000009032',
             'ki': '2F70DCA43C45ACB97E947FDD0C7CA30A',
@@ -143,8 +143,8 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
 --- testowner: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
   addr: 10.42.42.2
 --- testowner: Reserving 2 x modem (candidates: 4)
---- testowner: DBG: Picked - _hash: f392ed391f9d39abb6ae01431b26b4f44079a447
-  auth_algo: xor
+--- testowner: DBG: Picked - _hash: 0b538cb6ad799fbd7c2953fd3b4463a76c7cc9c0
+  auth_algo: comp128v1
   ciphers:
   - a5_0
   - a5_1
@@ -152,8 +152,8 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   ki: 80A37E6FDEA931EAC92FFA5F671EFEAD
   label: sierra_1
   path: /sierra_1
-- _hash: 1b3cf2a04bde791a84fcc462c29f73391b1f7313
-  auth_algo: xor
+- _hash: 3a6e7747dfe7dfdf817bd3351031bd08051605c3
+  auth_algo: comp128v1
   ciphers:
   - a5_0
   - a5_1
@@ -199,9 +199,9 @@ ip_address:
   _reserved_by: testowner-123-1490837279
   addr: 10.42.42.2
 modem:
-- _hash: f392ed391f9d39abb6ae01431b26b4f44079a447
+- _hash: 0b538cb6ad799fbd7c2953fd3b4463a76c7cc9c0
   _reserved_by: testowner-123-1490837279
-  auth_algo: xor
+  auth_algo: comp128v1
   ciphers:
   - a5_0
   - a5_1
@@ -209,9 +209,9 @@ modem:
   ki: 80A37E6FDEA931EAC92FFA5F671EFEAD
   label: sierra_1
   path: /sierra_1
-- _hash: 1b3cf2a04bde791a84fcc462c29f73391b1f7313
+- _hash: 3a6e7747dfe7dfdf817bd3351031bd08051605c3
   _reserved_by: testowner-123-1490837279
-  auth_algo: xor
+  auth_algo: comp128v1
   ciphers:
   - a5_0
   - a5_1

@@ -32,10 +32,6 @@ class OsmoHlr(log.Origin):
     process = None
     next_subscriber_id = 1
 
-    AUTH_ALGO_NONE = 0
-    AUTH_ALGO_XOR = 1
-    AUTH_ALGO_COMP128v1 = 2
-
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'osmo-hlr_%s' % ip_address.get('addr'))
         self.suite_run = suite_run
@@ -107,25 +103,23 @@ class OsmoHlr(log.Origin):
             log.ctx(proc)
             raise log.Error('Exited in error')
 
-    def subscriber_add(self, modem, msisdn=None, algo=None):
+    def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:
             msisdn = self.suite_run.resources_pool.next_msisdn(modem)
         modem.set_msisdn(msisdn)
         subscriber_id = self.next_subscriber_id
         self.next_subscriber_id += 1
 
-        if not algo:
-            alg_str = modem.auth_algo()
-            if alg_str is None or alg_str == 'none':
-                algo = self.AUTH_ALGO_NONE
-            elif alg_str == 'comp128v1':
-                algo = self.AUTH_ALGO_COMP128v1
-            elif alg_str == 'xor':
-                algo = self.AUTH_ALGO_XOR
-        if algo != self.AUTH_ALGO_NONE and not modem.ki():
-            raise log.Error("Auth algo %r selected and no KI specified" % algo)
+        if algo_str is None:
+            algo_str = modem.auth_algo() or util.OSMO_AUTH_ALGO_NONE
 
-        self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id, algo=algo)
+        if algo_str != util.OSMO_AUTH_ALGO_NONE and not modem.ki():
+            raise log.Error("Auth algo %r selected but no KI specified" % algo_str)
+
+        algo = util.osmo_auth_algo_by_name(algo_str)
+
+        self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id,
+                 algo_str=algo_str, algo=algo)
         conn = sqlite3.connect(self.db_file)
         try:
             c = conn.cursor()

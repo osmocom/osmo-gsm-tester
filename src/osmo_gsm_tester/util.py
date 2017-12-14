@@ -32,6 +32,15 @@ import tty
 import readline
 import subprocess
 
+# This mirrors enum osmo_auth_algo in libosmocore/include/osmocom/crypt/auth.h
+# so that the index within the tuple matches the enum value.
+OSMO_AUTH_ALGO_NONE = 'none'
+ENUM_OSMO_AUTH_ALGO = (OSMO_AUTH_ALGO_NONE, 'comp128v1', 'comp128v2', 'comp128v3', 'xor', 'milenage')
+
+def osmo_auth_algo_by_name(algo_str):
+    'Return enum osmo_auth_algo numeric value as from libosmocore, raise ValueError if not defined.'
+    return ENUM_OSMO_AUTH_ALGO.index(algo_str.lower())
+
 def prepend_library_path(path):
     lp = os.getenv('LD_LIBRARY_PATH')
     if not lp:

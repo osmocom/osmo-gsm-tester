@@ -20,7 +20,7 @@
 import re
 
 from . import log
-from .util import is_dict, is_list, str2bool
+from .util import is_dict, is_list, str2bool, ENUM_OSMO_AUTH_ALGO
 
 KEY_RE = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
 IPV4_RE = re.compile('([0-9]{1,3}.){3}[0-9]{1,3}')
@@ -62,9 +62,8 @@ def msisdn(val):
     match_re('MSISDN', MSISDN_RE, val)
 
 def auth_algo(val):
-    if val in ('none', 'xor', 'comp128v1'):
-        return
-    raise ValueError('Unknown Authentication Algorithm: %r' % val)
+    if val not in ENUM_OSMO_AUTH_ALGO:
+        raise ValueError('Unknown Authentication Algorithm: %r' % val)
 
 def uint(val):
     n = int(val)

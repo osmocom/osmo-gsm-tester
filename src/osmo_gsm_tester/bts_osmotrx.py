@@ -23,6 +23,9 @@ import tempfile
 from . import log, config, util, template, process, event_loop, pcu_osmo, bts_osmo
 
 class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
+##############
+# PROTECTED
+##############
     run_dir = None
     inst = None
     env = None
@@ -46,32 +49,6 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
     def launch_trx_enabled(self):
         return util.str2bool(self.conf.get('launch_trx'))
-
-    def start(self):
-        if self.bsc is None:
-            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
-        self.suite_run.poll()
-
-        self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
-        self.configure()
-
-        if self.launch_trx_enabled():
-            self.trx = OsmoTrx(self.suite_run, self.trx_remote_ip(), self.remote_addr())
-            self.trx.start()
-            self.log('Waiting for osmo-trx to start up...')
-            event_loop.wait(self, self.trx.trx_ready)
-
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
-        lib = self.inst.child('lib')
-        if not os.path.isdir(lib):
-            raise RuntimeError('No lib/ in %r' % self.inst)
-        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-
-        self.proc_bts = self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
-                            '-c', os.path.abspath(self.config_file),
-                            '-i', self.bsc.addr())
-        self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
@@ -110,6 +87,9 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
             self.dbg(r)
             f.write(r)
 
+########################
+# PUBLIC - INTERNAL API
+########################
     def conf_for_bsc(self):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_trx'))
@@ -128,6 +108,35 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
         self.dbg(conf=values)
         return values
+
+###################
+# PUBLIC (test API included)
+###################
+    def start(self):
+        if self.bsc is None:
+            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
+        self.suite_run.poll()
+
+        self.log('Starting to connect to', self.bsc)
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.configure()
+
+        if self.launch_trx_enabled():
+            self.trx = OsmoTrx(self.suite_run, self.trx_remote_ip(), self.remote_addr())
+            self.trx.start()
+            self.log('Waiting for osmo-trx to start up...')
+            event_loop.wait(self, self.trx.trx_ready)
+
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
+        lib = self.inst.child('lib')
+        if not os.path.isdir(lib):
+            raise RuntimeError('No lib/ in %r' % self.inst)
+        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+
+        self.proc_bts = self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
+                            '-c', os.path.abspath(self.config_file),
+                            '-i', self.bsc.addr())
+        self.suite_run.poll()
 
 class OsmoTrx(log.Origin):
     suite_run = None

@@ -23,6 +23,10 @@ import tempfile
 from . import log, config, util, template, process, event_loop, pcu_osmo, bts_osmo
 
 class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
+
+##############
+# PROTECTED
+##############
     run_dir = None
     inst = None
     env = None
@@ -35,33 +39,6 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
         super().__init__(suite_run, conf, OsmoBtsOctphy.BIN_BTS_OCTPHY)
         self.env = {}
         self.values = {}
-
-    def start(self):
-        if self.bsc is None:
-            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
-        self.suite_run.poll()
-
-        self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
-        self.configure()
-
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
-        btsoct_path = self.inst.child('bin', OsmoBtsOctphy.BIN_BTS_OCTPHY)
-        lib = self.inst.child('lib')
-        if not os.path.isdir(lib):
-            raise RuntimeError('No lib/ in %r' % self.inst)
-
-        # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
-        self.log('Setting RPATH for', OsmoBtsOctphy.BIN_BTS_OCTPHY)
-        util.change_elf_rpath(btsoct_path, util.prepend_library_path(lib), self.run_dir.new_dir('patchelf'))
-        # osmo-bty-octphy requires CAP_NET_RAW to open AF_PACKET socket:
-        self.log('Applying CAP_NET_RAW capability to', OsmoBtsOctphy.BIN_BTS_OCTPHY)
-        util.setcap_net_raw(btsoct_path, self.run_dir.new_dir('setcap_net_raw'))
-
-        self.proc_bts = self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1',
-                            '-c', os.path.abspath(self.config_file),
-                            '-i', self.bsc.addr(), '-t', str(self.num_trx()))
-        self.suite_run.poll()
 
     def launch_process(self, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
@@ -131,6 +108,9 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
             self.dbg(r)
             f.write(r)
 
+########################
+# PUBLIC - INTERNAL API
+########################
     def conf_for_bsc(self):
         values = config.get_defaults('bsc_bts')
         config.overlay(values, config.get_defaults('osmo_bts_octphy'))
@@ -149,5 +129,35 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
 
         self.dbg(conf=values)
         return values
+
+###################
+# PUBLIC (test API included)
+###################
+    def start(self):
+        if self.bsc is None:
+            raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
+        self.suite_run.poll()
+
+        self.log('Starting to connect to', self.bsc)
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.configure()
+
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
+        btsoct_path = self.inst.child('bin', OsmoBtsOctphy.BIN_BTS_OCTPHY)
+        lib = self.inst.child('lib')
+        if not os.path.isdir(lib):
+            raise RuntimeError('No lib/ in %r' % self.inst)
+
+        # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
+        self.log('Setting RPATH for', OsmoBtsOctphy.BIN_BTS_OCTPHY)
+        util.change_elf_rpath(btsoct_path, util.prepend_library_path(lib), self.run_dir.new_dir('patchelf'))
+        # osmo-bty-octphy requires CAP_NET_RAW to open AF_PACKET socket:
+        self.log('Applying CAP_NET_RAW capability to', OsmoBtsOctphy.BIN_BTS_OCTPHY)
+        util.setcap_net_raw(btsoct_path, self.run_dir.new_dir('setcap_net_raw'))
+
+        self.proc_bts = self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1',
+                            '-c', os.path.abspath(self.config_file),
+                            '-i', self.bsc.addr(), '-t', str(self.num_trx()))
+        self.suite_run.poll()
 
 # vim: expandtab tabstop=4 shiftwidth=4

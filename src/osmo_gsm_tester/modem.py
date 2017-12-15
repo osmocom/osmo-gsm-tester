@@ -596,7 +596,7 @@ class Modem(log.Origin):
         connmgr.ResetContexts() # Requires Powered=false
 
     def activate_context(self, apn='internet', user='ogt', pwd='', protocol='ip'):
-        self.dbg('activate_context', apn=apn, user=user)
+        self.dbg('activate_context', apn=apn, user=user, protocol=protocol)
 
         connmgr = self.dbus.interface(I_CONNMGR)
         ctx_path = connmgr.AddContext('internet')

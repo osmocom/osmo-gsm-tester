@@ -84,7 +84,7 @@ class OsmoBts(log.Origin, metaclass=ABCMeta):
 
     def pcu(self):
         if self._pcu is None:
-            self._pcu = self.create_pcu(self.suite_run, self, self.conf)
+            self._pcu = self.create_pcu()
         return self._pcu
 
     def set_bsc(self, bsc):

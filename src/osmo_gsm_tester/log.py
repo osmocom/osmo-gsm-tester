@@ -275,8 +275,10 @@ def large_separator(*msgs, sublevel=1, space_above=True):
         target.large_separator(*msgs, sublevel=sublevel, space_above=space_above)
 
 def get_src_from_caller(levels_up=1):
-    caller = getframeinfo(stack()[levels_up][0])
-    return '%s:%d' % (os.path.basename(caller.filename), caller.lineno)
+    # Poke into internal to avoid hitting the linecache which will make one or
+    # more calls to stat(2).
+    frame = sys._getframe(levels_up)
+    return '%s:%d' % (os.path.basename(frame.f_code.co_filename), frame.f_lineno)
 
 def get_src_from_exc_info(exc_info=None, levels_up=1):
     if exc_info is None:

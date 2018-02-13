@@ -614,7 +614,7 @@ class Modem(log.Origin):
         return ctx_path
 
     def deactivate_context(self, ctx_id):
-        self.dbg('activate_context', path=ctx_id)
+        self.dbg('deactivate_context', path=ctx_id)
         ctx = systembus_get(ctx_id)
         ctx.SetProperty('Active', Variant('b', False))
         event_loop.wait(self, lambda: ctx.GetProperties()['Active'] == False)

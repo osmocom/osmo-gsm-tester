@@ -618,6 +618,7 @@ class Modem(log.Origin):
         ctx = systembus_get(ctx_id)
         ctx.SetProperty('Active', Variant('b', False))
         event_loop.wait(self, lambda: ctx.GetProperties()['Active'] == False)
+        self.log('context deactivated', path=ctx_id)
 
     def sms_send(self, to_msisdn_or_modem, *tokens):
         if isinstance(to_msisdn_or_modem, Modem):

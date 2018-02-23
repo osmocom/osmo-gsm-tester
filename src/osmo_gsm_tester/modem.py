@@ -92,6 +92,14 @@ def list_modems():
     root = systembus_get('/')
     return sorted(root.GetModems())
 
+def get_dbuspath_from_syspath(syspath):
+    modems = list_modems()
+    for dbuspath, props in modems:
+        if props.get('SystemPath', '') == syspath:
+            return dbuspath
+    raise ValueError('could not find %s in modem list: %s' % (syspath, modems))
+
+
 def _async_result_handler(obj, result, user_data):
     '''Generic callback dispatcher called from glib loop when an async method
     call has returned. This callback is set up by method dbus_async_call.'''
@@ -341,10 +349,12 @@ class Modem(log.Origin):
 
     def __init__(self, conf):
         self.conf = conf
-        self.path = conf.get('path')
-        super().__init__(log.C_TST, self.path)
+        self.syspath = conf.get('path')
+        self.dbuspath = get_dbuspath_from_syspath(self.syspath)
+        super().__init__(log.C_TST, self.dbuspath)
+        self.dbg('creating from syspath %s', self.syspath)
         self.sms_received_list = []
-        self.dbus = ModemDbusInteraction(self.path)
+        self.dbus = ModemDbusInteraction(self.dbuspath)
         self.register_attempts = 0
         self.call_list = []
         # one Cancellable can handle several concurrent methods.

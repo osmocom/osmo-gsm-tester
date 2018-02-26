@@ -13,9 +13,9 @@ SMPP_ESME_RINVSYSID = 0x0000000F
 
 hlr = suite.hlr()
 bts = suite.bts()
-mgcpgw = suite.mgcpgw(bts_ip=bts.remote_addr())
+mgw_msc = suite.mgw()
 stp = suite.stp()
-msc = suite.msc(hlr, mgcpgw, stp)
+msc = suite.msc(hlr, mgw_msc, stp)
 smsc = msc.smsc
 
 esme = suite.esme()
@@ -29,7 +29,7 @@ smsc.esme_add(esme_no_pwd)
 stp.start()
 hlr.start()
 msc.start()
-mgcpgw.start()
+mgw_msc.start()
 
 log('Test with correct credentials (no password)')
 esme_no_pwd.connect()

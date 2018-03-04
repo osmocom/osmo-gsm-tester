@@ -122,7 +122,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         self.configure()
 
         if self.launch_trx_enabled():
-            self.trx = OsmoTrx(self.suite_run, self.trx_remote_ip(), self.remote_addr())
+            self.trx = OsmoTrx(self.suite_run, self.conf, self.trx_remote_ip(), self.remote_addr())
             self.trx.start()
             self.log('Waiting for osmo-trx to start up...')
             event_loop.wait(self, self.trx.trx_ready)
@@ -146,20 +146,45 @@ class OsmoTrx(log.Origin):
     proc_trx = None
 
     BIN_TRX = 'osmo-trx'
+    CONF_OSMO_TRX = 'osmo-trx.cfg'
 
-    def __init__(self, suite_run, listen_ip, bts_ip):
+    def __init__(self, suite_run, conf, listen_ip, bts_ip):
         super().__init__(log.C_RUN, OsmoTrx.BIN_TRX)
         self.suite_run = suite_run
+        self.conf = conf
         self.env = {}
         self.listen_ip = listen_ip
         self.bts_ip = bts_ip
 
+    def configure(self):
+        self.config_file = self.run_dir.new_file(OsmoTrx.CONF_OSMO_TRX)
+        self.dbg(config_file=self.config_file)
+
+        values = dict(osmo_bts_trx=config.get_defaults('osmo_trx'))
+        config.overlay(values, self.suite_run.config())
+        config.overlay(values, {
+                        'osmo_trx': {
+                            'bind_ip' : self.listen_ip,
+                        }
+        })
+        config.overlay(values, { 'osmo_trx': self.conf })
+
+        self.dbg('OSMO-TRX CONFIG:\n' + pprint.pformat(values))
+
+        with open(self.config_file, 'w') as f:
+            r = template.render(OsmoTrx.CONF_OSMO_TRX, values)
+            self.dbg(r)
+            f.write(r)
+
     def start(self):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.configure()
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoTrx.BIN_TRX)))
         lib = self.inst.child('lib')
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-        self.proc_trx = self.launch_process(OsmoTrx.BIN_TRX, '-x', '-j', self.listen_ip, '-i', self.bts_ip)
+        self.proc_trx = self.launch_process(OsmoTrx.BIN_TRX, '-x',
+                                            '-j', self.listen_ip, '-i', self.bts_ip,
+                                            '-C', os.path.abspath(self.config_file))
 
     def launch_process(self, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))

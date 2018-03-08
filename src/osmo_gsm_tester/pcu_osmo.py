@@ -20,11 +20,9 @@
 import os
 import pprint
 import tempfile
-from . import log, config, util, template, process, event_loop
+from . import log, config, util, template, process, event_loop, pcu
 
-class OsmoPcu(log.Origin):
-    suite_run = None
-    run_dir = None
+class OsmoPcu(pcu.Pcu):
     inst = None
     env = None
 
@@ -32,9 +30,7 @@ class OsmoPcu(log.Origin):
     PCU_OSMO_CFG = 'osmo-pcu.cfg'
 
     def __init__(self, suite_run, bts, conf):
-        super().__init__(log.C_RUN, OsmoPcu.BIN_PCU)
-        self.suite_run = suite_run
-        self.bts = bts
+        super().__init__(suite_run, bts, conf, OsmoPcu.BIN_PCU)
         self.conf = conf
         self.env = {}
 

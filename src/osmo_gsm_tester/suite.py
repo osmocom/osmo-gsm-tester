@@ -212,6 +212,11 @@ class SuiteRun(log.Origin):
         while self._processes:
             self._processes.pop().terminate()
 
+    def stop_process(self, process):
+        'Remove process from monitored list and stop it'
+        self._processes.remove(process)
+        process.terminate()
+
     def free_resources(self):
         if self.reserved_resources is None:
             return

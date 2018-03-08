@@ -29,7 +29,7 @@ from . import util
 from . import schema
 from . import modem
 from . import osmo_nitb
-from . import bts_sysmo, bts_osmotrx, bts_octphy
+from . import bts_sysmo, bts_osmotrx, bts_octphy, bts_nanobts
 
 from .util import is_dict, is_list
 
@@ -56,6 +56,10 @@ RESOURCES_SCHEMA = {
         'bts[].trx_remote_ip': schema.IPV4,
         'bts[].launch_trx': schema.BOOL_STR,
         'bts[].direct_pcu': schema.BOOL_STR,
+        'bts[].power_supply.type': schema.STR,
+        'bts[].power_supply.device': schema.STR,
+        'bts[].power_supply.port': schema.STR,
+        'bts[].net_device': schema.STR,
         'bts[].ciphers[]': schema.CIPHER,
         'bts[].trx_list[].hw_addr': schema.HWADDR,
         'bts[].trx_list[].net_device': schema.STR,
@@ -84,6 +88,7 @@ KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
         'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
         'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
+        'nanobts': bts_nanobts.NanoBts,
     }
 
 def register_bts_type(name, clazz):

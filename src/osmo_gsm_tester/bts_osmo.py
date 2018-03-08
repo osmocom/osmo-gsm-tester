@@ -65,11 +65,6 @@ class OsmoBts(log.Origin, metaclass=ABCMeta):
     def remote_addr(self):
         return self.conf.get('addr')
 
-    def ready_for_pcu(self):
-        if not self.proc_bts or not self.proc_bts.is_running:
-            return False
-        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
-
     def cleanup(self):
         'Nothing to do by default. Subclass can override if required.'
         pass
@@ -81,6 +76,11 @@ class OsmoBts(log.Origin, metaclass=ABCMeta):
     def start(self):
         'Starts BTS proccess and sets self.proc_bts with an object of Process interface'
         pass
+
+    def ready_for_pcu(self):
+        if not self.proc_bts or not self.proc_bts.is_running:
+            return False
+        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
 
     def pcu(self):
         if self._pcu is None:

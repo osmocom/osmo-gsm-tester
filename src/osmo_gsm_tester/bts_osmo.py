@@ -21,26 +21,17 @@ import os
 import pprint
 import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, event_loop, pcu_osmo
+from . import log, config, util, template, process, event_loop, bts, pcu_osmo
 
-class OsmoBts(log.Origin, metaclass=ABCMeta):
-    suite_run = None
+class OsmoBts(bts.Bts, metaclass=ABCMeta):
     proc_bts = None
-    bsc = None
-    sgsn = None
-    lac = None
-    rac = None
-    cellid = None
-    bvci = None
     _pcu = None
 
 ##############
 # PROTECTED
 ##############
     def __init__(self, suite_run, conf, name):
-        super().__init__(log.C_RUN, name)
-        self.suite_run = suite_run
-        self.conf = conf
+        super().__init__(suite_run, conf, name)
         if len(self.pcu_socket_path().encode()) > 107:
             raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
 
@@ -49,7 +40,7 @@ class OsmoBts(log.Origin, metaclass=ABCMeta):
 ########################
     @abstractmethod
     def conf_for_bsc(self):
-        'Used by bsc objects to get path to socket.'
+        # coming from bts.Bts, we forward the implementation to children.
         pass
 
     @abstractmethod
@@ -62,19 +53,12 @@ class OsmoBts(log.Origin, metaclass=ABCMeta):
         'Used by base class. Subclass can create different pcu implementations.'
         pass
 
-    def remote_addr(self):
-        return self.conf.get('addr')
-
-    def cleanup(self):
-        'Nothing to do by default. Subclass can override if required.'
-        pass
-
 ###################
 # PUBLIC (test API included)
 ###################
     @abstractmethod
     def start(self):
-        'Starts BTS proccess and sets self.proc_bts with an object of Process interface'
+        # coming from bts.Bts, we forward the implementation to children.
         pass
 
     def ready_for_pcu(self):
@@ -86,25 +70,6 @@ class OsmoBts(log.Origin, metaclass=ABCMeta):
         if self._pcu is None:
             self._pcu = self.create_pcu()
         return self._pcu
-
-    def set_bsc(self, bsc):
-        self.bsc = bsc
-
-    def set_sgsn(self, sgsn):
-        self.sgsn = sgsn
-
-    def set_lac(self, lac):
-        self.lac = lac
-
-    def set_rac(self, rac):
-        self.rac = rac
-
-    def set_cellid(self, cellid):
-        self.cellid = cellid
-
-    def set_bvci(self, bvci):
-        self.bvci = bvci
-
 
 class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 ##############
@@ -120,6 +85,7 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 ########################
     @abstractmethod
     def conf_for_bsc(self):
+        # coming from bts.Bts, we forward the implementation to children.
         pass
 
     def cleanup(self):
@@ -143,4 +109,5 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 ###################
     @abstractmethod
     def start(self):
+        # coming from bts.Bts, we forward the implementation to children.
         pass

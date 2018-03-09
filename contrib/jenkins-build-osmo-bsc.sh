@@ -11,4 +11,4 @@ build_repo libosmo-sccp
 build_repo osmo-mgw
 build_repo osmo-bsc
 
-create_bin_tgz osmo-bsc
+create_bin_tgz osmo-bsc abisip-find ipaccess-config

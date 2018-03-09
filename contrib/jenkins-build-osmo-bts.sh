@@ -4,8 +4,6 @@ base="$PWD"
 name="osmo-bts"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-# for gsm_data_shared.*
-have_repo openbsc
 have_repo octphy-2g-headers
 
 build_repo libosmocore --disable-doxygen

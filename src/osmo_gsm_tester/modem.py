@@ -41,6 +41,7 @@ I_CONNMGR = 'org.ofono.ConnectionManager'
 I_CALLMGR = 'org.ofono.VoiceCallManager'
 I_CALL = 'org.ofono.VoiceCall'
 I_SS = 'org.ofono.SupplementaryServices'
+I_SIMMGR = 'org.ofono.SimManager'
 
 # See https://github.com/intgr/ofono/blob/master/doc/network-api.txt#L78
 NETREG_ST_REGISTERED = 'registered'
@@ -342,6 +343,7 @@ class Modem(log.Origin):
     msisdn = None
     sms_received_list = None
     _ki = None
+    _imsi = None
 
     CTX_PROT_IPv4 = 'ip'
     CTX_PROT_IPv6 = 'ipv6'
@@ -423,10 +425,23 @@ class Modem(log.Origin):
         self.msisdn = msisdn
 
     def imsi(self):
-        imsi = self.conf.get('imsi')
-        if not imsi:
-            raise log.Error('No IMSI')
-        return imsi
+        if self._imsi is None:
+            if 'sim' in self.features():
+                if not self.is_powered():
+                        self.set_powered()
+                # wait for SimManager iface to appear after we power on
+                event_loop.wait(self, self.dbus.has_interface, I_SIMMGR, timeout=10)
+                simmgr = self.dbus.interface(I_SIMMGR)
+                # If properties are requested quickly, it may happen that Sim property is still not there.
+                event_loop.wait(self, lambda: simmgr.GetProperties().get('SubscriberIdentity', None) is not None, timeout=10)
+                props = simmgr.GetProperties()
+                self.dbg('got SIM properties', props)
+                self._imsi = props.get('SubscriberIdentity', None)
+            else:
+                self._imsi = self.conf.get('imsi')
+            if self._imsi is None:
+                raise log.Error('No IMSI')
+        return self._imsi
 
     def set_ki(self, ki):
         self._ki = ki
@@ -447,6 +462,7 @@ class Modem(log.Origin):
         req_ifaces += (I_SMS,) if 'sms' in self.features() else ()
         req_ifaces += (I_SS,) if 'ussd' in self.features() else ()
         req_ifaces += (I_CONNMGR,) if 'gprs' in self.features() else ()
+        req_ifaces += (I_SIMMGR,) if 'sim' in self.features() else ()
         return req_ifaces
 
     def _on_netreg_property_changed(self, name, value):

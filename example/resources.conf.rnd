@@ -1,0 +1,79 @@
+# all hardware and interfaces available to this osmo-gsm-tester
+
+ip_address:
+- addr: 10.42.42.2
+- addr: 10.42.42.3
+- addr: 10.42.42.4
+- addr: 10.42.42.5
+- addr: 10.42.42.6
+- addr: 10.42.42.7
+- addr: 10.42.42.8
+- addr: 10.42.42.9
+
+bts:
+- label: sysmoBTS 1002
+  type: osmo-bts-sysmo
+  ipa_unit_id: 1
+  addr: 10.42.42.114
+  band: GSM-1800
+  direct_pcu: true
+  ciphers: [a5_0, a5_1, a5_3]
+
+- label: Ettus B200
+  type: osmo-bts-trx
+  ipa_unit_id: 6
+  addr: 10.42.42.50
+  band: GSM-1800
+  launch_trx: true
+  ciphers: [a5_0, a5_1]
+
+arfcn:
+  - arfcn: 512
+    band: GSM-1800
+  - arfcn: 514
+    band: GSM-1800
+  - arfcn: 516
+    band: GSM-1800
+  - arfcn: 518
+    band: GSM-1800
+  - arfcn: 520
+    band: GSM-1800
+  - arfcn: 540
+    band: GSM-1900
+  - arfcn: 542
+    band: GSM-1900
+  - arfcn: 544
+    band: GSM-1900
+  - arfcn: 546
+    band: GSM-1900
+  - arfcn: 548
+    band: GSM-1900
+
+modem:
+- label: sierra_1st
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-1/1-1.2'
+  ki: '80A37E6FDEA931EAC92FFA5F671EFEAD'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: sierra_2nd
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-1/1-1.3'
+  ki: '00969E283349D354A8239E877F2E0866'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: ec20
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-1/1-1.6'
+  ki: 'BB70807226393CDBAC8DD3439FF54252'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'ussd', 'gprs', 'sim']
+
+- label: gobi2k
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-1/1-1.5'
+  ki: '2F70DCA43C45ACB97E947FDD0C7CA30A'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['gprs', 'sim']

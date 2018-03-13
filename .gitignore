@@ -9,3 +9,4 @@ test_work
 state
 *.pyc
 selftest/trial_test/
+example/resources.conf

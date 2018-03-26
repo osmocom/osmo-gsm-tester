@@ -30,8 +30,6 @@ from gi.module import get_introspection_module
 Gio = get_introspection_module('Gio')
 
 from gi.repository import GLib
-glib_main_loop = GLib.MainLoop()
-glib_main_ctx = glib_main_loop.get_context()
 bus = SystemBus()
 
 I_MODEM = 'org.ofono.Modem'
@@ -49,24 +47,14 @@ NETREG_ST_ROAMING = 'roaming'
 
 NETREG_MAX_REGISTER_ATTEMPTS = 3
 
-class DeferredHandling:
-    defer_queue = []
+class DeferredDBus:
 
     def __init__(self, dbus_iface, handler):
         self.handler = handler
         self.subscription_id = dbus_iface.connect(self.receive_signal)
 
     def receive_signal(self, *args, **kwargs):
-        DeferredHandling.defer_queue.append((self.handler, args, kwargs))
-
-    @staticmethod
-    def handle_queue():
-        while DeferredHandling.defer_queue:
-            handler, args, kwargs = DeferredHandling.defer_queue.pop(0)
-            handler(*args, **kwargs)
-
-def defer(handler, *args, **kwargs):
-    DeferredHandling.defer_queue.append((handler, args, kwargs))
+        event_loop.defer(self.handler, *args, **kwargs)
 
 def dbus_connect(dbus_iface, handler):
     '''This function shall be used instead of directly connecting DBus signals.
@@ -75,15 +63,7 @@ def dbus_connect(dbus_iface, handler):
     so that a signal handler is invoked only after the DBus polling is through
     by enlisting signals that should be handled in the
     DeferredHandling.defer_queue.'''
-    return DeferredHandling(dbus_iface, handler).subscription_id
-
-def poll_glib():
-    global glib_main_ctx
-    while glib_main_ctx.pending():
-        glib_main_ctx.iteration()
-    DeferredHandling.handle_queue()
-
-event_loop.register_poll_func(poll_glib)
+    return DeferredDBus(dbus_iface, handler).subscription_id
 
 def systembus_get(path):
     global bus
@@ -493,8 +473,8 @@ class Modem(log.Origin):
         # waiting for that. Make it async and try to register when the scan is
         # finished.
         register_func = self.scan_cb_register_automatic if mcc_mnc is None else self.scan_cb_register
-        result_handler = lambda obj, result, user_data: defer(register_func, result, user_data)
-        error_handler = lambda obj, e, user_data: defer(self.scan_cb_error_handler, e, mcc_mnc)
+        result_handler = lambda obj, result, user_data: event_loop.defer(register_func, result, user_data)
+        error_handler = lambda obj, e, user_data: event_loop.defer(self.scan_cb_error_handler, e, mcc_mnc)
         dbus_async_call(netreg, netreg.Scan, timeout=30, cancellable=self.cancellable,
                         result_handler=result_handler, error_handler=error_handler,
                         user_data=mcc_mnc)
@@ -559,7 +539,7 @@ class Modem(log.Origin):
         self.cancellable.cancel()
         # Cancel op is applied as a signal coming from glib mainloop, so we
         # need to run it and wait for the callbacks to handle cancellations.
-        poll_glib()
+        event_loop.poll()
         # once it has been triggered, create a new one for next operation:
         self.cancellable = Gio.Cancellable.new()
 

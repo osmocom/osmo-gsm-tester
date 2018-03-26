@@ -49,7 +49,6 @@ bts:
   ipa_unit_id: 9
   addr: 10.42.42.53
   band: GSM-1900
-  net_device: enp2s0
   power_supply:
     type: 'sispm'
     device: '01:01:4d:98:24'

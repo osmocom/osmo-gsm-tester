@@ -71,6 +71,21 @@ def ip_to_iface(ip):
         pass
     return None
 
+def dst_ip_get_local_bind(ip):
+    '''Retrieve default IP addr to bind to in order to route traffic to dst addr'''
+    try:
+        proc = subprocess.Popen(['ip', 'route', 'get', ip], stdout=subprocess.PIPE, universal_newlines=True)
+        output = proc.stdout.readlines()
+        words = output[0].split()
+        i = 0
+        while i < len(words):
+            if words[i] == 'src':
+                return words[i+1]
+            i += 1
+    except Exception as e:
+        pass
+    return None
+
 def setcap_net_raw(binary, run_dir):
     '''
     This functionality requires specific setup on the host running

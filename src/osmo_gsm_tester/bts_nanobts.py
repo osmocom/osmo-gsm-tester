@@ -86,24 +86,25 @@ class NanoBts(bts.Bts):
 ###################
 
     def start(self):
-        for attr in ['net_device', 'ipa_unit_id']:
-            if self.conf.get(attr) is None:
-                raise log.Error('No attribute %s provided in conf!' % attr)
+        if self.conf.get('ipa_unit_id') is None:
+            raise log.Error('No attribute %s provided in conf!' % attr)
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self._configure()
 
-        iface = self.conf.get('net_device')
         unitid = int(self.conf.get('ipa_unit_id'))
         bts_ip = self.remote_addr()
+        # This fine for now, however concurrent tests using Nanobts may run into "address already in use" since dst is broadcast.
+        # Once concurrency is needed, a new config attr should be added to have an extra static IP assigned on the main-unit to each Nanobts resource.
+        local_bind_ip =util.dst_ip_get_local_bind(bts_ip)
 
         # Make sure nanoBTS is powered and in a clean state:
         self.pwsup.power_cycle(1.0)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), iface,
+        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.remote_addr())
 
-        self.log('Finding nanobts %s...' % bts_ip)
-        ipfind = AbisIpFind(self.suite_run, self.run_dir, iface, 'preconf')
+        self.log('Finding nanobts %s, binding on %s...' % (bts_ip, local_bind_ip))
+        ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'preconf')
         ipfind.start()
         ipfind.wait_bts_ready(bts_ip)
         running_unitid = ipfind.get_unitid_by_ip(bts_ip)
@@ -124,7 +125,7 @@ class NanoBts(bts.Bts):
         event_loop.sleep(self, 20)
 
         self.log('Starting to connect to', self.bsc)
-        ipfind = AbisIpFind(self.suite_run, self.run_dir, iface, 'postconf')
+        ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
         ipfind.start()
         ipfind.wait_bts_ready(bts_ip)
         self.log('nanoBTS configured and running')
@@ -161,45 +162,36 @@ class AbisIpFind(log.Origin):
     run_dir = None
     inst = None
     env = None
-    iface = None
+    bind_ip = None
     proc = None
 
     BIN_ABISIP_FIND = 'abisip-find'
     BTS_UNIT_ID_RE = re.compile("Unit_ID='(?P<unit_id>\d+)/\d+/\d+'")
 
-    def __init__(self, suite_run, parent_run_dir, iface, name_suffix):
+    def __init__(self, suite_run, parent_run_dir, bind_ip, name_suffix):
         super().__init__(log.C_RUN, AbisIpFind.BIN_ABISIP_FIND + '-' + name_suffix)
         self.suite_run = suite_run
         self.parent_run_dir = parent_run_dir
-        self.iface = iface
+        self.bind_ip = bind_ip
         self.env = {}
-
-    def launch_process(self, binary_name, *args):
-        binary = os.path.abspath(self.inst.child('bin', binary_name))
-        run_dir = self.run_dir.new_dir(binary_name)
-        if not os.path.isfile(binary):
-            raise RuntimeError('Binary missing: %r' % binary)
-        proc = process.Process(binary_name, run_dir,
-                               (binary,) + args,
-                               env=self.env)
-        self.suite_run.remember_to_stop(proc)
-        proc.launch()
-        return proc
 
     def start(self):
         self.run_dir = util.Dir(self.parent_run_dir.new_dir(self.name()))
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bsc')))
+
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise log.Error('No lib/ in %r' % self.inst)
         ipfind_path = self.inst.child('bin', AbisIpFind.BIN_ABISIP_FIND)
-        # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
-        self.log('Setting RPATH for', AbisIpFind.BIN_ABISIP_FIND)
-        util.change_elf_rpath(ipfind_path, util.prepend_library_path(lib), self.run_dir.new_dir('patchelf'))
-        # osmo-bty-octphy requires CAP_NET_RAW to open AF_PACKET socket:
-        self.log('Applying CAP_NET_RAW capability to', AbisIpFind.BIN_ABISIP_FIND)
-        util.setcap_net_raw(ipfind_path, self.run_dir.new_dir('setcap_net_raw'))
-        self.proc = self.launch_process(AbisIpFind.BIN_ABISIP_FIND, self.iface)
+        if not os.path.isfile(ipfind_path):
+            raise RuntimeError('Binary missing: %r' % ipfind_path)
+
+        env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+        self.proc = process.Process(self.name(), self.run_dir,
+                            (ipfind_path, '-b', self.bind_ip),
+                            env=env)
+        self.suite_run.remember_to_stop(self.proc)
+        self.proc.launch()
 
     def stop(self):
         self.suite_run.stop_process(self.proc)

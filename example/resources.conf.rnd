@@ -27,7 +27,7 @@ bts:
   launch_trx: true
   ciphers: [a5_0, a5_1]
 
-- label: NanoBTS
+- label: NanoBTS-ONW-1900
   type: nanobts
   ipa_unit_id: 9
   addr: 10.42.42.53

@@ -44,7 +44,7 @@ bts:
   - hw_addr: 00:0c:90:2e:80:1e
     net_device: enp2s0
 
-- label: NanoBTS
+- label: NanoBTS-ONW-1900
   type: nanobts
   ipa_unit_id: 9
   addr: 10.42.42.53
@@ -53,6 +53,16 @@ bts:
     type: 'sispm'
     device: '01:01:4d:98:24'
     port: '1'
+
+- label: NanoBTS-ONW-900
+  type: nanobts
+  ipa_unit_id: 10
+  addr: 10.42.42.54
+  band: GSM-900
+  power_supply:
+    type: 'sispm'
+    device: '01:01:4d:98:24'
+    port: '2'
 
 arfcn:
   - arfcn: 512

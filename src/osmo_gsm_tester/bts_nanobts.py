@@ -70,6 +70,14 @@ class NanoBts(bts.Bts):
         sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
         config.overlay(values, sgsn_conf)
 
+        # Hack until we have proper ARFCN resource allocation support (OS#2230)
+        band = values.get('band')
+        trx_list = values.get('trx_list')
+        if band == 'GSM-1900':
+            config.overlay(trx_list[0], { 'arfcn' : '531' })
+        elif band == 'GSM-900':
+            config.overlay(trx_list[0], { 'arfcn' : '50' })
+
         config.overlay(values, { 'osmobsc_bts_type': 'nanobts' })
 
         self.dbg(conf=values)

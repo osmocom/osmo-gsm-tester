@@ -21,7 +21,7 @@ import os
 import pprint
 import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, event_loop, pcu_osmo
+from . import log, config, util, template, process, pcu_osmo
 
 class Bts(log.Origin, metaclass=ABCMeta):
     suite_run = None

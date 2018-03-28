@@ -22,8 +22,9 @@ import pprint
 import tempfile
 import re
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, event_loop, pcap_recorder, bts, pcu
+from . import log, config, util, template, process, pcap_recorder, bts, pcu
 from . import powersupply
+from .event_loop import MainLoop
 
 class NanoBts(bts.Bts):
 
@@ -130,7 +131,7 @@ class NanoBts(bts.Bts):
         # Let some time for BTS to restart. It takes much more than 20 secs, and
         # this way we make sure we don't catch responses in abisip-find prior to
         # BTS restarting.
-        event_loop.sleep(self, 20)
+        MainLoop.sleep(self, 20)
 
         self.log('Starting to connect to', self.bsc)
         ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
@@ -139,7 +140,7 @@ class NanoBts(bts.Bts):
         self.log('nanoBTS configured and running')
         ipfind.stop()
 
-        event_loop.wait(self, self.bsc.bts_is_connected, self, timeout=600)
+        MainLoop.wait(self, self.bsc.bts_is_connected, self, timeout=600)
         self.log('nanoBTS connected to BSC')
 
         #According to roh, it can be configured to use a static IP in a permanent way:
@@ -227,7 +228,7 @@ class AbisIpFind(log.Origin):
         return self.get_line_by_ip(ipaddr) is not None
 
     def wait_bts_ready(self, ipaddr):
-        event_loop.wait(self, self.bts_ready, ipaddr)
+        MainLoop.wait(self, self.bts_ready, ipaddr)
 
 
 class IpAccessConfig(log.Origin):
@@ -265,7 +266,7 @@ class IpAccessConfig(log.Origin):
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
         self.proc = self.launch_process(IpAccessConfig.BIN_IPACCESS_CONFIG, *args)
         try:
-            event_loop.wait(self, self.proc.terminated)
+            MainLoop.wait(self, self.proc.terminated)
         except Exception as e:
             self.proc.terminate()
             raise e

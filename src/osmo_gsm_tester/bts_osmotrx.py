@@ -20,7 +20,8 @@
 import os
 import pprint
 import tempfile
-from . import log, config, util, template, process, event_loop, pcu_osmo, bts_osmo
+from . import log, config, util, template, process, pcu_osmo, bts_osmo
+from .event_loop import MainLoop
 
 class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 ##############
@@ -125,7 +126,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
             self.trx = OsmoTrx(self.suite_run, self.conf, self.trx_remote_ip(), self.remote_addr())
             self.trx.start()
             self.log('Waiting for osmo-trx to start up...')
-            event_loop.wait(self, self.trx.trx_ready)
+            MainLoop.wait(self, self.trx.trx_ready)
 
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
         lib = self.inst.child('lib')

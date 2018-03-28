@@ -18,7 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractmethod
-from . import log, event_loop
+from . import log
+from .event_loop import MainLoop
 
 class PowerSupply(log.Origin, metaclass=ABCMeta):
 
@@ -46,7 +47,7 @@ class PowerSupply(log.Origin, metaclass=ABCMeta):
     def power_cycle(self, sleep=0):
         """Turns off the device, waits N.N seconds, then turn on the device."""
         self.power_set(False)
-        event_loop.sleep(self, sleep)
+        MainLoop.sleep(self, sleep)
         self.power_set(True)
 
 

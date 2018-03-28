@@ -21,7 +21,7 @@ import os
 import pprint
 import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, event_loop, bts, pcu_osmo
+from . import log, config, util, template, process, bts, pcu_osmo
 
 class OsmoBts(bts.Bts, metaclass=ABCMeta):
     proc_bts = None

@@ -112,35 +112,7 @@ class EventLoop:
         self.wait_no_raise(log_obj, lambda: False, [], {}, timeout=seconds, timestep=seconds)
 
 
-evloop = EventLoop()
-
-def register_poll_func(func):
-    global evloop
-    evloop.register_poll_func(func)
-
-def unregister_poll_func(func):
-    global evloop
-    evloop.unregister_poll_func(func)
-
-def poll():
-    global evloop
-    evloop.poll()
-
-def wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout, timestep):
-    global evloop
-    evloop.wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout, timestep)
-
-def wait(log_obj, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
-    global evloop
-    evloop.wait(log_obj, condition, *condition_args, timeout=timeout, timestep=timestep, **condition_kwargs)
-
-def sleep(log_obj, seconds):
-    global evloop
-    evloop.sleep(log_obj, seconds)
-
-def defer(handler, *args, **kwargs):
-    global evloop
-    evloop.defer(handler, *args, **kwargs)
+MainLoop = EventLoop()
 
 
 # vim: expandtab tabstop=4 shiftwidth=4

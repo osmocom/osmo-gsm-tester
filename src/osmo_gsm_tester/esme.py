@@ -23,7 +23,8 @@ import smpplib.command
 import smpplib.consts
 import smpplib.exceptions
 
-from . import log, util, event_loop, sms
+from . import log, util, sms
+from .event_loop import MainLoop
 
 # if you want to know what's happening inside python-smpplib
 #import logging
@@ -82,14 +83,14 @@ class Esme(log.Origin):
 
     def start_listening(self):
         self.listening = True
-        event_loop.register_poll_func(self.poll)
+        MainLoop.register_poll_func(self.poll)
 
     def stop_listening(self):
         if not self.listening:
             return
         self.listening = False
         # Empty the queue before processing the unbind + disconnect PDUs
-        event_loop.unregister_poll_func(self.poll)
+        MainLoop.unregister_poll_func(self.poll)
         self.poll()
 
     def connect(self):
@@ -176,7 +177,7 @@ class Esme(log.Origin):
             umref, self.pdus_pending = self.sms_send(sms_obj, mode, receipt)
             self.dbg('pdus_pending:', self.pdus_pending)
             self.client.set_message_sent_handler(self._process_pdus_pending)
-            event_loop.wait(self, lambda: len(self.pdus_pending) == 0, timeout=10)
+            MainLoop.wait(self, lambda: len(self.pdus_pending) == 0, timeout=10)
             return umref
         finally:
             self.client.set_message_sent_handler(old_func)

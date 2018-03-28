@@ -20,7 +20,7 @@
 import os
 import pprint
 import tempfile
-from . import log, config, util, template, process, event_loop, pcu
+from . import log, config, util, template, process, pcu
 
 class OsmoPcu(pcu.Pcu):
     inst = None

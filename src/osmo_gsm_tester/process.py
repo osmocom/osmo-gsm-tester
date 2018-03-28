@@ -23,7 +23,8 @@ import subprocess
 import signal
 from datetime import datetime
 
-from . import log, event_loop
+from . import log
+from .event_loop import MainLoop
 from .util import Dir
 
 class Process(log.Origin):
@@ -204,7 +205,7 @@ class Process(log.Origin):
         return self.result is not None
 
     def wait(self, timeout=300):
-        event_loop.wait(self, self.terminated, timeout=timeout)
+        MainLoop.wait(self, self.terminated, timeout=timeout)
 
 
 class RemoteProcess(Process):

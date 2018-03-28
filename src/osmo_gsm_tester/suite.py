@@ -21,7 +21,8 @@ import os
 import sys
 import time
 import pprint
-from . import config, log, template, util, resource, schema, event_loop, test
+from . import config, log, template, util, resource, schema, test
+from .event_loop import MainLoop
 from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme
 
 class Timeout(Exception):
@@ -150,7 +151,7 @@ class SuiteRun(log.Origin):
         try:
             log.large_separator(self.trial.name(), self.name(), sublevel=2)
             self.mark_start()
-            event_loop.register_poll_func(self.poll)
+            MainLoop.register_poll_func(self.poll)
             if not self.reserved_resources:
                 self.reserve_resources()
             for t in self.tests:
@@ -175,7 +176,7 @@ class SuiteRun(log.Origin):
             self.stop_processes()
             self.objects_cleanup()
             self.free_resources()
-            event_loop.unregister_poll_func(self.poll)
+            MainLoop.unregister_poll_func(self.poll)
             self.duration = time.time() - self.start_timestamp
 
             passed, skipped, failed = self.count_test_results()
@@ -344,7 +345,7 @@ class SuiteRun(log.Origin):
         sys.__stdout__.write(msg)
         sys.__stdout__.write('\n')
         sys.__stdout__.flush()
-        entered = util.input_polling('> ', event_loop.poll)
+        entered = util.input_polling('> ', MainLoop.poll)
         self.log('prompt entered:', repr(entered))
         return entered
 

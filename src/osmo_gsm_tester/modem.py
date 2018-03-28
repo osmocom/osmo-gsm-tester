@@ -17,7 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, util, event_loop, sms
+from . import log, util, sms
+from .event_loop import MainLoop
 
 from pydbus import SystemBus, Variant
 import time
@@ -54,7 +55,7 @@ class DeferredDBus:
         self.subscription_id = dbus_iface.connect(self.receive_signal)
 
     def receive_signal(self, *args, **kwargs):
-        event_loop.defer(self.handler, *args, **kwargs)
+        MainLoop.defer(self.handler, *args, **kwargs)
 
 def dbus_connect(dbus_iface, handler):
     '''This function shall be used instead of directly connecting DBus signals.
@@ -296,13 +297,13 @@ class ModemDbusInteraction(log.Origin):
 
     def set_bool(self, name, bool_val, iface=I_MODEM):
         # to make sure any pending signals are received before we send out more DBus requests
-        event_loop.poll()
+        MainLoop.poll()
 
         val = bool(bool_val)
         self.log('Setting', name, val)
         self.interface(iface).SetProperty(name, Variant('b', val))
 
-        event_loop.wait(self, self.property_is, name, bool_val)
+        MainLoop.wait(self, self.property_is, name, bool_val)
 
     def set_powered(self, powered=True):
         self.set_bool('Powered', powered)
@@ -410,10 +411,10 @@ class Modem(log.Origin):
                 if not self.is_powered():
                         self.set_powered()
                 # wait for SimManager iface to appear after we power on
-                event_loop.wait(self, self.dbus.has_interface, I_SIMMGR, timeout=10)
+                MainLoop.wait(self, self.dbus.has_interface, I_SIMMGR, timeout=10)
                 simmgr = self.dbus.interface(I_SIMMGR)
                 # If properties are requested quickly, it may happen that Sim property is still not there.
-                event_loop.wait(self, lambda: simmgr.GetProperties().get('SubscriberIdentity', None) is not None, timeout=10)
+                MainLoop.wait(self, lambda: simmgr.GetProperties().get('SubscriberIdentity', None) is not None, timeout=10)
                 props = simmgr.GetProperties()
                 self.dbg('got SIM properties', props)
                 self._imsi = props.get('SubscriberIdentity', None)
@@ -473,8 +474,8 @@ class Modem(log.Origin):
         # waiting for that. Make it async and try to register when the scan is
         # finished.
         register_func = self.scan_cb_register_automatic if mcc_mnc is None else self.scan_cb_register
-        result_handler = lambda obj, result, user_data: event_loop.defer(register_func, result, user_data)
-        error_handler = lambda obj, e, user_data: event_loop.defer(self.scan_cb_error_handler, e, mcc_mnc)
+        result_handler = lambda obj, result, user_data: MainLoop.defer(register_func, result, user_data)
+        error_handler = lambda obj, e, user_data: MainLoop.defer(self.scan_cb_error_handler, e, mcc_mnc)
         dbus_async_call(netreg, netreg.Scan, timeout=30, cancellable=self.cancellable,
                         result_handler=result_handler, error_handler=error_handler,
                         user_data=mcc_mnc)
@@ -539,7 +540,7 @@ class Modem(log.Origin):
         self.cancellable.cancel()
         # Cancel op is applied as a signal coming from glib mainloop, so we
         # need to run it and wait for the callbacks to handle cancellations.
-        event_loop.poll()
+        MainLoop.poll()
         # once it has been triggered, create a new one for next operation:
         self.cancellable = Gio.Cancellable.new()
 
@@ -550,20 +551,20 @@ class Modem(log.Origin):
         self.set_powered(False)
         req_ifaces = self._required_ifaces()
         for iface in req_ifaces:
-            event_loop.wait(self, lambda: not self.dbus.has_interface(iface), timeout=10)
+            MainLoop.wait(self, lambda: not self.dbus.has_interface(iface), timeout=10)
 
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'
         req_ifaces = self._required_ifaces()
         if self.is_powered():
             self.dbg('Power cycling')
-            event_loop.sleep(self, 1.0) # workaround for ofono bug OS#3064
+            MainLoop.sleep(self, 1.0) # workaround for ofono bug OS#3064
             self.power_off()
         else:
             self.dbg('Powering on')
         self.set_powered()
         self.set_online()
-        event_loop.wait(self, self.dbus.has_interface, *req_ifaces, timeout=10)
+        MainLoop.wait(self, self.dbus.has_interface, *req_ifaces, timeout=10)
 
     def connect(self, mcc_mnc=None):
         'Connect to MCC+MNC'
@@ -616,7 +617,7 @@ class Modem(log.Origin):
 
         # Activate can only be called after we are attached
         ctx.SetProperty('Active', Variant('b', True))
-        event_loop.wait(self, lambda: ctx.GetProperties()['Active'] == True)
+        MainLoop.wait(self, lambda: ctx.GetProperties()['Active'] == True)
         self.log('context activated', path=ctx_path, apn=apn, user=user, properties=ctx.GetProperties())
         return ctx_path
 
@@ -624,7 +625,7 @@ class Modem(log.Origin):
         self.dbg('deactivate_context', path=ctx_id)
         ctx = systembus_get(ctx_id)
         ctx.SetProperty('Active', Variant('b', False))
-        event_loop.wait(self, lambda: ctx.GetProperties()['Active'] == False)
+        MainLoop.wait(self, lambda: ctx.GetProperties()['Active'] == False)
         self.dbg('deactivate_context active=false, removing', path=ctx_id)
         connmgr = self.dbus.interface(I_CONNMGR)
         connmgr.RemoveContext(ctx_id)
@@ -689,7 +690,7 @@ class Modem(log.Origin):
         else:
             caller_msisdn = str(caller_msisdn_or_modem)
         self.dbg('Waiting for incoming call from:', caller_msisdn)
-        event_loop.wait(self, lambda: self._find_call_msisdn_state(caller_msisdn, 'incoming') is not None, timeout=timeout)
+        MainLoop.wait(self, lambda: self._find_call_msisdn_state(caller_msisdn, 'incoming') is not None, timeout=timeout)
         return self._find_call_msisdn_state(caller_msisdn, 'incoming')
 
     def call_answer(self, call_id):

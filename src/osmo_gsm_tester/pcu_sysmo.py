@@ -19,7 +19,7 @@
 
 import os
 import pprint
-from . import log, config, util, template, process, event_loop
+from . import log, config, util, template, process
 
 class OsmoPcuSysmo(log.Origin):
     suite_run = None

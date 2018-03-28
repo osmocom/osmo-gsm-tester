@@ -20,7 +20,8 @@
 import sispm
 from usb.core import USBError
 
-from . import log, event_loop
+from . import log
+from .event_loop import MainLoop
 from .powersupply import PowerSupply
 
 class PowerSupplySispm(PowerSupply):
@@ -50,7 +51,7 @@ class PowerSupplySispm(PowerSupply):
             except USBError as e:
                     if e.errno == 16 or e.errno==110:
                         self.log('skip usb error, retry', repr(e))
-                        event_loop.sleep(self, 0.1)
+                        MainLoop.sleep(self, 0.1)
                         continue
                     raise e
 

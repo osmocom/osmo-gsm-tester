@@ -197,7 +197,7 @@ class AbisIpFind(log.Origin):
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
         self.proc = process.Process(self.name(), self.run_dir,
-                            (ipfind_path, '-b', self.bind_ip),
+                            (ipfind_path, '-i', '1', '-b', self.bind_ip),
                             env=env)
         self.suite_run.remember_to_stop(self.proc)
         self.proc.launch()
@@ -229,7 +229,10 @@ class AbisIpFind(log.Origin):
 
     def wait_bts_ready(self, ipaddr):
         MainLoop.wait(self, self.bts_ready, ipaddr)
-
+        # There's a period of time after boot in which nanobts answers to
+        # abisip-find but tcp RSTs ipacces-config conns. Let's wait in here a
+        # bit more time to avoid failing after stating the BTS is ready.
+        MainLoop.sleep(self, 2)
 
 class IpAccessConfig(log.Origin):
     suite_run = None

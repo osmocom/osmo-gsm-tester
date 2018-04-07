@@ -96,7 +96,11 @@ class EventLoop:
         wait_req = WaitRequest(condition, condition_args, condition_kwargs, timeout, timestep)
         wait_id = GObject.timeout_add(timestep*1000, self._trigger_cb_func, wait_req.condition_check)
         while True:
-            self.poll(may_block=True)
+            try:
+                self.poll(may_block=True)
+            except Exception: # cleanup of temporary resources in the wait scope
+                GObject.source_remove(wait_id)
+                raise
             if wait_req.condition_ack or wait_req.timeout_ack:
                 GObject.source_remove(wait_id)
                 success = wait_req.condition_ack

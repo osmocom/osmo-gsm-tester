@@ -4,12 +4,12 @@ base="$PWD"
 name="osmo-msc"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-build_repo libosmocore --disable-doxygen
-build_repo libosmo-abis
-build_repo libosmo-netif --disable-doxygen
-build_repo libsmpp34
-build_repo libosmo-sccp
-build_repo osmo-mgw
-build_repo osmo-msc --enable-smpp --disable-iu
+build_repo libosmocore --enable-sanitize --disable-doxygen
+build_repo libosmo-abis --enable-sanitize
+build_repo libosmo-netif --enable-sanitize --disable-doxygen
+build_repo libsmpp34 --enable-sanitize
+build_repo libosmo-sccp --enable-sanitize
+build_repo osmo-mgw --enable-sanitize
+build_repo osmo-msc --enable-sanitize --enable-smpp --disable-iu
 
 create_bin_tgz osmo-msc

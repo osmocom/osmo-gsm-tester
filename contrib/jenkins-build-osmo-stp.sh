@@ -4,9 +4,9 @@ base="$PWD"
 name="osmo-stp"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-build_repo libosmocore --disable-doxygen
-build_repo libosmo-abis
-build_repo libosmo-netif --disable-doxygen
-build_repo libosmo-sccp
+build_repo libosmocore --enable-sanitize --disable-doxygen
+build_repo libosmo-abis --enable-sanitize
+build_repo libosmo-netif --enable-sanitize --disable-doxygen
+build_repo libosmo-sccp --enable-sanitize
 
 create_bin_tgz osmo-stp

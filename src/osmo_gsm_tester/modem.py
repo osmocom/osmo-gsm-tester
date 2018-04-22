@@ -708,9 +708,14 @@ class Modem(log.Origin):
         return self.call_state(call_id) == 'active'
 
     def call_state(self, call_id):
-        call_dbus_obj = systembus_get(call_id)
-        props = call_dbus_obj.GetProperties()
-        state = props.get('State')
+        try:
+            call_dbus_obj = systembus_get(call_id)
+            props = call_dbus_obj.GetProperties()
+            state = props.get('State')
+        except Exception as e:
+            self.log('asking call state for non existent call')
+            log.log_exn()
+            state = 'disconnected'
         self.dbg('call state: %s' % state)
         return state
 

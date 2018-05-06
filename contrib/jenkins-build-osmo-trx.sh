@@ -6,6 +6,6 @@ name="osmo-trx"
 
 # AddressSanitizer is not enabled on purpose since overhead affects the clocking.
 build_repo libosmocore --disable-doxygen
-build_repo osmo-trx --without-sse
+build_repo osmo-trx --without-sse --with-uhd
 
-create_bin_tgz osmo-trx
+create_bin_tgz osmo-trx-uhd

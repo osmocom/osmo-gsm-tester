@@ -146,7 +146,7 @@ class OsmoTrx(log.Origin):
     env = None
     proc_trx = None
 
-    BIN_TRX = 'osmo-trx'
+    BIN_TRX = 'osmo-trx-uhd'
     CONF_OSMO_TRX = 'osmo-trx.cfg'
 
     def __init__(self, suite_run, conf, listen_ip, bts_ip):

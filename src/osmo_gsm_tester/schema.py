@@ -99,6 +99,12 @@ def modem_feature(val):
         return
     raise ValueError('Unknown Modem Feature: %r' % val)
 
+def phy_channel_config(val):
+    if val in ('CCCH', 'CCCH+SDCCH4', 'TCH/F', 'TCH/H', 'SDCCH8', 'PDCH',
+               'TCH/F_PDCH', 'CCCH+SDCCH4+CBCH', 'SDCCH8+CBCH','TCH/F_TCH/H_PDCH'):
+        return
+    raise ValueError('Unknown Physical channel config: %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -113,6 +119,7 @@ AUTH_ALGO = 'auth_algo'
 TIMES='times'
 CIPHER = 'cipher'
 MODEM_FEATURE = 'modem_feature'
+PHY_CHAN = 'chan'
 
 SCHEMA_TYPES = {
         INT: int,
@@ -129,6 +136,7 @@ SCHEMA_TYPES = {
         TIMES: times,
         CIPHER: cipher,
         MODEM_FEATURE: modem_feature,
+        PHY_CHAN: phy_channel_config,
     }
 
 def validate(config, schema):

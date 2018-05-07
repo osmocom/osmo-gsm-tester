@@ -35,7 +35,7 @@ class SysmoBts(bts_osmo.OsmoBts):
     BTS_SYSMO_CFG = 'osmo-bts-sysmo.cfg'
 
     def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, SysmoBts.BTS_SYSMO_BIN)
+        super().__init__(suite_run, conf, SysmoBts.BTS_SYSMO_BIN, 'osmo_bts_sysmo')
         self.remote_user = 'root'
 
     def _direct_pcu_enabled(self):
@@ -103,7 +103,7 @@ class SysmoBts(bts_osmo.OsmoBts):
         return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
 
     def conf_for_bsc(self):
-        values = self.conf_for_bsc_osmo('osmo_bts_sysmo')
+        values = self.conf_for_bsc_prepare()
         self.dbg(conf=values)
         return values
 

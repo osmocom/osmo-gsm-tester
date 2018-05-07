@@ -38,7 +38,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
     CONF_BTS_TRX = 'osmo-bts-trx.cfg'
 
     def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, OsmoBtsTrx.BIN_BTS_TRX)
+        super().__init__(suite_run, conf, OsmoBtsTrx.BIN_BTS_TRX, 'osmo_bts_trx')
         self.env = {}
 
     def trx_remote_ip(self):
@@ -92,7 +92,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 # PUBLIC - INTERNAL API
 ########################
     def conf_for_bsc(self):
-        values = self.conf_for_bsc_osmo('osmo_bts_trx')
+        values = self.conf_for_bsc_prepare()
         self.dbg(conf=values)
         return values
 

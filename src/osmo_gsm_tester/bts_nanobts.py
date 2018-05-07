@@ -36,7 +36,7 @@ class NanoBts(bts.Bts):
     def __init__(self, suite_run, conf):
         if conf.get('addr') is None:
             raise log.Error('No attribute addr provided in conf!')
-        super().__init__(suite_run, conf, 'nanobts_%s' % conf.get('addr'))
+        super().__init__(suite_run, conf, 'nanobts_%s' % conf.get('addr'), 'nanobts')
 
     def _configure(self):
         if self.bsc is None:
@@ -56,7 +56,7 @@ class NanoBts(bts.Bts):
 ########################
 
     def conf_for_bsc(self):
-        values = self.conf_for_bsc_osmo('nanobts')
+        values = self.conf_for_bsc_prepare()
         # Hack until we have proper ARFCN resource allocation support (OS#2230)
         band = values.get('band')
         trx_list = values.get('trx_list')

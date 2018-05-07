@@ -30,14 +30,14 @@ class OsmoBts(bts.Bts, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf, name):
-        super().__init__(suite_run, conf, name)
+    def __init__(self, suite_run, conf, name, defaults_cfg_name):
+        super().__init__(suite_run, conf, name, defaults_cfg_name)
         if len(self.pcu_socket_path().encode()) > 107:
             raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
 
-    def conf_for_bsc_osmo(self, bts_defaults_name):
+    def conf_for_bsc_prepare(self):
         values = config.get_defaults('bsc_bts')
-        config.overlay(values, config.get_defaults(bts_defaults_name))
+        config.overlay(values, config.get_defaults(self.defaults_cfg_name))
         if self.lac is not None:
             config.overlay(values, { 'location_area_code': self.lac })
         if self.rac is not None:
@@ -94,8 +94,8 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 ##############
     pcu_sk_tmp_dir = None
 
-    def __init__(self, suite_run, conf, name):
-        super().__init__(suite_run, conf, name)
+    def __init__(self, suite_run, conf, name, defaults_cfg_name):
+        super().__init__(suite_run, conf, name, defaults_cfg_name)
 
 ########################
 # PUBLIC - INTERNAL API

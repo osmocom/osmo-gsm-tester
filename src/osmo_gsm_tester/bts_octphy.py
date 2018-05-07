@@ -36,7 +36,7 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
     CONF_BTS_OCTPHY = 'osmo-bts-octphy.cfg'
 
     def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, OsmoBtsOctphy.BIN_BTS_OCTPHY)
+        super().__init__(suite_run, conf, OsmoBtsOctphy.BIN_BTS_OCTPHY, 'osmo_bts_octphy')
         self.env = {}
         self.values = {}
 
@@ -112,7 +112,7 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
 # PUBLIC - INTERNAL API
 ########################
     def conf_for_bsc(self):
-        values = self.conf_for_bsc_osmo('osmo_bts_octphy')
+        values = self.conf_for_bsc_prepare()
         self.dbg(conf=values)
         return values
 

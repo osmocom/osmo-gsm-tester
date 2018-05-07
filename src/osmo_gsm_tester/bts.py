@@ -32,15 +32,16 @@ class Bts(log.Origin, metaclass=ABCMeta):
     rac = None
     cellid = None
     bvci = None
+    defaults_cfg_name = None
 
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf, name):
+    def __init__(self, suite_run, conf, name, defaults_cfg_name):
         super().__init__(log.C_RUN, name)
         self.suite_run = suite_run
         self.conf = conf
-
+        self.defaults_cfg_name = defaults_cfg_name
 ########################
 # PUBLIC - INTERNAL API
 ########################

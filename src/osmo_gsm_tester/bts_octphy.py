@@ -52,9 +52,6 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
         proc.launch()
         return proc
 
-    def num_trx(self):
-        return len(self.values['osmo_bts_octphy'].get('trx_list', []))
-
     def allocate_phy_instances(self, c):
         '''
         Generate match trx Z <-> phy X inst Y to use in vty config

@@ -60,6 +60,8 @@ RESOURCES_SCHEMA = {
         'bts[].power_supply.device': schema.STR,
         'bts[].power_supply.port': schema.STR,
         'bts[].ciphers[]': schema.CIPHER,
+        'bts[].num_trx': schema.UINT,
+        'bts[].max_trx': schema.UINT,
         'bts[].trx_list[].hw_addr': schema.HWADDR,
         'bts[].trx_list[].net_device': schema.STR,
         'bts[].trx_list[].nominal_power': schema.UINT,

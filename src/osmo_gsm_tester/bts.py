@@ -21,7 +21,7 @@ import os
 import pprint
 import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, pcu_osmo
+from . import log, config, util, template, process, schema, pcu_osmo
 
 class Bts(log.Origin, metaclass=ABCMeta):
     suite_run = None
@@ -33,6 +33,9 @@ class Bts(log.Origin, metaclass=ABCMeta):
     cellid = None
     bvci = None
     defaults_cfg_name = None
+    _num_trx = 1
+    _max_trx = None
+    overlay_trx_list = []
 
 ##############
 # PROTECTED
@@ -42,10 +45,65 @@ class Bts(log.Origin, metaclass=ABCMeta):
         self.suite_run = suite_run
         self.conf = conf
         self.defaults_cfg_name = defaults_cfg_name
+        self._init_num_trx()
+
+    def _resolve_bts_cfg(self, cfg_name):
+        res = None
+        val = config.get_defaults('bsc_bts').get(cfg_name)
+        if val is not None:
+            res = val
+        val = config.get_defaults(self.defaults_cfg_name).get(cfg_name)
+        if val is not None:
+            res = val
+        val = self.conf.get(cfg_name)
+        if val is not None:
+            res = val
+        return res
+
+    def _init_num_trx(self):
+        self._num_trx = 1
+        self._max_trx = None
+        val = self._resolve_bts_cfg('num_trx')
+        if val is not None:
+            self._num_trx = int(val)
+        val = self._resolve_bts_cfg('max_trx')
+        if val is not None:
+            self._max_trx = int(val)
+        self._validate_new_num_trx(self._num_trx)
+        self.overlay_trx_list = [Bts._new_default_trx_cfg() for trx in range(self._num_trx)]
+
+    def _validate_new_num_trx(self, num_trx):
+        if self._max_trx is not None and num_trx > self._max_trx:
+            raise log.Error('Amount of TRX requested is too high for maximum allowed: %u > %u' %(num_trx, self._max_trx))
+
+    @staticmethod
+    def _new_default_trx_cfg():
+        return {'timeslot_list':[{} for ts in range(8)]}
+
+    @staticmethod
+    def _trx_list_recreate(trx_list, new_size):
+        curr_len = len(trx_list)
+        if new_size < curr_len:
+            trx_list = trx_list[0:new_size]
+        elif new_size > curr_len:
+            for i in range(new_size - curr_len):
+                trx_list.append(Bts._new_default_trx_cfg())
+        return trx_list
 
     def conf_for_bsc_prepare(self):
         values = config.get_defaults('bsc_bts')
-        config.overlay(values, config.get_defaults(self.defaults_cfg_name))
+        # Make sure the trx_list is adapted to num of trx configured at runtime
+        # to avoid overlay issues.
+        trx_list = values.get('trx_list')
+        if trx_list and len(trx_list) != self.num_trx():
+            values['trx_list'] = Bts._trx_list_recreate(trx_list, self.num_trx())
+
+        bts_defaults = config.get_defaults(self.defaults_cfg_name)
+        trx_list = bts_defaults.get('trx_list')
+        if trx_list and len(trx_list) != self.num_trx():
+            bts_defaults['trx_list'] = Bts._trx_list_recreate(trx_list, self.num_trx())
+
+        config.overlay(values, bts_defaults)
         if self.lac is not None:
             config.overlay(values, { 'location_area_code': self.lac })
         if self.rac is not None:
@@ -58,6 +116,8 @@ class Bts(log.Origin, metaclass=ABCMeta):
 
         sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
         config.overlay(values, sgsn_conf)
+
+        config.overlay(values, { 'trx_list': self.overlay_trx_list })
         return values
 
 ########################
@@ -110,5 +170,22 @@ class Bts(log.Origin, metaclass=ABCMeta):
 
     def set_bvci(self, bvci):
         self.bvci = bvci
+
+    def set_num_trx(self, num_trx):
+        assert num_trx > 0
+        self._validate_new_num_trx(num_trx)
+        if num_trx == self._num_trx:
+            return
+        self._num_trx = num_trx
+        self.overlay_trx_list = Bts._trx_list_recreate(self.overlay_trx_list, num_trx)
+
+    def num_trx(self):
+        return self._num_trx
+
+    def set_trx_phy_channel(self, trx_idx, ts_idx, config):
+        assert trx_idx < self._num_trx
+        assert ts_idx < 8
+        schema.phy_channel_config(config) # validation
+        self.overlay_trx_list[trx_idx]['timeslot_list'][ts_idx]['phys_chan_config'] = config
 
 # vim: expandtab tabstop=4 shiftwidth=4

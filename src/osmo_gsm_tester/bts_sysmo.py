@@ -103,21 +103,7 @@ class SysmoBts(bts_osmo.OsmoBts):
         return os.path.join(SysmoBts.REMOTE_DIR, 'pcu_bts')
 
     def conf_for_bsc(self):
-        values = config.get_defaults('bsc_bts')
-        config.overlay(values, config.get_defaults('osmo_bts_sysmo'))
-        if self.lac is not None:
-            config.overlay(values, { 'location_area_code': self.lac })
-        if self.rac is not None:
-            config.overlay(values, { 'routing_area_code': self.rac })
-        if self.cellid is not None:
-            config.overlay(values, { 'cell_identity': self.cellid })
-        if self.bvci is not None:
-            config.overlay(values, { 'bvci': self.bvci })
-        config.overlay(values, self.conf)
-
-        sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
-        config.overlay(values, sgsn_conf)
-
+        values = self.conf_for_bsc_osmo('osmo_bts_sysmo')
         self.dbg(conf=values)
         return values
 

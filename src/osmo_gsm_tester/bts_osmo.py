@@ -35,23 +35,6 @@ class OsmoBts(bts.Bts, metaclass=ABCMeta):
         if len(self.pcu_socket_path().encode()) > 107:
             raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
 
-    def conf_for_bsc_prepare(self):
-        values = config.get_defaults('bsc_bts')
-        config.overlay(values, config.get_defaults(self.defaults_cfg_name))
-        if self.lac is not None:
-            config.overlay(values, { 'location_area_code': self.lac })
-        if self.rac is not None:
-            config.overlay(values, { 'routing_area_code': self.rac })
-        if self.cellid is not None:
-            config.overlay(values, { 'cell_identity': self.cellid })
-        if self.bvci is not None:
-            config.overlay(values, { 'bvci': self.bvci })
-        config.overlay(values, self.conf)
-
-        sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
-        config.overlay(values, sgsn_conf)
-        return values
-
 ########################
 # PUBLIC - INTERNAL API
 ########################

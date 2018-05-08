@@ -112,6 +112,16 @@ def setcap_net_admin(binary, run_dir):
     if proc.result != 0:
         raise RuntimeError('%s finished with err code %d' % (SETCAP_NET_ADMIN_BIN, proc.result))
 
+def import_path_prepend(pathname):
+    dir = os.path.realpath(pathname)
+    if dir not in sys.path:
+        sys.path.insert(0, dir)
+
+def import_path_remove(pathname):
+    dir = os.path.realpath(pathname)
+    if dir not in sys.path:
+        sys.path.remove(dir)
+
 class listdict(dict):
     'a dict of lists { "a": [1, 2, 3],  "b": [1, 2] }'
 

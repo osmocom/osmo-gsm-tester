@@ -148,9 +148,11 @@ class SuiteRun(log.Origin):
         self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
 
     def run_tests(self, names=None):
+        suite_libdir = os.path.join(self.definition.suite_dir, 'lib')
         try:
             log.large_separator(self.trial.name(), self.name(), sublevel=2)
             self.mark_start()
+            util.import_path_prepend(suite_libdir)
             MainLoop.register_poll_func(self.poll)
             if not self.reserved_resources:
                 self.reserve_resources()
@@ -177,6 +179,7 @@ class SuiteRun(log.Origin):
             self.objects_cleanup()
             self.free_resources()
             MainLoop.unregister_poll_func(self.poll)
+            util.import_path_remove(suite_libdir)
             self.duration = time.time() - self.start_timestamp
 
             passed, skipped, failed = self.count_test_results()

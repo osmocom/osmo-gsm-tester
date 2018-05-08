@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
-add_subdir_to_import_path("lib")
 from testlib import call_test_setup_run
 
 def my_bts_setup(bts):

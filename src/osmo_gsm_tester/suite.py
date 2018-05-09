@@ -70,6 +70,7 @@ class SuiteRun(log.Origin):
     resources_pool = None
     reserved_resources = None
     objects_to_clean_up = None
+    test_import_modules_to_clean_up = []
     _resource_requirements = None
     _config = None
     _processes = None
@@ -99,6 +100,27 @@ class SuiteRun(log.Origin):
             obj = self.objects_to_clean_up.pop()
             try:
                 obj.cleanup()
+            except Exception:
+                log.log_exn()
+
+    def test_import_modules_register_for_cleanup(self, mod):
+        '''
+        Tests are required to call this API for any module loaded from its own
+        lib subdir, because they are loaded in the global namespace. Otherwise
+        later tests importing modules with the same name will re-use an already
+        loaded module.
+        '''
+        if mod not in self.test_import_modules_to_clean_up:
+            self.dbg('registering module %r for cleanup' % mod)
+            self.test_import_modules_to_clean_up.append(mod)
+
+    def test_import_modules_cleanup(self):
+        while self.test_import_modules_to_clean_up:
+            mod = self.test_import_modules_to_clean_up.pop()
+            try:
+                self.dbg('Cleaning up module %r' % mod)
+                del sys.modules[mod.__name__]
+                del mod
             except Exception:
                 log.log_exn()
 
@@ -179,6 +201,7 @@ class SuiteRun(log.Origin):
             self.objects_cleanup()
             self.free_resources()
             MainLoop.unregister_poll_func(self.poll)
+            self.test_import_modules_cleanup()
             util.import_path_remove(suite_libdir)
             self.duration = time.time() - self.start_timestamp
 

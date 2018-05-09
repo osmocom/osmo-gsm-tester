@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
+import testlib
+suite.test_import_modules_register_for_cleanup(testlib)
 from testlib import call_test_setup_run
 
 def my_bts_setup(bts):

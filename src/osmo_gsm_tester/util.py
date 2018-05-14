@@ -119,7 +119,7 @@ def import_path_prepend(pathname):
 
 def import_path_remove(pathname):
     dir = os.path.realpath(pathname)
-    if dir not in sys.path:
+    if dir in sys.path:
         sys.path.remove(dir)
 
 class listdict(dict):

@@ -14,6 +14,8 @@ def my_bts_setup(bts):
     bts.set_trx_phy_channel(0, 4, 'TCH/F_PDCH')
     bts.set_trx_phy_channel(0, 5, 'TCH/F_PDCH')
     bts.set_trx_phy_channel(0, 6, 'TCH/F_PDCH')
-    bts.set_trx_phy_channel(0, 7, 'PDCH')
+    bts.set_trx_phy_channel(0, 7, 'TCH/F_PDCH')
 
-call_test_setup_run(bts_setup_cb=my_bts_setup, gprs_enable=True)
+# Check that dynamic timeslots work fine with gprs disabled.
+
+call_test_setup_run(bts_setup_cb=my_bts_setup, gprs_enable=False)

@@ -1,0 +1,25 @@
+[ORDERED_INCLUDE]
+"/osmo-ttcn3-hacks/Common.cfg"
+"/osmo-ttcn3-hacks/bts/BTS_Tests.default"
+
+[LOGGING]
+
+[TESTPORT_PARAMETERS]
+*.BTSVTY.CTRL_HOSTNAME := "${btsvty_ctrl_hostname}"
+
+[MODULE_PARAMETERS]
+BTS_Tests.mp_rsl_ip := "172.18.9.10"
+BTS_Tests.mp_bb_trxc_ip := "127.0.0.1"
+BTS_Tests.mp_pcu_socket := "/data/unix_pcu/pcu_bts"
+BTS_Tests.mp_bb_trxc_port := -1
+L1CTL_PortType.m_l1ctl_sock_path := "/data/unix_l2/osmocom_l2"
+BTS_Tests.mp_ctrl_ip   := "${btsvty_ctrl_hostname}"
+BTS_Tests.mp_rxlev_exp := 1
+BTS_Tests.mp_tolerance_rxlev := 10;
+BTS_Tests.mp_tolerance_rxqual := 1;
+BTS_Tests.mp_trx0_arfcn := 868
+
+[MAIN_CONTROLLER]
+
+[EXECUTE]
+BTS_Tests.control

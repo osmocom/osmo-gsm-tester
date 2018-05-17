@@ -10,3 +10,4 @@ state
 *.pyc
 selftest/trial_test/
 example/resources.conf
+ttcn3/resources.conf

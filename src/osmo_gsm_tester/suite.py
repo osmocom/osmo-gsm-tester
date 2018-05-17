@@ -23,7 +23,7 @@ import time
 import pprint
 from . import config, log, template, util, resource, schema, test
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon
 
 class Timeout(Exception):
     pass
@@ -331,6 +331,12 @@ class SuiteRun(log.Origin):
         esme_obj = esme.Esme(self.msisdn())
         self.register_for_cleanup(esme_obj)
         return esme_obj
+
+    def osmocon(self, specifics=None):
+        conf = self.reserved_resources.get(resource.R_OSMOCON, specifics=specifics)
+        osmocon_obj = osmocon.Osmocon(self, conf=conf)
+        self.register_for_cleanup(osmocon_obj)
+        return osmocon_obj
 
     def msisdn(self):
         msisdn = self.resources_pool.next_msisdn(self)

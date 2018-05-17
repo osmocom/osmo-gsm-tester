@@ -44,7 +44,8 @@ R_IP_ADDRESS = 'ip_address'
 R_BTS = 'bts'
 R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
-R_ALL = (R_IP_ADDRESS, R_BTS, R_ARFCN, R_MODEM)
+R_OSMOCON = 'osmocon_phone'
+R_ALL = (R_IP_ADDRESS, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON)
 
 RESOURCES_SCHEMA = {
         'ip_address[].addr': schema.IPV4,
@@ -76,6 +77,7 @@ RESOURCES_SCHEMA = {
         'modem[].auth_algo': schema.AUTH_ALGO,
         'modem[].ciphers[]': schema.CIPHER,
         'modem[].features[]': schema.MODEM_FEATURE,
+        'osmocon_phone[].serial_device': schema.STR,
     }
 
 WANT_SCHEMA = util.dict_add(

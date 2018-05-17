@@ -11,4 +11,4 @@ build_repo libosmo-sccp --enable-sanitize
 build_repo osmo-mgw --enable-sanitize
 build_repo osmo-bsc --enable-sanitize
 
-create_bin_tgz osmo-bsc abisip-find ipaccess-config
+create_bin_tgz "osmo-bsc abisip-find ipaccess-config"

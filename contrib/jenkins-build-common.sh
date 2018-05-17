@@ -139,32 +139,42 @@ build_repo() {
   make install
 }
 
+prune_files() {
+        bindir="$1"
+        wanted_binaries="$2"
+
+        if [ ! -d "$prefix_real/$bindir" ]; then return; fi
+        # remove binaries not intended to originate from this build
+        cd "$prefix_real/$bindir"
+        for f in * ; do
+          if [ -z "$(echo "_ $wanted_binaries _" | grep " $f ")" ]; then
+            rm "$f"
+          fi
+        done
+
+        # ensure requested binaries indeed exist
+        for b in $wanted_binaries ; do
+          if [ ! -f "$b" ]; then
+            set +x; echo "ERROR: no such binary: $b in $prefix_real/$bindir/"; set -x
+            ls -1 "$prefix_real/$bindir"
+            exit 1
+          fi
+        done
+}
+
 create_bin_tgz() {
   # build the archive that is going to be copied to the tester
 
-  wanted_binaries="$@"
+  wanted_binaries_bin="$1"
+  wanted_binaries_sbin="$2"
 
-  if [ -z "$wanted_binaries" ]; then
+  if [ -z "$wanted_binaries_bin" ] && [ -z "$wanted_binaries_sbin" ]; then
     set +x; echo "ERROR: create_bin_tgz needs a list of permitted binaries"; set -x
     exit 1
   fi
 
-  # remove binaries not intended to originate from this build
-  cd "$prefix_real"/bin
-  for f in * ; do
-    if [ -z "$(echo "_ $wanted_binaries _" | grep " $f ")" ]; then
-      rm "$f"
-    fi
-  done
-
-  # ensure requested binaries indeed exist
-  for b in $wanted_binaries ; do
-    if [ ! -f "$b" ]; then
-      set +x; echo "ERROR: no such binary: $b in $prefix_real/bin/"; set -x
-      ls -1 "$prefix_real/bin"
-      exit 1
-    fi
-  done
+  prune_files bin "$wanted_binaries_bin"
+  prune_files sbin "$wanted_binaries_sbin"
 
   cd "$prefix_real"
   this="$name.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"

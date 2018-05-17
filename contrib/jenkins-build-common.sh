@@ -91,6 +91,8 @@ have_repo() {
 
   git rev-parse HEAD
 
+  echo "$(git rev-parse HEAD) $dep" >> "$prefix_real/${name}_git_hashes.txt"
+
   cd "$base"
 }
 
@@ -121,8 +123,6 @@ build_repo() {
   have_repo "$dep" "$branch"
 
   cd "$dep"
-
-  echo "$(git rev-parse HEAD) $dep" >> "$prefix_real/${name}_git_hashes.txt"
 
   # special shim: we know the openbsc.git needs to be built in the openbsc/ subdir.
   if [ "$dep" = "openbsc" ]; then

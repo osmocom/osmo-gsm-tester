@@ -34,9 +34,10 @@ poll = None
 prompt = None
 Timeout = None
 Sms = None
+process = None
 
-def setup(suite_run, _test, suite_module, event_module, sms_module):
-    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Timeout, Sms
+def setup(suite_run, _test, suite_module, event_module, sms_module, process_module):
+    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Timeout, Sms, process
     trial = suite_run.trial
     suite = suite_run
     test = _test
@@ -51,5 +52,6 @@ def setup(suite_run, _test, suite_module, event_module, sms_module):
     prompt = suite_run.prompt
     Timeout = suite_module.Timeout
     Sms = sms_module.Sms
+    process = process_module
 
 # vim: expandtab tabstop=4 shiftwidth=4

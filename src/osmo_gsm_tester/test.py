@@ -54,9 +54,9 @@ class Test(log.Origin):
             log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
-            from . import suite, sms
+            from . import suite, sms, process
             from .event_loop import MainLoop
-            testenv.setup(self.suite_run, self, suite, MainLoop, sms)
+            testenv.setup(self.suite_run, self, suite, MainLoop, sms, process)
             with self.redirect_stdout():
                 util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
                                      self.path)

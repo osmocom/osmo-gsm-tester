@@ -126,6 +126,7 @@ class Process(log.Origin):
         self.cleanup()
 
     def cleanup(self):
+        self.dbg('Cleanup')
         self.close_output_logs()
         if self.result == 0:
             self.log('Terminated: ok', rc=self.result)
@@ -149,7 +150,6 @@ class Process(log.Origin):
         self.log('stderr:\n', m, '\n')
 
     def close_output_logs(self):
-        self.dbg('Cleanup')
         for k, v in self.outputs.items():
             path, f = v
             if f:

@@ -31,6 +31,7 @@ class OsmoBsc(log.Origin):
     process = None
     bts = None
     encryption = None
+    rsl_ip = None
     mgw = None
     stp = None
 
@@ -92,6 +93,9 @@ class OsmoBsc(log.Origin):
             encryption_vty = util.encryption2osmovty(values['bsc']['net']['encryption'])
         config.overlay(values, dict(bsc=dict(net=dict(encryption=encryption_vty))))
 
+        if self.rsl_ip is not None:
+            config.overlay(values, dict(bsc=dict(net=dict(rsl_ip=self.rsl_ip))))
+
         self.dbg('BSC CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:
@@ -104,6 +108,12 @@ class OsmoBsc(log.Origin):
 
     def set_encryption(self, val):
         self.encryption = val
+
+    def set_rsl_ip(self, ip_addr):
+        '''Overwrite RSL IPaddr option sent to all BTS during OML config. Useful
+        for tests only willing to use osmo-bsc to do the OML setup but using
+        other external entities to test the RSL path, such as TTCN3 tests.'''
+        self.rsl_ip = ip_addr
 
     def bts_add(self, bts):
         self.bts.append(bts)

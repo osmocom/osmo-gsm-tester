@@ -52,6 +52,9 @@ network
   channel allocator ascending
   rach tx integer 9
   rach max transmission 7
+% if bsc.net.get('rsl_ip', False):
+  ip.access rsl-ip ${bsc.net.rsl_ip}
+% endif
   ip.access unit_id ${bts.ipa_unit_id} 0
   oml ip.access stream_id ${bts.stream_id} line 0
 % if bts.get('sgsn', False):

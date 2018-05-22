@@ -51,7 +51,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
     def launch_trx_enabled(self):
         return util.str2bool(self.conf.get('launch_trx'))
 
-    def launch_process(self, binary_name, *args):
+    def launch_process(self, keepalive, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
         run_dir = self.run_dir.new_dir(binary_name)
         if not os.path.isfile(binary):
@@ -59,7 +59,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc)
+        self.suite_run.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 
@@ -99,7 +99,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 ###################
 # PUBLIC (test API included)
 ###################
-    def start(self):
+    def start(self, keepalive=False):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         self.suite_run.poll()
@@ -110,7 +110,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
         if self.launch_trx_enabled():
             self.trx = OsmoTrx(self.suite_run, self.conf, self.trx_remote_ip(), self.remote_addr())
-            self.trx.start()
+            self.trx.start(keepalive)
             self.log('Waiting for osmo-trx to start up...')
             MainLoop.wait(self, self.trx.trx_ready)
 
@@ -120,7 +120,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
-        self.proc_bts = self.launch_process(OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
+        self.proc_bts = self.launch_process(keepalive, OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr())
         self.suite_run.poll()
@@ -163,17 +163,17 @@ class OsmoTrx(log.Origin):
             self.dbg(r)
             f.write(r)
 
-    def start(self):
+    def start(self, keepalive=False):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
         lib = self.inst.child('lib')
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-        self.proc_trx = self.launch_process(OsmoTrx.BIN_TRX, '-x',
+        self.proc_trx = self.launch_process(keepalive, OsmoTrx.BIN_TRX, '-x',
                                             '-j', self.listen_ip, '-i', self.bts_ip,
                                             '-C', os.path.abspath(self.config_file))
 
-    def launch_process(self, binary_name, *args):
+    def launch_process(self, keepalive, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
         run_dir = self.run_dir.new_dir(binary_name)
         if not os.path.isfile(binary):
@@ -181,7 +181,7 @@ class OsmoTrx(log.Origin):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc)
+        self.suite_run.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 

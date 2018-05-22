@@ -80,7 +80,7 @@ class NanoBts(bts.Bts):
 # PUBLIC (test API included)
 ###################
 
-    def start(self):
+    def start(self, keepalive=False):
         if self.conf.get('ipa_unit_id') is None:
             raise log.Error('No attribute %s provided in conf!' % attr)
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))

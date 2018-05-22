@@ -230,19 +230,27 @@ class SuiteRun(log.Origin):
                 skipped += 1
         return (passed, skipped, failed)
 
-    def remember_to_stop(self, process):
+    def remember_to_stop(self, process, respawn=False):
+        '''Ask suite to monitor and manage lifecycle of the Process object. If a
+        process managed by suite finishes before cleanup time, the current test
+        will be marked as FAIL and end immediatelly. If respwan=True, then suite
+        will respawn() the process instead.'''
         if self._processes is None:
             self._processes = []
-        self._processes.insert(0, process)
+        self._processes.insert(0, (process, respawn))
 
     def stop_processes(self):
         while self._processes:
-            self._processes.pop().terminate()
+            process, respawn = self._processes.pop()
+            process.terminate()
 
     def stop_process(self, process):
         'Remove process from monitored list and stop it'
-        self._processes.remove(process)
-        process.terminate()
+        for proc_respawn in self._processes:
+            proc, respawn = proc_respawn
+            if proc == process:
+                self._processes.remove(proc_respawn)
+                proc.terminate()
 
     def free_resources(self):
         if self.reserved_resources is None:
@@ -351,12 +359,15 @@ class SuiteRun(log.Origin):
 
     def poll(self):
         if self._processes:
-            for process in self._processes:
+            for process, respawn in self._processes:
                 if process.terminated():
-                    process.log_stdout_tail()
-                    process.log_stderr_tail()
-                    log.ctx(process)
-                    raise log.Error('Process ended prematurely: %s' % process.name())
+                    if respawn == True:
+                        process.respawn()
+                    else:
+                        process.log_stdout_tail()
+                        process.log_stderr_tail()
+                        log.ctx(process)
+                        raise log.Error('Process ended prematurely: %s' % process.name())
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

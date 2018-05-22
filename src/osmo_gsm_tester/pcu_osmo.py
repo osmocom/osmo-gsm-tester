@@ -34,7 +34,7 @@ class OsmoPcu(pcu.Pcu):
         self.conf = conf
         self.env = {}
 
-    def start(self):
+    def start(self, keepalive=False):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
@@ -44,12 +44,12 @@ class OsmoPcu(pcu.Pcu):
             raise RuntimeError('No lib/ in %r' % self.inst)
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 
-        self.launch_process(OsmoPcu.BIN_PCU, '-r', '1',
+        self.launch_process(keepalive, OsmoPcu.BIN_PCU, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bts.bsc.addr())
         self.suite_run.poll()
 
-    def launch_process(self, binary_name, *args):
+    def launch_process(self, keepalive, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
         run_dir = self.run_dir.new_dir(binary_name)
         if not os.path.isfile(binary):
@@ -57,7 +57,7 @@ class OsmoPcu(pcu.Pcu):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc)
+        self.suite_run.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 

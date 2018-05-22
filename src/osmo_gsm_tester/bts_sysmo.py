@@ -54,9 +54,9 @@ class SysmoBts(bts_osmo.OsmoBts):
             log.ctx(proc)
             raise log.Error('Exited in error')
 
-    def launch_remote(self, name, popen_args, remote_cwd=None):
+    def launch_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
         proc = self._process_remote(name, popen_args, remote_cwd)
-        self.suite_run.remember_to_stop(proc)
+        self.suite_run.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 
@@ -110,7 +110,7 @@ class SysmoBts(bts_osmo.OsmoBts):
 ###################
 # PUBLIC (test API included)
 ###################
-    def start(self):
+    def start(self, keepalive=False):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         log.log('Starting sysmoBTS to connect to', self.bsc)
@@ -151,6 +151,6 @@ class SysmoBts(bts_osmo.OsmoBts):
         if self._direct_pcu_enabled():
             args += ('-M',)
 
-        self.proc_bts = self.launch_remote('osmo-bts-sysmo', args, remote_cwd=remote_run_dir)
+        self.proc_bts = self.launch_remote('osmo-bts-sysmo', args, remote_cwd=remote_run_dir, keepalive=keepalive)
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -139,8 +139,9 @@ class Bts(log.Origin, metaclass=ABCMeta):
 # PUBLIC (test API included)
 ###################
     @abstractmethod
-    def start(self):
-        'Starts BTS proccess and sets self.proc_bts with an object of Process interface'
+    def start(self, keepalive=False):
+        '''Starts BTS. If keepalive is set, it will expect internal issues and
+        respawn related processes when detected'''
         pass
 
     @abstractmethod

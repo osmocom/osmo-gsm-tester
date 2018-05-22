@@ -43,7 +43,7 @@ class OsmoPcuSysmo(log.Origin):
         self.remote_env = {}
         self.remote_user = 'root'
 
-    def start(self):
+    def start(self, keepalive=False):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
 
@@ -75,7 +75,7 @@ class OsmoPcuSysmo(log.Origin):
             ('LD_LIBRARY_PATH=%s' % remote_lib,
              remote_binary, '-c', remote_config_file, '-r', '1',
              '-i', self.sysmobts.bsc.addr()),
-            remote_cwd=remote_run_dir)
+            remote_cwd=remote_run_dir, keepalive=keepalive)
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
@@ -90,9 +90,9 @@ class OsmoPcuSysmo(log.Origin):
             log.ctx(proc)
             raise log.Error('Exited in error')
 
-    def launch_remote(self, name, popen_args, remote_cwd=None):
+    def launch_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
         proc = self._process_remote(name, popen_args, remote_cwd)
-        self.suite_run.remember_to_stop(proc)
+        self.suite_run.remember_to_stop(proc, keepalive)
         proc.launch()
 
     def run_local(self, name, popen_args):

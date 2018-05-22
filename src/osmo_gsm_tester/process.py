@@ -79,6 +79,13 @@ class Process(log.Origin):
         self.set_name(self.name_str, pid=self.process_obj.pid)
         self.log('Launched')
 
+    def respawn(self):
+        self.dbg('respawn')
+        assert not self.is_running()
+        self.result = None
+        self.killed = None
+        self.launch()
+
     def _poll_termination(self, time_to_wait_for_term=5):
         wait_step = 0.001
         waited_time = 0

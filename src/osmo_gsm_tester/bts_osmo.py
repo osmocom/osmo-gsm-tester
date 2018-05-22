@@ -57,7 +57,7 @@ class OsmoBts(bts.Bts, metaclass=ABCMeta):
 # PUBLIC (test API included)
 ###################
     @abstractmethod
-    def start(self):
+    def start(self, keepalive=False):
         # coming from bts.Bts, we forward the implementation to children.
         pass
 
@@ -108,6 +108,6 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 # PUBLIC (test API included)
 ###################
     @abstractmethod
-    def start(self):
+    def start(self, keepalive=False):
         # coming from bts.Bts, we forward the implementation to children.
         pass

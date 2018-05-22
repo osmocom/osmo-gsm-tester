@@ -42,7 +42,7 @@ class Pcu(log.Origin, metaclass=ABCMeta):
 ###################
 
     @abstractmethod
-    def start(self):
+    def start(self, keepalive=False):
         """Start the PCU. Must be implemented by subclass."""
         pass
 
@@ -54,7 +54,7 @@ class PcuDummy(Pcu):
     def __init__(self, suite_run, bts, conf):
         super().__init__(suite_run, bts, conf, 'PcuDummy')
 
-    def start(self):
+    def start(self, keepalive=False):
         pass
 
 # vim: expandtab tabstop=4 shiftwidth=4

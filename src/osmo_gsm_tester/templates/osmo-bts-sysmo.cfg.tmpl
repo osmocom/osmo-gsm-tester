@@ -12,6 +12,11 @@ log stderr
   ! Level required by ready_for_pcu(): pcu info
   logging level pcu info
 !
+line vty
+ bind ${osmo_bts_sysmo.addr}
+ctrl
+ bind ${osmo_bts_sysmo.addr}
+!
 phy 0
  instance 0
 bts 0

@@ -12,7 +12,11 @@ log stderr
   ! Level required by ready_for_pcu(): pcu info
   logging level pcu info
 !
-
+line vty
+ bind ${osmo_bts_octphy.addr}
+ctrl
+ bind ${osmo_bts_octphy.addr}
+!
 %for phy in osmo_bts_octphy.phy_list:
 phy ${loop.index}
  octphy hw-addr ${phy.hw_addr}

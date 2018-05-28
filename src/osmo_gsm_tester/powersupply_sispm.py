@@ -86,6 +86,7 @@ class PowerSupplySispm(PowerSupply):
             raise log.Error('No "port" attribute provided in power_supply conf!')
         if not int(myport):
             raise log.Error('Wrong non numeric "port" attribute provided in power_supply conf!')
+        self.set_name('sispm-'+mydevid+'-'+myport)
         self.port = int(myport)
         device = self._get_device()
         if device is None:

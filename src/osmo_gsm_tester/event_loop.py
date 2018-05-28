@@ -109,7 +109,7 @@ class EventLoop:
     def wait(self, log_obj, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
         if not self.wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout, timestep):
             log.ctx(log_obj)
-            raise log.Error('Wait timeout')
+            raise log.Error('Wait timeout', condition=condition, timeout=timeout, timestep=timestep)
 
     def sleep(self, log_obj, seconds):
         assert seconds > 0.

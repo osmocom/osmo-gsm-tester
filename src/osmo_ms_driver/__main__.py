@@ -60,8 +60,6 @@ def main():
     # Event server to handle MS->test events
     ev_server = EventServer("ev_server", event_server_path)
     ev_server.listen(loop)
-    #while True:
-    #   loop.select()
 
     # Just a single test for now.
     test = MassUpdateLocationTest("lu_test", num_ms, cdf, ev_server, tmp_dir)

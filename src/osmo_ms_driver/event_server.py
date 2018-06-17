@@ -27,7 +27,7 @@ class EventServer(log.Origin):
     def read_cb(self, obj, mask):
         # addresss doesn't give us the remote but currently we don't
         # need it.
-        (data, address) = self._server.recvfrom(4096)
+        data, ancdata, flags, addr = self._server.recvmsg(4096, 4096)
         now = time.clock_gettime(time.CLOCK_MONOTONIC)
         for handler in self._handlers:
-            handler(data, now)
+            handler(data, addr, now)

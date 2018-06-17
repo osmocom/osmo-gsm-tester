@@ -167,7 +167,7 @@ class MassUpdateLocationTest(log.Origin):
         for launcher in self._started:
             launcher.kill()
 
-    def handle_msg(self, _data, time):
+    def handle_msg(self, _data, addr, time):
         import json
         data = json.loads(_data.decode())
 

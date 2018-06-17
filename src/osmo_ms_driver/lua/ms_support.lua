@@ -11,6 +11,7 @@ local mod = {}
 function mod.register(ms, path)
 	g_ms = ms
 
+	osmo.unix_passcred(g_c:getfd())
 	g_c:connect(path)
 
 	local event = {}

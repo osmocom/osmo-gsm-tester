@@ -1,5 +1,5 @@
-# osmo_ms_driver: Starter for processes
-# Help to start processes over time.
+# osmo_ms_driver: Locationg Update Test
+# Create MS's and wait for the Location Update to succeed.
 #
 # Copyright (C) 2018 by Holger Hans Peter Freyther
 #
@@ -19,45 +19,21 @@
 
 from osmo_gsm_tester import log
 from .starter import OsmoVirtPhy, OsmoMobile
+from .test_support import imsi_ki_gen, Results
 
 from datetime import timedelta
 
 import time
 
-def imsi_ki_gen():
-    """
-    Generate IMSIs and KIs to be used by test.
-    """
-    n = 1010000000000
-    while True:
-        yield ("%.15d" % n, "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00")
-        n += 1
-
-class Results(log.Origin):
+class LUResult(Results):
 
     def __init__(self, name):
-        super().__init__(log.C_RUN, name)
-        self._time_of_registration = None
-        self._time_of_launch = None
+        super().__init__(name)
         self._time_of_lu = None
-
-    def set_start_time(self, time):
-        assert self._time_of_registration is None
-        self._time_of_registration = time
-
-    def set_launch_time(self, time):
-        assert self._time_of_launch is None
-        self._time_of_launch = time
 
     def set_lu_time(self, time):
         assert self._time_of_lu is None
         self._time_of_lu = time
-
-    def start_time(self):
-        return self._time_of_registration or 0
-
-    def launch_time(self):
-        return self._time_of_launch or 0
 
     def lu_time(self):
         return self._time_of_lu or 0
@@ -98,7 +74,7 @@ class MassUpdateLocationTest(log.Origin):
                                 self.TEMPLATE_CFG, imsi_gen,
                                 phy.phy_filename(),
                                 event_server.server_path())
-            self._results[ms_name] = Results(ms_name)
+            self._results[ms_name] = LUResult(ms_name)
             self._unstarted.append(launcher)
         self._event_server = event_server
         self._event_server.register(self.handle_msg)

@@ -188,10 +188,18 @@ class MassUpdateLocationTest(log.Origin):
     def all_completed(self):
         return self._outstanding == 0
 
+    def results_min_max(self, results):
+        min_value = max_value = None
+        for result in results:
+            if min_value is None or result.lu_delay() < min_value:
+                min_value = result.lu_delay()
+            if max_value is None or result.lu_delay() > max_value:
+                max_value = result.lu_delay()
+        return min_value, max_value
+
     def print_stats(self):
         all_completed = self.all_completed()
-        min_value = min(self._results.values(), key=lambda x: x.lu_delay())
-        max_value = max(self._results.values(), key=lambda x: x.lu_delay())
+        min_value, max_value = self.results_min_max(filter(lambda x: x.has_lu_time(), self._results.values()))
 
         self.log("Tests done", all_completed=all_completed,
-                    min=min_value.lu_delay(), max=max_value.lu_delay())
+                    min=min_value, max=max_value)

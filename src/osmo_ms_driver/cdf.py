@@ -103,3 +103,10 @@ def ease_in_out_duration(duration, step_size=timedelta(milliseconds=20)):
     scale = 1.0/duration.total_seconds()
     return DistributionFunctionHandler(step_size, duration,
                                         lambda x: _in_out(x*scale))
+
+
+cdfs = {
+    'immediate': lambda x,y: immediate(y),
+    'linear': linear_with_duration,
+    'ease_in_out': ease_in_out_duration,
+}

@@ -35,6 +35,9 @@ class LUResult(Results):
         assert self._time_of_lu is None
         self._time_of_lu = time
 
+    def has_lu_time(self):
+        return self._time_of_lu is not None
+
     def lu_time(self):
         return self._time_of_lu or 0
 
@@ -64,6 +67,7 @@ class MassUpdateLocationTest(log.Origin):
         self._results = {}
         imsi_gen = imsi_ki_gen()
 
+        self._outstanding = number_of_ms
         for i in range(0, number_of_ms):
             ms_name = "%.5d" % i
 
@@ -155,6 +159,8 @@ class MassUpdateLocationTest(log.Origin):
         elif data['type'] == 'event':
             if data['data']['lu_done'] == 1:
                 ms = self._results[data['ms']]
+                if not ms.has_lu_time():
+                    self._outstanding = self._outstanding - 1
                 ms.set_lu_time(time)
                 self.log("MS performed LU ", ms=ms, at=time, lu_delay=ms.lu_delay())
         else:
@@ -165,7 +171,7 @@ class MassUpdateLocationTest(log.Origin):
     def wait_for_result(self, loop):
         to_complete_time = self._start_time + self.TEST_TIME.total_seconds()
 
-        while True:
+        while not self.all_completed():
             now_time = time.clock_gettime(time.CLOCK_MONOTONIC)
             sleep_time = to_complete_time - now_time
             if sleep_time < 0:
@@ -173,9 +179,11 @@ class MassUpdateLocationTest(log.Origin):
             loop.schedule_timeout(sleep_time)
             loop.select()
 
+    def all_completed(self):
+        return self._outstanding == 0
+
     def print_stats(self):
-        from functools import reduce
-        all_completed = reduce(lambda b, ms: b and ms.lu_time() is not None, self._results.values(), True)
+        all_completed = self.all_completed()
         min_value = min(self._results.values(), key=lambda x: x.lu_delay())
         max_value = max(self._results.values(), key=lambda x: x.lu_delay())
 

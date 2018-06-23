@@ -19,14 +19,13 @@
 from .event_server import EventServer
 from .simple_loop import SimpleLoop
 from .location_update_test import MassUpdateLocationTest
-from .cdf import ease_in_out_duration, linear_with_duration, cdfs
+from .cdf import cdfs
 from osmo_gsm_tester import log
 
 # System modules
 import argparse
 import atexit
 import datetime
-import subprocess
 import signal
 import tempfile
 import os.path

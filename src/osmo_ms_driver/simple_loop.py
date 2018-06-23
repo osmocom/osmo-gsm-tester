@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from osmo_gsm_tester import log
-from functools import partial
 
 import os
 import selectors

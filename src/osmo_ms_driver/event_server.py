@@ -1,6 +1,5 @@
 
 from osmo_gsm_tester import log
-from functools import partial
 
 import time
 

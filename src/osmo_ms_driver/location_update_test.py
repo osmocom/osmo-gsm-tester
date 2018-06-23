@@ -98,7 +98,7 @@ class MassUpdateLocationTest(log.Origin):
         for phy in self._phys:
             phy.verify_ready()
 
-    def launch(self, loop):
+    def prepare(self, loop):
         self.log("Starting testcase")
 
         self.pre_launch(loop)
@@ -108,40 +108,57 @@ class MassUpdateLocationTest(log.Origin):
                             self._cdf.duration().total_seconds() + \
                             timedelta(seconds=120).total_seconds()
 
-        current_time = self._start_time
-        step_size = self._cdf.step_size().total_seconds()
         self._started = []
-        too_slow = 0
+        self._too_slow = 0
+
+    def step_once(self, loop, current_time):
+        if len(self._unstarted) <= 0:
+            return current_time, None
+
+        step_size = self._cdf.step_size().total_seconds()
 
         # Start
         self._cdf.step_once()
 
-        while len(self._unstarted) > 0:
-            # Check for timeout
-            # start pending MS
-            while len(self._started) < self._cdf.current_scaled_value() and len(self._unstarted) > 0:
-                ms = self._unstarted.pop(0)
-                ms.start(loop)
-                launch_time = time.clock_gettime(time.CLOCK_MONOTONIC)
-                self._results[ms.name_number()].set_launch_time(launch_time)
-                self._started.append(ms)
+        # Check for timeout
+        # start pending MS
+        while len(self._started) < self._cdf.current_scaled_value() and len(self._unstarted) > 0:
+            ms = self._unstarted.pop(0)
+            ms.start(loop)
+            launch_time = time.clock_gettime(time.CLOCK_MONOTONIC)
+            self._results[ms.name_number()].set_launch_time(launch_time)
+            self._started.append(ms)
 
-            # Progress and sleep
-            self._cdf.step_once()
+        now_time = time.clock_gettime(time.CLOCK_MONOTONIC)
+        sleep_time = (current_time + step_size) - now_time
+        if sleep_time <= 0:
+            self.log("Starting too slowly. Moving on",
+		    target=(current_time + step_size), now=now_time, sleep=sleep_time)
+            self._too_slow += 1
+            sleep_time = 0
 
+        if len(self._unstarted) == 0:
+            end_time = time.clock_gettime(time.CLOCK_MONOTONIC)
+            self.log("All started...", too_slow=self._too_slow, duration=end_time - self._start_time)
+            return current_time, None
+
+        return current_time + step_size, sleep_time
+
+    def run_test(self, loop):
+        self.prepare(loop)
+
+        to_complete_time = self._start_time + self.TEST_TIME.total_seconds()
+        tick_time = self._start_time
+
+        while not self.all_completed():
+            tick_time, sleep_time = self.step_once(loop, tick_time)
             now_time = time.clock_gettime(time.CLOCK_MONOTONIC)
-            sleep_time = (current_time + step_size) - now_time
-            if sleep_time <= 0:
-                self.log("Starting too slowly. Moving on",
-			target=(current_time + step_size), now=now_time, sleep=sleep_time)
-                too_slow += 1
-            else:
-                loop.schedule_timeout(sleep_time)
-                loop.select()
-            current_time += step_size
-
-        end_time = time.clock_gettime(time.CLOCK_MONOTONIC)
-        self.log("All started...", too_slow=too_slow, duration=end_time - self._start_time)
+            if sleep_time is None:
+                sleep_time = to_complete_time - now_time
+            if sleep_time < 0:
+                break
+            loop.schedule_timeout(sleep_time)
+            loop.select()
 
     def stop_all(self):
         for launcher in self._started:
@@ -167,17 +184,6 @@ class MassUpdateLocationTest(log.Origin):
             print(time, data)
             raise Exception("Unknown event type..:" + _data.decode())
 
-
-    def wait_for_result(self, loop):
-        to_complete_time = self._start_time + self.TEST_TIME.total_seconds()
-
-        while not self.all_completed():
-            now_time = time.clock_gettime(time.CLOCK_MONOTONIC)
-            sleep_time = to_complete_time - now_time
-            if sleep_time < 0:
-                break
-            loop.schedule_timeout(sleep_time)
-            loop.select()
 
     def all_completed(self):
         return self._outstanding == 0

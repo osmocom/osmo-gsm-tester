@@ -82,10 +82,7 @@ def main():
     atexit.register(test.stop_all)
 
     # Run until everything has been launched
-    test.launch(loop)
-
-    # Wait for it to complete
-    test.wait_for_result(loop)
+    test.run_test(loop)
 
     # Print stats
     test.print_stats()

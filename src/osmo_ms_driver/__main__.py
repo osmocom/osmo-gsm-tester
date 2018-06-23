@@ -24,6 +24,7 @@ from osmo_gsm_tester import log
 
 # System modules
 import argparse
+import atexit
 import datetime
 import subprocess
 import signal
@@ -78,6 +79,7 @@ def main():
 
     # Just a single test for now.
     test = MassUpdateLocationTest("lu_test", args.num_ms, cdf, ev_server, tmp_dir)
+    atexit.register(test.stop_all)
 
     # Run until everything has been launched
     test.launch(loop)

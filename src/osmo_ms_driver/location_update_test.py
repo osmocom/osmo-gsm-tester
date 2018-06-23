@@ -55,7 +55,6 @@ class MassUpdateLocationTest(log.Origin):
 
     TEMPLATE_LUA = "osmo-mobile-lu.lua"
     TEMPLATE_CFG = "osmo-mobile.cfg"
-    TEST_TIME = timedelta(seconds=120)
 
     def __init__(self, name, number_of_ms, cdf_function, event_server, tmp_dir):
         super().__init__(log.C_RUN, name)
@@ -144,10 +143,10 @@ class MassUpdateLocationTest(log.Origin):
 
         return current_time + step_size, sleep_time
 
-    def run_test(self, loop):
+    def run_test(self, loop, test_duration):
         self.prepare(loop)
 
-        to_complete_time = self._start_time + self.TEST_TIME.total_seconds()
+        to_complete_time = self._start_time + test_duration.total_seconds()
         tick_time = self._start_time
 
         while not self.all_completed():

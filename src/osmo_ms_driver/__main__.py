@@ -23,6 +23,8 @@ from .cdf import cdfs
 from osmo_gsm_tester import log
 
 # System modules
+from datetime import timedelta
+
 import argparse
 import atexit
 import datetime
@@ -39,6 +41,9 @@ def parser():
     parser.add_argument('-i', '--launch-interval', dest='launch_interval',
             default=100, type=int,
             help="Time between launching in milliseconds")
+    parser.add_argument('-t', '--test-duration', dest="test_duration",
+            default=120, type=int,
+            help="Time of the test duration in seconds")
     parser.add_argument('-d', '--distribution', dest="cdf_name",
             choices=cdfs.keys(), default="ease_in_out",
             help="Curve to use for starting within launch duration")
@@ -81,7 +86,7 @@ def main():
     atexit.register(test.stop_all)
 
     # Run until everything has been launched
-    test.run_test(loop)
+    test.run_test(loop, timedelta(seconds=args.test_duration))
 
     # Print stats
     test.print_stats()

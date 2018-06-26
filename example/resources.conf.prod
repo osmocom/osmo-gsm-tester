@@ -47,7 +47,7 @@ bts:
 - label: NanoBTS-ONW-1900
   type: nanobts
   ipa_unit_id: 9
-  addr: 10.42.42.53
+  addr: 10.42.42.120
   band: GSM-1900
   power_supply:
     type: 'sispm'
@@ -57,7 +57,7 @@ bts:
 - label: NanoBTS-ONW-900
   type: nanobts
   ipa_unit_id: 10
-  addr: 10.42.42.54
+  addr: 10.42.42.121
   band: GSM-900
   power_supply:
     type: 'sispm'

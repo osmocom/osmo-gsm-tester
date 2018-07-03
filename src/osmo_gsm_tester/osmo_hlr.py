@@ -54,7 +54,7 @@ class OsmoHlr(log.Origin):
 
         # bootstrap an empty hlr.db
         self.db_file = self.run_dir.new_file('hlr.db')
-        sql_input = inst.child('share/doc/osmo-hlr/hlr.sql')
+        sql_input = inst.child('share/doc/osmo-hlr/sql/hlr.sql')
         if not os.path.isfile(sql_input):
             raise log.Error('hlr.sql missing:', sql_input)
         self.run_local('create_hlr_db', ('/bin/sh', '-c', 'sqlite3 %r < %r' % (self.db_file, sql_input)))

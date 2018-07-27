@@ -30,12 +30,13 @@ bts:
 - label: NanoBTS-ONW-1900
   type: nanobts
   ipa_unit_id: 9
-  addr: 10.42.42.120
   band: GSM-1900
-  power_supply:
-    type: 'sispm'
-    device: '01:01:55:2e:b6'
-    port: '1'
+  trx_list:
+    - addr: 10.42.42.120
+      power_supply:
+        type: 'sispm'
+        device: '01:01:55:2e:b6'
+        port: '1'
 
 arfcn:
   - arfcn: 512

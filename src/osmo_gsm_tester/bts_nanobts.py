@@ -28,28 +28,37 @@ from .event_loop import MainLoop
 
 class NanoBts(bts.Bts):
 
-    pwsup = None
+    pwsup_list = []
     _pcu = None
 ##############
 # PROTECTED
 ##############
     def __init__(self, suite_run, conf):
-        if conf.get('addr') is None:
-            raise log.Error('No attribute addr provided in conf!')
-        super().__init__(suite_run, conf, 'nanobts_%s' % conf.get('addr'), 'nanobts')
+        super().__init__(suite_run, conf, 'nanobts_%s' % conf.get('label', 'nolabel'), 'nanobts')
 
     def _configure(self):
         if self.bsc is None:
             raise log.Error('BTS needs to be added to a BSC or NITB before it can be configured')
 
-        pwsup_opt = self.conf.get('power_supply', {})
-        if not pwsup_opt:
-            raise log.Error('No power_supply attribute provided in conf!')
-        pwsup_type = pwsup_opt.get('type')
-        if not pwsup_type:
-            raise log.Error('No type attribute provided in power_supply conf!')
+        for trx_i in range(self.num_trx()):
+            pwsup_opt = self.conf.get('trx_list')[trx_i].get('power_supply', {})
+            if not pwsup_opt:
+                raise log.Error('No power_supply attribute provided in conf for TRX %d!' % trx_i)
+            pwsup_type = pwsup_opt.get('type')
+            if not pwsup_type:
+                raise log.Error('No type attribute provided in power_supply conf for TRX %d!' % trx_i)
+            self.pwsup_list.append(powersupply.get_instance_by_type(pwsup_type, pwsup_opt))
 
-        self.pwsup = powersupply.get_instance_by_type(pwsup_type, pwsup_opt)
+
+    def get_pcap_filter_all_trx_ip(self):
+        ret = "("
+        for trx_i in range(self.num_trx()):
+            if trx_i != 0:
+                ret = ret + " or "
+            bts_trx_ip = self.conf.get('trx_list')[trx_i].get('addr')
+            ret = ret + "host " + bts_trx_ip
+        ret = ret + ")"
+        return ret
 
 ########################
 # PUBLIC - INTERNAL API
@@ -61,9 +70,11 @@ class NanoBts(bts.Bts):
         band = values.get('band')
         trx_list = values.get('trx_list')
         if band == 'GSM-1900':
-            config.overlay(trx_list[0], { 'arfcn' : '531' })
+            for trx_i in range(len(trx_list)):
+                config.overlay(trx_list[trx_i], { 'arfcn' : str(531 + trx_i * 2) })
         elif band == 'GSM-900':
-            config.overlay(trx_list[0], { 'arfcn' : '50' })
+            for trx_i in range(len(trx_list)):
+                config.overlay(trx_list[trx_i], { 'arfcn' : str(50 + trx_i * 2) })
 
         config.overlay(values, { 'osmobsc_bts_type': 'nanobts' })
 
@@ -72,9 +83,10 @@ class NanoBts(bts.Bts):
 
 
     def cleanup(self):
-        if self.pwsup:
-            self.dbg('Powering off NanoBTS')
-            self.pwsup.power_set(False)
+        for pwsup in self.pwsup_list:
+            self.dbg('Powering off NanoBTS TRX')
+            pwsup.power_set(False)
+        self.pwsup_list = []
 
 ###################
 # PUBLIC (test API included)
@@ -87,44 +99,50 @@ class NanoBts(bts.Bts):
         self._configure()
 
         unitid = int(self.conf.get('ipa_unit_id'))
-        bts_ip = self.remote_addr()
-        # This fine for now, however concurrent tests using Nanobts may run into "address already in use" since dst is broadcast.
-        # Once concurrency is needed, a new config attr should be added to have an extra static IP assigned on the main-unit to each Nanobts resource.
-        local_bind_ip =util.dst_ip_get_local_bind(bts_ip)
 
-        # Make sure nanoBTS is powered and in a clean state:
-        self.pwsup.power_cycle(1.0)
+        # Make sure all nanoBTS TRX are powered and in a clean state:
+        for pwsup in self.pwsup_list:
+            self.dbg('Powering cycling NanoBTS TRX')
+            pwsup.power_cycle(1.0)
 
         pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
-                                   'host %s and port not 22' % self.remote_addr())
+                                   '%s and port not 22' % self.get_pcap_filter_all_trx_ip())
 
-        self.log('Finding nanobts %s, binding on %s...' % (bts_ip, local_bind_ip))
-        ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'preconf')
-        ipfind.start()
-        ipfind.wait_bts_ready(bts_ip)
-        running_unitid = ipfind.get_unitid_by_ip(bts_ip)
-        self.log('Found nanobts %s with unit_id %d' % (bts_ip, running_unitid))
-        ipfind.stop()
 
-        ipconfig = IpAccessConfig(self.suite_run, self.run_dir, bts_ip)
-        if running_unitid != unitid:
-            if not ipconfig.set_unit_id(unitid, False):
-                raise log.Error('Failed configuring unit id %d' % unitid)
-        # Apply OML IP and restart nanoBTS as it is required to apply the changes.
-        if not ipconfig.set_oml_ip(self.bsc.addr(), True):
-            raise log.Error('Failed configuring OML IP %s' % bts_ip)
+        # TODO: If setting N TRX, we should set up them in parallel instead of waiting for each one.
+        for trx_i in range(self.num_trx()):
+            bts_trx_ip = self.conf.get('trx_list')[trx_i].get('addr')
+            # This fine for now, however concurrent tests using Nanobts may run into "address already in use" since dst is broadcast.
+            # Once concurrency is needed, a new config attr should be added to have an extra static IP assigned on the main-unit to each Nanobts resource.
+            local_bind_ip = util.dst_ip_get_local_bind(bts_trx_ip)
 
-        # Let some time for BTS to restart. It takes much more than 20 secs, and
-        # this way we make sure we don't catch responses in abisip-find prior to
-        # BTS restarting.
-        MainLoop.sleep(self, 20)
+            self.log('Finding nanobts %s, binding on %s...' % (bts_trx_ip, local_bind_ip))
+            ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'preconf')
+            ipfind.start()
+            ipfind.wait_bts_ready(bts_trx_ip)
+            running_unitid, running_trx = ipfind.get_unitid_by_ip(bts_trx_ip)
+            self.log('Found nanobts %s with unit_id %d trx %d' % (bts_trx_ip, running_unitid, running_trx))
+            ipfind.stop()
 
-        self.log('Starting to connect to', self.bsc)
-        ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
-        ipfind.start()
-        ipfind.wait_bts_ready(bts_ip)
-        self.log('nanoBTS configured and running')
-        ipfind.stop()
+            ipconfig = IpAccessConfig(self.suite_run, self.run_dir, bts_trx_ip)
+            if running_unitid != unitid or running_trx != trx_i:
+                if not ipconfig.set_unit_id(unitid, trx_i, False):
+                    raise log.Error('Failed configuring unit id %d trx %d' % (unitid, trx_i))
+            # Apply OML IP and restart nanoBTS as it is required to apply the changes.
+            if not ipconfig.set_oml_ip(self.bsc.addr(), True):
+                raise log.Error('Failed configuring OML IP %s' % bts_trx_ip)
+
+            # Let some time for BTS to restart. It takes much more than 20 secs, and
+            # this way we make sure we don't catch responses in abisip-find prior to
+            # BTS restarting.
+            MainLoop.sleep(self, 20)
+
+            self.log('Starting to connect id %d trx %d to' % (unitid, trx_i), self.bsc)
+            ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
+            ipfind.start()
+            ipfind.wait_bts_ready(bts_trx_ip)
+            self.log('nanoBTS id %d trx %d configured and running' % (unitid, trx_i))
+            ipfind.stop()
 
         MainLoop.wait(self, self.bsc.bts_is_connected, self, timeout=600)
         self.log('nanoBTS connected to BSC')
@@ -161,7 +179,7 @@ class AbisIpFind(log.Origin):
     proc = None
 
     BIN_ABISIP_FIND = 'abisip-find'
-    BTS_UNIT_ID_RE = re.compile("Unit_ID='(?P<unit_id>\d+)/\d+/\d+'")
+    BTS_UNIT_ID_RE = re.compile("Unit_ID='(?P<unit_id>\d+)/\d+/(?P<trx_id>\d+)'")
 
     def __init__(self, suite_run, parent_run_dir, bind_ip, name_suffix):
         super().__init__(log.C_RUN, AbisIpFind.BIN_ABISIP_FIND + '-' + name_suffix)
@@ -207,7 +225,8 @@ class AbisIpFind(log.Origin):
             res = AbisIpFind.BTS_UNIT_ID_RE.search(line)
             if res:
                 unit_id = int(res.group('unit_id'))
-                return unit_id
+                trx_id = int(res.group('trx_id'))
+                return (unit_id, trx_id)
             raise log.Error('abisip-find unit_id field for nanobts %s not found in %s' %(ipaddr, line))
 
     def bts_ready(self, ipaddr):
@@ -261,13 +280,14 @@ class IpAccessConfig(log.Origin):
             raise e
         return self.proc.result
 
-    def set_unit_id(self, unitid, restart=False):
+    def set_unit_id(self, unitid, trx_num, restart=False):
+        uid_str = '%d/0/%d' % (unitid, trx_num)
         if restart:
-            retcode = self.run('unitid', '--restart', '--unit-id', '%d/0/0' % unitid, self.bts_ip)
+            retcode = self.run('unitid', '--restart', '--unit-id', '%s' % uid_str, self.bts_ip)
         else:
-            retcode = self.run('unitid', '--unit-id', '%d/0/0' % unitid, self.bts_ip)
+            retcode = self.run('unitid', '--unit-id', '%s' % uid_str, self.bts_ip)
         if retcode != 0:
-            log.err('ipaccess-config --unit-id %d/0/0 returned error code %d' % (unitid, retcode))
+            log.err('ipaccess-config --unit-id %s returned error code %d' % (uid_str, retcode))
         return retcode == 0
 
     def set_oml_ip(self, omlip, restart=False):

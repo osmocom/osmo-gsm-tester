@@ -20,6 +20,7 @@
 import os
 import pprint
 import tempfile
+import copy
 from abc import ABCMeta, abstractmethod
 from . import log, config, util, template, process, schema, pcu_osmo
 
@@ -112,7 +113,12 @@ class Bts(log.Origin, metaclass=ABCMeta):
             config.overlay(values, { 'cell_identity': self.cellid })
         if self.bvci is not None:
             config.overlay(values, { 'bvci': self.bvci })
-        config.overlay(values, self.conf)
+
+        conf = copy.deepcopy(self.conf)
+        trx_list = conf.get('trx_list')
+        if trx_list and len(trx_list) != self.num_trx():
+            conf['trx_list'] = Bts._trx_list_recreate(trx_list, self.num_trx())
+        config.overlay(values, conf)
 
         sgsn_conf = {} if self.sgsn is None else self.sgsn.conf_for_client()
         config.overlay(values, sgsn_conf)

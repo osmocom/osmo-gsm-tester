@@ -28,13 +28,13 @@ from .event_loop import MainLoop
 
 class NanoBts(bts.Bts):
 
-    pwsup_list = []
-    _pcu = None
 ##############
 # PROTECTED
 ##############
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf, 'nanobts_%s' % conf.get('label', 'nolabel'), 'nanobts')
+        self.pwsup_list = []
+        self._pcu = None
 
     def _configure(self):
         if self.bsc is None:

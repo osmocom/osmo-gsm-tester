@@ -27,10 +27,6 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 ##############
 # PROTECTED
 ##############
-    run_dir = None
-    inst = None
-    env = None
-    trx = None
 
     BIN_BTS_TRX = 'osmo-bts-trx'
     BIN_PCU = 'osmo-pcu'
@@ -39,6 +35,9 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf, OsmoBtsTrx.BIN_BTS_TRX, 'osmo_bts_trx')
+        self.run_dir = None
+        self.inst = None
+        self.trx = None
         self.env = {}
 
     def trx_remote_ip(self):

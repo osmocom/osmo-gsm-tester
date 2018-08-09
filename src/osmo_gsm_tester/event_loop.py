@@ -23,10 +23,12 @@ from gi.repository import GLib, GObject
 from . import log
 
 class DeferredHandling:
-    defer_queue = []
+
+    def __init__(self):
+        self.defer_queue = []
 
     def handle_queue(self):
-        while DeferredHandling.defer_queue:
+        while self.defer_queue:
             handler, args, kwargs = self.defer_queue.pop(0)
             handler(*args, **kwargs)
 
@@ -34,10 +36,10 @@ class DeferredHandling:
         self.defer_queue.append((handler, args, kwargs))
 
 class WaitRequest:
-    timeout_ack = False
-    condition_ack = False
 
     def __init__(self, condition, condition_args, condition_kwargs, timeout, timestep):
+        self.timeout_ack = False
+        self.condition_ack = False
         self.timeout_started = time.time()
         self.timeout = timeout
         self.condition = condition
@@ -53,12 +55,9 @@ class WaitRequest:
             self.timeout_ack = True
 
 class EventLoop:
-    poll_funcs = []
-    gloop = None
-    gctx = None
-    deferred_handling = None
 
     def __init__(self):
+        self.poll_funcs = []
         self.gloop = GLib.MainLoop()
         self.gctx = self.gloop.get_context()
         self.deferred_handling = DeferredHandling()

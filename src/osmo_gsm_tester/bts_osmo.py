@@ -24,14 +24,14 @@ from abc import ABCMeta, abstractmethod
 from . import log, config, util, template, process, bts, pcu_osmo
 
 class OsmoBts(bts.Bts, metaclass=ABCMeta):
-    proc_bts = None
-    _pcu = None
 
 ##############
 # PROTECTED
 ##############
     def __init__(self, suite_run, conf, name, defaults_cfg_name):
         super().__init__(suite_run, conf, name, defaults_cfg_name)
+        self._pcu = None
+        self.proc_bts = None
         if len(self.pcu_socket_path().encode()) > 107:
             raise log.Error('Path for pcu socket is longer than max allowed len for unix socket path (107):', self.pcu_socket_path())
 
@@ -75,9 +75,9 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    pcu_sk_tmp_dir = None
 
     def __init__(self, suite_run, conf, name, defaults_cfg_name):
+        self.pcu_sk_tmp_dir = None
         super().__init__(suite_run, conf, name, defaults_cfg_name)
 
 ########################

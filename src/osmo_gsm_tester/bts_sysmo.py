@@ -25,10 +25,6 @@ class SysmoBts(bts_osmo.OsmoBts):
 ##############
 # PROTECTED
 ##############
-    run_dir = None
-    inst = None
-    remote_inst = None
-    remote_dir = None
 
     REMOTE_DIR = '/osmo-gsm-tester-bts'
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
@@ -36,6 +32,10 @@ class SysmoBts(bts_osmo.OsmoBts):
 
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf, SysmoBts.BTS_SYSMO_BIN, 'osmo_bts_sysmo')
+        self.run_dir = None
+        self.inst = None
+        self.remote_inst = None
+        self.remote_dir = None
         self.remote_user = 'root'
 
     def _direct_pcu_enabled(self):

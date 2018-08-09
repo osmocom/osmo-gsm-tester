@@ -19,7 +19,6 @@
 
 class Sms:
     _last_sms_idx = 0
-    msg = None
 
     def __init__(self, src_msisdn=None, dst_msisdn=None, *tokens):
         Sms._last_sms_idx += 1

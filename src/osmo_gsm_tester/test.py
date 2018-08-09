@@ -31,11 +31,10 @@ class Test(log.Origin):
     PASS = 'pass'
     FAIL = 'FAIL'
 
-    _run_dir = None
-
     def __init__(self, suite_run, test_basename):
         self.basename = test_basename
         super().__init__(log.C_TST, self.basename)
+        self._run_dir = None
         self.suite_run = suite_run
         self.path = os.path.join(self.suite_run.definition.suite_dir, self.basename)
         self.status = Test.UNKNOWN

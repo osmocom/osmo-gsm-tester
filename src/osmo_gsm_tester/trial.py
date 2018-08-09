@@ -36,12 +36,6 @@ class Trial(log.Origin):
     PASS = 'PASS'
     FAIL = 'FAIL'
 
-    path = None
-    dir = None
-    _run_dir = None
-    bin_tars = None
-    log_targets = None
-
     @staticmethod
     def next(trials_dir):
 
@@ -63,6 +57,8 @@ class Trial(log.Origin):
         self.bin_tars = []
         self.suites = []
         self.status = Trial.UNKNOWN
+        self._run_dir = None
+        self.log_targets = None
 
     def __repr__(self):
         return self.name()

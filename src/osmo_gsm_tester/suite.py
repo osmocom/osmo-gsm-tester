@@ -63,21 +63,17 @@ class SuiteRun(log.Origin):
     PASS = 'PASS'
     FAIL = 'FAIL'
 
-    trial = None
-    status = None
-    start_timestamp = None
-    duration = None
-    resources_pool = None
-    reserved_resources = None
-    objects_to_clean_up = None
-    test_import_modules_to_clean_up = []
-    _resource_requirements = None
-    _config = None
-    _processes = None
-    _run_dir = None
-
     def __init__(self, trial, suite_scenario_str, suite_definition, scenarios=[]):
         super().__init__(log.C_TST, suite_scenario_str)
+        self.start_timestamp = None
+        self.duration = None
+        self.reserved_resources = None
+        self.objects_to_clean_up = None
+        self.test_import_modules_to_clean_up = []
+        self._resource_requirements = None
+        self._config = None
+        self._processes = None
+        self._run_dir = None
         self.trial = trial
         self.definition = suite_definition
         self.scenarios = scenarios

@@ -24,10 +24,6 @@ from . import log, util, process
 from .event_loop import MainLoop
 
 class Osmocon(log.Origin):
-    suite_run = None
-    run_dir = None
-    process = None
-    sk_tmp_dir = None
 
     FIRMWARE_FILE="opt/osmocom-bb/target/firmware/board/compal_e88/layer1.compalram.bin"
 
@@ -37,6 +33,8 @@ class Osmocon(log.Origin):
             raise log.Error('osmocon_phone contains no attr "serial_device"')
         self.serial_device = os.path.realpath(serial_device)
         super().__init__(log.C_RUN, 'osmocon_%s' % os.path.basename(self.serial_device))
+        self.run_dir = None
+        self.process = None
         self.suite_run = suite_run
         self.conf = conf
         self.sk_tmp_dir = tempfile.mkdtemp('', 'ogtosmoconsk')

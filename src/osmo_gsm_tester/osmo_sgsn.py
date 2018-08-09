@@ -23,16 +23,12 @@ import pprint
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
 class OsmoSgsn(log.Origin):
-    suite_run = None
-    ip_address = None
-    run_dir = None
-    config_file = None
-    process = None
-    hlr = None
-    ggsn = None
 
     def __init__(self, suite_run, hlr, ggsn, ip_address):
         super().__init__(log.C_RUN, 'osmo-sgsn_%s' % ip_address.get('addr'))
+        self.run_dir = None
+        self.config_file = None
+        self.process = None
         self.suite_run = suite_run
         self.hlr = hlr
         self.ggsn = ggsn

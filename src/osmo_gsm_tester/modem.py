@@ -321,10 +321,6 @@ class ModemDbusInteraction(log.Origin):
 
 class Modem(log.Origin):
     'convenience for ofono Modem interaction'
-    msisdn = None
-    sms_received_list = None
-    _ki = None
-    _imsi = None
 
     CTX_PROT_IPv4 = 'ip'
     CTX_PROT_IPv6 = 'ipv6'
@@ -336,6 +332,9 @@ class Modem(log.Origin):
         self.dbuspath = get_dbuspath_from_syspath(self.syspath)
         super().__init__(log.C_TST, self.dbuspath)
         self.dbg('creating from syspath %s', self.syspath)
+        self.msisdn = None
+        self._ki = None
+        self._imsi = None
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.dbuspath)
         self.register_attempts = 0

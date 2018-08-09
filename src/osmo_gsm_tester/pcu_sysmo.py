@@ -22,14 +22,6 @@ import pprint
 from . import log, config, util, template, process
 
 class OsmoPcuSysmo(log.Origin):
-    suite_run = None
-    bsc = None
-    run_dir = None
-    inst = None
-    remote_inst = None
-    remote_env = None
-    remote_dir = None
-    sysmobts = None
 
     REMOTE_DIR = '/osmo-gsm-tester-pcu'
     PCU_SYSMO_BIN = 'osmo-pcu'
@@ -37,6 +29,12 @@ class OsmoPcuSysmo(log.Origin):
 
     def __init__(self, suite_run, sysmobts, conf):
         super().__init__(log.C_RUN, self.PCU_SYSMO_BIN)
+        self.run_dir = None
+        self.bsc = None
+        self.inst = None
+        self.remote_inst = None
+        self.remote_dir = None
+        self.sysmobts = None
         self.suite_run = suite_run
         self.sysmobts = sysmobts
         self.conf = conf

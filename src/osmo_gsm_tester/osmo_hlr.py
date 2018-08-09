@@ -25,8 +25,6 @@ import sqlite3
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
 class OsmoHlr(log.Origin):
-    suite_run = None
-    ip_address = None
     run_dir = None
     config_file = None
     process = None
@@ -34,9 +32,12 @@ class OsmoHlr(log.Origin):
 
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'osmo-hlr_%s' % ip_address.get('addr'))
+        self.run_dir = None
+        self.config_file = None
+        self.process = None
+        self.next_subscriber_id = 1
         self.suite_run = suite_run
         self.ip_address = ip_address
-        self.bts = []
 
     def start(self):
         self.log('Starting osmo-hlr')

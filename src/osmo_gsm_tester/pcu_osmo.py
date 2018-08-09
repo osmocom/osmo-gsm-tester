@@ -23,14 +23,14 @@ import tempfile
 from . import log, config, util, template, process, pcu
 
 class OsmoPcu(pcu.Pcu):
-    inst = None
-    env = None
 
     BIN_PCU = 'osmo-pcu'
     PCU_OSMO_CFG = 'osmo-pcu.cfg'
 
     def __init__(self, suite_run, bts, conf):
         super().__init__(suite_run, bts, conf, OsmoPcu.BIN_PCU)
+        self.run_dir = None
+        self.inst = None
         self.conf = conf
         self.env = {}
 

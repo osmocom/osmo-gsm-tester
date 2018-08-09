@@ -34,8 +34,6 @@ MAX_SYS_ID_LEN = 16
 MAX_PASSWD_LEN = 16
 
 class Esme(log.Origin):
-    client = None
-    smsc = None
 
     MSGMODE_TRANSACTION = smpplib.consts.SMPP_MSGMODE_FORWARD
     MSGMODE_STOREFORWARD = smpplib.consts.SMPP_MSGMODE_STOREFORWARD
@@ -45,6 +43,8 @@ class Esme(log.Origin):
         # Get last characters of msisdn to stay inside MAX_SYS_ID_LEN. Similar to modulus operator.
         self.set_system_id('esme-' + self.msisdn[-11:])
         super().__init__(log.C_TST, self.system_id)
+        self.client = None
+        self.smsc = None
         self.set_password('esme-pwd')
         self.connected = False
         self.bound = False

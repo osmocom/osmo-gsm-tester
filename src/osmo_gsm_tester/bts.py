@@ -25,24 +25,21 @@ from abc import ABCMeta, abstractmethod
 from . import log, config, util, template, process, schema, pcu_osmo
 
 class Bts(log.Origin, metaclass=ABCMeta):
-    suite_run = None
-    conf = None
-    bsc = None
-    sgsn = None
-    lac = None
-    rac = None
-    cellid = None
-    bvci = None
-    defaults_cfg_name = None
-    _num_trx = 1
-    _max_trx = None
-    overlay_trx_list = []
 
 ##############
 # PROTECTED
 ##############
     def __init__(self, suite_run, conf, name, defaults_cfg_name):
         super().__init__(log.C_RUN, name)
+        self.bsc = None
+        self.sgsn = None
+        self.lac = None
+        self.rac = None
+        self.cellid = None
+        self.bvci = None
+        self._num_trx = 1
+        self._max_trx = None
+        self.overlay_trx_list = []
         self.suite_run = suite_run
         self.conf = conf
         self.defaults_cfg_name = defaults_cfg_name

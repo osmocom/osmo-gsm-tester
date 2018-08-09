@@ -24,19 +24,14 @@ import pprint
 from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
 
 class OsmoBsc(log.Origin):
-    suite_run = None
-    ip_address = None
-    run_dir = None
-    config_file = None
-    process = None
-    bts = None
-    encryption = None
-    rsl_ip = None
-    mgw = None
-    stp = None
 
     def __init__(self, suite_run, msc, mgw, stp, ip_address):
         super().__init__(log.C_RUN, 'osmo-bsc_%s' % ip_address.get('addr'))
+        self.run_dir = None
+        self.config_file = None
+        self.process = None
+        self.encryption = None
+        self.rsl_ip = None
         self.suite_run = suite_run
         self.ip_address = ip_address
         self.bts = []

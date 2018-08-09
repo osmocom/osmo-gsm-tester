@@ -22,9 +22,6 @@ from . import log
 
 class Pcu(log.Origin, metaclass=ABCMeta):
     """PCU Abstract Base Class."""
-    suite_run = None
-    run_dir = None
-    bts = None
 
 ##############
 # PROTECTED

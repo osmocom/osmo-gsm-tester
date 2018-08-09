@@ -20,7 +20,6 @@
 from . import log, config, util, template, process
 
 class Smsc:
-    esmes = None
 
     SMSC_POLICY_CLOSED = 'closed'
     SMSC_POLICY_ACCEPT_ALL = 'accept-all'

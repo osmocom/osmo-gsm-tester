@@ -29,13 +29,11 @@ from .util import Dir
 
 class Process(log.Origin):
 
-    process_obj = None
-    outputs = None
-    result = None
-    killed = None
-
     def __init__(self, name, run_dir, popen_args, **popen_kwargs):
         super().__init__(log.C_RUN, name)
+        self.process_obj = None
+        self.result = None
+        self.killed = None
         self.name_str = name
         self.run_dir = run_dir
         self.popen_args = popen_args

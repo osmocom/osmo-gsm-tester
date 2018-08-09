@@ -27,16 +27,14 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
 ##############
 # PROTECTED
 ##############
-    run_dir = None
-    inst = None
-    env = None
 
     BIN_BTS_OCTPHY = 'osmo-bts-octphy'
-
     CONF_BTS_OCTPHY = 'osmo-bts-octphy.cfg'
 
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf, OsmoBtsOctphy.BIN_BTS_OCTPHY, 'osmo_bts_octphy')
+        self.run_dir = None
+        self.inst = None
         self.env = {}
         self.values = {}
 

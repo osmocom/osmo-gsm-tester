@@ -23,14 +23,12 @@ import pprint
 from . import log, util, config, template, process, pcap_recorder
 
 class OsmoStp(log.Origin):
-    suite_run = None
-    ip_address = None
-    run_dir = None
-    config_file = None
-    process = None
 
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'osmo-stp_%s' % ip_address.get('addr'))
+        self.run_dir = None
+        self.config_file = None
+        self.process = None
         self.suite_run = suite_run
         self.ip_address = ip_address
 

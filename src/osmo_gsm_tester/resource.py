@@ -87,7 +87,8 @@ WANT_SCHEMA = util.dict_add(
 
 CONF_SCHEMA = util.dict_add(
     { 'defaults.timeout': schema.STR },
-    dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
+    dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]),
+    dict([('modifiers.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
 
 KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
@@ -113,7 +114,7 @@ class ResourcesPool(log.Origin):
         self.all_resources = Resources(config.read(self.config_path, RESOURCES_SCHEMA))
         self.all_resources.set_hashes()
 
-    def reserve(self, origin, want):
+    def reserve(self, origin, want, modifiers):
         '''
         attempt to reserve the resources specified in the dict 'want' for
         'origin'. Obtain a lock on the resources lock dir, verify that all
@@ -125,7 +126,11 @@ class ResourcesPool(log.Origin):
 
         'origin' should be an Origin() instance.
 
-        'want' is a dict matching RESOURCES_SCHEMA.
+        'want' is a dict matching RESOURCES_SCHEMA, used to specify what to
+        reserve.
+
+        'modifiers' is a dict matching RESOURCES_SCHEMA, it is overlaid on top
+        of 'want'.
 
         If an entry has no attribute set, any of the resources may be
         reserved without further limitations.
@@ -142,6 +147,7 @@ class ResourcesPool(log.Origin):
          }
         '''
         schema.validate(want, RESOURCES_SCHEMA)
+        schema.validate(modifiers, RESOURCES_SCHEMA)
 
         origin_id = origin.origin_id()
 
@@ -156,7 +162,7 @@ class ResourcesPool(log.Origin):
             config.write(rrfile_path, reserved)
 
             self.remember_to_free(to_be_reserved)
-            return ReservedResources(self, origin, to_be_reserved)
+            return ReservedResources(self, origin, to_be_reserved, modifiers)
 
     def free(self, origin, to_be_freed):
         log.ctx(origin)
@@ -491,10 +497,12 @@ class ReservedResources(log.Origin):
     dependencies from so far unused (but reserved) resource.
     '''
 
-    def __init__(self, resources_pool, origin, reserved):
+    def __init__(self, resources_pool, origin, reserved, modifiers):
         self.resources_pool = resources_pool
         self.origin = origin
-        self.reserved = reserved
+        self.reserved_original = reserved
+        self.reserved = copy.deepcopy(self.reserved_original)
+        config.overlay(self.reserved, modifiers)
 
     def __repr__(self):
         return 'resources(%s)=%s' % (self.origin.name(), pprint.pformat(self.reserved))
@@ -551,9 +559,9 @@ class ReservedResources(log.Origin):
                 item.pop(USED_KEY, None)
 
     def free(self):
-        if self.reserved:
-            self.resources_pool.free(self.origin, self.reserved)
-        self.reserved = None
+        if self.reserved_original:
+            self.resources_pool.free(self.origin, self.reserved_original)
+        self.reserved_original = None
 
     def counts(self):
         counts = {}

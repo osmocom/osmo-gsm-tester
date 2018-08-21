@@ -71,6 +71,7 @@ class SuiteRun(log.Origin):
         self.objects_to_clean_up = None
         self.test_import_modules_to_clean_up = []
         self._resource_requirements = None
+        self._resource_modifiers = None
         self._config = None
         self._processes = None
         self._run_dir = None
@@ -154,6 +155,11 @@ class SuiteRun(log.Origin):
             self._resource_requirements = self.combined('resources')
         return self._resource_requirements
 
+    def resource_modifiers(self):
+        if self._resource_modifiers is None:
+            self._resource_modifiers = self.combined('modifiers')
+        return self._resource_modifiers
+
     def config(self):
         if self._config is None:
             self._config = self.combined('config')
@@ -163,7 +169,7 @@ class SuiteRun(log.Origin):
         if self.reserved_resources:
             raise RuntimeError('Attempt to reserve resources twice for a SuiteRun')
         self.log('reserving resources in', self.resources_pool.state_dir, '...')
-        self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements())
+        self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements(), self.resource_modifiers())
 
     def run_tests(self, names=None):
         suite_libdir = os.path.join(self.definition.suite_dir, 'lib')

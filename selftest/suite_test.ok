@@ -34,6 +34,8 @@ trial test_suite
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...
 tst test_suite: DBG: {combining='resources'}
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]
+tst test_suite: DBG: {combining='modifiers'}
+tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]
 tst test_suite: Reserving 3 x bts (candidates: 6)
 tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
   addr: 10.42.42.53
@@ -177,6 +179,9 @@ tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/stat
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
+tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
   addr: 10.42.42.53
@@ -255,6 +260,9 @@ tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/stat
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
+tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
   addr: 10.42.42.53
@@ -302,6 +310,129 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   label: m7802
   path: /wavecom_1
   [resource.py:[LINENR]]
+
+----------------------------------------------
+trial test_suite hello_world.py
+----------------------------------------------
+tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py:[LINENR]'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
+---------------------------------------------------------------------
+trial test_suite PASS
+---------------------------------------------------------------------
+PASS: test_suite (pass: 1, skip: 5)
+    pass: hello_world.py (N.N sec)
+    skip: mo_mt_sms.py
+    skip: mo_sms.py
+    skip: test_error.py
+    skip: test_fail.py
+    skip: test_fail_raise.py
+- test with scenario and modifiers
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
+cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir  [config.py:[LINENR]]
+tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
+tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
+tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={bts=[{'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'type': 'sysmo'}]}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 076ff06a4b719e61779492d3fb99f42a6635bb72
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 9eaa928b04ce04b19dbae972f9bfc3eea6f5e249
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  trx_remote_ip: 10.42.42.112
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+  [resource.py:[LINENR]]
+tst test_suite: Reserving 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+  [resource.py:[LINENR]]
+tst test_suite: Reserving 2 x modem (candidates: 16)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+  [resource.py:[LINENR]]
+resources(test_suite)={'bts': [{'_hash': '076ff06a4b719e61779492d3fb99f42a6635bb72',
+          '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+          'addr': '10.42.42.53',
+          'band': 'GSM-1800',
+          'ipa_unit_id': '7',
+          'label': 'sysmoCell 5000',
+          'trx_list': [{'max_power_red': '3', 'nominal_power': '20'},
+                       {'max_power_red': '0', 'nominal_power': '20'}],
+          'trx_remote_ip': '10.42.42.112',
+          'type': 'osmo-bts-trx'},
+         {'_hash': '9eaa928b04ce04b19dbae972f9bfc3eea6f5e249',
+          '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+          'addr': '10.42.42.53',
+          'band': 'GSM-1800',
+          'ipa_unit_id': '7',
+          'label': 'sysmoCell 5000',
+          'trx_list': [{'nominal_power': '20'},
+                       {'max_power_red': '1', 'nominal_power': '20'}],
+          'trx_remote_ip': '10.42.42.112',
+          'type': 'osmo-bts-trx'},
+         {'_hash': '07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9',
+          '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+          'addr': '10.42.42.114',
+          'band': 'GSM-1800',
+          'ipa_unit_id': '1',
+          'label': 'sysmoBTS 1002',
+          'type': 'sysmo'}],
+ 'ip_address': [{'_hash': 'cde1debf28f07f94f92c761b4b7c6bf35785ced4',
+                 '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+                 'addr': '10.42.42.1'}],
+ 'modem': [{'_hash': '19c69e45aa090fb511446bd00797690aa82ff52f',
+            '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+            'imsi': '901700000007801',
+            'ki': 'D620F48487B1B782DA55DF6717F08FF9',
+            'label': 'm7801',
+            'path': '/wavecom_0'},
+           {'_hash': 'e1a46516a1fb493b2617ab14fc1693a9a45ec254',
+            '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+            'imsi': '901700000007802',
+            'ki': '47FDB2D55CE6A10A85ABDAD034A5B7B3',
+            'label': 'm7802',
+            'path': '/wavecom_1'}]}
+
+---------------------------------------------------------------------
+trial test_suite
+---------------------------------------------------------------------
 
 ----------------------------------------------
 trial test_suite hello_world.py

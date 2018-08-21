@@ -2,3 +2,4 @@
 \.py:[0-9]*	.py:[LINENR]
 \([0-9.]+ sec\)	(N.N sec)
 {combining_scenarios='resources', scenario='foo'}:.*	{combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
+test_suite-[0-9]*-[0-9]*	test_suite-[ID_NUM]-[ID_NUM]

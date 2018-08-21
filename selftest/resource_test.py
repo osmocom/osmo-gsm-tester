@@ -77,15 +77,21 @@ want = {
        'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
        'modem': [ { 'times': 2 , 'ciphers': ['a5_0', 'a5_1']} ],
      }
-
+modifiers = {
+    'bts': [ {}, {'num_trx': 2 }],
+}
 origin = log.Origin(None, 'testowner')
 
-resources = pool.reserve(origin, config.replicate_times(want))
+resources = pool.reserve(origin, config.replicate_times(want), config.replicate_times(modifiers))
 
 print('~~~ currently reserved:')
 with open(rrfile, 'r') as f:
     print(f.read())
 print('~~~ end: currently reserved\n')
+
+print('~~~ with modifiers:')
+print(repr(resources))
+print('~~~ end: with modifiers:')
 
 resources.free()
 

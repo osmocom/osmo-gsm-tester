@@ -105,6 +105,11 @@ def phy_channel_config(val):
         return
     raise ValueError('Unknown Physical channel config: %r' % val)
 
+def channel_allocator(val):
+    if val in ('ascending', 'descending'):
+        return
+    raise ValueError('Unknown Channel Allocator Policy %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -120,6 +125,7 @@ TIMES='times'
 CIPHER = 'cipher'
 MODEM_FEATURE = 'modem_feature'
 PHY_CHAN = 'chan'
+CHAN_ALLOCATOR = 'chan_allocator'
 
 SCHEMA_TYPES = {
         INT: int,
@@ -137,6 +143,7 @@ SCHEMA_TYPES = {
         CIPHER: cipher,
         MODEM_FEATURE: modem_feature,
         PHY_CHAN: phy_channel_config,
+        CHAN_ALLOCATOR: channel_allocator,
     }
 
 def validate(config, schema):

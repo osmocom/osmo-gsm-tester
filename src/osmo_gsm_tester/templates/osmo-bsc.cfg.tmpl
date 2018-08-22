@@ -49,7 +49,7 @@ network
   ms max power 33
   cell reselection hysteresis 4
   rxlev access min 0
-  channel allocator ascending
+  channel allocator ${bts.channel_allocator}
   rach tx integer 9
   rach max transmission 7
 % if bsc.net.get('rsl_ip', False):

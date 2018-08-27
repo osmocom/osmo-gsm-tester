@@ -26,11 +26,25 @@ bts:
   band: GSM-1800
   ciphers: [a5_0, a5_1]
   osmo_trx:
+    type: uhd
     launch_trx: true
     remote_user: jenkins
     trx_ip: 10.42.42.116
     clock_reference: external
     multi_arfcn: true
+
+- label: LimeSDR-USB
+  type: osmo-bts-trx
+  ipa_unit_id: 11
+  addr: 10.42.42.53
+  band: GSM-1800
+  ciphers: [a5_0, a5_1]
+  osmo_trx:
+    type: lms
+    launch_trx: true
+    remote_user: jenkins
+    trx_ip: 10.42.42.117
+    clock_reference: external
 
 - label: sysmoCell 5000
   type: osmo-bts-trx

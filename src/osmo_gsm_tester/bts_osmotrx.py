@@ -165,6 +165,7 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
     def get_instance_by_type(cls, type, suite_run, conf):
         KNOWN_OSMOTRX_TYPES = {
             'uhd': OsmoTrxUHD,
+            'lms': OsmoTrxLMS,
         }
         osmo_trx_class = KNOWN_OSMOTRX_TYPES.get(type)
         return osmo_trx_class(suite_run, conf)
@@ -280,5 +281,15 @@ class OsmoTrxUHD(OsmoTrx):
 
     def binary_name(self):
         return OsmoTrxUHD.BIN_TRX
+
+class OsmoTrxLMS(OsmoTrx):
+    BIN_TRX = 'osmo-trx-lms'
+
+    def __init__(self, suite_run, conf):
+        super().__init__(suite_run, conf)
+        self.conf['osmo_trx']['channels'][0]['rx_path'] = 'LNAW'
+
+    def binary_name(self):
+        return OsmoTrxLMS.BIN_TRX
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -110,7 +110,7 @@ msc
  mgw remote-port 2427
  mgw local-ip ${bsc.ip_address.addr}
  mgw endpoint-range 1 31
- codec-list hr3
+ codec-list ${' '.join(bsc.net.codec_list)}
  amr-config 12_2k forbidden
  amr-config 10_2k forbidden
  amr-config 7_95k forbidden

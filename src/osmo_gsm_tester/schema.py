@@ -110,6 +110,11 @@ def channel_allocator(val):
         return
     raise ValueError('Unknown Channel Allocator Policy %r' % val)
 
+def codec(val):
+    if val in ('hr1', 'hr2', 'hr3', 'fr1', 'fr2', 'fr3'):
+        return
+    raise ValueError('Unknown Codec value: %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -126,6 +131,7 @@ CIPHER = 'cipher'
 MODEM_FEATURE = 'modem_feature'
 PHY_CHAN = 'chan'
 CHAN_ALLOCATOR = 'chan_allocator'
+CODEC = 'codec'
 
 SCHEMA_TYPES = {
         INT: int,
@@ -144,6 +150,7 @@ SCHEMA_TYPES = {
         MODEM_FEATURE: modem_feature,
         PHY_CHAN: phy_channel_config,
         CHAN_ALLOCATOR: channel_allocator,
+        CODEC: codec,
     }
 
 def validate(config, schema):

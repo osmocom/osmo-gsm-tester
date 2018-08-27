@@ -87,7 +87,8 @@ WANT_SCHEMA = util.dict_add(
     RESOURCES_SCHEMA)
 
 CONF_SCHEMA = util.dict_add(
-    { 'defaults.timeout': schema.STR },
+    { 'defaults.timeout': schema.STR,
+      'config.bsc.net.codec_list[]': schema.CODEC },
     dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]),
     dict([('modifiers.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
 

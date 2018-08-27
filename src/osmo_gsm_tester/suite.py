@@ -126,14 +126,18 @@ class SuiteRun(log.Origin):
         self.duration = 0
         self.status = SuiteRun.UNKNOWN
 
-    def combined(self, conf_name):
+    def combined(self, conf_name, replicate_times=True):
         log.dbg(combining=conf_name)
         log.ctx(combining_scenarios=conf_name)
-        combination = config.replicate_times(self.definition.conf.get(conf_name, {}))
+        combination = self.definition.conf.get(conf_name, {})
+        if replicate_times:
+            combination = config.replicate_times(combination)
         log.dbg(definition_conf=combination)
         for scenario in self.scenarios:
             log.ctx(combining_scenarios=conf_name, scenario=scenario.name())
-            c = config.replicate_times(scenario.get(conf_name, {}))
+            c = scenario.get(conf_name, {})
+            if replicate_times:
+                c = config.replicate_times(c)
             log.dbg(scenario=scenario.name(), conf=c)
             if c is None:
                 continue
@@ -162,7 +166,7 @@ class SuiteRun(log.Origin):
 
     def config(self):
         if self._config is None:
-            self._config = self.combined('config')
+            self._config = self.combined('config', False)
         return self._config
 
     def reserve_resources(self):

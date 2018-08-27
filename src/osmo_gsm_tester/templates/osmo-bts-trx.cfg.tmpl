@@ -21,8 +21,8 @@ ctrl
  bind ${osmo_bts_trx.addr}
 !
 phy 0
- osmotrx ip local ${osmo_bts_trx.trx_local_ip}
- osmotrx ip remote ${osmo_bts_trx.trx_remote_ip}
+ osmotrx ip local ${osmo_bts_trx.osmo_trx.bts_ip}
+ osmotrx ip remote ${osmo_bts_trx.osmo_trx.trx_ip}
  instance 0
   osmotrx rx-gain 25
   osmotrx tx-attenuation oml

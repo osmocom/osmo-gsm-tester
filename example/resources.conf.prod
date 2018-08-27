@@ -24,16 +24,21 @@ bts:
   ipa_unit_id: 6
   addr: 10.42.42.50
   band: GSM-1800
-  launch_trx: true
   ciphers: [a5_0, a5_1]
+  osmo_trx:
+    launch_trx: true
+    clock_reference: external
 
 - label: sysmoCell 5000
   type: osmo-bts-trx
   ipa_unit_id: 7
   addr: 10.42.42.51
   band: GSM-1800
-  trx_remote_ip: 10.42.42.112
   ciphers: [a5_0, a5_1]
+  osmo_trx:
+        launch_trx: false
+        clock_reference: external
+        trx_ip: 10.42.42.112
 
 - label: OCTBTS 3500
   type: osmo-bts-octphy

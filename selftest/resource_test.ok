@@ -54,21 +54,23 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
           'ipa_unit_id': '1',
           'label': 'sysmoBTS 1002',
           'type': 'osmo-bts-sysmo'},
-         {'_hash': '6a9c9fbd364e1563a5b9f0826030a7888fd19575',
+         {'_hash': '2158317d5e0055070e7174c2498dedf53a2957e9',
           'addr': '10.42.42.50',
           'band': 'GSM-1800',
           'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '6',
           'label': 'Ettus B200',
-          'launch_trx': 'True',
+          'osmo_trx': {'clock_reference': 'external', 'launch_trx': 'True'},
           'type': 'osmo-bts-trx'},
-         {'_hash': 'e50fd38e3bfe8039ac13bc315bc84f46110b7443',
+         {'_hash': 'f964ba5fe7a37b97ec3e0c4ef21c9231a19de45d',
           'addr': '10.42.42.51',
           'band': 'GSM-1800',
           'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '7',
           'label': 'sysmoCell 5000',
-          'trx_remote_ip': '10.42.42.112',
+          'osmo_trx': {'clock_reference': 'external',
+                       'launch_trx': 'False',
+                       'trx_ip': '10.42.42.112'},
           'type': 'osmo-bts-trx'}],
  'ip_address': [{'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
                  'addr': '10.42.42.2'},
@@ -129,7 +131,7 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: osmo-bts-sysmo
-- _hash: 6a9c9fbd364e1563a5b9f0826030a7888fd19575
+- _hash: 2158317d5e0055070e7174c2498dedf53a2957e9
   addr: 10.42.42.50
   band: GSM-1800
   ciphers:
@@ -137,7 +139,9 @@ cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/conf/test_work/s
   - a5_1
   ipa_unit_id: '6'
   label: Ettus B200
-  launch_trx: 'True'
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'True'
   type: osmo-bts-trx
 --- testowner: Reserving 1 x ip_address (candidates: 5)
 --- testowner: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
@@ -183,7 +187,7 @@ bts:
   ipa_unit_id: '1'
   label: sysmoBTS 1002
   type: osmo-bts-sysmo
-- _hash: 6a9c9fbd364e1563a5b9f0826030a7888fd19575
+- _hash: 2158317d5e0055070e7174c2498dedf53a2957e9
   _reserved_by: testowner-123-1490837279
   addr: 10.42.42.50
   band: GSM-1800
@@ -192,7 +196,9 @@ bts:
   - a5_1
   ipa_unit_id: '6'
   label: Ettus B200
-  launch_trx: 'True'
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'True'
   type: osmo-bts-trx
 ip_address:
 - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
@@ -240,15 +246,15 @@ resources(testowner)={'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df0
           'ipa_unit_id': '1',
           'label': 'sysmoBTS 1002',
           'type': 'osmo-bts-sysmo'},
-         {'_hash': '6a9c9fbd364e1563a5b9f0826030a7888fd19575',
+         {'_hash': '2158317d5e0055070e7174c2498dedf53a2957e9',
           '_reserved_by': 'testowner-123-1490837279',
           'addr': '10.42.42.50',
           'band': 'GSM-1800',
           'ciphers': ['a5_0', 'a5_1'],
           'ipa_unit_id': '6',
           'label': 'Ettus B200',
-          'launch_trx': 'True',
           'num_trx': 2,
+          'osmo_trx': {'clock_reference': 'external', 'launch_trx': 'True'},
           'type': 'osmo-bts-trx'}],
  'ip_address': [{'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
                  '_reserved_by': 'testowner-123-1490837279',

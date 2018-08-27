@@ -115,6 +115,11 @@ def codec(val):
         return
     raise ValueError('Unknown Codec value: %r' % val)
 
+def osmo_trx_clock_ref(val):
+    if val in ('internal', 'external', 'gspdo'):
+        return
+    raise ValueError('Unknown OsmoTRX clock reference value: %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -132,6 +137,7 @@ MODEM_FEATURE = 'modem_feature'
 PHY_CHAN = 'chan'
 CHAN_ALLOCATOR = 'chan_allocator'
 CODEC = 'codec'
+OSMO_TRX_CLOCK_REF = 'osmo_trx_clock_ref'
 
 SCHEMA_TYPES = {
         INT: int,
@@ -151,6 +157,7 @@ SCHEMA_TYPES = {
         PHY_CHAN: phy_channel_config,
         CHAN_ALLOCATOR: channel_allocator,
         CODEC: codec,
+        OSMO_TRX_CLOCK_REF: osmo_trx_clock_ref,
     }
 
 def validate(config, schema):

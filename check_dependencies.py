@@ -24,5 +24,6 @@ import traceback
 import yaml
 import pydbus
 import sqlite3
+import sispm
 
 print('dependencies ok')

@@ -25,5 +25,6 @@ import yaml
 import pydbus
 import sqlite3
 import sispm
+import smpplib
 
 print('dependencies ok')

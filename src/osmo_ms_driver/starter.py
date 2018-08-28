@@ -71,6 +71,7 @@ class OsmoMobile(Launcher):
         self._imsi_ki_generator = imsi_ki_generator
         self._phy_filename = phy_filename
         self._ev_server_path = ev_server_path
+        self._imsi, self._ki = next(self._imsi_ki_generator)
 
     def write_lua_cfg(self):
         lua_support = os.path.join(os.path.dirname(__file__), 'lua')
@@ -87,13 +88,12 @@ class OsmoMobile(Launcher):
         return lua_cfg_file
 
     def write_mob_cfg(self, lua_filename, phy_filename):
-        (imsi, ki) = next(self._imsi_ki_generator)
         cfg = {
             'test': {
                 'script': lua_filename,
                 'virt_phy': phy_filename,
-                'imsi': imsi,
-                'ki_comp128': ki,
+                'imsi': self._imsi,
+                'ki_comp128': self._ki,
                 'ms_number': self._name_number,
             }
         }

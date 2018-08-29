@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from copy import copy
 from osmo_gsm_tester import log
 from .starter import OsmoVirtPhy, OsmoMobile
 from .test_support import imsi_ki_gen, Results
@@ -62,6 +62,7 @@ class MassUpdateLocationTest(log.Origin):
         self._cdf = cdf_function
         self._cdf.set_target(number_of_ms)
         self._unstarted = []
+        self._mobiles = []
         self._phys = []
         self._results = {}
         imsi_gen = imsi_ki_gen()
@@ -78,9 +79,13 @@ class MassUpdateLocationTest(log.Origin):
                                 phy.phy_filename(),
                                 event_server.server_path())
             self._results[ms_name] = LUResult(ms_name)
-            self._unstarted.append(launcher)
+            self._mobiles.append(launcher)
         self._event_server = event_server
         self._event_server.register(self.handle_msg)
+        self._unstarted = copy(self._mobiles)
+
+    def mobiles(self):
+        return self._mobiles
 
     def pre_launch(self, loop):
         """

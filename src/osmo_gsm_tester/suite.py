@@ -23,7 +23,7 @@ import time
 import pprint
 from . import config, log, util, resource, test
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon, ms_driver
 
 class Timeout(Exception):
     pass
@@ -310,6 +310,11 @@ class SuiteRun(log.Origin):
         if ip_address is None:
             ip_address = self.ip_address()
         return osmo_stp.OsmoStp(self, ip_address)
+
+    def ms_driver(self):
+        ms = ms_driver.MsDriver(self)
+        self.register_for_cleanup(ms)
+        return ms
 
     def bts(self, specifics=None):
         bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))

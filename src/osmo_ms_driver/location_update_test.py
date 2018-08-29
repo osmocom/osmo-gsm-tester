@@ -83,6 +83,7 @@ class MassUpdateLocationTest(log.Origin):
         self._event_server = event_server
         self._event_server.register(self.handle_msg)
         self._unstarted = copy(self._mobiles)
+        self._started = []
 
     def mobiles(self):
         return self._mobiles

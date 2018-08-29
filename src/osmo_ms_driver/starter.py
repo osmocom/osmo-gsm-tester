@@ -73,6 +73,12 @@ class OsmoMobile(Launcher):
         self._ev_server_path = ev_server_path
         self._imsi, self._ki = next(self._imsi_ki_generator)
 
+    def imsi(self):
+        return self._imsi
+
+    def ki(self):
+        return self._ki
+
     def write_lua_cfg(self):
         lua_support = os.path.join(os.path.dirname(__file__), 'lua')
         cfg = {

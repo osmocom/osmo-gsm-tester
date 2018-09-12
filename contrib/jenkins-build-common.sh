@@ -132,7 +132,7 @@ build_repo() {
   set +x; echo; echo; set -x
   autoreconf -fi
   set +x; echo; echo; set -x
-  ./configure --prefix="$prefix" $CONFIGURE_FLAGS $configure_opts
+  ./configure --prefix="$prefix" --with-systemdsystemunitdir=no $CONFIGURE_FLAGS $configure_opts
   set +x; echo; echo; set -x
   make -j8 || make  # libsmpp34 can't build in parallel
   set +x; echo; echo; set -x

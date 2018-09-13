@@ -9,4 +9,4 @@ build_repo libosmo-abis --enable-sanitize
 build_repo libosmo-netif --enable-sanitize --disable-doxygen
 build_repo osmo-mgw --enable-sanitize
 
-create_bin_tgz "osmo-bsc_mgcp osmo-mgw"
+create_bin_tgz "osmo-mgw"

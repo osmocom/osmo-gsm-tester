@@ -11,8 +11,13 @@ from osmo_gsm_tester.testenv import *
 SMPP_ESME_RINVPASWD = 0x0000000E
 SMPP_ESME_RINVSYSID = 0x0000000F
 
-nitb = suite.nitb()
-smsc = nitb.smsc
+hlr = suite.hlr()
+bts = suite.bts()
+mgw_msc = suite.mgw()
+stp = suite.stp()
+msc = suite.msc(hlr, mgw_msc, stp)
+smsc = msc.smsc
+
 esme = suite.esme()
 esme_no_pwd = suite.esme()
 esme_no_pwd.set_password('')
@@ -21,7 +26,10 @@ smsc.set_smsc_policy(smsc.SMSC_POLICY_CLOSED)
 smsc.esme_add(esme)
 smsc.esme_add(esme_no_pwd)
 
-nitb.start()
+stp.start()
+hlr.start()
+msc.start()
+mgw_msc.start()
 
 log('Test with correct credentials (no password)')
 esme_no_pwd.connect()

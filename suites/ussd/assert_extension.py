@@ -3,24 +3,36 @@ from osmo_gsm_tester.testenv import *
 
 USSD_COMMAND_GET_EXTENSION = '*#100#'
 
-nitb = suite.nitb()
+hlr = suite.hlr()
 bts = suite.bts()
+mgw_msc = suite.mgw()
+mgw_bsc = suite.mgw()
+stp = suite.stp()
+msc = suite.msc(hlr, mgw_msc, stp)
+bsc = suite.bsc(msc, mgw_bsc, stp)
 ms = suite.modem()
 
-print('start nitb and bts...')
-nitb.bts_add(bts)
-nitb.start()
+hlr.start()
+stp.start()
+msc.start()
+mgw_msc.start()
+mgw_bsc.start()
+
+bsc.bts_add(bts)
+bsc.start()
+
 bts.start()
-wait(nitb.bts_is_connected, bts)
+wait(bsc.bts_is_connected, bts)
 
-nitb.subscriber_add(ms)
+hlr.subscriber_add(ms)
 
-ms.connect(nitb.mcc_mnc())
+ms.connect(msc.mcc_mnc())
+
 ms.log_info()
 
 print('waiting for modems to attach...')
-wait(ms.is_connected, nitb.mcc_mnc())
-wait(nitb.subscriber_attached, ms)
+wait(ms.is_connected, msc.mcc_mnc())
+wait(msc.subscriber_attached, ms)
 
 # ofono (qmi) currently changes state to 'registered' jut after sending
 # 'Location Update Request', but before receiving 'Location Updating Accept'.
@@ -34,4 +46,5 @@ sleep(10)
 
 print('Sending ussd code %s' % USSD_COMMAND_GET_EXTENSION)
 response = ms.ussd_send(USSD_COMMAND_GET_EXTENSION)
-assert ' ' + ms.msisdn + '\r' in response
+log('got ussd response: %r' % repr(response))
+assert response.endswith(' ' + ms.msisdn)

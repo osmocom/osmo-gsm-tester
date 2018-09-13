@@ -1,23 +1,43 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
-
-print('use resources...')
-nitb = suite.nitb()
+hlr = suite.hlr()
 bts = suite.bts()
+pcu = bts.pcu()
+mgw_msc = suite.mgw()
+mgw_bsc = suite.mgw()
+stp = suite.stp()
+ggsn = suite.ggsn()
+sgsn = suite.sgsn(hlr, ggsn)
+msc = suite.msc(hlr, mgw_msc, stp)
+bsc = suite.bsc(msc, mgw_bsc, stp)
+
 modems = suite.modems(int(prompt('How many modems?')))
 
-print('start nitb and bts...')
-nitb.bts_add(bts)
-nitb.start()
+bsc.bts_add(bts)
+sgsn.bts_add(bts)
+
+hlr.start()
+stp.start()
+ggsn.start()
+sgsn.start()
+msc.start()
+mgw_msc.start()
+mgw_bsc.start()
+bsc.start()
+
 bts.start()
-wait(nitb.bts_is_connected, bts)
+print('Waiting for bts to connect to bsc...')
+wait(bsc.bts_is_connected, bts)
+print('Waiting for bts to be ready...')
+wait(bts.ready_for_pcu)
+pcu.start()
 
 for m in modems:
-  nitb.subscriber_add(m)
-  m.connect(nitb.mcc_mnc())
+  hlr.subscriber_add(m)
+  m.connect(msc.mcc_mnc())
 
 while True:
-  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>')
+  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>, data-attach, data-wait, data-detach, data-activate')
   cmd = cmd.strip().lower()
 
   if not cmd:
@@ -31,15 +51,15 @@ while True:
   elif 'wait-registered'.startswith(cmd):
     try:
       for m in modems:
-         wait(m.is_connected, nitb.mcc_mnc())
-      wait(nitb.subscriber_attached, *modems)
+          wait(m.is_connected, msc.mcc_mnc())
+      wait(msc.subscriber_attached, *modems)
     except Timeout:
       print('Timeout while waiting for registration.')
 
   elif 'get-registered'.startswith(cmd):
-    print(nitb.imsi_list_attached())
+    print(msc.imsi_list_attached())
     print('RESULT: %s' %
-       ('All modems are registered.' if nitb.subscriber_attached(*modems)
+       ('All modems are registered.' if msc.subscriber_attached(*modems)
         else 'Some modem(s) not registered yet.'))
 
   elif 'sms'.startswith(cmd):
@@ -105,6 +125,35 @@ while True:
     for ms in modems:
         print('modem %s: ussd %s' % (ms.name(), ussd_cmd))
         response = ms.ussd_send(ussd_cmd)
+        print('modem %s: response=%r' % (ms.name(), response))
+
+  elif cmd.startswith('data-attach'):
+    if len(params) != 1:
+      print('wrong format')
+      continue
+    for ms in modems:
+        print('modem %s: attach' % ms.name())
+        ms.attach()
+        wait(ms.is_attached)
+        print('modem %s: attached' % ms.name())
+
+  elif cmd.startswith('data-detach'):
+    if len(params) != 1:
+      print('wrong format')
+      continue
+    for ms in modems:
+        print('modem %s: detach' % ms.name())
+        ms.attach()
+        wait(lambda: not ms.is_attached())
+        print('modem %s: detached' % ms.name())
+
+  elif cmd.startswith('data-activate'):
+    if len(params) != 1:
+      print('wrong format')
+      continue
+    for ms in modems:
+        print('modem %s: activate' % ms.name())
+        response = ms.activate_context()
         print('modem %s: response=%r' % (ms.name(), response))
 
   else:

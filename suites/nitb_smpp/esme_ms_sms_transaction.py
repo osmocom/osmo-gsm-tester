@@ -10,36 +10,26 @@ from osmo_gsm_tester.testenv import *
 
 SMPP_ESME_RINVDSTADR = 0x0000000B
 
-hlr = suite.hlr()
+nitb = suite.nitb()
 bts = suite.bts()
-mgw_msc = suite.mgw()
-mgw_bsc = suite.mgw()
-stp = suite.stp()
-msc = suite.msc(hlr, mgw_msc, stp)
-bsc = suite.bsc(msc, mgw_bsc, stp)
-bsc.bts_add(bts)
-
 ms = suite.modem()
 esme = suite.esme()
-msc.smsc.esme_add(esme)
 
-hlr.start()
-stp.start()
-msc.start()
-mgw_msc.start()
-mgw_bsc.start()
-bsc.start()
+print('start nitb and bts...')
+nitb.bts_add(bts)
+nitb.smsc.esme_add(esme)
+nitb.start()
 bts.start()
-wait(bsc.bts_is_connected, bts)
+wait(nitb.bts_is_connected, bts)
 
 esme.connect()
-hlr.subscriber_add(ms)
-ms.connect(msc.mcc_mnc())
+nitb.subscriber_add(ms)
+ms.connect(nitb.mcc_mnc())
 
 ms.log_info()
 print('waiting for modem to attach...')
-wait(ms.is_connected, msc.mcc_mnc())
-wait(msc.subscriber_attached, ms)
+wait(ms.is_connected, nitb.mcc_mnc())
+wait(nitb.subscriber_attached, ms)
 
 print('sending first sms...')
 msg = Sms(esme.msisdn, ms.msisdn, 'smpp send message')

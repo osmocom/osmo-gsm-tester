@@ -6,8 +6,11 @@
 
 from osmo_gsm_tester.testenv import *
 
-nitb = suite.nitb()
-smsc = nitb.smsc
+hlr = suite.hlr()
+mgw_msc = suite.mgw()
+stp = suite.stp()
+msc = suite.msc(hlr, mgw_msc, stp)
+smsc = msc.smsc
 esme = suite.esme()
 
 # Here we deliberately omit calling smsc.esme_add() to avoid having it included
@@ -15,7 +18,10 @@ esme = suite.esme()
 smsc.set_smsc_policy(smsc.SMSC_POLICY_ACCEPT_ALL)
 esme.set_smsc(smsc)
 
-nitb.start()
+stp.start()
+hlr.start()
+msc.start()
+mgw_msc.start()
 
 # Due to accept-all policy, connect() should work even if we didn't previously
 # configure the esme in the smsc, no matter the system_id / password we use.

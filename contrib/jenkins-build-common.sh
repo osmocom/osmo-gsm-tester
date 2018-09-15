@@ -12,6 +12,7 @@
 # build_repo libosmocore --configure --opts
 # build_repo libosmo-foo special_branch --configure --opts
 # build_repo osmo-bar
+# build_repo_dir openbsc ./openbsc
 #
 # create_bin_tgz
 #--------------
@@ -98,11 +99,19 @@ have_repo() {
 
 build_repo() {
   # usage: build_repo <name> [<branch>] [--configure-opts [...]]
+  dir="$1"
+  shift
+  build_repo_dir "${dir}" "./" $@
+}
+
+build_repo_dir() {
+  # usage: build_repo_dir <name> <dir> [<branch>] [--configure-opts [...]]
   dep="$1"
+  dir="$2"
   branch="master"
-  if [ -z "$(echo "$2" | grep '^-')" ]; then
+  if [ -z "$(echo "$3" | grep '^-')" ]; then
     # second arg does not start with a dash, it's empty or a branch
-    branch="$2"
+    branch="$3"
     if [ -n "$branch" ]; then
       # we had a branch arg, need to shift once more to get config options
       shift
@@ -110,6 +119,7 @@ build_repo() {
       branch="master"
     fi
   fi
+  shift
   shift
   configure_opts="$@"
 
@@ -122,12 +132,7 @@ build_repo() {
 
   have_repo "$dep" "$branch"
 
-  cd "$dep"
-
-  # special shim: we know the openbsc.git needs to be built in the openbsc/ subdir.
-  if [ "$dep" = "openbsc" ]; then
-    cd openbsc
-  fi
+  cd "$dep/${dir}"
 
   set +x; echo; echo; set -x
   autoreconf -fi

@@ -23,9 +23,11 @@ ctrl
 phy 0
  osmotrx ip local ${osmo_bts_trx.osmo_trx.bts_ip}
  osmotrx ip remote ${osmo_bts_trx.osmo_trx.trx_ip}
- instance 0
+%for chan in osmo_bts_trx.osmo_trx.channels:
+ instance ${loop.index}
   osmotrx rx-gain 25
   osmotrx tx-attenuation oml
+%endfor
 bts 0
  band ${osmo_bts_trx.band}
  ipa unit-id ${osmo_bts_trx.ipa_unit_id} 0
@@ -44,5 +46,7 @@ bts 0
  gsmtap-sapi ptcch
  gsmtap-sapi cbch
  gsmtap-sapi sacch
- trx 0
-  phy 0 instance 0
+%for chan in osmo_bts_trx.osmo_trx.channels:
+ trx ${loop.index}
+  phy 0 instance ${loop.index}
+%endfor

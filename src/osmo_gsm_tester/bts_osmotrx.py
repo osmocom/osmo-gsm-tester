@@ -77,7 +77,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
                             'osmo_trx': {
                                 'bts_ip': self.remote_addr(),
                                 'trx_ip': self.trx_remote_ip(),
-                                'channels': [{}] # TODO: implement channels for multiTRX
+                                'channels': [{} for trx_i in range(self.num_trx())]
                             }
                         }
         })
@@ -134,7 +134,8 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
         self.proc_bts = self.launch_process(keepalive, OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
-                            '-i', self.bsc.addr())
+                            '-i', self.bsc.addr(),
+                            '-t', str(self.num_trx()))
         self.suite_run.poll()
 
 class OsmoTrx(log.Origin, metaclass=ABCMeta):

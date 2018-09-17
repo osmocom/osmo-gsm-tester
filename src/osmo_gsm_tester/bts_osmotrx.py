@@ -174,6 +174,8 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
         self.dbg(config_file=self.config_file)
 
         values = self.conf
+        multi_arfcn_bool = util.str2bool(values.get('osmo_trx', {}).get('multi_arfcn', False))
+        config.overlay(values, { 'osmo_trx': { 'multi_arfcn': multi_arfcn_bool } })
 
         self.dbg('OSMO-TRX CONFIG:\n' + pprint.pformat(values))
 

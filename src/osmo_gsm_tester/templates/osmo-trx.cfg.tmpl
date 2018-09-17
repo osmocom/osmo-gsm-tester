@@ -19,6 +19,11 @@ trx
  remote-ip ${osmo_trx.bts_ip}
  base-port 5700
  egprs disable
+%if osmo_trx.get('multi_arfcn', False):
+ multi-arfcn enable
+%else:
+ multi-arfcn disable
+%endif
  tx-sps 4
  rx-sps 4
  clock-ref ${osmo_trx.clock_reference}

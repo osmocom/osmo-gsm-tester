@@ -92,7 +92,7 @@ have_repo() {
 
   git rev-parse HEAD
 
-  echo "$(git rev-parse HEAD) $dep" >> "$prefix_real/${name}_git_hashes.txt"
+  echo "$(git rev-parse HEAD) $repo" >> "$prefix_real/${name}_git_hashes.txt"
 
   cd "$base"
 }

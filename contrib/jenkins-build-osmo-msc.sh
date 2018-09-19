@@ -11,6 +11,8 @@ build_repo libsmpp34 --enable-sanitize
 build_repo libosmo-sccp --enable-sanitize
 build_repo osmo-mgw --enable-sanitize
 build_repo osmo-hlr --enable-sanitize
-build_repo osmo-msc --enable-sanitize --enable-smpp --disable-iu
+build_repo libasn1c --enable-sanitize
+build_repo osmo-iuh --enable-sanitize
+build_repo osmo-msc --enable-sanitize --enable-smpp --enable-iu
 
 create_bin_tgz osmo-msc

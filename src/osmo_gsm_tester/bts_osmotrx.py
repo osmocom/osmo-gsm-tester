@@ -20,9 +20,8 @@
 import os
 import stat
 import pprint
-import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, pcu_osmo, bts_osmo
+from . import log, config, util, template, process, bts_osmo
 from .event_loop import MainLoop
 
 class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):

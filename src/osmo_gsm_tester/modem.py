@@ -21,9 +21,6 @@ from . import log, util, sms
 from .event_loop import MainLoop
 
 from pydbus import SystemBus, Variant
-import time
-import pprint
-import sys
 
 # Required for Gio.Cancellable.
 # See https://lazka.github.io/pgi-docs/Gio-2.0/classes/Cancellable.html#Gio.Cancellable

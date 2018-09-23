@@ -17,12 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import pprint
-import tempfile
 import copy
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, schema, pcu_osmo
+from . import log, config, schema
 
 class Bts(log.Origin, metaclass=ABCMeta):
 

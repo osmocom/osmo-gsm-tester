@@ -17,11 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import math
 from datetime import datetime
 import xml.etree.ElementTree as et
-from . import log, suite, test
+from . import test
 
 def trial_to_junit_write(trial, junit_path):
     elements = et.ElementTree(element=trial_to_junit(trial))
@@ -53,7 +52,7 @@ def test_to_junit(t):
     testcase.set('name', t.name())
     testcase.set('time', str(math.ceil(t.duration)))
     if t.status == test.Test.SKIP:
-        skip = et.SubElement(testcase, 'skipped')
+        et.SubElement(testcase, 'skipped')
     elif t.status == test.Test.FAIL:
         failure = et.SubElement(testcase, 'failure')
         failure.set('type', t.fail_type or 'failure')

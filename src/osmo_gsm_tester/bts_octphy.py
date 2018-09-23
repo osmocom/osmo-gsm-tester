@@ -19,8 +19,7 @@
 
 import os
 import pprint
-import tempfile
-from . import log, config, util, template, process, pcu_osmo, bts_osmo
+from . import log, config, util, template, process, bts_osmo
 
 class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
 

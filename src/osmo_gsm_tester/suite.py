@@ -21,7 +21,7 @@ import os
 import sys
 import time
 import pprint
-from . import config, log, template, util, resource, schema, test
+from . import config, log, util, resource, test
 from .event_loop import MainLoop
 from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon
 

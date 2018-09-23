@@ -18,10 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import pprint
 import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, bts, pcu_osmo
+from . import log, bts, pcu_osmo
 
 class OsmoBts(bts.Bts, metaclass=ABCMeta):
 

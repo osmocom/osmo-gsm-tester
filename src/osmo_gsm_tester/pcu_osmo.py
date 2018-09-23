@@ -19,8 +19,7 @@
 
 import os
 import pprint
-import tempfile
-from . import log, config, util, template, process, pcu
+from . import config, util, template, process, pcu
 
 class OsmoPcu(pcu.Pcu):
 

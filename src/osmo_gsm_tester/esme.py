@@ -23,7 +23,7 @@ import smpplib.command
 import smpplib.consts
 import smpplib.exceptions
 
-from . import log, util, sms
+from . import log
 from .event_loop import MainLoop
 
 # if you want to know what's happening inside python-smpplib

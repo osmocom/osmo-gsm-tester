@@ -18,11 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import pprint
-import tempfile
 import re
-from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, pcap_recorder, bts, pcu
+from . import log, config, util, process, pcap_recorder, bts, pcu
 from . import powersupply
 from .event_loop import MainLoop
 

@@ -4,7 +4,7 @@ base="$PWD"
 name="osmo-ggsn"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-build_repo libosmocore --enable-sanitize --disable-doxygen
-build_repo osmo-ggsn --enable-sanitize
+build_repo libosmocore ${SANITIZE_FLAGS} --disable-doxygen
+build_repo osmo-ggsn ${SANITIZE_FLAGS}
 
 create_bin_tgz osmo-ggsn

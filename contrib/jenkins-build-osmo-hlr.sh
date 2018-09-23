@@ -4,8 +4,8 @@ base="$PWD"
 name="osmo-hlr"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-build_repo libosmocore --enable-sanitize --disable-doxygen
-build_repo libosmo-abis --enable-sanitize
-build_repo osmo-hlr --enable-sanitize
+build_repo libosmocore ${SANITIZE_FLAGS} --disable-doxygen
+build_repo libosmo-abis ${SANITIZE_FLAGS}
+build_repo osmo-hlr ${SANITIZE_FLAGS}
 
 create_bin_tgz osmo-hlr

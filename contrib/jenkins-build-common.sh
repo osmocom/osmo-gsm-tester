@@ -49,6 +49,10 @@ prefix="${prefix-"$base/inst-$name"}"
 # osmo-bts within the sysmoBTS SDK
 prefix_real="${prefix_real-"$prefix"}"
 
+# Flag to be used to enable ASAN in builds. Defaults to enable ASAN builds and
+# it can be disabled by passing SANITIZE_FLAGS="" to the build.
+SANITIZE_FLAGS="${SANITIZE_FLAGS---enable-sanitize}"
+
 export PKG_CONFIG_PATH="$prefix_real/lib/pkgconfig:$PKG_CONFIG_PATH"
 export LD_LIBRARY_PATH="$prefix_real/lib:$LD_LIBRARY_PATH"
 

@@ -141,6 +141,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 class OsmoTrx(log.Origin, metaclass=ABCMeta):
 
     CONF_OSMO_TRX = 'osmo-trx.cfg'
+    REMOTE_DIR = '/osmo-gsm-tester-trx/last_run'
 
 ##############
 # PROTECTED
@@ -150,8 +151,10 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
         self.suite_run = suite_run
         self.conf = conf
         self.env = {}
-        self.listen_ip = conf.get('trx_ip')
-        self.bts_ip = conf.get('bts_ip')
+        self.log("OSMOTRX CONF: %r" % conf)
+        self.listen_ip = conf.get('osmo_trx', {}).get('trx_ip')
+        self.bts_ip = conf.get('osmo_trx', {}).get('bts_ip')
+        self.remote_user = conf.get('osmo_trx', {}).get('remote_user', None)
         self.run_dir = None
         self.inst = None
         self.proc_trx = None
@@ -184,7 +187,7 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
             self.dbg(r)
             f.write(r)
 
-    def launch_process(self, keepalive, binary_name, *args):
+    def launch_process_local(self, keepalive, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
         run_dir = self.run_dir.new_dir(binary_name)
         if not os.path.isfile(binary):
@@ -196,6 +199,14 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
         proc.launch()
         return proc
 
+    def launch_process_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
+        run_dir = self.run_dir.new_dir(name)
+        proc = process.RemoteProcess(name, run_dir, self.remote_user, self.listen_ip, remote_cwd,
+                                     popen_args)
+        self.suite_run.remember_to_stop(proc, keepalive)
+        proc.launch()
+        return proc
+
 ##############
 # PUBLIC (test API included)
 ##############
@@ -203,10 +214,21 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
-        lib = self.inst.child('lib')
-        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-        self.proc_trx = self.launch_process(keepalive, self.binary_name(),
+        if not self.remote_user:
+            # Run locally if ssh user is not set
+            lib = self.inst.child('lib')
+            self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+            self.proc_trx = self.launch_process_local(keepalive, self.binary_name(),
                                             '-C', os.path.abspath(self.config_file))
+        else:
+            remote_run_dir = util.Dir(OsmoTrx.REMOTE_DIR)
+            self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
+                                                self.listen_ip, self.binary_name(), self.config_file)
+            remote_config_file = remote_run_dir.child(OsmoTrx.CONF_OSMO_TRX)
+            remote_lib = self.remote_inst.child('lib')
+            remote_binary = self.remote_inst.child('bin', self.binary_name())
+            args = ('LD_LIBRARY_PATH=%s' % remote_lib, remote_binary, '-C', remote_config_file)
+            self.proc_trx = self.launch_process_remote(self.binary_name(), args, remote_cwd=remote_run_dir, keepalive=keepalive)
 
     def trx_ready(self):
         if not self.proc_trx or not self.proc_trx.is_running:

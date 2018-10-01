@@ -41,33 +41,13 @@ class SysmoBts(bts_osmo.OsmoBts):
     def _direct_pcu_enabled(self):
         return util.str2bool(self.conf.get('direct_pcu'))
 
-    def _process_remote(self, name, popen_args, remote_cwd=None):
-        run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
-                                     popen_args)
-
-    def run_remote(self, name, popen_args, remote_cwd=None):
-        proc = self._process_remote(name, popen_args, remote_cwd)
-        proc.launch()
-        proc.wait()
-        if proc.result != 0:
-            log.ctx(proc)
-            raise log.Error('Exited in error')
-
     def launch_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
-        proc = self._process_remote(name, popen_args, remote_cwd)
+        run_dir = self.run_dir.new_dir(name)
+        proc = process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
+                                     popen_args)
         self.suite_run.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
-
-    def run_local(self, name, popen_args):
-        run_dir = self.run_dir.new_dir(name)
-        proc = process.Process(name, run_dir, popen_args)
-        proc.launch()
-        proc.wait()
-        if proc.result != 0:
-            log.ctx(proc)
-            raise log.Error('Exited in error')
 
     def create_pcu(self):
         return pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
@@ -124,23 +104,14 @@ class SysmoBts(bts_osmo.OsmoBts):
         if not self.inst.isfile('bin', SysmoBts.BTS_SYSMO_BIN):
             raise log.Error('No osmo-bts-sysmo binary in', self.inst)
 
-        self.remote_dir = util.Dir(SysmoBts.REMOTE_DIR)
-        self.remote_inst = util.Dir(self.remote_dir.child(os.path.basename(str(self.inst))))
+        remote_run_dir = util.Dir(SysmoBts.REMOTE_DIR)
 
-        self.run_remote('rm-remote-dir', ('test', '!', '-d', SysmoBts.REMOTE_DIR, '||', 'rm', '-rf', SysmoBts.REMOTE_DIR))
-        self.run_remote('mk-remote-dir', ('mkdir', '-p', SysmoBts.REMOTE_DIR))
-        self.run_local('scp-inst-to-sysmobts',
-            ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.remote_addr(), str(self.remote_inst))))
+        self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
+                                         self.remote_addr(), SysmoBts.BTS_SYSMO_BIN, self.config_file)
+        process.run_remote_sync(self.run_dir, self.remote_user, self.remote_addr(), 'reload-dsp-firmware',
+                             ('/bin/sh', '-c', '"cat /lib/firmware/sysmobts-v?.bit > /dev/fpgadl_par0 ; cat /lib/firmware/sysmobts-v?.out > /dev/dspdl_dm644x_0"'))
 
-        remote_run_dir = self.remote_dir.child(SysmoBts.BTS_SYSMO_BIN)
-        self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
-
-        remote_config_file = self.remote_dir.child(SysmoBts.BTS_SYSMO_CFG)
-        self.run_local('scp-cfg-to-sysmobts',
-            ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.remote_addr(), remote_config_file)))
-
-        self.run_remote('reload-dsp-firmware', ('/bin/sh', '-c', '"cat /lib/firmware/sysmobts-v?.bit > /dev/fpgadl_par0 ; cat /lib/firmware/sysmobts-v?.out > /dev/dspdl_dm644x_0"'))
-
+        remote_config_file = remote_run_dir.child(SysmoBts.BTS_SYSMO_CFG)
         remote_lib = self.remote_inst.child('lib')
         remote_binary = self.remote_inst.child('bin', 'osmo-bts-sysmo')
 

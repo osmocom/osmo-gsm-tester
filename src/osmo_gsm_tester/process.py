@@ -233,4 +233,41 @@ class RemoteProcess(Process):
                                      ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
 
+
+def run_local_sync(run_dir, name, popen_args):
+    run_dir =run_dir.new_dir(name)
+    proc = Process(name, run_dir, popen_args)
+    proc.launch()
+    proc.wait()
+    if proc.result != 0:
+        log.ctx(proc)
+        raise log.Error('Exited in error')
+
+def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):
+    run_dir = run_dir.new_dir(name)
+    proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd,
+                                 popen_args)
+    proc.launch()
+    proc.wait()
+    if proc.result != 0:
+        log.ctx(proc)
+        raise log.Error('Exited in error')
+
+def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):
+    run_local_sync(run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (remote_user, remote_addr, remote_path)))
+
+def copy_inst_ssh(run_dir, inst, remote_dir, remote_user, remote_addr, remote_rundir_append, cfg_file_name):
+    remote_inst = Dir(remote_dir.child(os.path.basename(str(inst))))
+    remote_dir_str = str(remote_dir)
+    run_remote_sync(run_dir, remote_user, remote_addr, 'rm-remote-dir', ('test', '!', '-d', remote_dir_str, '||', 'rm', '-rf', remote_dir_str))
+    run_remote_sync(run_dir, remote_user, remote_addr, 'mk-remote-dir', ('mkdir', '-p', remote_dir_str))
+    scp(run_dir, remote_user, remote_addr, 'scp-inst-to-remote', str(inst), remote_dir_str)
+
+    remote_run_dir = remote_dir.child(remote_rundir_append)
+    run_remote_sync(run_dir, remote_user, remote_addr, 'mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
+
+    remote_config_file = remote_dir.child(os.path.basename(cfg_file_name))
+    scp(run_dir, remote_user, remote_addr, 'scp-cfg-to-remote', cfg_file_name, remote_config_file)
+    return remote_inst
+
 # vim: expandtab tabstop=4 shiftwidth=4

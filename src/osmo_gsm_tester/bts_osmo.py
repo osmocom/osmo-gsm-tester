@@ -61,10 +61,10 @@ class OsmoBts(bts.Bts, metaclass=ABCMeta):
         # coming from bts.Bts, we forward the implementation to children.
         pass
 
+    @abstractmethod
     def ready_for_pcu(self):
-        if not self.proc_bts or not self.proc_bts.is_running:
-            return False
-        return 'BTS is up' in (self.proc_bts.get_stderr() or '')
+        'Used by tests to know when BTS is prepared and PCU can be started.'
+        pass
 
     def pcu(self):
         if self._pcu is None:
@@ -107,6 +107,11 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 ###################
 # PUBLIC (test API included)
 ###################
+    def ready_for_pcu(self):
+        if not self.proc_bts or not self.proc_bts.is_running:
+            return False
+        return os.path.exists(self.pcu_socket_path())
+
     @abstractmethod
     def start(self, keepalive=False):
         # coming from bts.Bts, we forward the implementation to children.

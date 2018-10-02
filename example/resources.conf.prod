@@ -27,6 +27,8 @@ bts:
   ciphers: [a5_0, a5_1]
   osmo_trx:
     launch_trx: true
+    remote_user: jenkins
+    trx_ip: 10.42.42.230
     clock_reference: external
 
 - label: sysmoCell 5000

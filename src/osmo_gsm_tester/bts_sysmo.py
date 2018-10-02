@@ -90,6 +90,12 @@ class SysmoBts(bts_osmo.OsmoBts):
 ###################
 # PUBLIC (test API included)
 ###################
+    # We get log from ssh stdout instead of usual stderr.
+    def ready_for_pcu(self):
+        if not self.proc_bts or not self.proc_bts.is_running:
+            return False
+        return 'BTS is up' in (self.proc_bts.get_stdout() or '')
+
     def start(self, keepalive=False):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')

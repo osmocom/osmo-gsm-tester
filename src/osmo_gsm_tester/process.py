@@ -228,7 +228,10 @@ class RemoteProcess(Process):
             cd = 'cd "%s"; ' % self.remote_cwd
         else:
             cd = ''
-        self.popen_args = ['ssh', self.remote_user+'@'+self.remote_host,
+        # We need double -t to force tty and be able to forward signals to
+        # processes (SIGHUP) when we close ssh on the local side. As a result,
+        # stderr seems to be merged into stdout in ssh client.
+        self.popen_args = ['ssh', '-t', '-t', self.remote_user+'@'+self.remote_host,
                            '%s%s' % (cd,
                                      ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)

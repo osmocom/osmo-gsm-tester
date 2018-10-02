@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import stat
 import pprint
 import tempfile
 from abc import ABCMeta, abstractmethod
@@ -142,6 +143,7 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
 
     CONF_OSMO_TRX = 'osmo-trx.cfg'
     REMOTE_DIR = '/osmo-gsm-tester-trx/last_run'
+    WRAPPER_SCRIPT = 'ssh_sigkiller.sh'
 
 ##############
 # PROTECTED
@@ -207,6 +209,28 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
         proc.launch()
         return proc
 
+    def generate_wrapper_script(self):
+        wrapper_script = self.run_dir.new_file(OsmoTrx.WRAPPER_SCRIPT)
+        with open(wrapper_script, 'w') as f:
+            r = """#!/bin/bash
+            mypid=0
+            sign_handler() {
+                    sig=$1
+                    echo "received signal handler $sig, killing $mypid"
+                    kill $mypid
+            }
+            trap 'sign_handler SIGINT' SIGINT
+            trap 'sign_handler SIGHUP' SIGHUP
+            "$@" &
+            mypid=$!
+            echo "waiting for $mypid"
+            wait $mypid
+            """
+            f.write(r)
+        st = os.stat(wrapper_script)
+        os.chmod(wrapper_script, st.st_mode | stat.S_IEXEC)
+        return wrapper_script
+
 ##############
 # PUBLIC (test API included)
 ##############
@@ -221,13 +245,21 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
             self.proc_trx = self.launch_process_local(keepalive, self.binary_name(),
                                             '-C', os.path.abspath(self.config_file))
         else:
+            # Run remotely through ssh. We need to run osmo-trx under a wrapper
+            # script since osmo-trx ignores SIGHUP and will keep running after
+            # we close local ssh session. The wrapper script catches SIGHUP and
+            # sends SIGINT to it.
+            wrapper_script = self.generate_wrapper_script()
             remote_run_dir = util.Dir(OsmoTrx.REMOTE_DIR)
             self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
                                                 self.listen_ip, self.binary_name(), self.config_file)
+            remote_wrapper_script = remote_run_dir.child(OsmoTrx.WRAPPER_SCRIPT)
             remote_config_file = remote_run_dir.child(OsmoTrx.CONF_OSMO_TRX)
             remote_lib = self.remote_inst.child('lib')
             remote_binary = self.remote_inst.child('bin', self.binary_name())
-            args = ('LD_LIBRARY_PATH=%s' % remote_lib, remote_binary, '-C', remote_config_file)
+            process.scp(self.run_dir, self.remote_user, self.listen_ip, 'scp-wrapper-to-remote', wrapper_script, remote_wrapper_script)
+
+            args = ('LD_LIBRARY_PATH=%s' % remote_lib, remote_wrapper_script, remote_binary, '-C', remote_config_file)
             self.proc_trx = self.launch_process_remote(self.binary_name(), args, remote_cwd=remote_run_dir, keepalive=keepalive)
 
     def trx_ready(self):

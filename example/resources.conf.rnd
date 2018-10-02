@@ -28,6 +28,7 @@ bts:
     type: uhd
     launch_trx: true
     clock_reference: external
+    multi_arfcn: true
     remote_user: jenkins
     trx_ip: 127.0.0.1
   ciphers: [a5_0, a5_1]

@@ -8,7 +8,7 @@ log stderr
  logging color 1
  logging print category 1
  logging print extended-timestamp 1
- logging level all debug
+ logging level set-all debug
 !
 line vty
  no login

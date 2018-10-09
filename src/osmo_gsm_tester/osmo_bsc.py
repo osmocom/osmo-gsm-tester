@@ -53,8 +53,11 @@ class OsmoBsc(log.Origin):
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
-                                   'host %s and port not 22' % self.addr())
+        if self.rsl_ip and self.addr() != self.rsl_ip:
+            filter = 'host %s or host %s and port not 22' % (self.addr(), self.rsl_ip)
+        else:
+            filter = 'host %s and port not 22' % self.addr()
+        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None, filter)
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
 

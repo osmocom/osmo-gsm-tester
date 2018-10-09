@@ -28,7 +28,7 @@ bts:
   osmo_trx:
     launch_trx: true
     remote_user: jenkins
-    trx_ip: 10.42.42.230
+    trx_ip: 10.42.42.116
     clock_reference: external
     multi_arfcn: true
 

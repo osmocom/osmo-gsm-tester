@@ -63,12 +63,17 @@ cp $RUNDIR/BTS_Tests.cfg $VOL_BASE_DIR/bts-tester/
 
 echo Starting container with BTS testsuite
 docker kill ${DOCKER_NAME}
+if [ "x$PCU_SOCKET_PATH" != "x" ]; then
+	MOUNT_PCU_SOCKET_OPT="--mount type=bind,source=$(dirname "$PCU_SOCKET_PATH"),destination=/data/unix_pcu"
+else
+	MOUNT_PCU_SOCKET_OPT=""
+fi
 docker run	--rm \
 		--network $NET_NAME --ip 172.18.9.10 \
 		-e "TTCN3_PCAP_PATH=/data" \
 		--mount type=bind,source=$VOL_BASE_DIR/bts-tester,destination=/data \
 		--mount type=bind,source="$(dirname "$L2_SOCKET_PATH")",destination=/data/unix_l2 \
-		--mount type=bind,source="$(dirname "$PCU_SOCKET_PATH")",destination=/data/unix_pcu \
+		$MOUNT_PCU_SOCKET_OPT \
 		--name ${DOCKER_NAME} \
 		$REPO_USER/${SUITE_NAME} &
 child_ps=$!

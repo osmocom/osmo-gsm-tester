@@ -46,11 +46,17 @@ bts_tmpl_file = os.path.join(own_dir, 'scripts', 'BTS_Tests.cfg.tmpl')
 script_run_dir = test.get_run_dir().new_dir('ttcn3')
 bts_cfg_file = os.path.join(str(script_run_dir), 'BTS_Tests.cfg')
 junit_ttcn3_dst_file = os.path.join(str(suite.trial.get_run_dir()), 'trial-') + suite.name() + '.xml'
-docker_cmd = (script_file, str(script_run_dir), junit_ttcn3_dst_file, osmocon.l2_socket_path(), bts.pcu_socket_path())
+if bts.bts_type() == 'osmo-bts-trx':
+    pcu_available = True
+    pcu_sk = bts.pcu_socket_path()
+else: # PCU unix socket not available locally
+    pcu_available = False
+    pcu_sk = ''
+docker_cmd = (script_file, str(script_run_dir), junit_ttcn3_dst_file, osmocon.l2_socket_path(), pcu_sk)
 
 print('Creating template')
 mytemplate = Template(filename=bts_tmpl_file)
-r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr())
+r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available)
 with open(bts_cfg_file, 'w') as f:
     f.write(r)
 

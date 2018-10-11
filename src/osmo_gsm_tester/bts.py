@@ -157,6 +157,10 @@ class Bts(log.Origin, metaclass=ABCMeta):
         'Get the Pcu object associated with the BTS'
         pass
 
+    def bts_type(self):
+        'Get the type of BTS'
+        return self.conf.get('type')
+
     def set_bsc(self, bsc):
         self.bsc = bsc
 

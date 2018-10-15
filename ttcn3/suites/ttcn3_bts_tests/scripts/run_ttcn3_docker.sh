@@ -3,8 +3,9 @@ set -x
 
 RUNDIR="$1"
 JUNIT_TTCN3_DST_FILE="$2"
-L2_SOCKET_PATH="$3"
-PCU_SOCKET_PATH="$4"
+BSC_RSL_ADDR="$3"
+L2_SOCKET_PATH="$4"
+PCU_SOCKET_PATH="$5"
 
 # Absolute path to this script
 SCRIPT=$(readlink -f "$0")
@@ -27,7 +28,7 @@ DOCKER_NAME="$BUILD_TAG-$SUITE_NAME"
 network_create() {
 	NET=$1
 	echo Creating network $NET_NAME
-	docker network create --internal --subnet $NET $NET_NAME
+	docker network create --subnet $NET $NET_NAME
 }
 
 network_remove() {
@@ -70,6 +71,7 @@ else
 fi
 docker run	--rm \
 		--network $NET_NAME --ip 172.18.9.10 \
+		-p ${BSC_RSL_ADDR}:3003:3003 \
 		-e "TTCN3_PCAP_PATH=/data" \
 		--mount type=bind,source=$VOL_BASE_DIR/bts-tester,destination=/data \
 		--mount type=bind,source="$(dirname "$L2_SOCKET_PATH")",destination=/data/unix_l2 \

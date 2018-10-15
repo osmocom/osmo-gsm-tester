@@ -30,7 +30,8 @@ stp_dummy.start()
 msc_dummy.start()
 mgw_dummy.start()
 
-bsc.set_rsl_ip('172.18.9.10')
+nat_rsl_ip = suite.ip_address().get('addr')
+bsc.set_rsl_ip(nat_rsl_ip)
 bsc.bts_add(bts)
 sgsn_dummy.bts_add(bts)
 
@@ -52,7 +53,7 @@ if bts.bts_type() == 'osmo-bts-trx':
 else: # PCU unix socket not available locally
     pcu_available = False
     pcu_sk = ''
-docker_cmd = (script_file, str(script_run_dir), junit_ttcn3_dst_file, osmocon.l2_socket_path(), pcu_sk)
+docker_cmd = (script_file, str(script_run_dir), junit_ttcn3_dst_file, nat_rsl_ip, osmocon.l2_socket_path(), pcu_sk)
 
 print('Creating template')
 mytemplate = Template(filename=bts_tmpl_file)

@@ -48,8 +48,10 @@ wait(ms.is_attached)
 
 # We need to use inet46 since ofono qmi only uses ipv4v6 eua (OS#2713)
 ctx_id_v4 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv4)
-sleep(5)
-# TODO: send ping to server or open TCP conn with a socket in python
+print("Setting up data plan for %r" % repr(ctx_id_v4))
+ms.setup_context_data_plane(ctx_id_v4)
+print("Running 10 ping requests for %r" % repr(ctx_id_v4))
+ms.run_netns_wait('ping', ('ping', '-c', '10', ggsn.addr()))
 ms.deactivate_context(ctx_id_v4)
 
 # We need to use inet46 since ofono qmi only uses ipv4v6 eua (OS#2713)

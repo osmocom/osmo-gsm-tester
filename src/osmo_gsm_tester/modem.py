@@ -17,10 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, util, sms
+from . import log, util, sms, process
 from .event_loop import MainLoop
 
 from pydbus import SystemBus, Variant
+import os
 
 # Required for Gio.Cancellable.
 # See https://lazka.github.io/pgi-docs/Gio-2.0/classes/Cancellable.html#Gio.Cancellable
@@ -323,15 +324,17 @@ class Modem(log.Origin):
     CTX_PROT_IPv6 = 'ipv6'
     CTX_PROT_IPv46 = 'dual'
 
-    def __init__(self, conf):
+    def __init__(self, suite_run, conf):
+        self.suite_run = suite_run
         self.conf = conf
         self.syspath = conf.get('path')
         self.dbuspath = get_dbuspath_from_syspath(self.syspath)
         super().__init__(log.C_TST, self.dbuspath)
-        self.dbg('creating from syspath %s', self.syspath)
+        self.dbg('creating from syspath %s' % self.syspath)
         self.msisdn = None
         self._ki = None
         self._imsi = None
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name().strip('/')))
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.dbuspath)
         self.register_attempts = 0
@@ -357,6 +360,9 @@ class Modem(log.Origin):
             self.power_off()
         self.dbus.cleanup()
         self.dbus = None
+
+    def netns(self):
+        return os.path.basename(self.syspath.rstrip('/'))
 
     def properties(self, *args, **kwargs):
         '''Return a dict of properties on this modem. For the actual arguments,
@@ -626,6 +632,23 @@ class Modem(log.Origin):
         connmgr = self.dbus.interface(I_CONNMGR)
         connmgr.RemoveContext(ctx_id)
         self.log('context deactivated', path=ctx_id)
+
+    def run_netns_wait(self, name, popen_args):
+        proc = process.NetNSProcess(name, self.run_dir.new_dir(name), self.netns(), popen_args,
+                                       env={})
+        process.run_proc_sync(proc)
+
+    def setup_context_data_plane(self, ctx_id):
+        self.dbg('setup_context_data', path=ctx_id)
+        ctx = systembus_get(ctx_id)
+        ctx_settings = ctx.GetProperties().get('Settings', None)
+        if not ctx_settings:
+            raise log.Error('%s no Settings found! No way to get iface!' % ctx_id)
+        iface = ctx_settings.get('Interface', None)
+        if not iface:
+            raise log.Error('%s Settings contains no iface! %r' % (ctx_id, repr(ctx_settings)))
+        self.run_netns_wait('ifup', ('ip', 'link', 'set', 'dev', iface, 'up'))
+        self.run_netns_wait('dhcp', ('udhcpc', '-q', '-i', iface))
 
     def sms_send(self, to_msisdn_or_modem, *tokens):
         if isinstance(to_msisdn_or_modem, Modem):

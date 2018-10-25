@@ -328,7 +328,7 @@ class SuiteRun(log.Origin):
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
         self.dbg('create Modem object', conf=conf)
-        ms = modem.Modem(conf)
+        ms = modem.Modem(self, conf)
         self.register_for_cleanup(ms)
         return ms
 

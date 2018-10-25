@@ -100,6 +100,9 @@ class Process(log.Origin):
             time.sleep(wait_step)
         return False
 
+    def send_signal(self, sig):
+        os.kill(self.process_obj.pid, sig)
+
     def terminate(self):
         if self.process_obj is None:
             return
@@ -109,21 +112,21 @@ class Process(log.Origin):
         while True:
             # first try SIGINT to allow stdout+stderr flushing
             self.log('Terminating (SIGINT)')
-            os.kill(self.process_obj.pid, signal.SIGINT)
+            self.send_signal(signal.SIGINT)
             self.killed = signal.SIGINT
             if self._poll_termination():
                 break
 
             # SIGTERM maybe?
             self.log('Terminating (SIGTERM)')
-            self.process_obj.terminate()
+            self.send_signal(signal.SIGTERM)
             self.killed = signal.SIGTERM
             if self._poll_termination():
                 break
 
             # out of patience
             self.log('Terminating (SIGKILL)')
-            self.process_obj.kill()
+            self.send_signal(signal.SIGKILL)
             self.killed = signal.SIGKILL
             break;
 
@@ -236,6 +239,22 @@ class RemoteProcess(Process):
                                      ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
 
+class NetNSProcess(Process):
+    NETNS_EXEC_BIN = 'osmo-gsm-tester_netns_exec.sh'
+    def __init__(self, name, run_dir, netns, popen_args, **popen_kwargs):
+        super().__init__(name, run_dir, popen_args, **popen_kwargs)
+        self.netns = netns
+
+        self.popen_args = ['sudo', self.NETNS_EXEC_BIN, self.netns] + list(popen_args)
+        self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
+
+    # HACK: Since we run under sudo, only way to kill root-owned process is to kill as root...
+    # This function is overwritten from Process.
+    def send_signal(self, sig):
+        kill_cmd = ('kill', '-%d' % int(sig), str(self.process_obj.pid))
+        run_local_netns_sync(self.run_dir, self.name()+"-kill", self.netns, kill_cmd)
+
+
 def run_proc_sync(proc):
     try:
         proc.launch()
@@ -250,6 +269,11 @@ def run_proc_sync(proc):
 def run_local_sync(run_dir, name, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = Process(name, run_dir, popen_args)
+    run_proc_sync(proc)
+
+def run_local_netns_sync(run_dir, name, netns, popen_args):
+    run_dir =run_dir.new_dir(name)
+    proc = NetNSProcess(name, run_dir, netns, popen_args)
     run_proc_sync(proc)
 
 def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):

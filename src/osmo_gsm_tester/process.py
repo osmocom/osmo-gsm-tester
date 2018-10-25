@@ -236,25 +236,26 @@ class RemoteProcess(Process):
                                      ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
 
+def run_proc_sync(proc):
+    try:
+        proc.launch()
+        proc.wait()
+    except Exception as e:
+        proc.terminate()
+        raise e
+    if proc.result != 0:
+        log.ctx(proc)
+        raise log.Error('Exited in error')
 
 def run_local_sync(run_dir, name, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = Process(name, run_dir, popen_args)
-    proc.launch()
-    proc.wait()
-    if proc.result != 0:
-        log.ctx(proc)
-        raise log.Error('Exited in error')
+    run_proc_sync(proc)
 
 def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):
     run_dir = run_dir.new_dir(name)
-    proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd,
-                                 popen_args)
-    proc.launch()
-    proc.wait()
-    if proc.result != 0:
-        log.ctx(proc)
-        raise log.Error('Exited in error')
+    proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd, popen_args)
+    run_proc_sync(proc)
 
 def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):
     run_local_sync(run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (remote_user, remote_addr, remote_path)))

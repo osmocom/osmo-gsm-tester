@@ -23,7 +23,7 @@ import time
 import pprint
 from . import config, log, util, resource, test
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon, ms_driver
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon, ms_driver, iperf3
 
 class Timeout(Exception):
     pass
@@ -348,6 +348,12 @@ class SuiteRun(log.Origin):
         osmocon_obj = osmocon.Osmocon(self, conf=conf)
         self.register_for_cleanup(osmocon_obj)
         return osmocon_obj
+
+    def iperf3srv(self, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        iperf3srv_obj = iperf3.IPerf3Server(self, ip_address)
+        return iperf3srv_obj
 
     def msisdn(self):
         msisdn = self.resources_pool.next_msisdn(self)

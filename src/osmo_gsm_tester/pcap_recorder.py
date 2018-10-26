@@ -26,7 +26,7 @@ from . import log, util, config, template, process, osmo_ctrl
 
 class PcapRecorder(log.Origin):
 
-    def __init__(self, suite_run, run_dir, iface=None, filters=''):
+    def __init__(self, suite_run, run_dir, iface=None, filters='', netns=None):
         self.iface = iface
         if not self.iface:
             self.iface = "any"
@@ -34,16 +34,20 @@ class PcapRecorder(log.Origin):
         super().__init__(log.C_RUN, 'pcap-recorder_%s' % self.iface, filters=self.filters)
         self.suite_run = suite_run
         self.run_dir = run_dir
+        self.netns = netns
         self.start()
 
     def start(self):
         self.dbg('Recording pcap', self.run_dir, self.filters)
         dumpfile = os.path.join(os.path.abspath(self.run_dir), self.name() + ".pcap")
-        self.process = process.Process(self.name(), self.run_dir,
-                                       ('tcpdump', '-n',
-                                       '-i', self.iface,
-                                       '-w', dumpfile,
-                                       self.filters))
+        popen_args = ('tcpdump', '-n',
+                      '-i', self.iface,
+                      '-w', dumpfile,
+                      self.filters)
+        if self.netns:
+            self.process = process.NetNSProcess(self.name(), self.run_dir, self.netns, popen_args)
+        else:
+            self.process = process.Process(self.name(), self.run_dir, popen_args)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
 

@@ -9,6 +9,7 @@ ip_address:
 - addr: 10.42.42.7
 - addr: 10.42.42.8
 - addr: 10.42.42.9
+- addr: 10.42.42.10
 
 bts:
 - label: sysmoBTS 1002

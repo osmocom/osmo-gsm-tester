@@ -57,8 +57,8 @@ network
 % endif
   ip.access unit_id ${bts.ipa_unit_id} 0
   oml ip.access stream_id ${bts.stream_id} line 0
-% if bts.get('sgsn', False):
-  gprs mode gprs
+% if bts.get('sgsn', False) and bts['gprs_mode'] != 'none':
+  gprs mode ${bts.gprs_mode}
   gprs routing area ${bts.routing_area_code}
   gprs network-control-order nc1
   gprs cell bvci ${bts.bvci}

@@ -110,6 +110,11 @@ def channel_allocator(val):
         return
     raise ValueError('Unknown Channel Allocator Policy %r' % val)
 
+def gprs_mode(val):
+    if val in ('none', 'gprs', 'egprs'):
+        return
+    raise ValueError('Unknown GPRS mode %r' % val)
+
 def codec(val):
     if val in ('hr1', 'hr2', 'hr3', 'fr1', 'fr2', 'fr3'):
         return
@@ -136,6 +141,7 @@ CIPHER = 'cipher'
 MODEM_FEATURE = 'modem_feature'
 PHY_CHAN = 'chan'
 CHAN_ALLOCATOR = 'chan_allocator'
+GPRS_MODE = 'gprs_mode'
 CODEC = 'codec'
 OSMO_TRX_CLOCK_REF = 'osmo_trx_clock_ref'
 
@@ -156,6 +162,7 @@ SCHEMA_TYPES = {
         MODEM_FEATURE: modem_feature,
         PHY_CHAN: phy_channel_config,
         CHAN_ALLOCATOR: channel_allocator,
+        GPRS_MODE: gprs_mode,
         CODEC: codec,
         OSMO_TRX_CLOCK_REF: osmo_trx_clock_ref,
     }

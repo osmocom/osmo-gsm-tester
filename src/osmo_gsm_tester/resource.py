@@ -57,6 +57,7 @@ RESOURCES_SCHEMA = {
         'bts[].direct_pcu': schema.BOOL_STR,
         'bts[].ciphers[]': schema.CIPHER,
         'bts[].channel_allocator': schema.CHAN_ALLOCATOR,
+        'bts[].gprs_mode': schema.GPRS_MODE,
         'bts[].num_trx': schema.UINT,
         'bts[].max_trx': schema.UINT,
         'bts[].trx_list[].addr': schema.IPV4,

@@ -9,6 +9,7 @@ build_repo libosmo-abis ${SANITIZE_FLAGS}
 build_repo libosmo-netif ${SANITIZE_FLAGS} --disable-doxygen
 build_repo libosmo-sccp ${SANITIZE_FLAGS}
 build_repo osmo-ggsn ${SANITIZE_FLAGS}
+build_repo osmo-hlr ${SANITIZE_FLAGS}
 build_repo libasn1c ${SANITIZE_FLAGS}
 build_repo osmo-iuh ${SANITIZE_FLAGS}
 build_repo osmo-sgsn ${SANITIZE_FLAGS} --enable-iu

@@ -175,6 +175,31 @@ prune_files() {
         done
 }
 
+add_rpath() {
+	# Adds an RPATH to executables in bin/ or sbin/ to search for the
+	# (Osmocom) libraries in `dirname /proc/self/exe`/../lib/. Adds an
+	# RPATH to a library to search in the same directory as the library.
+	#
+	# NOTE: Binaries should not have the SUID bit set and should run as the
+	# user executing the binary.
+	#
+	# NOTE: $ORIGIN is not a shell variable but a feature of the dynamic
+	# linker that will be expanded at runtime. For details see:
+	# http://man7.org/linux/man-pages/man8/ld.so.8.html
+	#
+	# Add an rpath relative to the binary and library if the directory
+	# exists.
+	if [ -d bin/ ]; then
+		find bin -depth -type f -exec patchelf --set-rpath '$ORIGIN/../lib/' {} \;
+	fi
+	if [ -d sbin/ ]; then
+		find sbin -depth -type f -exec patchelf --set-rpath '$ORIGIN/../lib/' {} \;
+	fi
+	if [ -d lib/ ]; then
+		find lib -depth -type f -name "lib*.so.*" -exec patchelf --set-rpath '$ORIGIN/' {} \;
+	fi
+}
+
 create_bin_tgz() {
   # build the archive that is going to be copied to the tester
 
@@ -190,6 +215,7 @@ create_bin_tgz() {
   prune_files sbin "$wanted_binaries_sbin"
 
   cd "$prefix_real"
+  add_rpath
   this="$name.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
   tar="${this}.tgz"
   tar czf "$base/$tar" *

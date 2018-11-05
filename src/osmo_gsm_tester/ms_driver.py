@@ -74,6 +74,33 @@ class MsDriver(log.Origin):
             self.event_server_sk_tmp_dir = tempfile.mkdtemp('', 'ogteventserversk')
         return os.path.join(self.event_server_sk_tmp_dir, 'osmo_ms_driver.unix')
 
+    def build_binary_options(self):
+        """Builds an instance of BinaryOptions.
+
+        Populates the BinaryOptions by searching the virtphy and mobile
+        application within the trial directory.
+        """
+
+        # Get the base directory for the virtphy/mobile application
+        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmocom-bb')))
+
+        # Assume these are dynamically linked and verify there is a lib dir.
+        lib = inst.child('lib')
+        if not os.path.isdir(lib):
+            raise RuntimeError('No lib/ in %r' % inst)
+        env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+
+        def check_and_return_binary(name):
+            """Checks the binary exists and returns the path."""
+            binary = inst.child('bin', name)
+            if not os.path.isfile(name):
+                raise RuntimeError('Binary missing: %r' % binary)
+            return binary
+
+        virtphy = check_and_return_binary('virtphy')
+        mobile = check_and_return_binary('mobile')
+        return BinaryOptions(virtphy, mobile, env)
+
     def configure(self):
         """
         Configures the subscribers, tests and registration server. Needs to be
@@ -83,10 +110,10 @@ class MsDriver(log.Origin):
 
         self._ev_server = EventServer("ev_server", event_server_path)
         self._ev_server.listen(self._loop)
-        options = BinaryOptions("virtphy", "mobile", None)
+        options = self.build_binary_options()
         self._test_case = MassUpdateLocationTest("mass", options, self._num_ms, self._cdf,
                                                  self._ev_server,
-                                                 util.Dir(self.event_server_sk_tmp_dir),
+                                                 util.Dir(self.suite_run.get_test_run_dir()),
                                                  suite_run=self._suite_run)
 
         # TODO: We should pass subscribers down to the test and not get it from

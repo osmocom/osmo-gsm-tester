@@ -21,7 +21,7 @@ from .simple_loop import SimpleLoop
 from .location_update_test import MassUpdateLocationTest
 from .cdf import cdfs
 from .starter import BinaryOptions
-from osmo_gsm_tester import log
+from osmo_gsm_tester import log, util
 
 # System modules
 from datetime import timedelta
@@ -64,7 +64,7 @@ def main():
 
     loop = SimpleLoop()
 
-    tmp_dir = tempfile.mkdtemp(suffix="osmo-ms-driver")
+    tmp_dir = util.Dir(tempfile.mkdtemp(suffix="osmo-ms-driver"))
     log.log("Going to store files in ", tmp_dir=tmp_dir)
 
     # How long should starting all apps take
@@ -73,7 +73,7 @@ def main():
     time_step=datetime.timedelta(milliseconds=args.launch_interval)
 
     # Event server path
-    event_server_path = os.path.join(tmp_dir,  "osmo_ms_driver.unix")
+    event_server_path = os.path.join(str(tmp_dir),  "osmo_ms_driver.unix")
 
     # The function that decides when to start something
     cdf = cdfs[args.cdf_name](time_start, time_step)

@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import timedelta
-from . import log
+from . import log, util
 from osmo_ms_driver.cdf import cdfs
 from osmo_ms_driver.event_server import EventServer
 from osmo_ms_driver.simple_loop import SimpleLoop
@@ -85,7 +85,8 @@ class MsDriver(log.Origin):
         self._ev_server.listen(self._loop)
         options = BinaryOptions("virtphy", "mobile", None)
         self._test_case = MassUpdateLocationTest("mass", options, self._num_ms, self._cdf,
-                                                 self._ev_server, self.event_server_sk_tmp_dir,
+                                                 self._ev_server,
+                                                 util.Dir(self.event_server_sk_tmp_dir),
                                                  suite_run=self._suite_run)
 
         # TODO: We should pass subscribers down to the test and not get it from

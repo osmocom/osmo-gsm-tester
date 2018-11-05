@@ -31,7 +31,7 @@ class Launcher(log.Origin):
         self._binary = binary
         self._env = env
         self._name_number = name_number
-        self._tmp_dir = tmp_dir
+        self._tmp_dir = tmp_dir.new_dir(self.name())
 
     def name_number(self):
         return self._name_number

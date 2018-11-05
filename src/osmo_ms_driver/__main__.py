@@ -20,6 +20,7 @@ from .event_server import EventServer
 from .simple_loop import SimpleLoop
 from .location_update_test import MassUpdateLocationTest
 from .cdf import cdfs
+from .starter import BinaryOptions
 from osmo_gsm_tester import log
 
 # System modules
@@ -82,7 +83,8 @@ def main():
     ev_server.listen(loop)
 
     # Just a single test for now.
-    test = MassUpdateLocationTest("lu_test", args.num_ms, cdf, ev_server, tmp_dir)
+    options = BinaryOptions("virtphy", "mobile", None)
+    test = MassUpdateLocationTest("lu_test", options, args.num_ms, cdf, ev_server, tmp_dir)
     atexit.register(test.stop_all)
 
     # Run until everything has been launched

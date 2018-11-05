@@ -18,6 +18,7 @@
 
 from osmo_gsm_tester import log, template
 
+import collections
 import os
 import os.path
 import subprocess
@@ -26,9 +27,13 @@ import time
 _devnull = open(os.devnull, 'w')
 #_devnull = open('/dev/stdout', 'w')
 
+BinaryOptions = collections.namedtuple("BinaryOptions", ["virtphy", "mobile", "env"])
+
 class Launcher(log.Origin):
-    def __init__(self, base_name, name_number, tmp_dir):
+    def __init__(self, binary, env, base_name, name_number, tmp_dir):
         super().__init__(log.C_RUN, "{}/{}".format(base_name, name_number))
+        self._binary = binary
+        self._env = env
         self._name_number = name_number
         self._tmp_dir = tmp_dir
 
@@ -36,8 +41,8 @@ class Launcher(log.Origin):
         return self._name_number
 
 class OsmoVirtPhy(Launcher):
-    def __init__(self, name_number, tmp_dir):
-        super().__init__("osmo-ms-virt-phy", name_number, tmp_dir)
+    def __init__(self, binary, env, name_number, tmp_dir):
+        super().__init__(binary, env, "osmo-ms-virt-phy", name_number, tmp_dir)
         self._phy_filename = os.path.join(self._tmp_dir, "osmocom_l2_" + self._name_number)
         self._vphy_proc = None
 
@@ -49,9 +54,9 @@ class OsmoVirtPhy(Launcher):
             raise log.Error('Path for unix socket is longer than max allowed len for unix socket path (107):', self._phy_filename)
 
         self.log("Starting virtphy process")
-        args = ["virtphy", "--l1ctl-sock=" + self._phy_filename]
+        args = [self._binary, "--l1ctl-sock=" + self._phy_filename]
         self.log(' '.join(args))
-        self._vphy_proc = subprocess.Popen(args, stderr=_devnull, stdout=_devnull)
+        self._vphy_proc = subprocess.Popen(args, stderr=_devnull, stdout=_devnull, env=self._env)
 
     def verify_ready(self):
         while True:
@@ -65,8 +70,8 @@ class OsmoVirtPhy(Launcher):
             self._vphy_proc.terminate()
 
 class OsmoMobile(Launcher):
-    def __init__(self, name_number, tmp_dir, lua_tmpl, cfg_tmpl, imsi_ki_generator, phy_filename, ev_server_path):
-        super().__init__("osmo-ms-mob", name_number, tmp_dir)
+    def __init__(self, binary, env, name_number, tmp_dir, lua_tmpl, cfg_tmpl, imsi_ki_generator, phy_filename, ev_server_path):
+        super().__init__(binary, env, "osmo-ms-mob", name_number, tmp_dir)
         self._lua_template = lua_tmpl
         self._cfg_template = cfg_tmpl
         self._imsi_ki_generator = imsi_ki_generator
@@ -117,9 +122,9 @@ class OsmoMobile(Launcher):
 
         self.log("Starting process")
         # Let the kernel pick an unused port for the VTY.
-        args = ["mobile", "-c", mob_filename, "--vty-port=0"]
+        args = [self._binary, "-c", mob_filename, "--vty-port=0"]
         self.log(' '.join(args))
-        self._omob_proc = subprocess.Popen(args, stderr=_devnull, stdout=_devnull)
+        self._omob_proc = subprocess.Popen(args, stderr=_devnull, stdout=_devnull, env=self._env)
 
     def kill(self):
         """Clean up things."""

@@ -21,6 +21,7 @@ from osmo_ms_driver.cdf import cdfs
 from osmo_ms_driver.event_server import EventServer
 from osmo_ms_driver.simple_loop import SimpleLoop
 from osmo_ms_driver.location_update_test import MassUpdateLocationTest
+from osmo_ms_driver.starter import BinaryOptions
 
 import os.path
 import shutil
@@ -83,7 +84,9 @@ class MsDriver(log.Origin):
 
         self._ev_server = EventServer("ev_server", event_server_path)
         self._ev_server.listen(self._loop)
-        self._test_case = MassUpdateLocationTest("mass", self._num_ms, self._cdf, self._ev_server, self.event_server_sk_tmp_dir)
+        options = BinaryOptions("virtphy", "mobile", None)
+        self._test_case = MassUpdateLocationTest("mass", options, self._num_ms, self._cdf,
+                                                 self._ev_server, self.event_server_sk_tmp_dir)
 
         # TODO: We should pass subscribers down to the test and not get it from
         # there.

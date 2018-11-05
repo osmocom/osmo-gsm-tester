@@ -56,8 +56,9 @@ class MassUpdateLocationTest(log.Origin):
     TEMPLATE_LUA = "osmo-mobile-lu.lua"
     TEMPLATE_CFG = "osmo-mobile.cfg"
 
-    def __init__(self, name, number_of_ms, cdf_function, event_server, tmp_dir):
+    def __init__(self, name, options, number_of_ms, cdf_function, event_server, tmp_dir):
         super().__init__(log.C_RUN, name)
+        self._binary_options = options
         self._number_of_ms = number_of_ms
         self._cdf = cdf_function
         self._cdf.set_target(number_of_ms)
@@ -71,10 +72,12 @@ class MassUpdateLocationTest(log.Origin):
         for i in range(0, number_of_ms):
             ms_name = "%.5d" % i
 
-            phy = OsmoVirtPhy(ms_name, tmp_dir)
+            phy = OsmoVirtPhy(options.virtphy, options.env,
+                              ms_name, tmp_dir)
             self._phys.append(phy)
 
-            launcher = OsmoMobile(ms_name, tmp_dir, self.TEMPLATE_LUA,
+            launcher = OsmoMobile(options.mobile, options.env,
+                                ms_name, tmp_dir, self.TEMPLATE_LUA,
                                 self.TEMPLATE_CFG, imsi_gen,
                                 phy.phy_filename(),
                                 event_server.server_path())

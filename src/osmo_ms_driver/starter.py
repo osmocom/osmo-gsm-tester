@@ -39,6 +39,7 @@ class OsmoVirtPhy(Launcher):
     def __init__(self, name_number, tmp_dir):
         super().__init__("osmo-ms-virt-phy", name_number, tmp_dir)
         self._phy_filename = os.path.join(self._tmp_dir, "osmocom_l2_" + self._name_number)
+        self._vphy_proc = None
 
     def phy_filename(self):
         return self._phy_filename
@@ -61,7 +62,7 @@ class OsmoVirtPhy(Launcher):
     def kill(self):
         """Clean up things."""
         if self._vphy_proc:
-            self._vphy_proc.kill()
+            self._vphy_proc.terminate()
 
 class OsmoMobile(Launcher):
     def __init__(self, name_number, tmp_dir, lua_tmpl, cfg_tmpl, imsi_ki_generator, phy_filename, ev_server_path):
@@ -72,6 +73,7 @@ class OsmoMobile(Launcher):
         self._phy_filename = phy_filename
         self._ev_server_path = ev_server_path
         self._imsi, self._ki = next(self._imsi_ki_generator)
+        self._omob_proc = None
 
     def imsi(self):
         return self._imsi
@@ -122,4 +124,4 @@ class OsmoMobile(Launcher):
     def kill(self):
         """Clean up things."""
         if self._omob_proc:
-            self._omob_proc.kill()
+            self._omob_proc.terminate()

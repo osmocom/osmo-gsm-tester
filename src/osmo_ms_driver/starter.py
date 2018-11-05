@@ -16,16 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from osmo_gsm_tester import log, template
+from osmo_gsm_tester import log, process, template
 
 import collections
 import os
 import os.path
-import subprocess
 import time
-
-_devnull = open(os.devnull, 'w')
-#_devnull = open('/dev/stdout', 'w')
 
 BinaryOptions = collections.namedtuple("BinaryOptions", ["virtphy", "mobile", "env"])
 
@@ -49,14 +45,17 @@ class OsmoVirtPhy(Launcher):
     def phy_filename(self):
         return self._phy_filename
 
-    def start(self, loop):
+    def start(self, loop, suite_run=None):
         if len(self._phy_filename.encode()) > 107:
             raise log.Error('Path for unix socket is longer than max allowed len for unix socket path (107):', self._phy_filename)
 
-        self.log("Starting virtphy process")
+        self.log("Starting virtphy")
         args = [self._binary, "--l1ctl-sock=" + self._phy_filename]
-        self.log(' '.join(args))
-        self._vphy_proc = subprocess.Popen(args, stderr=_devnull, stdout=_devnull, env=self._env)
+        self._vphy_proc = process.Process(self.name(), self._tmp_dir,
+                                          args, env=self._env)
+        if suite_run:
+            suite_run.remember_to_stop(self._vphy_proc)
+        self._vphy_proc.launch()
 
     def verify_ready(self):
         while True:
@@ -64,7 +63,7 @@ class OsmoVirtPhy(Launcher):
                 return
             time.sleep(0.2)
 
-    def kill(self):
+    def terminate(self):
         """Clean up things."""
         if self._vphy_proc:
             self._vphy_proc.terminate()
@@ -116,17 +115,20 @@ class OsmoMobile(Launcher):
             w.write(mob_vty)
         return mob_cfg_file
 
-    def start(self, loop):
+    def start(self, loop, suite_run=None):
         lua_filename = self.write_lua_cfg()
         mob_filename = self.write_mob_cfg(lua_filename, self._phy_filename)
 
-        self.log("Starting process")
+        self.log("Starting mobile")
         # Let the kernel pick an unused port for the VTY.
         args = [self._binary, "-c", mob_filename, "--vty-port=0"]
-        self.log(' '.join(args))
-        self._omob_proc = subprocess.Popen(args, stderr=_devnull, stdout=_devnull, env=self._env)
+        self._omob_proc = process.Process(self.name(), self._tmp_dir,
+                                          args, env=self._env)
+        if suite_run:
+            suite_run.remember_to_stop(self._omob_proc)
+        self._omob_proc.launch()
 
-    def kill(self):
+    def terminate(self):
         """Clean up things."""
         if self._omob_proc:
             self._omob_proc.terminate()

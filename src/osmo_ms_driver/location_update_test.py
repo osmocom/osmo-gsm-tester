@@ -56,12 +56,14 @@ class MassUpdateLocationTest(log.Origin):
     TEMPLATE_LUA = "osmo-mobile-lu.lua"
     TEMPLATE_CFG = "osmo-mobile.cfg"
 
-    def __init__(self, name, options, number_of_ms, cdf_function, event_server, tmp_dir):
+    def __init__(self, name, options, number_of_ms, cdf_function,
+                 event_server, tmp_dir, suite_run=None):
         super().__init__(log.C_RUN, name)
         self._binary_options = options
         self._number_of_ms = number_of_ms
         self._cdf = cdf_function
         self._cdf.set_target(number_of_ms)
+        self._suite_run = suite_run
         self._unstarted = []
         self._mobiles = []
         self._phys = []
@@ -100,7 +102,7 @@ class MassUpdateLocationTest(log.Origin):
         """
         self.log("Pre-launching all virtphy's")
         for phy in self._phys:
-            phy.start(loop)
+            phy.start(loop, self._suite_run)
 
         self.log("Checking if sockets are in the filesystem")
         for phy in self._phys:
@@ -132,7 +134,7 @@ class MassUpdateLocationTest(log.Origin):
         # start pending MS
         while len(self._started) < self._cdf.current_scaled_value() and len(self._unstarted) > 0:
             ms = self._unstarted.pop(0)
-            ms.start(loop)
+            ms.start(loop, self._suite_run)
             launch_time = time.clock_gettime(time.CLOCK_MONOTONIC)
             self._results[ms.name_number()].set_launch_time(launch_time)
             self._started.append(ms)
@@ -170,7 +172,7 @@ class MassUpdateLocationTest(log.Origin):
 
     def stop_all(self):
         for launcher in self._started:
-            launcher.kill()
+            launcher.terminate()
 
     def handle_msg(self, _data, addr, time):
         import json

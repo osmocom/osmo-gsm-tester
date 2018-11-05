@@ -63,7 +63,6 @@ class MsDriver(log.Origin):
         self._test_duration = timedelta(seconds=120)
         self._cdf = cdfs["ease_in_out"](self._time_start, self._time_step)
         self._loop = SimpleLoop()
-        self._suite_run.remember_to_stop(self)
         self._test_case = None
         self.event_server_sk_tmp_dir = None
 
@@ -86,7 +85,8 @@ class MsDriver(log.Origin):
         self._ev_server.listen(self._loop)
         options = BinaryOptions("virtphy", "mobile", None)
         self._test_case = MassUpdateLocationTest("mass", options, self._num_ms, self._cdf,
-                                                 self._ev_server, self.event_server_sk_tmp_dir)
+                                                 self._ev_server, self.event_server_sk_tmp_dir,
+                                                 suite_run=self._suite_run)
 
         # TODO: We should pass subscribers down to the test and not get it from
         # there.
@@ -120,16 +120,11 @@ class MsDriver(log.Origin):
 
     def cleanup(self):
         """
-        Stops the testcase and all launched processes. Called by the
-        suite.
+        Cleans up the driver (e.g. AF_UNIX files).
         """
 
         # Clean-up the temporary directory.
         if self.event_server_sk_tmp_dir:
             shutil.rmtree(path=self.event_server_sk_tmp_dir)
-
-        if not self._test_case:
-            return
-        self._test_case.stop_all()
 
 # vim: expandtab tabstop=4 shiftwidth=4

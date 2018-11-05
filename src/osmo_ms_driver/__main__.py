@@ -83,7 +83,7 @@ def main():
     ev_server.listen(loop)
 
     # Just a single test for now.
-    options = BinaryOptions("virtphy", "mobile", None)
+    options = BinaryOptions("virtphy", "mobile", os.environ)
     test = MassUpdateLocationTest("lu_test", options, args.num_ms, cdf, ev_server, tmp_dir)
     atexit.register(test.stop_all)
 

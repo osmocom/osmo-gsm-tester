@@ -64,6 +64,7 @@ class MsDriver(log.Origin):
         self._loop = SimpleLoop()
         self._suite_run.remember_to_stop(self)
         self._test_case = None
+        self.event_server_sk_tmp_dir = None
 
         if len(self.event_server_path().encode()) > 107:
             raise log.Error('Path for event_server socket is longer than max allowed len for unix socket path (107):', self.event_server_path())

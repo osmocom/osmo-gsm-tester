@@ -132,19 +132,47 @@ modem:
   ciphers: [a5_0, a5_1]
   features: ['sms', 'voice', 'ussd', 'sim']
 
-- label: ec20
-  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.4/1-5.4.1/1-5.4.1.6'
-  ki: '07F35D0A9476646169669401215580E0'
-  auth_algo: 'comp128v1'
-  ciphers: [a5_0, a5_1]
-  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
-
 - label: gobi2k
   path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.4/1-5.4.1/1-5.4.1.5'
   ki: '5752B3F43277C35D2D1D957007DF74E2'
   auth_algo: 'comp128v1'
   ciphers: [a5_0, a5_1]
   features: ['sim']
+
+- label: ec20_1
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.4/1-5.4.1/1-5.4.1.6'
+  ki: '07F35D0A9476646169669401215580E0'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: ec20_2
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.3/1-5.3.2'
+  ki: '278B899D126C31F3B24D21E3EB556530'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: ec20_3
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.3/1-5.3.3'
+  ki: 'B43BBCD8DE4D594F4146DE3D8ADC589D'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: ec20_4
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.3/1-5.3.5'
+  ki: 'A41F06F39DE3B0295C178A674D3E3636'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: ec20_5
+  path: '/sys/devices/pci0000:00/0000:00:12.2/usb1/1-5/1-5.3/1-5.3.6'
+  ki: '8CCBE85A62C6DC7AC2A9886F4BBC3146'
+  auth_algo: 'comp128v1'
+  ciphers: [a5_0, a5_1]
+  features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
 
 osmocon_phone:
   - serial_device: '/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00897B41-if00-port0'

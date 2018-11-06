@@ -74,6 +74,7 @@ RESOURCES_SCHEMA = {
         'bts[].osmo_trx.clock_reference': schema.OSMO_TRX_CLOCK_REF,
         'bts[].osmo_trx.trx_ip': schema.IPV4,
         'bts[].osmo_trx.remote_user': schema.STR,
+        'bts[].osmo_trx.dev_args': schema.STR,
         'bts[].osmo_trx.multi_arfcn': schema.BOOL_STR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,

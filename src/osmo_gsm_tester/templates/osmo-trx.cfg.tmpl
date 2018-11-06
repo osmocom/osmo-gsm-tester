@@ -24,6 +24,9 @@ trx
 %else:
  multi-arfcn disable
 %endif
+%if osmo_trx.get('dev_args', False):
+ dev-args ${osmo_trx.dev_args}
+%endif
  tx-sps 4
  rx-sps 4
  clock-ref ${osmo_trx.clock_reference}

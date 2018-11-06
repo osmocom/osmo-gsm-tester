@@ -34,6 +34,20 @@ bts:
     clock_reference: external
     multi_arfcn: true
 
+- label: UmTRX
+  type: osmo-bts-trx
+  ipa_unit_id: 12
+  addr: 10.42.42.54
+  band: GSM-1800
+  ciphers: [a5_0, a5_1]
+  osmo_trx:
+    type: uhd
+    launch_trx: true
+    remote_user: jenkins
+    trx_ip: 10.42.42.118
+    dev_args: addr=10.42.42.130,pa=NONE,pa_power_max_dbm=23,fifo_ctrl_window=0,status_port=12345
+    clock_reference: internal
+
 - label: LimeSDR-USB
   type: osmo-bts-trx
   ipa_unit_id: 11

@@ -1,4 +1,4 @@
-# osmo_ms_driver: Locationg Update Test
+# osmo_ms_driver: Location Update Test
 # Create MS's and wait for the Location Update to succeed.
 #
 # Copyright (C) 2018 by Holger Hans Peter Freyther

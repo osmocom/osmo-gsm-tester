@@ -24,6 +24,17 @@ from . import log, util, process, pcap_recorder
 
 DEFAULT_SRV_PORT = 5003
 
+
+def iperf3_result_to_json(file):
+    with open(file) as f:
+            # Sometimes iperf3 provides 2 dictionaries, the 2nd one being an error about being interrupted (by us).
+            # json parser doesn't support (raises exception) parsing several dictionaries at a time (not a valid json object).
+            # We are only interested in the first dictionary, the regular results one:
+            d = f.read().split("\n}\n")[0] + "\n}\n"
+            data = json.loads(d)
+    return data
+
+
 class IPerf3Server(log.Origin):
 
     def __init__(self, suite_run, ip_address):
@@ -55,9 +66,7 @@ class IPerf3Server(log.Origin):
         self.suite_run.stop_process(self.process)
 
     def get_results(self):
-        with open(self.log_file) as f:
-                data = json.load(f)
-        return data
+        return iperf3_result_to_json(self.log_file)
 
     def addr(self):
         return self.ip_address.get('addr')
@@ -100,8 +109,6 @@ class IPerf3Client(log.Origin):
         return self.get_results()
 
     def get_results(self):
-        with open(self.log_file) as f:
-                data = json.load(f)
-        return data
+        return iperf3_result_to_json(self.log_file)
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -77,7 +77,7 @@ class Process(log.Origin):
         self.set_name(self.name_str, pid=self.process_obj.pid)
         self.log('Launched')
 
-    def launch_sync(self):
+    def launch_sync(self, raise_nonsuccess=True):
         '''
         calls launch() method and block waiting for it to finish, serving the
         mainloop meanwhile.
@@ -88,9 +88,10 @@ class Process(log.Origin):
         except Exception as e:
             self.terminate()
             raise e
-        if self.result != 0:
+        if raise_nonsuccess and self.result != 0:
             log.ctx(self)
-            raise log.Error('Exited in error')
+            raise log.Error('Exited in error %d' % self.result)
+        return self.result
 
     def respawn(self):
         self.dbg('respawn')

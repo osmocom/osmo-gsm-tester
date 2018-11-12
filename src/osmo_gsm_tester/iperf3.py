@@ -105,7 +105,7 @@ class IPerf3Client(log.Origin):
             self.process = process.NetNSProcess(self.name(), self.run_dir, netns, popen_args, env={})
         else:
             self.process = process.Process(self.name(), self.run_dir, popen_args, env={})
-        process.run_proc_sync(self.process)
+        self.process.launch_sync()
         return self.get_results()
 
     def get_results(self):

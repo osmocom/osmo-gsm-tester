@@ -77,6 +77,21 @@ class Process(log.Origin):
         self.set_name(self.name_str, pid=self.process_obj.pid)
         self.log('Launched')
 
+    def launch_sync(self):
+        '''
+        calls launch() method and block waiting for it to finish, serving the
+        mainloop meanwhile.
+        '''
+        try:
+            self.launch()
+            self.wait()
+        except Exception as e:
+            self.terminate()
+            raise e
+        if self.result != 0:
+            log.ctx(self)
+            raise log.Error('Exited in error')
+
     def respawn(self):
         self.dbg('respawn')
         assert not self.is_running()
@@ -255,31 +270,20 @@ class NetNSProcess(Process):
         run_local_netns_sync(self.run_dir, self.name()+"-kill", self.netns, kill_cmd)
 
 
-def run_proc_sync(proc):
-    try:
-        proc.launch()
-        proc.wait()
-    except Exception as e:
-        proc.terminate()
-        raise e
-    if proc.result != 0:
-        log.ctx(proc)
-        raise log.Error('Exited in error')
-
 def run_local_sync(run_dir, name, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = Process(name, run_dir, popen_args)
-    run_proc_sync(proc)
+    proc.launch_sync()
 
 def run_local_netns_sync(run_dir, name, netns, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = NetNSProcess(name, run_dir, netns, popen_args)
-    run_proc_sync(proc)
+    proc.launch_sync()
 
 def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):
     run_dir = run_dir.new_dir(name)
     proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd, popen_args)
-    run_proc_sync(proc)
+    proc.launch_sync()
 
 def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):
     run_local_sync(run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (remote_user, remote_addr, remote_path)))

@@ -636,7 +636,7 @@ class Modem(log.Origin):
     def run_netns_wait(self, name, popen_args):
         proc = process.NetNSProcess(name, self.run_dir.new_dir(name), self.netns(), popen_args,
                                        env={})
-        process.run_proc_sync(proc)
+        proc.launch_sync()
 
     def setup_context_data_plane(self, ctx_id):
         self.dbg('setup_context_data', path=ctx_id)

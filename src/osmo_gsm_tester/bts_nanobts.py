@@ -253,7 +253,7 @@ class IpAccessConfig(log.Origin):
         self.bts_ip = bts_ip
         self.env = {}
 
-    def launch_process(self, binary_name, *args):
+    def create_process(self, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
         run_dir = self.run_dir.new_dir(binary_name)
         if not os.path.isfile(binary):
@@ -261,7 +261,6 @@ class IpAccessConfig(log.Origin):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        proc.launch()
         return proc
 
     def run(self, name_suffix, *args):
@@ -269,13 +268,8 @@ class IpAccessConfig(log.Origin):
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bsc')))
         lib = self.inst.child('lib')
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-        self.proc = self.launch_process(IpAccessConfig.BIN_IPACCESS_CONFIG, *args)
-        try:
-            MainLoop.wait(self, self.proc.terminated)
-        except Exception as e:
-            self.proc.terminate()
-            raise e
-        return self.proc.result
+        self.proc = self.create_process(IpAccessConfig.BIN_IPACCESS_CONFIG, *args)
+        return self.proc.launch_sync(raise_nonsuccess=False)
 
     def set_unit_id(self, unitid, trx_num, restart=False):
         uid_str = '%d/0/%d' % (unitid, trx_num)

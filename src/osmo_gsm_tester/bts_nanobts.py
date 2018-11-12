@@ -19,6 +19,7 @@
 
 import os
 import re
+import json
 from . import log, config, util, process, pcap_recorder, bts, pcu
 from . import powersupply
 from .event_loop import MainLoop
@@ -122,24 +123,31 @@ class NanoBts(bts.Bts):
             ipfind.stop()
 
             ipconfig = IpAccessConfig(self.suite_run, self.run_dir, bts_trx_ip)
+            running_oml_ip = ipconfig.get_oml_ip()
+
             if running_unitid != unitid or running_trx != trx_i:
                 if not ipconfig.set_unit_id(unitid, trx_i, False):
                     raise log.Error('Failed configuring unit id %d trx %d' % (unitid, trx_i))
-            # Apply OML IP and restart nanoBTS as it is required to apply the changes.
-            if not ipconfig.set_oml_ip(self.bsc.addr(), True):
-                raise log.Error('Failed configuring OML IP %s' % bts_trx_ip)
 
-            # Let some time for BTS to restart. It takes much more than 20 secs, and
-            # this way we make sure we don't catch responses in abisip-find prior to
-            # BTS restarting.
-            MainLoop.sleep(self, 20)
+            if running_oml_ip != self.bsc.addr():
+                # Apply OML IP and restart nanoBTS as it is required to apply the changes.
+                self.dbg('Current OML IPaddr "%s" does not match BSC IPaddr "%s", reconfiguring and restarting it' % (running_oml_ip, self.bsc.addr()))
+                if not ipconfig.set_oml_ip(self.bsc.addr(), True):
+                    raise log.Error('Failed configuring OML IP %s' % bts_trx_ip)
 
-            self.log('Starting to connect id %d trx %d to' % (unitid, trx_i), self.bsc)
-            ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
-            ipfind.start()
-            ipfind.wait_bts_ready(bts_trx_ip)
-            self.log('nanoBTS id %d trx %d configured and running' % (unitid, trx_i))
-            ipfind.stop()
+                # Let some time for BTS to restart. It takes much more than 20 secs, and
+                # this way we make sure we don't catch responses in abisip-find prior to
+                # BTS restarting.
+                MainLoop.sleep(self, 20)
+
+                self.dbg('Starting to connect id %d trx %d to' % (unitid, trx_i), self.bsc)
+                ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
+                ipfind.start()
+                ipfind.wait_bts_ready(bts_trx_ip)
+                self.log('nanoBTS id %d trx %d configured and running' % (unitid, trx_i))
+                ipfind.stop()
+            else:
+                self.dbg('nanoBTS id %d trx %d no need to change OML IP (%s) and restart' % (unitid, trx_i, running_oml_ip))
 
         MainLoop.wait(self, self.bsc.bts_is_connected, self, timeout=600)
         self.log('nanoBTS connected to BSC')
@@ -274,20 +282,30 @@ class IpAccessConfig(log.Origin):
     def set_unit_id(self, unitid, trx_num, restart=False):
         uid_str = '%d/0/%d' % (unitid, trx_num)
         if restart:
-            retcode = self.run('unitid', '--restart', '--unit-id', '%s' % uid_str, self.bts_ip)
+            retcode = self.run('setunitid', '--restart', '--unit-id', '%s' % uid_str, self.bts_ip)
         else:
-            retcode = self.run('unitid', '--unit-id', '%s' % uid_str, self.bts_ip)
+            retcode = self.run('setunitid', '--unit-id', '%s' % uid_str, self.bts_ip)
         if retcode != 0:
-            log.err('ipaccess-config --unit-id %s returned error code %d' % (uid_str, retcode))
+            self.err('ipaccess-config --unit-id %s returned error code %d' % (uid_str, retcode))
         return retcode == 0
 
     def set_oml_ip(self, omlip, restart=False):
         if restart:
-            retcode = self.run('oml', '--restart', '--oml-ip', omlip, self.bts_ip)
+            retcode = self.run('setoml', '--restart', '--oml-ip', omlip, self.bts_ip)
         else:
-            retcode = self.run('oml', '--oml-ip', omlip, self.bts_ip)
+            retcode = self.run('setoml', '--oml-ip', omlip, self.bts_ip)
         if retcode != 0:
             self.error('ipaccess-config --oml-ip %s returned error code %d' % (omlip, retcode))
         return retcode == 0
+
+    def get_oml_ip(self):
+        retcode = self.run('getoml', '-q', '-G', self.bts_ip)
+        if retcode != 0:
+            raise log.Error('ipaccess-config -q -G %s returned error code %d' % (self.bts_ip, retcode))
+        output = self.proc.get_stdout()
+        # Our logging system adds "launched on" line at the start, so let's skip until the json code:
+        output_json = output[output.index('{'):]
+        json_data = json.loads(output_json)
+        return json_data['primary_oml_ip']
 
 # vim: expandtab tabstop=4 shiftwidth=4

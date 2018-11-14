@@ -95,7 +95,7 @@ class IPerf3Client(log.Origin):
         self.server = iperf3srv
         self.suite_run = suite_run
 
-    def run_test(self, netns=None):
+    def prepare_test_proc(self, netns=None):
         self.log('Starting iperf3-client connecting to %s:%d' % (self.server.addr(), self.server.port()))
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
 
@@ -110,6 +110,10 @@ class IPerf3Client(log.Origin):
             self.process = process.NetNSProcess(self.name(), self.run_dir, netns, popen_args, env={})
         else:
             self.process = process.Process(self.name(), self.run_dir, popen_args, env={})
+        return self.process
+
+    def run_test_sync(self, netns=None):
+        self.prepare_test_proc(netns)
         self.process.launch_sync()
         return self.get_results()
 

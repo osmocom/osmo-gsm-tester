@@ -76,6 +76,9 @@ class IPerf3Server(log.Origin):
     def port(self):
         return self._port
 
+    def __str__(self):
+        return "%s:%u" %(self.addr(), self.port())
+
     def running(self):
         return not self.process.terminated()
 

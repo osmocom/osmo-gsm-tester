@@ -22,9 +22,6 @@ import json
 
 from . import log, util, process, pcap_recorder
 
-DEFAULT_SRV_PORT = 5003
-
-
 def iperf3_result_to_json(file):
     with open(file) as f:
             # Sometimes iperf3 provides 2 dictionaries, the 2nd one being an error about being interrupted (by us).
@@ -37,6 +34,8 @@ def iperf3_result_to_json(file):
 
 class IPerf3Server(log.Origin):
 
+    DEFAULT_SRV_PORT = 5003
+
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'iperf3-srv_%s' % ip_address.get('addr'))
         self.run_dir = None
@@ -44,7 +43,7 @@ class IPerf3Server(log.Origin):
         self.process = None
         self.suite_run = suite_run
         self.ip_address = ip_address
-        self._port = DEFAULT_SRV_PORT
+        self._port = IPerf3Server.DEFAULT_SRV_PORT
 
     def start(self):
         self.log('Starting iperf3-srv')
@@ -61,6 +60,9 @@ class IPerf3Server(log.Origin):
                                        env={})
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
+
+    def set_port(self, port):
+        self._port = port
 
     def stop(self):
         self.suite_run.stop_process(self.process)

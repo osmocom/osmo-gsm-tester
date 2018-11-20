@@ -77,7 +77,6 @@ network
   gprs nsvc 0 local udp port 23020
   gprs nsvc 0 remote udp port 23000
   gprs nsvc 0 remote ip val_bts.sgsn_ip_addr_bts0
-  no force-combined-si
   trx 0
    rf_locked 0
    arfcn val_trx_arfcn_trx0
@@ -148,7 +147,6 @@ network
   gprs nsvc 0 local udp port 23020
   gprs nsvc 0 remote udp port 23000
   gprs nsvc 0 remote ip val_bts.sgsn_ip_addr_bts1
-  no force-combined-si
   trx 0
    rf_locked 0
    arfcn val_trx_arfcn_trx0

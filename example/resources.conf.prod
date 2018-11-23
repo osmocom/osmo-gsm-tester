@@ -31,6 +31,7 @@ bts:
     launch_trx: true
     remote_user: jenkins
     trx_ip: 10.42.42.116
+    dev_args: "type=b200,serial=306BD11"
     clock_reference: external
     multi_arfcn: true
 
@@ -45,7 +46,7 @@ bts:
     launch_trx: true
     remote_user: jenkins
     trx_ip: 10.42.42.118
-    dev_args: addr=10.42.42.130,pa=NONE,pa_power_max_dbm=23,fifo_ctrl_window=0,status_port=12345
+    dev_args: "addr=10.42.42.130,pa=NONE,pa_power_max_dbm=23,fifo_ctrl_window=0,status_port=12345"
     clock_reference: internal
 
 - label: LimeSDR-USB

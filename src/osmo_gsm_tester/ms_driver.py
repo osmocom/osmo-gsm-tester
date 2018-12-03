@@ -93,7 +93,7 @@ class MsDriver(log.Origin):
         def check_and_return_binary(name):
             """Checks the binary exists and returns the path."""
             binary = inst.child('bin', name)
-            if not os.path.isfile(name):
+            if not os.path.isfile(binary):
                 raise RuntimeError('Binary missing: %r' % binary)
             return binary
 

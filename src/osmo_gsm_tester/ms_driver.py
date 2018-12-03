@@ -113,7 +113,7 @@ class MsDriver(log.Origin):
         options = self.build_binary_options()
         self._test_case = MassUpdateLocationTest("mass", options, self._num_ms, self._cdf,
                                                  self._ev_server,
-                                                 util.Dir(self._suite_run.get_test_run_dir()),
+                                                 util.Dir(self.event_server_sk_tmp_dir),
                                                  suite_run=self._suite_run)
 
         # TODO: We should pass subscribers down to the test and not get it from

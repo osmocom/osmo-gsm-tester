@@ -11,7 +11,7 @@ def print_results(cli_res, srv_res):
     print("\tSEND: %d KB, %d kbps, %d seconds" % (cli_sent['bytes']/1000, cli_sent['bits_per_second']/1000, cli_sent['seconds']))
     print("\tRECV: %d KB, %d kbps, %d seconds" % (cli_recv['bytes']/1000, cli_recv['bits_per_second']/1000, cli_recv['seconds']))
 
-def run_iperf3_cli_parallel(iperf3clients, ms_li):
+def run_iperf3_cli_parallel(iperf3clients, ms_li, ready_cb):
     assert len(iperf3clients) == len(ms_li)
     procs = []
     for i in range(len(iperf3clients)):
@@ -20,6 +20,8 @@ def run_iperf3_cli_parallel(iperf3clients, ms_li):
     try:
         for proc in procs:
             proc.launch()
+        if ready_cb:
+            ready_cb(ms_li)
         for proc in procs:
             proc.wait()
     except Exception as e:
@@ -28,7 +30,7 @@ def run_iperf3_cli_parallel(iperf3clients, ms_li):
         raise e
 
 
-def setup_run_iperf3_test_parallel(num_ms):
+def setup_run_iperf3_test_parallel(num_ms, ready_cb=None):
     hlr = suite.hlr()
     bts = suite.bts()
     pcu = bts.pcu()
@@ -98,7 +100,7 @@ def setup_run_iperf3_test_parallel(num_ms):
         ms.setup_context_data_plane(ctx_id_v4)
         setattr(ms, 'tmp_ctx_id', ctx_id_v4)
 
-    run_iperf3_cli_parallel(clients, ms_li)
+    run_iperf3_cli_parallel(clients, ms_li, ready_cb)
 
     for i in range(num_ms):
         servers[i].stop()

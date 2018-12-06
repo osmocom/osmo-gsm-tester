@@ -1,0 +1,48 @@
+! Configuration rendered by osmo-gsm-tester
+log stderr
+  logging color 1
+  logging print extended-timestamp 1
+  logging print category 1
+  logging level abis debug
+  logging level oml debug
+  logging level pag debug
+  logging level rll debug
+  logging level rr debug
+  logging level rsl debug
+  logging level l1c info
+  logging level l1p error
+  logging level trx info
+  ! Level required by ready_for_pcu(): pcu info
+  logging level pcu info
+!
+line vty
+ bind ${osmo_bts_virtual.addr}
+ctrl
+ bind ${osmo_bts_virtual.addr}
+!
+phy 0
+ instance 0
+bts 0
+ band ${osmo_bts_virtual.band}
+ ipa unit-id ${osmo_bts_virtual.ipa_unit_id} 0
+ oml remote-ip ${osmo_bts_virtual.oml_remote_ip}
+ pcu-socket ${osmo_bts_virtual.pcu_socket_path}
+ gsmtap-sapi bcch
+ gsmtap-sapi ccch
+ gsmtap-sapi rach
+ gsmtap-sapi agch
+ gsmtap-sapi pch
+ gsmtap-sapi sdcch
+ gsmtap-sapi tch/f
+ gsmtap-sapi tch/h
+ gsmtap-sapi pacch
+ gsmtap-sapi pdtch
+ gsmtap-sapi ptcch
+ gsmtap-sapi cbch
+ gsmtap-sapi sacch
+ trx 0
+  power-ramp max-initial 23000 mdBm
+  power-ramp step-size 2000 mdB
+  power-ramp step-interval 1
+  ms-power-control dsp
+  phy 0 instance 0

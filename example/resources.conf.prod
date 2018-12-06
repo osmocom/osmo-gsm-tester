@@ -110,6 +110,12 @@ bts:
         device: '01:01:4d:98:24'
         port: '3'
 
+- label: OsmoBTS Virtual
+  type: osmo-bts-virtual
+  ipa_unit_id: 13
+  addr: 10.42.42.55
+  band: GSM-1800
+
 arfcn:
   - arfcn: 512
     band: GSM-1800

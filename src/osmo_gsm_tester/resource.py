@@ -29,7 +29,7 @@ from . import util
 from . import schema
 from . import modem
 from . import osmo_nitb
-from . import bts_sysmo, bts_osmotrx, bts_octphy, bts_nanobts
+from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts
 
 from .util import is_dict, is_list
 
@@ -102,6 +102,7 @@ KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
         'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
         'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
+        'osmo-bts-virtual': bts_osmovirtual.OsmoBtsVirtual,
         'nanobts': bts_nanobts.NanoBts,
     }
 

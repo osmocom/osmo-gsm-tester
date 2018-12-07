@@ -8,6 +8,7 @@ test -x "$run_script"
 cd osmo-gsm-tester
 make deps
 make check
+./contrib/jenkins-build-manuals.sh
 cd "$base"
 
 PATH="$base/osmo-gsm-tester/src:$PATH" \

@@ -10,4 +10,4 @@ build_repo libosmocore ${SANITIZE_FLAGS} --disable-doxygen
 build_repo libosmo-abis ${SANITIZE_FLAGS}
 build_repo osmo-bts ${SANITIZE_FLAGS} --enable-trx --with-openbsc=$base/openbsc/openbsc/include --enable-octphy --with-octsdr-2g=$base/octphy-2g-headers
 
-create_bin_tgz "osmo-bts-trx osmo-bts-octphy"
+create_bin_tgz "osmo-bts-trx osmo-bts-octphy osmo-bts-virtual"

@@ -121,7 +121,7 @@ class OsmoMobile(Launcher):
 
         self.log("Starting mobile")
         # Let the kernel pick an unused port for the VTY.
-        args = [self._binary, "-c", mob_filename, "--vty-port=0"]
+        args = [self._binary, "-c", mob_filename]
         self._omob_proc = process.Process(self.name(), self._tmp_dir,
                                           args, env=self._env)
         if suite_run:

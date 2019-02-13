@@ -40,6 +40,7 @@ I_CALLMGR = 'org.ofono.VoiceCallManager'
 I_CALL = 'org.ofono.VoiceCall'
 I_SS = 'org.ofono.SupplementaryServices'
 I_SIMMGR = 'org.ofono.SimManager'
+I_VOICECALL = 'org.ofono.VoiceCall'
 
 # See https://github.com/intgr/ofono/blob/master/doc/network-api.txt#L78
 NETREG_ST_REGISTERED = 'registered'
@@ -318,6 +319,39 @@ class ModemDbusInteraction(log.Origin):
     def is_online(self):
         return self.property_is('Online', True)
 
+class ModemCall(log.Origin):
+    'ofono Modem voicecall dbus object'
+
+    def __init__(self, modem, dbuspath):
+        super().__init__(log.C_TST, dbuspath)
+        self.modem = modem
+        self.dbuspath = dbuspath
+        self.signal_list = []
+        self.register_signals()
+
+    def register_signals(self):
+        call_dbus_obj = systembus_get(self.dbuspath)
+        subscr = dbus_connect(call_dbus_obj.PropertyChanged, lambda name, value: self.on_voicecall_property_change(self.dbuspath, name, value))
+        self.signal_list.append(subscr)
+        subscr = dbus_connect(call_dbus_obj.DisconnectReason, lambda reason: self.on_voicecall_disconnect_reason(self.dbuspath, reason))
+        self.signal_list.append(subscr)
+
+    def unregister_signals(self):
+        for subscr in self.signal_list:
+            subscr.disconnect()
+        self.signal_list = []
+
+    def cleanup(self):
+        self.unregister_signals()
+
+    def __del__(self):
+        self.cleanup()
+
+    def on_voicecall_property_change(self, obj_path, name, value):
+        self.dbg('%r:%r.PropertyChanged() -> %s=%s' % (obj_path, I_VOICECALL, name, value))
+
+    def on_voicecall_disconnect_reason(self, obj_path, reason):
+        self.dbg('%r:%r.DisconnectReason() -> %s' % (obj_path, I_VOICECALL, reason))
 
 class Modem(MS):
     'convenience for ofono Modem interaction'
@@ -357,6 +391,9 @@ class Modem(MS):
             self.cancellable = None
         if self.is_powered():
             self.power_off()
+        for call_obj in self.call_list:
+            call_obj.cleanup()
+        self.call_list = []
         self.dbus.cleanup()
         self.dbus = None
 
@@ -670,8 +707,15 @@ class Modem(MS):
         return False
 
     def call_id_list(self):
-        self.dbg('call_id_list: %r' % self.call_list)
-        return self.call_list
+        li = [call.dbuspath for call in self.call_list]
+        self.dbg('call_id_list: %r' % li)
+        return li
+
+    def call_find_by_id(self, id):
+        for call in self.call_list:
+            if call.dbuspath == id:
+                return call
+        return None
 
     def call_dial(self, to_msisdn_or_modem):
         if isinstance(to_msisdn_or_modem, Modem):
@@ -681,9 +725,9 @@ class Modem(MS):
         self.dbg('Dialing:', to_msisdn)
         cmgr = self.dbus.interface(I_CALLMGR)
         call_obj_path = cmgr.Dial(to_msisdn, 'default')
-        if call_obj_path not in self.call_list:
+        if self.call_find_by_id(call_obj_path) is None:
             self.dbg('Adding %s to call list' % call_obj_path)
-            self.call_list.append(call_obj_path)
+            self.call_list.append(ModemCall(self, call_obj_path))
         else:
             self.dbg('Dial returned already existing call')
         return call_obj_path
@@ -734,15 +778,17 @@ class Modem(MS):
 
     def _on_callmgr_call_added(self, obj_path, properties):
         self.dbg('%r.CallAdded() -> %s=%r' % (I_CALLMGR, obj_path, repr(properties)))
-        if obj_path not in self.call_list:
-            self.call_list.append(obj_path)
+        if self.call_find_by_id(obj_path) is None:
+            self.call_list.append(ModemCall(self, obj_path))
         else:
             self.dbg('Call already exists %r' % obj_path)
 
     def _on_callmgr_call_removed(self, obj_path):
         self.dbg('%r.CallRemoved() -> %s' % (I_CALLMGR, obj_path))
-        if obj_path in self.call_list:
-            self.call_list.remove(obj_path)
+        call_obj = self.call_find_by_id(obj_path)
+        if call_obj is not None:
+            self.call_list.remove(call_obj)
+            call_obj.cleanup()
         else:
             self.dbg('Trying to remove non-existing call %r' % obj_path)
 

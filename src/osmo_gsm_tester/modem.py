@@ -717,6 +717,7 @@ class Modem(log.Origin):
         assert self.call_state(call_id) == 'incoming'
         call_dbus_obj = systembus_get(call_id)
         call_dbus_obj.Answer()
+        self.dbg('Answered call %s' % call_id)
 
     def call_hangup(self, call_id):
         self.dbg('Hang up call %s' % call_id)

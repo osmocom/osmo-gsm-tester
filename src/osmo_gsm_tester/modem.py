@@ -735,7 +735,7 @@ class Modem(log.Origin):
             self.log('asking call state for non existent call')
             log.log_exn()
             state = 'disconnected'
-        self.dbg('call state: %s' % state)
+        self.dbg('call state: %s' % state, call_id=call_id)
         return state
 
     def _on_callmgr_call_added(self, obj_path, properties):

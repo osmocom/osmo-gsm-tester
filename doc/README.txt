@@ -23,9 +23,11 @@ Packages required to run the osmo-gsm-tester:
   python3-mako \
   python3-gi \
   ofono \
-  python3-pip
+  python3-pip \
+  python3-usb
   pip3 install git+git://github.com/podshumok/python-smpplib.git
   pip3 install pydbus
+  pip3 install pysispm
 
 To build ofono:
   apt-get install libglib2.0-dev \

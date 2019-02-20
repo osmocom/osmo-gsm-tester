@@ -29,7 +29,7 @@ from gi.module import get_introspection_module
 Gio = get_introspection_module('Gio')
 
 from gi.repository import GLib
-bus = SystemBus()
+bus = None
 
 I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
@@ -66,6 +66,8 @@ def dbus_connect(dbus_iface, handler):
 
 def systembus_get(path):
     global bus
+    if not bus:
+        bus = SystemBus()
     return bus.get('org.ofono', path)
 
 def list_modems():

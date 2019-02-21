@@ -30,7 +30,9 @@ rm -rf "$trial_dir/inst" || true
 
 # tar up all results for archiving (optional)
 cd "$trial_dir"
-journalctl -u ofono -o short-precise --since "${time_start}" > "$(readlink last_run)/ofono.log"
+if [ -x $(command -v journalctl) ]; then
+  journalctl -u ofono -o short-precise --since "${time_start}" > "$(readlink last_run)/ofono.log"
+fi
 tar czf "$base/${trial_dir}-run.tgz" "$(readlink last_run)"
 tar czf "$base/${trial_dir}-bin.tgz" *.md5 *.tgz
 

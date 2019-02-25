@@ -39,3 +39,27 @@ arfcn:
     band: GSM-1900
   - arfcn: 548
     band: GSM-1900
+
+modem:
+  - imsi: "001010000000000"
+    type: osmo-mobile
+  - imsi: "001010000000001"
+    type: osmo-mobile
+  - imsi: "001010000000002"
+    type: osmo-mobile
+  - imsi: "001010000000003"
+    type: osmo-mobile
+  - imsi: "001010000000004"
+    type: osmo-mobile
+  - imsi: "001010000000005"
+    type: osmo-mobile
+  - imsi: "001010000000006"
+    type: osmo-mobile
+  - imsi: "001010000000007"
+    type: osmo-mobile
+  - imsi: "001010000000008"
+    type: osmo-mobile
+  - imsi: "001010000000009"
+    type: osmo-mobile
+  - imsi: "001010000000009"
+    type: osmo-mobile

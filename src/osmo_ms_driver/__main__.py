@@ -21,7 +21,9 @@ from .simple_loop import SimpleLoop
 from .location_update_test import MassUpdateLocationTest
 from .cdf import cdfs
 from .starter import BinaryOptions
+from .test_support import imsi_ki_gen
 from osmo_gsm_tester import log, util
+from osmo_gsm_tester import ms
 
 # System modules
 from datetime import timedelta
@@ -84,7 +86,19 @@ def main():
 
     # Just a single test for now.
     options = BinaryOptions("virtphy", "mobile", os.environ)
-    test = MassUpdateLocationTest("lu_test", options, args.num_ms, cdf, ev_server, tmp_dir)
+    test = MassUpdateLocationTest("lu_test", options, cdf, ev_server, tmp_dir)
+
+    # Add subscribers to the test.
+    imsi_gen = imsi_ki_gen()
+    for i in range(0, args.num_ms):
+        imsi, ki = next(imsi_gen)
+        conf = {
+            'imsi': imsi,
+            'ki': ki,
+            'auth_algo': 'comp128v1',
+        }
+        test.subscriber_add(ms.MS("ms_%d" % i, conf))
+
     atexit.register(test.stop_all)
 
     # Run until everything has been launched

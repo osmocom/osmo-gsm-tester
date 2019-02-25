@@ -344,6 +344,15 @@ class SuiteRun(log.Origin):
             l.append(self.modem())
         return l
 
+    def all_resources(self, resource_func):
+        """Returns all yielded resource."""
+        l = []
+        while True:
+            try:
+                l.append(resource_func())
+            except resource.NoResourceExn:
+                return l
+
     def esme(self):
         esme_obj = esme.Esme(self.msisdn())
         self.register_for_cleanup(esme_obj)

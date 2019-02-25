@@ -9,6 +9,7 @@ print('use resources...')
 nitb = suite.nitb()
 bts = suite.bts()
 ms_driver = suite.ms_driver()
+modems = suite.all_resources(suite.modem)
 
 print('start nitb and bts...')
 nitb.bts_add(bts)
@@ -16,9 +17,10 @@ nitb.start()
 bts.start()
 wait(nitb.bts_is_connected, bts)
 
-# Configure all MS that the MS driver knows about.
-for ms in ms_driver.ms_subscribers():
-    nitb.subscriber_add(ms)
+# Configure all MS that are available to this test.
+for modem in modems:
+    nitb.subscriber_add(modem)
+    ms_driver.subscriber_add(modem)
 
 # Run the base test.
 ms_driver.run_test()

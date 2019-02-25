@@ -69,14 +69,14 @@ class OsmoVirtPhy(Launcher):
             self._vphy_proc.terminate()
 
 class OsmoMobile(Launcher):
-    def __init__(self, binary, env, name_number, tmp_dir, lua_tmpl, cfg_tmpl, imsi_ki_generator, phy_filename, ev_server_path):
+    def __init__(self, binary, env, name_number, tmp_dir, lua_tmpl, cfg_tmpl, subscriber, phy_filename, ev_server_path):
         super().__init__(binary, env, "osmo-ms-mob", name_number, tmp_dir)
         self._lua_template = lua_tmpl
         self._cfg_template = cfg_tmpl
-        self._imsi_ki_generator = imsi_ki_generator
         self._phy_filename = phy_filename
         self._ev_server_path = ev_server_path
-        self._imsi, self._ki = next(self._imsi_ki_generator)
+        self._imsi = subscriber.imsi()
+        self._ki = subscriber.ki()
         self._omob_proc = None
 
     def imsi(self):

@@ -26,3 +26,9 @@ class MSOsmoMobile(ms.MS):
     def cleanup(self):
         # do nothing for a virtual resource
         pass
+
+    def ki(self):
+        ki = super().ki()
+        if not ki:
+            return "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+        return ki

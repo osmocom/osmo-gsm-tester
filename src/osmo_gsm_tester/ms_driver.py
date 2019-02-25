@@ -27,29 +27,6 @@ import os.path
 import shutil
 import tempfile
 
-class Subscriber(log.Origin):
-    def __init__(self, imsi, ki):
-        super().__init__(log.C_RUN, 'subscriber')
-        self._imsi = imsi
-        self._ki = ki
-        self._auth_algo = "comp128v1"
-        self._msisdn = None
-
-    def msisdn(self):
-        return self._msisdn
-
-    def set_msisdn(self, msisdn):
-        self._msisdn = msisdn
-
-    def imsi(self):
-       return self._imsi
-
-    def ki(self):
-       return self._ki
-
-    def auth_algo(self):
-       return self._auth_algo
-
 class MsDriver(log.Origin):
 
     def __init__(self, suite_run):
@@ -57,7 +34,6 @@ class MsDriver(log.Origin):
         self._suite_run = suite_run
 
         # TODO: take config out of the test scenario
-        self._num_ms = 10
         self._time_start = timedelta(seconds=60)
         self._time_step = timedelta(milliseconds=100)
         self._test_duration = timedelta(seconds=120)
@@ -65,6 +41,8 @@ class MsDriver(log.Origin):
         self._loop = SimpleLoop()
         self._test_case = None
         self.event_server_sk_tmp_dir = None
+        self._subscribers = []
+        self._configured = False
 
         if len(self.event_server_path().encode()) > 107:
             raise log.Error('Path for event_server socket is longer than max allowed len for unix socket path (107):', self.event_server_path())
@@ -101,6 +79,10 @@ class MsDriver(log.Origin):
         mobile = check_and_return_binary('mobile')
         return BinaryOptions(virtphy, mobile, env)
 
+    def subscriber_add(self, subscriber):
+        """Adds a subscriber to the list of subscribers."""
+        self._subscribers.append(subscriber)
+
     def configure(self):
         """
         Configures the subscribers, tests and registration server. Needs to be
@@ -111,24 +93,14 @@ class MsDriver(log.Origin):
         self._ev_server = EventServer("ev_server", event_server_path)
         self._ev_server.listen(self._loop)
         options = self.build_binary_options()
-        self._test_case = MassUpdateLocationTest("mass", options, self._num_ms, self._cdf,
+        self._test_case = MassUpdateLocationTest("mass", options, self._cdf,
                                                  self._ev_server,
                                                  util.Dir(self.event_server_sk_tmp_dir),
                                                  suite_run=self._suite_run)
 
-        # TODO: We should pass subscribers down to the test and not get it from
-        # there.
-        self._subs = [Subscriber(imsi=mob.imsi(), ki=mob.ki()) for mob in self._test_case.mobiles()]
-
-
-    def ms_subscribers(self):
-        """
-        Returns a list of 'subscribers' that were configured in the
-        current scenario.
-        """
-        if not hasattr(self, '_subs'):
-            self.configure()
-        return self._subs
+        for sub in self._subscribers:
+            self._test_case.subscriber_add(sub)
+        self._configured = True
 
     def run_test(self):
         """
@@ -136,7 +108,7 @@ class MsDriver(log.Origin):
         devices according to their schedule. Returns once all tests succeeded
         or the configured timeout has passed.
         """
-        if not hasattr(self, '_subs'):
+        if not self._configured:
             self.configure()
         self._test_case.run_test(self._loop, self._test_duration)
 

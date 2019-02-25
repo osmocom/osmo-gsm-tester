@@ -19,7 +19,7 @@
 from copy import copy
 from osmo_gsm_tester import log
 from .starter import OsmoVirtPhy, OsmoMobile
-from .test_support import imsi_ki_gen, Results
+from .test_support import Results
 
 from datetime import timedelta
 
@@ -56,42 +56,53 @@ class MassUpdateLocationTest(log.Origin):
     TEMPLATE_LUA = "osmo-mobile-lu.lua"
     TEMPLATE_CFG = "osmo-mobile.cfg"
 
-    def __init__(self, name, options, number_of_ms, cdf_function,
+    def __init__(self, name, options, cdf_function,
                  event_server, tmp_dir, suite_run=None):
         super().__init__(log.C_RUN, name)
         self._binary_options = options
-        self._number_of_ms = number_of_ms
         self._cdf = cdf_function
-        self._cdf.set_target(number_of_ms)
         self._suite_run = suite_run
+        self._tmp_dir = tmp_dir
         self._unstarted = []
         self._mobiles = []
         self._phys = []
         self._results = {}
-        imsi_gen = imsi_ki_gen()
 
-        self._outstanding = number_of_ms
-        for i in range(0, number_of_ms):
-            ms_name = "%.5d" % i
-
-            phy = OsmoVirtPhy(options.virtphy, options.env,
-                              ms_name, tmp_dir)
-            self._phys.append(phy)
-
-            launcher = OsmoMobile(options.mobile, options.env,
-                                ms_name, tmp_dir, self.TEMPLATE_LUA,
-                                self.TEMPLATE_CFG, imsi_gen,
-                                phy.phy_filename(),
-                                event_server.server_path())
-            self._results[ms_name] = LUResult(ms_name)
-            self._mobiles.append(launcher)
         self._event_server = event_server
         self._event_server.register(self.handle_msg)
-        self._unstarted = copy(self._mobiles)
         self._started = []
+        self._subscribers = []
 
-    def mobiles(self):
-        return self._mobiles
+    def subscriber_add(self, subscriber):
+        """
+        Adds a subscriber to the list of subscribers.
+
+        Must be called before starting the testcase.
+        """
+        self._subscribers.append(subscriber)
+
+    def configure_tasks(self):
+        """Sets up the test run."""
+
+        self._cdf.set_target(len(self._subscribers))
+        self._outstanding = len(self._subscribers)
+        for i in range(0, self._outstanding):
+            ms_name = "%.5d" % i
+
+            phy = OsmoVirtPhy(self._binary_options.virtphy,
+                              self._binary_options.env,
+                              ms_name, self._tmp_dir)
+            self._phys.append(phy)
+
+            launcher = OsmoMobile(self._binary_options.mobile,
+                                self._binary_options.env,
+                                ms_name, self._tmp_dir, self.TEMPLATE_LUA,
+                                self.TEMPLATE_CFG, self._subscribers[i],
+                                phy.phy_filename(),
+                                self._event_server.server_path())
+            self._results[ms_name] = LUResult(ms_name)
+            self._mobiles.append(launcher)
+        self._unstarted = copy(self._mobiles)
 
     def pre_launch(self, loop):
         """
@@ -111,6 +122,7 @@ class MassUpdateLocationTest(log.Origin):
     def prepare(self, loop):
         self.log("Starting testcase")
 
+        self.configure_tasks()
         self.pre_launch(loop)
 
         self._start_time = time.clock_gettime(time.CLOCK_MONOTONIC)

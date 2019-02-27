@@ -395,11 +395,6 @@ class Resources(dict):
             raise RuntimeError('adding a list of resources to itself?')
         config.add(self, copy.deepcopy(more))
 
-    def combine(self, more_rules):
-        if more_rules is self:
-            raise RuntimeError('combining a list of resource rules with itself?')
-        config.combine(self, copy.deepcopy(more))
-
     def mark_reserved_by(self, origin_id):
         for key, item_list in self.items():
             for item in item_list:

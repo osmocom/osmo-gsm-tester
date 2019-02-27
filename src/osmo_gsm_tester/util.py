@@ -64,7 +64,7 @@ def ip_to_iface(ip):
             for line in proc.stdout.readlines():
                 if 'inet' in line and ' ' + ip + '/' in line:
                     return line.split()[-1]
-    except Exception as e:
+    except Exception:
         pass
     return None
 
@@ -79,7 +79,7 @@ def dst_ip_get_local_bind(ip):
             if words[i] == 'src':
                 return words[i+1]
             i += 1
-    except Exception as e:
+    except Exception:
         pass
     return None
 

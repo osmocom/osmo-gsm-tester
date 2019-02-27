@@ -176,8 +176,6 @@ class OsmoNitbCtrl(log.Origin):
         return osmo_ctrl.OsmoCtrl(self.nitb.addr(), OsmoNitbCtrl.PORT)
 
     def subscriber_add(self, imsi, msisdn, ki=None, algo=None):
-        created = False
-
         if algo:
             value = '%s,%s,%s,%s' % (imsi,msisdn,algo,ki)
         else:

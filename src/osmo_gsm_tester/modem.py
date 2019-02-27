@@ -125,7 +125,7 @@ def dbus_async_call(instance, proxymethod, *proxymethod_args,
     user_data = (result_handler, error_handler, user_data)
 
     # See https://lazka.github.io/pgi-docs/Gio-2.0/classes/DBusProxy.html#Gio.DBusProxy.call
-    ret = instance._bus.con.call(
+    instance._bus.con.call(
         instance._bus_name, instance._path,
         proxymethod._iface_name, proxymethod.__name__,
         GLib.Variant(proxymethod._sinargs, proxymethod_args),
@@ -596,14 +596,14 @@ class Modem(log.Origin):
         if self.is_attached():
             self.detach()
         connmgr = self.dbus.interface(I_CONNMGR)
-        prop = connmgr.SetProperty('RoamingAllowed', Variant('b', allow_roaming))
-        prop = connmgr.SetProperty('Powered', Variant('b', True))
+        connmgr.SetProperty('RoamingAllowed', Variant('b', allow_roaming))
+        connmgr.SetProperty('Powered', Variant('b', True))
 
     def detach(self):
         self.dbg('detach')
         connmgr = self.dbus.interface(I_CONNMGR)
-        prop = connmgr.SetProperty('RoamingAllowed', Variant('b', False))
-        prop = connmgr.SetProperty('Powered', Variant('b', False))
+        connmgr.SetProperty('RoamingAllowed', Variant('b', False))
+        connmgr.SetProperty('Powered', Variant('b', False))
         connmgr.DeactivateAll()
         connmgr.ResetContexts() # Requires Powered=false
 
@@ -734,7 +734,7 @@ class Modem(log.Origin):
             call_dbus_obj = systembus_get(call_id)
             props = call_dbus_obj.GetProperties()
             state = props.get('State')
-        except Exception as e:
+        except Exception:
             self.log('asking call state for non existent call')
             log.log_exn()
             state = 'disconnected'

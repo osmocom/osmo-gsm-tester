@@ -51,7 +51,6 @@ def render(name, values):
     template = _lookup.get_template(tmpl_name)
     _logger.dbg('rendering', tmpl_name)
 
-    line_info_name = tmpl_name.replace('-', '_').replace('.', '_')
     return template.render(**dict2obj(values))
 
 # vim: expandtab tabstop=4 shiftwidth=4

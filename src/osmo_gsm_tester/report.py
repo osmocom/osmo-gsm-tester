@@ -42,8 +42,8 @@ def suite_to_junit(suite):
         testsuite.set('time', str(math.ceil(suite.duration)))
     testsuite.set('tests', str(len(suite.tests)))
     testsuite.set('failures', str(suite.count_test_results()[2]))
-    for test in suite.tests:
-        testcase = test_to_junit(test)
+    for suite_test in suite.tests:
+        testcase = test_to_junit(suite_test)
         testsuite.append(testcase)
     return testsuite
 

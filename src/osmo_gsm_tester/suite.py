@@ -23,7 +23,7 @@ import time
 import pprint
 from . import config, log, util, resource, test
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon, ms_driver, iperf3, process
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, esme, osmocon, ms_driver, iperf3, process
 
 class Timeout(Exception):
     pass
@@ -329,8 +329,12 @@ class SuiteRun(log.Origin):
 
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
+        ms_type = conf.get('type')
+        ms_class = resource.KNOWN_MS_TYPES.get(ms_type)
+        if ms_class is None:
+            raise RuntimeError('No such Modem type is defined: %r' % ms_type)
         self.dbg('create Modem object', conf=conf)
-        ms = modem.Modem(self, conf)
+        ms = ms_class(self, conf)
         self.register_for_cleanup(ms)
         return ms
 

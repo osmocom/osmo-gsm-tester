@@ -27,6 +27,7 @@ from . import config
 from . import util
 from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts
+from . import modem
 
 from .util import is_dict, is_list
 
@@ -103,6 +104,14 @@ KNOWN_BTS_TYPES = {
         'osmo-bts-virtual': bts_osmovirtual.OsmoBtsVirtual,
         'nanobts': bts_nanobts.NanoBts,
     }
+
+
+KNOWN_MS_TYPES = {
+        # Map None to ofono for forward compability
+        None: modem.Modem,
+        'ofono': modem.Modem,
+}
+
 
 def register_bts_type(name, clazz):
     KNOWN_BTS_TYPES[name] = clazz

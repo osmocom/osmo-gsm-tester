@@ -19,6 +19,7 @@
 
 from . import log, util, sms, process
 from .event_loop import MainLoop
+from .ms import MS
 
 from pydbus import SystemBus, Variant
 import os
@@ -318,8 +319,7 @@ class ModemDbusInteraction(log.Origin):
         return self.property_is('Online', True)
 
 
-
-class Modem(log.Origin):
+class Modem(MS):
     'convenience for ofono Modem interaction'
 
     CTX_PROT_IPv4 = 'ip'
@@ -327,16 +327,13 @@ class Modem(log.Origin):
     CTX_PROT_IPv46 = 'dual'
 
     def __init__(self, suite_run, conf):
-        self.suite_run = suite_run
-        self.conf = conf
         self.syspath = conf.get('path')
         self.dbuspath = get_dbuspath_from_syspath(self.syspath)
-        super().__init__(log.C_TST, self.dbuspath)
+        super().__init__(self.dbuspath, conf)
         self.dbg('creating from syspath %s' % self.syspath)
-        self.msisdn = None
         self._ki = None
         self._imsi = None
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name().strip('/')))
+        self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name().strip('/')))
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.dbuspath)
         self.register_attempts = 0
@@ -406,9 +403,6 @@ class Modem(log.Origin):
     def is_online(self):
         return self.dbus.is_online()
 
-    def set_msisdn(self, msisdn):
-        self.msisdn = msisdn
-
     def imsi(self):
         if self._imsi is None:
             if 'sim' in self.features():
@@ -423,7 +417,7 @@ class Modem(log.Origin):
                 self.dbg('got SIM properties', props)
                 self._imsi = props.get('SubscriberIdentity', None)
             else:
-                self._imsi = self.conf.get('imsi')
+                self._imsi = super().imsi()
             if self._imsi is None:
                 raise log.Error('No IMSI')
         return self._imsi
@@ -434,13 +428,10 @@ class Modem(log.Origin):
     def ki(self):
         if self._ki is not None:
             return self._ki
-        return self.conf.get('ki')
-
-    def auth_algo(self):
-        return self.conf.get('auth_algo', None)
+        return super().ki()
 
     def features(self):
-        return self.conf.get('features', [])
+        return self._conf.get('features', [])
 
     def _required_ifaces(self):
         req_ifaces = (I_NETREG,)

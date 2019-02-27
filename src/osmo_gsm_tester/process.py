@@ -21,11 +21,37 @@ import os
 import time
 import subprocess
 import signal
+from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
 from . import log
 from .event_loop import MainLoop
 from .util import Dir
+
+class TerminationStrategy(log.Origin, metaclass=ABCMeta):
+    """A baseclass for terminating a collection of processes."""
+
+    def __init__(self):
+        self._processes = []
+
+    def add_process(self, process):
+        """Remembers a process that needs to be terminated."""
+        self._processes.append(process)
+
+    @abstractmethod
+    def terminate_all(self):
+        "Terminates all scheduled processes and waits for the termination."""
+        pass
+
+
+class ParallelTerminationStrategy(TerminationStrategy):
+    """Processes will be terminated in parallel."""
+
+    def terminate_all(self):
+        # TODO(zecke): Actually make this non-sequential.
+        for process in self._processes:
+            process.terminate()
+
 
 class Process(log.Origin):
 

@@ -23,7 +23,7 @@ import time
 import pprint
 from . import config, log, util, resource, test
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon, ms_driver, iperf3
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, modem, esme, osmocon, ms_driver, iperf3, process
 
 class Timeout(Exception):
     pass
@@ -246,9 +246,11 @@ class SuiteRun(log.Origin):
         self._processes.insert(0, (process, respawn))
 
     def stop_processes(self):
+        strategy = process.ParallelTerminationStrategy()
         while self._processes:
-            process, respawn = self._processes.pop()
-            process.terminate()
+            proc, _ = self._processes.pop()
+            strategy.add_process(proc)
+        strategy.terminate_all()
 
     def stop_process(self, process):
         'Remove process from monitored list and stop it'
@@ -382,15 +384,15 @@ class SuiteRun(log.Origin):
 
     def poll(self):
         if self._processes:
-            for process, respawn in self._processes:
-                if process.terminated():
+            for proc, respawn in self._processes:
+                if proc.terminated():
                     if respawn == True:
-                        process.respawn()
+                        proc.respawn()
                     else:
-                        process.log_stdout_tail()
-                        process.log_stderr_tail()
-                        log.ctx(process)
-                        raise log.Error('Process ended prematurely: %s' % process.name())
+                        proc.log_stdout_tail()
+                        proc.log_stderr_tail()
+                        log.ctx(proc)
+                        raise log.Error('Process ended prematurely: %s' % proc.name())
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

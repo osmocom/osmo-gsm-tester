@@ -145,6 +145,12 @@ class Process(log.Origin):
     def send_signal(self, sig):
         os.kill(self.process_obj.pid, sig)
 
+    def kill(self, sig):
+        """Kills the process with the given signal and remembers it."""
+        self.log('Terminating (%s)' % sig.name)
+        self.send_signal(sig)
+        self.killed = sig
+
     def terminate(self):
         if self.process_obj is None:
             return
@@ -153,23 +159,17 @@ class Process(log.Origin):
 
         while True:
             # first try SIGINT to allow stdout+stderr flushing
-            self.log('Terminating (SIGINT)')
-            self.send_signal(signal.SIGINT)
-            self.killed = signal.SIGINT
+            self.kill(signal.SIGINT)
             if self._poll_termination():
                 break
 
             # SIGTERM maybe?
-            self.log('Terminating (SIGTERM)')
-            self.send_signal(signal.SIGTERM)
-            self.killed = signal.SIGTERM
+            self.kill(signal.SIGTERM)
             if self._poll_termination():
                 break
 
             # out of patience
-            self.log('Terminating (SIGKILL)')
-            self.send_signal(signal.SIGKILL)
-            self.killed = signal.SIGKILL
+            self.kill(signal.SIGKILL)
             break;
 
         self.process_obj.wait()

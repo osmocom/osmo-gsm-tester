@@ -75,6 +75,7 @@ RESOURCES_SCHEMA = {
         'bts[].osmo_trx.multi_arfcn': schema.BOOL_STR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
+        'modem[].type': schema.STR,
         'modem[].label': schema.STR,
         'modem[].path': schema.STR,
         'modem[].imsi': schema.IMSI,

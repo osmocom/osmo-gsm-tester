@@ -18,8 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys
-from mako.template import Template
+import os
 from mako.lookup import TemplateLookup
 
 from . import log

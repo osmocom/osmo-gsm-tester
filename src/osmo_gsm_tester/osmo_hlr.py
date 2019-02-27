@@ -18,11 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import re
 import pprint
 import sqlite3
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
+from . import log, util, config, template, process, pcap_recorder
 
 class OsmoHlr(log.Origin):
     run_dir = None

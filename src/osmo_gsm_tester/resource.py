@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import time
 import copy
 import atexit
 import pprint
@@ -27,8 +26,6 @@ from . import log
 from . import config
 from . import util
 from . import schema
-from . import modem
-from . import osmo_nitb
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts
 
 from .util import is_dict, is_list

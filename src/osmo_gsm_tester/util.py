@@ -27,9 +27,6 @@ import shutil
 import atexit
 import threading
 import importlib.util
-import fcntl
-import tty
-import readline
 import subprocess
 
 # This mirrors enum osmo_auth_algo in libosmocore/include/osmocom/crypt/auth.h

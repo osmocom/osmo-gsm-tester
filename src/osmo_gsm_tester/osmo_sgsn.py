@@ -20,7 +20,7 @@
 import os
 import pprint
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
+from . import log, util, config, template, process, pcap_recorder
 
 class OsmoSgsn(log.Origin):
 

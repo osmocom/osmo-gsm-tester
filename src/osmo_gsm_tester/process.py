@@ -47,10 +47,75 @@ class TerminationStrategy(log.Origin, metaclass=ABCMeta):
 class ParallelTerminationStrategy(TerminationStrategy):
     """Processes will be terminated in parallel."""
 
-    def terminate_all(self):
-        # TODO(zecke): Actually make this non-sequential.
+    def _prune_dead_processes(self, poll_first):
+        """Removes all dead processes from the list."""
+        # Remove all processes that terminated!
+        self._processes = list(filter(lambda proc: proc.is_running(poll_first), self._processes))
+
+    def _build_process_map(self):
+        """Builds a mapping from pid to process."""
+        self._process_map = {}
         for process in self._processes:
-            process.terminate()
+            pid = process.pid()
+            if pid is None:
+                continue
+            self._process_map[pid] = process
+
+    def _poll_once(self):
+        """Polls for to be collected children once."""
+        pid, result = os.waitpid(0, os.WNOHANG)
+        # Did some other process die?
+        if pid == 0:
+            return False
+        proc = self._process_map.get(pid)
+        if proc is None:
+            self.dbg("Unknown process with pid(%d) died." % pid)
+            return False
+        # Update the process state and forget about it
+        self.log("PID %d died..." % pid)
+        proc.result = result
+        proc.cleanup()
+        self._processes.remove(proc)
+        del self._process_map[pid]
+        return True
+
+    def _poll_for_termination(self, time_to_wait_for_term=5):
+        """Waits for the termination of processes until timeout|all ended."""
+
+        wait_step = 0.001
+        waited_time = 0
+        while len(self._processes) > 0:
+            # Collect processes until there are none to be collected.
+            while True:
+                try:
+                    if not self._poll_once():
+                        break
+                except ChildProcessError:
+                    break
+
+            # All processes died and we can return before sleeping
+            if len(self._processes) == 0:
+                break
+            waited_time += wait_step
+            # make wait_step approach 1.0
+            wait_step = (1. + 5. * wait_step) / 6.
+            if waited_time >= time_to_wait_for_term:
+                break
+            time.sleep(wait_step)
+
+    def terminate_all(self):
+        self.dbg("Scheduled to terminate %d processes." % len(self._processes))
+        self._prune_dead_processes(True)
+        self._build_process_map()
+
+        # Iterate through all signals.
+        for sig in [signal.SIGTERM, signal.SIGINT, signal.SIGKILL]:
+            self.dbg("Starting to kill with %s" % sig.name)
+            for process in self._processes:
+                process.kill(sig)
+            if sig == signal.SIGKILL:
+                continue
+            self._poll_for_termination()
 
 
 class Process(log.Origin):
@@ -144,6 +209,11 @@ class Process(log.Origin):
 
     def send_signal(self, sig):
         os.kill(self.process_obj.pid, sig)
+
+    def pid(self):
+        if self.process_obj is None:
+            return None
+        return self.process_obj.pid
 
     def kill(self, sig):
         """Kills the process with the given signal and remembers it."""

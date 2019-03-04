@@ -117,6 +117,14 @@ bts:
   addr: 10.42.42.55
   band: GSM-1800
 
+- label: OC-2G
+  type: osmo-bts-oc2g
+  ipa_unit_id: 14
+  addr: 10.42.42.100
+  band: GSM-900
+  direct_pcu: true
+  ciphers: [a5_0, a5_1, a5_3]
+
 arfcn:
   - arfcn: 512
     band: GSM-1800

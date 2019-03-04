@@ -1,0 +1,42 @@
+! Configuration rendered by osmo-gsm-tester
+log stderr
+  logging color 1
+  logging print extended-timestamp 1
+  logging print category 1
+  logging level abis debug
+  logging level oml debug
+  logging level pag debug
+  logging level rll debug
+  logging level rr debug
+  logging level rsl debug
+  ! Level required by ready_for_pcu(): pcu info
+  logging level pcu info
+!
+line vty
+ bind ${osmo_bts_oc2g.addr}
+ctrl
+ bind ${osmo_bts_oc2g.addr}
+!
+phy 0
+ instance 0
+  trx-calibration-path /mnt/rom/factory/calib
+bts 0
+ band ${osmo_bts_oc2g.band}
+ ipa unit-id ${osmo_bts_oc2g.ipa_unit_id} 0
+ oml remote-ip ${osmo_bts_oc2g.oml_remote_ip}
+ pcu-socket ${osmo_bts_oc2g.pcu_socket_path}
+ gsmtap-sapi bcch
+ gsmtap-sapi ccch
+ gsmtap-sapi rach
+ gsmtap-sapi agch
+ gsmtap-sapi pch
+ gsmtap-sapi sdcch
+ gsmtap-sapi tch/f
+ gsmtap-sapi tch/h
+ gsmtap-sapi pacch
+ gsmtap-sapi pdtch
+ gsmtap-sapi ptcch
+ gsmtap-sapi cbch
+ gsmtap-sapi sacch
+ trx 0
+  phy 0 instance 0

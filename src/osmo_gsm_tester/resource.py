@@ -26,7 +26,7 @@ from . import log
 from . import config
 from . import util
 from . import schema
-from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts
+from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
 from . import modem
 from . import ms_osmo_mobile
 
@@ -101,6 +101,7 @@ CONF_SCHEMA = util.dict_add(
 KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
         'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
+        'osmo-bts-oc2g': bts_oc2g.OsmoBtsOC2G,
         'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
         'osmo-bts-virtual': bts_osmovirtual.OsmoBtsVirtual,
         'nanobts': bts_nanobts.NanoBts,

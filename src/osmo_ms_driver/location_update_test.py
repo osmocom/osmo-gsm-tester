@@ -23,11 +23,9 @@ from .test_support import imsi_ki_gen, Results
 
 from datetime import timedelta
 
-import collections
 import time
 
 class LUResult(Results):
-    """Representation of a Location Updating Result."""
 
     def __init__(self, name):
         super().__init__(name)
@@ -45,10 +43,6 @@ class LUResult(Results):
 
     def lu_delay(self):
         return self.lu_time() - self.start_time()
-
-
-LUStats = collections.namedtuple("LUStats", ["num_attempted", "num_completed",
-                                 "min_latency", "max_latency"])
 
 class MassUpdateLocationTest(log.Origin):
     """
@@ -213,24 +207,9 @@ class MassUpdateLocationTest(log.Origin):
                 max_value = result.lu_delay()
         return min_value, max_value
 
-    def get_result_values(self):
-        """
-        Returns the raw result values of the test run in any order.
-        """
-        return self._results.values()
-
-    def get_stats(self):
-        """
-        Returns a statistical summary of the test.
-        """
-        attempted = self._number_of_ms
-        completed = attempted - self._outstanding
-        min_latency, max_latency = self.find_min_max(filter(lambda x: x.has_lu_time(), self._results.values()))
-        return LUStats(attempted, completed, min_latency, max_latency)
-
     def print_stats(self):
-        stats = self.get_stats()
-        all_completed = stats.num_attempted == stats.num_completed
+        all_completed = self.all_completed()
+        min_value, max_value = self.find_min_max(filter(lambda x: x.has_lu_time(), self._results.values()))
 
         self.log("Tests done", all_completed=all_completed,
-                    min=stats.min_latency, max=stats.max_latency)
+                    min=min_value, max=max_value)

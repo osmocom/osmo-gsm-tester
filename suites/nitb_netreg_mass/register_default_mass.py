@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
-Runs a network registration with a 'massive' amount of MS
+Run a network registration with a 'massive' amount of MS
 using the ms_driver infrastructure.
 """
 from osmo_gsm_tester.testenv import *
-from datetime import timedelta
 
-print('Claiming resources for the test')
+print('use resources...')
 nitb = suite.nitb()
 bts = suite.bts()
 ms_driver = suite.ms_driver()
 
-print('Launching a simple network')
+print('start nitb and bts...')
 nitb.bts_add(bts)
 nitb.start()
 bts.start()
@@ -24,35 +23,5 @@ for ms in ms_driver.ms_subscribers():
 # Run the base test.
 ms_driver.run_test()
 
-# Print the stats of the run.
+# Print stats
 ms_driver.print_stats()
-
-# Evaluate if this run was successful or not. Our initial acceptance criteria
-# is quite basic but it should allow us to scale to a larger number of MS and
-# reasons (e.g. have a full BCCH).
-#
-# 99% of LUs should complete
-# 99% of successful LUs should complete within 10s.
-stats = ms_driver.get_stats()
-if len(mobiles) > 0 and stats.num_completed < 1:
-    raise Exception("No run completed.")
-completion_ratio = stats.num_attempted / stats.num_completed
-
-# Verify that 99% of LUs completed.
-if completion_ratio < 0.99:
-    raise Exception("Completion ratio of %f%% lower than threshold." % (completion_ratio * 100.0))
-
-# Check how many results are below our threshold.
-acceptable_delay = timedelta(seconds=20)
-results = ms_driver.get_result_values()
-quick_enough = 0
-for result in results:
-    if not result.has_lu_time():
-        continue
-    if timedelta(seconds=result.lu_delay()) >= acceptable_delay:
-        continue
-    quick_enough = quick_enough + 1
-
-latency_ratio = quick_enough / len(results)
-if latency_ratio < 0.99:
-    raise Exception("Latency ratio of %f%% lower than threshold." % (latency_ratio * 100.0))

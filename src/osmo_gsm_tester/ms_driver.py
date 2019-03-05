@@ -146,18 +146,6 @@ class MsDriver(log.Origin):
         """
         self._test_case.print_stats()
 
-    def get_stats(self):
-        """
-        Returns a statistical summary of the test.
-        """
-        return self._test_case.get_stats()
-
-    def get_result_values(self):
-        """
-        Returns the raw result values of the test run in any order.
-        """
-        return self._test_case.get_result_values()
-
     def cleanup(self):
         """
         Cleans up the driver (e.g. AF_UNIX files).

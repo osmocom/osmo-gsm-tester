@@ -61,5 +61,183 @@ modem:
     type: osmo-mobile
   - imsi: "001010000000009"
     type: osmo-mobile
-  - imsi: "001010000000009"
+  - imsi: "001020000000000"
+    type: osmo-mobile
+  - imsi: "001020000000001"
+    type: osmo-mobile
+  - imsi: "001020000000002"
+    type: osmo-mobile
+  - imsi: "001020000000003"
+    type: osmo-mobile
+  - imsi: "001020000000004"
+    type: osmo-mobile
+  - imsi: "001020000000005"
+    type: osmo-mobile
+  - imsi: "001020000000006"
+    type: osmo-mobile
+  - imsi: "001020000000007"
+    type: osmo-mobile
+  - imsi: "001020000000008"
+    type: osmo-mobile
+  - imsi: "001020000000009"
+    type: osmo-mobile
+  - imsi: "001030000000000"
+    type: osmo-mobile
+  - imsi: "001030000000001"
+    type: osmo-mobile
+  - imsi: "001030000000002"
+    type: osmo-mobile
+  - imsi: "001030000000003"
+    type: osmo-mobile
+  - imsi: "001030000000004"
+    type: osmo-mobile
+  - imsi: "001030000000005"
+    type: osmo-mobile
+  - imsi: "001030000000006"
+    type: osmo-mobile
+  - imsi: "001030000000007"
+    type: osmo-mobile
+  - imsi: "001030000000008"
+    type: osmo-mobile
+  - imsi: "001030000000009"
+    type: osmo-mobile
+  - imsi: "001040000000000"
+    type: osmo-mobile
+  - imsi: "001040000000001"
+    type: osmo-mobile
+  - imsi: "001040000000002"
+    type: osmo-mobile
+  - imsi: "001040000000003"
+    type: osmo-mobile
+  - imsi: "001040000000004"
+    type: osmo-mobile
+  - imsi: "001040000000005"
+    type: osmo-mobile
+  - imsi: "001040000000006"
+    type: osmo-mobile
+  - imsi: "001040000000007"
+    type: osmo-mobile
+  - imsi: "001040000000008"
+    type: osmo-mobile
+  - imsi: "001040000000009"
+    type: osmo-mobile
+  - imsi: "001050000000000"
+    type: osmo-mobile
+  - imsi: "001050000000001"
+    type: osmo-mobile
+  - imsi: "001050000000002"
+    type: osmo-mobile
+  - imsi: "001050000000003"
+    type: osmo-mobile
+  - imsi: "001050000000004"
+    type: osmo-mobile
+  - imsi: "001050000000005"
+    type: osmo-mobile
+  - imsi: "001050000000006"
+    type: osmo-mobile
+  - imsi: "001050000000007"
+    type: osmo-mobile
+  - imsi: "001050000000008"
+    type: osmo-mobile
+  - imsi: "001050000000009"
+    type: osmo-mobile
+  - imsi: "001060000000000"
+    type: osmo-mobile
+  - imsi: "001060000000001"
+    type: osmo-mobile
+  - imsi: "001060000000002"
+    type: osmo-mobile
+  - imsi: "001060000000003"
+    type: osmo-mobile
+  - imsi: "001060000000004"
+    type: osmo-mobile
+  - imsi: "001060000000005"
+    type: osmo-mobile
+  - imsi: "001060000000006"
+    type: osmo-mobile
+  - imsi: "001060000000007"
+    type: osmo-mobile
+  - imsi: "001060000000008"
+    type: osmo-mobile
+  - imsi: "001060000000009"
+    type: osmo-mobile
+  - imsi: "001070000000000"
+    type: osmo-mobile
+  - imsi: "001070000000001"
+    type: osmo-mobile
+  - imsi: "001070000000002"
+    type: osmo-mobile
+  - imsi: "001070000000003"
+    type: osmo-mobile
+  - imsi: "001070000000004"
+    type: osmo-mobile
+  - imsi: "001070000000005"
+    type: osmo-mobile
+  - imsi: "001070000000006"
+    type: osmo-mobile
+  - imsi: "001070000000007"
+    type: osmo-mobile
+  - imsi: "001070000000008"
+    type: osmo-mobile
+  - imsi: "001070000000009"
+    type: osmo-mobile
+  - imsi: "001080000000000"
+    type: osmo-mobile
+  - imsi: "001080000000001"
+    type: osmo-mobile
+  - imsi: "001080000000002"
+    type: osmo-mobile
+  - imsi: "001080000000003"
+    type: osmo-mobile
+  - imsi: "001080000000004"
+    type: osmo-mobile
+  - imsi: "001080000000005"
+    type: osmo-mobile
+  - imsi: "001080000000006"
+    type: osmo-mobile
+  - imsi: "001080000000007"
+    type: osmo-mobile
+  - imsi: "001080000000008"
+    type: osmo-mobile
+  - imsi: "001080000000009"
+    type: osmo-mobile
+  - imsi: "001090000000000"
+    type: osmo-mobile
+  - imsi: "001090000000001"
+    type: osmo-mobile
+  - imsi: "001090000000002"
+    type: osmo-mobile
+  - imsi: "001090000000003"
+    type: osmo-mobile
+  - imsi: "001090000000004"
+    type: osmo-mobile
+  - imsi: "001090000000005"
+    type: osmo-mobile
+  - imsi: "001090000000006"
+    type: osmo-mobile
+  - imsi: "001090000000007"
+    type: osmo-mobile
+  - imsi: "001090000000008"
+    type: osmo-mobile
+  - imsi: "001090000000009"
+    type: osmo-mobile
+  - imsi: "001100000000000"
+    type: osmo-mobile
+  - imsi: "001100000000001"
+    type: osmo-mobile
+  - imsi: "001100000000002"
+    type: osmo-mobile
+  - imsi: "001100000000003"
+    type: osmo-mobile
+  - imsi: "001100000000004"
+    type: osmo-mobile
+  - imsi: "001100000000005"
+    type: osmo-mobile
+  - imsi: "001100000000006"
+    type: osmo-mobile
+  - imsi: "001100000000007"
+    type: osmo-mobile
+  - imsi: "001100000000008"
+    type: osmo-mobile
+  - imsi: "001100000000009"
     type: osmo-mobile

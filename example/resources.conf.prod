@@ -61,6 +61,7 @@ bts:
     remote_user: jenkins
     trx_ip: 10.42.42.117
     clock_reference: external
+    dev_args: "LimeSDR-USB,serial=00090706024F0A22"
 
 - label: sysmoCell 5000
   type: osmo-bts-trx

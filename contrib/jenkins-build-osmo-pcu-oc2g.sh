@@ -18,7 +18,13 @@ prefix="/usr/local/jenkins-build/inst-$name"
 prefix_real="$DESTDIR$prefix"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
+prev_git_url="${git_url}"
+git_url="https://gitlab.com/nrw_oc2g/"
+have_repo "oc2g-fw" "nrw/oc2g"
+git_url="${prev_git_url}"
+L1_OC2G_HEADERS="$PWD/oc2g-fw/inc"
+
 build_repo libosmocore --disable-pcsc --disable-doxygen --disable-gnutls
-build_repo osmo-pcu --disable-sysmocom-dsp
+build_repo osmo-pcu --disable-sysmocom-dsp -enable-oc2gbts-phy --with-oc2g="$L1_OC2G_HEADERS"
 
 create_bin_tgz osmo-pcu

@@ -364,7 +364,7 @@ class NetNSProcess(Process):
     # This function is overwritten from Process.
     def send_signal(self, sig):
         kill_cmd = ('kill', '-%d' % int(sig), str(self.process_obj.pid))
-        run_local_netns_sync(self.run_dir, self.name()+"-kill", self.netns, kill_cmd)
+        run_local_netns_sync(self.run_dir, self.name()+"-kill"+str(sig), self.netns, kill_cmd)
 
 
 def run_local_sync(run_dir, name, popen_args):

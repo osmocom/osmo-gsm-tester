@@ -363,6 +363,11 @@ class NetNSProcess(Process):
     # HACK: Since we run under sudo, only way to kill root-owned process is to kill as root...
     # This function is overwritten from Process.
     def send_signal(self, sig):
+        if sig == signal.SIGKILL:
+            # if we kill sudo, its children (bash running NETNS_EXEC_BIN +
+            # tcpdump under it) are kept alive. Let's instead tell the script to
+            # kill tcpdump:
+            sig = signal.SIGUSR1
         kill_cmd = ('kill', '-%d' % int(sig), str(self.process_obj.pid))
         run_local_netns_sync(self.run_dir, self.name()+"-kill"+str(sig), self.netns, kill_cmd)
 

@@ -104,7 +104,10 @@ class ParallelTerminationStrategy(TerminationStrategy):
             time.sleep(wait_step)
 
     def terminate_all(self):
-        self.dbg("Scheduled to terminate %d processes." % len(self._processes))
+        num_processes = len(self._processes)
+        self.dbg("Scheduled to terminate %d processes." % num_processes)
+        if num_processes == 0:
+            return
         self._prune_dead_processes(True)
         self._build_process_map()
 
@@ -116,6 +119,8 @@ class ParallelTerminationStrategy(TerminationStrategy):
             if sig == signal.SIGKILL:
                 continue
             self._poll_for_termination()
+            if len(self._processes) == 0:
+                return
 
 
 class Process(log.Origin):

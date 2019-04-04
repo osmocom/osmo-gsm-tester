@@ -96,14 +96,6 @@ tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
@@ -127,14 +119,6 @@ trial test_suite test_error.py
 tst test_error.py:[LINENR]: I am 'test_suite' / 'test_error.py:[LINENR]'  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]]
 tst test_error.py:[LINENR]: ERR: AssertionError: test_error.py:[LINENR]: assert False  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]: assert False]
 tst test_error.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_error.py:[LINENR]]  [test.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
@@ -158,14 +142,6 @@ trial test_suite test_fail.py
 tst test_fail.py:[LINENR]: I am 'test_suite' / 'test_fail.py:[LINENR]'  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
 tst test_fail.py:[LINENR]: ERR: EpicFail: This failure is expected  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
 tst test_fail.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail.py:[LINENR]]  [test.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
@@ -188,14 +164,6 @@ trial test_suite test_fail_raise.py
 ----------------------------------------------
 tst test_fail_raise.py:[LINENR]: ERR: ExpectedFail: This failure is expected  [test_suite↪test_fail_raise.py:[LINENR]]  [test_fail_raise.py:[LINENR]: raise ExpectedFail('This failure is expected')]
 tst test_fail_raise.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail_raise.py:[LINENR]]  [test.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
@@ -283,14 +251,6 @@ tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
@@ -378,14 +338,6 @@ tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
@@ -519,14 +471,6 @@ tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Scheduled to terminate 0 processes.  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGTERM  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGINT  [process.py:[LINENR]]
---- ParallelTerminationStrategy: DBG: Starting to kill with SIGKILL  [process.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------

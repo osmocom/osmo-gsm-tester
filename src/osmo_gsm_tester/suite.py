@@ -244,6 +244,8 @@ class SuiteRun(log.Origin):
         self._processes.insert(0, (process, respawn))
 
     def stop_processes(self):
+        if len(self._processes) == 0:
+            return
         strategy = process.ParallelTerminationStrategy()
         while self._processes:
             proc, _ = self._processes.pop()

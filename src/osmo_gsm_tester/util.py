@@ -100,6 +100,17 @@ def setcap_net_admin(binary, run_dir):
     proc = Process(SETCAP_NET_ADMIN_BIN, run_dir, ['sudo', SETCAP_NET_ADMIN_BIN, binary])
     proc.launch_sync()
 
+def move_iface_to_netns(ifname, netns, run_dir):
+    '''
+    Moves an iface to a netns. It creates the netns if it doesn't exist.
+    fail_iface_not_found=False is handy in order to assume the iface is already
+    in another netns and thus cannot be foud.
+    '''
+    from .process import Process
+    NETNS_SETUP_BIN = 'osmo-gsm-tester_netns_setup.sh'
+    proc = Process('move_netns', run_dir, ['sudo', NETNS_SETUP_BIN, ifname, netns])
+    proc.launch_sync()
+
 def import_path_prepend(pathname):
     dir = os.path.realpath(pathname)
     if dir not in sys.path:

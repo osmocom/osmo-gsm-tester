@@ -677,6 +677,7 @@ class Modem(MS):
         iface = ctx_settings.get('Interface', None)
         if not iface:
             raise log.Error('%s Settings contains no iface! %r' % (ctx_id, repr(ctx_settings)))
+        util.move_iface_to_netns(iface, self.netns(), self.run_dir.new_dir('move_netns'))
         self.run_netns_wait('ifup', ('ip', 'link', 'set', 'dev', iface, 'up'))
         self.run_netns_wait('dhcp', ('udhcpc', '-q', '-i', iface))
 

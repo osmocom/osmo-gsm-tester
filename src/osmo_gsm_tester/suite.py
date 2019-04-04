@@ -73,7 +73,7 @@ class SuiteRun(log.Origin):
         self._resource_requirements = None
         self._resource_modifiers = None
         self._config = None
-        self._processes = None
+        self._processes = []
         self._run_dir = None
         self.trial = trial
         self.definition = suite_definition
@@ -241,8 +241,6 @@ class SuiteRun(log.Origin):
         process managed by suite finishes before cleanup time, the current test
         will be marked as FAIL and end immediatelly. If respwan=True, then suite
         will respawn() the process instead.'''
-        if self._processes is None:
-            self._processes = []
         self._processes.insert(0, (process, respawn))
 
     def stop_processes(self):
@@ -396,16 +394,15 @@ class SuiteRun(log.Origin):
         return bvci
 
     def poll(self):
-        if self._processes:
-            for proc, respawn in self._processes:
-                if proc.terminated():
-                    if respawn == True:
-                        proc.respawn()
-                    else:
-                        proc.log_stdout_tail()
-                        proc.log_stderr_tail()
-                        log.ctx(proc)
-                        raise log.Error('Process ended prematurely: %s' % proc.name())
+        for proc, respawn in self._processes:
+            if proc.terminated():
+                if respawn == True:
+                    proc.respawn()
+                else:
+                    proc.log_stdout_tail()
+                    proc.log_stderr_tail()
+                    log.ctx(proc)
+                    raise log.Error('Process ended prematurely: %s' % proc.name())
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

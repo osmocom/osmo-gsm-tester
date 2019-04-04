@@ -52,10 +52,7 @@ def change_elf_rpath(binary, paths, run_dir):
     '''
     from .process import Process
     proc = Process('patchelf', run_dir, ['patchelf', '--set-rpath', paths, binary])
-    proc.launch()
-    proc.wait()
-    if proc.result != 0:
-        raise RuntimeError('patchelf finished with err code %d' % proc.result)
+    proc.launch_sync()
 
 def ip_to_iface(ip):
     try:
@@ -91,10 +88,7 @@ def setcap_net_raw(binary, run_dir):
     from .process import Process
     SETCAP_NET_RAW_BIN = 'osmo-gsm-tester_setcap_net_raw.sh'
     proc = Process(SETCAP_NET_RAW_BIN, run_dir, ['sudo', SETCAP_NET_RAW_BIN, binary])
-    proc.launch()
-    proc.wait()
-    if proc.result != 0:
-        raise RuntimeError('%s finished with err code %d' % (SETCAP_NET_RAW_BIN, proc.result))
+    proc.launch_sync()
 
 def setcap_net_admin(binary, run_dir):
     '''
@@ -104,10 +98,7 @@ def setcap_net_admin(binary, run_dir):
     from .process import Process
     SETCAP_NET_ADMIN_BIN = 'osmo-gsm-tester_setcap_net_admin.sh'
     proc = Process(SETCAP_NET_ADMIN_BIN, run_dir, ['sudo', SETCAP_NET_ADMIN_BIN, binary])
-    proc.launch()
-    proc.wait()
-    if proc.result != 0:
-        raise RuntimeError('%s finished with err code %d' % (SETCAP_NET_ADMIN_BIN, proc.result))
+    proc.launch_sync()
 
 def import_path_prepend(pathname):
     dir = os.path.realpath(pathname)

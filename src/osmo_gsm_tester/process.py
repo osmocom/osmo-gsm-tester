@@ -157,16 +157,27 @@ class Process(log.Origin):
         return f
 
     def launch(self):
+        preexec_fn = None
         log.dbg('cd %r; %s %s' % (
                 os.path.abspath(str(self.run_dir)),
                 ' '.join(['%s=%r'%(k,v) for k,v in self.popen_kwargs.get('env', {}).items()]),
                 ' '.join(self.popen_args)))
+
+        if self.popen_args[0] == "sudo":
+            # sudo drops forwarding of signals sent by processes of the same
+            # process group, which means by default will drop signals from
+            # parent and children processes. By moving it to another group, we
+            # will later be able to kill it.
+            # Note: sudo documentation is wrong, since it states it only drops
+            # signals from children.
+            preexec_fn = os.setpgrp
 
         self.process_obj = subprocess.Popen(
             self.popen_args,
             stdout=self.make_output_log('stdout'),
             stderr=self.make_output_log('stderr'),
             stdin=subprocess.PIPE,
+            preexec_fn=preexec_fn,
             shell=False,
             cwd=self.run_dir.path,
             **self.popen_kwargs)

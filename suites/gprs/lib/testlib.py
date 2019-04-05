@@ -26,7 +26,10 @@ def run_iperf3_cli_parallel(iperf3clients, ms_li, ready_cb):
             proc.wait()
     except Exception as e:
         for proc in procs:
-            proc.terminate()
+            try:
+                proc.terminate()
+            except Exception:
+                print("Exception while terminating process %r" % repr(process))
         raise e
 
 

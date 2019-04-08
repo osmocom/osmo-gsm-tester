@@ -590,7 +590,6 @@ class Modem(MS):
         req_ifaces = self._required_ifaces()
         if self.is_powered():
             self.dbg('Power cycling')
-            MainLoop.sleep(self, 1.0) # workaround for ofono bug OS#3064
             self.power_off()
         else:
             self.dbg('Powering on')

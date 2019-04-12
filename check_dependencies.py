@@ -26,5 +26,7 @@ import pydbus
 import sqlite3
 import sispm
 import smpplib
+import urllib.request
+import xml.etree.ElementTree
 
 print('dependencies ok')

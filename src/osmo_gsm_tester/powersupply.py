@@ -1,6 +1,6 @@
 # osmo_gsm_tester: class defining a Power Supply object
 #
-# Copyright (C) 2018 by sysmocom - s.f.m.c. GmbH
+# Copyright (C) 2018-2019 by sysmocom - s.f.m.c. GmbH
 #
 # Author: Pau Espin Pedrol <pespin@sysmocom.de>
 #
@@ -51,10 +51,11 @@ class PowerSupply(log.Origin, metaclass=ABCMeta):
         self.power_set(True)
 
 
-from . import powersupply_sispm
+from . import powersupply_sispm, powersupply_intellinet
 
 KNOWN_PWSUPPLY_TYPES = {
         'sispm' : powersupply_sispm.PowerSupplySispm,
+        'intellinet' : powersupply_intellinet.PowerSupplyIntellinet,
 }
 
 def register_type(name, clazz):

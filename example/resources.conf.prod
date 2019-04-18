@@ -90,8 +90,8 @@ bts:
   trx_list:
     - addr: 10.42.42.120
       power_supply:
-        type: 'sispm'
-        device: '01:01:4d:98:24'
+        type: 'intellinet'
+        device: '10.42.42.250'
         port: '1'
 
 - label: NanoBTS-ONW-900
@@ -102,13 +102,13 @@ bts:
   trx_list:
     - addr: 10.42.42.121
       power_supply:
-        type: 'sispm'
-        device: '01:01:4d:98:24'
+        type: 'intellinet'
+        device: '10.42.42.250'
         port: '2'
     - addr: 10.42.42.122
       power_supply:
-        type: 'sispm'
-        device: '01:01:4d:98:24'
+        type: 'intellinet'
+        device: '10.42.42.250'
         port: '3'
 
 - label: OsmoBTS Virtual

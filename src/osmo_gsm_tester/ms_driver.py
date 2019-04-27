@@ -130,6 +130,12 @@ class MsDriver(log.Origin):
         """
         return self._test_case.get_result_values()
 
+    def lus_less_than(self, acceptable_delay):
+        """
+        Returns the results that completed their LU within the acceptable delay.
+        """
+        return self._test_case.lus_less_than(acceptable_delay)
+
     def cleanup(self):
         """
         Cleans up the driver (e.g. AF_UNIX files).

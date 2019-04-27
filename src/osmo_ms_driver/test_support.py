@@ -26,15 +26,17 @@ def imsi_ki_gen():
         yield ("%.15d" % n, "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00")
         n += 1
 
-class Results(log.Origin):
+class ResultStore(log.Origin):
     """
-    A base class to collect results from tests.
+    The class for results. There should be one result class per test subject.
+    Specific tests can use add_result to add their outcome to this object.
     """
 
     def __init__(self, name):
         super().__init__(log.C_RUN, name)
         self._time_of_registration = None
         self._time_of_launch = None
+        self._results = {}
 
     def set_start_time(self, time):
         assert self._time_of_registration is None
@@ -49,3 +51,15 @@ class Results(log.Origin):
 
     def launch_time(self):
         return self._time_of_launch or 0
+
+    def set_result(self, key, value):
+        """Sets a result with the given key and value."""
+        self._results[key] = value
+
+    def get_result(self, key, default=None):
+        """Returns the result for the given key or default."""
+        return self._results.get(key, default)
+
+    def has_result(self, key):
+        """Returns true if there is a value for the key."""
+        return self._results.get(key) is not None

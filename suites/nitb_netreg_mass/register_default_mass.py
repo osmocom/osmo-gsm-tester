@@ -46,15 +46,7 @@ if completion_ratio < 0.99:
 
 # Check how many results are below our threshold.
 acceptable_delay = timedelta(seconds=30)
-results = ms_driver.get_result_values()
-quick_enough = 0
-for result in results:
-    if not result.has_lu_time():
-        continue
-    if timedelta(seconds=result.lu_delay()) >= acceptable_delay:
-        continue
-    quick_enough = quick_enough + 1
-
-latency_ratio = quick_enough / len(results)
+quick_enough = len(ms_driver.lus_less_than(acceptable_delay))
+latency_ratio = quick_enough / stats.num_attempted
 if latency_ratio < 0.99:
     raise Exception("Latency ratio of %f%% lower than threshold." % (latency_ratio * 100.0))

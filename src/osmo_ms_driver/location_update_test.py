@@ -19,32 +19,39 @@
 from copy import copy
 from osmo_gsm_tester import log
 from .starter import OsmoVirtPhy, OsmoMobile
-from .test_support import Results
+from .test_support import ResultStore
 
 from datetime import timedelta
 
 import collections
 import time
 
-class LUResult(Results):
-    """Representation of a Location Updating Result."""
+# Key used for the result dictionary
+LU_RESULT_NAME = 'lu_time'
 
-    def __init__(self, name):
-        super().__init__(name)
-        self._time_of_lu = None
+def has_lu_time(result):
+    """
+    Returns true if a LU occurred.
+    """
+    return result.has_result(LU_RESULT_NAME)
 
-    def set_lu_time(self, time):
-        assert self._time_of_lu is None
-        self._time_of_lu = time
+def lu_time(result):
+    """
+    Returns the time of the LU occurrence.
+    """
+    return result.get_result(LU_RESULT_NAME, default=0)
 
-    def has_lu_time(self):
-        return self._time_of_lu is not None
+def lu_delay(result):
+    """
+    Returns the delay from LU success to MS start time.
+    """
+    return lu_time(result) - result.start_time()
 
-    def lu_time(self):
-        return self._time_of_lu or 0
-
-    def lu_delay(self):
-        return self.lu_time() - self.start_time()
+def set_lu_time(result, time):
+    """
+    Sets/Overrides the time of the LU success for this MS.
+    """
+    result.set_result(LU_RESULT_NAME, time)
 
 
 LUStats = collections.namedtuple("LUStats", ["num_attempted", "num_completed",
@@ -106,7 +113,7 @@ class MassUpdateLocationTest(log.Origin):
                                 self.TEMPLATE_CFG, self._subscribers[i],
                                 phy.phy_filename(),
                                 self._event_server.server_path())
-            self._results[ms_name] = LUResult(ms_name)
+            self._results[ms_name] = ResultStore(ms_name)
             self._mobiles.append(launcher)
         self._unstarted = copy(self._mobiles)
 
@@ -204,10 +211,10 @@ class MassUpdateLocationTest(log.Origin):
         elif data['type'] == 'event':
             if data['data']['lu_done'] == 1:
                 ms = self._results[data['ms']]
-                if not ms.has_lu_time():
+                if not has_lu_time(ms):
                     self._outstanding = self._outstanding - 1
-                ms.set_lu_time(time)
-                self.log("MS performed LU ", ms=ms, at=time, lu_delay=ms.lu_delay())
+                set_lu_time(ms, time)
+                self.log("MS performed LU ", ms=ms, at=time, lu_delay=lu_delay(ms))
         else:
             print(time, data)
             raise Exception("Unknown event type..:" + _data.decode())
@@ -219,10 +226,10 @@ class MassUpdateLocationTest(log.Origin):
     def find_min_max(self, results):
         min_value = max_value = None
         for result in results:
-            if min_value is None or result.lu_delay() < min_value:
-                min_value = result.lu_delay()
-            if max_value is None or result.lu_delay() > max_value:
-                max_value = result.lu_delay()
+            if min_value is None or lu_delay(result) < min_value:
+                min_value = lu_delay(result)
+            if max_value is None or lu_delay(result) > max_value:
+                max_value = lu_delay(result)
         return min_value, max_value
 
     def get_result_values(self):
@@ -237,7 +244,7 @@ class MassUpdateLocationTest(log.Origin):
         """
         attempted = len(self._subscribers)
         completed = attempted - self._outstanding
-        min_latency, max_latency = self.find_min_max(filter(lambda x: x.has_lu_time(), self._results.values()))
+        min_latency, max_latency = self.find_min_max(filter(lambda x: has_lu_time(x), self._results.values()))
         return LUStats(attempted, completed, min_latency, max_latency)
 
     def print_stats(self):
@@ -246,3 +253,16 @@ class MassUpdateLocationTest(log.Origin):
 
         self.log("Tests done", all_completed=all_completed,
                     min=stats.min_latency, max=stats.max_latency)
+
+    def lus_less_than(self, acceptable_delay):
+        """
+        Returns LUs that completed within the acceptable delay.
+        """
+        res = []
+        for result in self._results.values():
+            if not has_lu_time(result):
+                continue
+            if timedelta(seconds=lu_delay(result)) >= acceptable_delay:
+                continue
+            res.append(result)
+        return res

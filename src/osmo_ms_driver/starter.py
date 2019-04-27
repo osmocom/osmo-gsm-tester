@@ -91,6 +91,7 @@ class OsmoMobile(Launcher):
             'test': {
                 'event_path': self._ev_server_path,
                 'lua_support': lua_support,
+                'run_lu_test': True,
             }
         }
         lua_cfg_file = os.path.join(self._tmp_dir, "lua_" + self._name_number + ".lua")

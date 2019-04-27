@@ -59,7 +59,7 @@ class MassUpdateLocationTest(log.Origin):
     decides how quickly to start them and a timeout.
     """
 
-    TEMPLATE_LUA = "osmo-mobile-lu.lua"
+    TEMPLATE_LUA = "osmo-mobile.lua"
     TEMPLATE_CFG = "osmo-mobile.cfg"
 
     def __init__(self, name, options, cdf_function,

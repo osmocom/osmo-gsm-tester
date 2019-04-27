@@ -2,11 +2,18 @@ package.path = '${test.lua_support}/?.lua;' .. package.path
 event = require('ms_support')
 send = 1
 
-function mm_cb(new_state, new_substate, old_substate)
+
+function lu_test_mm_cb(new_state, new_substate, old_substate)
         if new_state == 19 and new_substate == 1 and send == 1 then
             send = 0
             event.send({lu_done=1})
         end
+end
+
+function mm_cb(new_state, new_substate, old_substate)
+% if test.run_lu_test:
+	lu_test_mm_cb(new_state, new_substate, old_substate)
+% endif
 end
 
 local cbs = {

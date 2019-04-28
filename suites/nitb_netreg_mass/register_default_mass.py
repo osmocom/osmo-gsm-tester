@@ -38,7 +38,7 @@ ms_driver.print_stats()
 stats = ms_driver.get_stats()
 if len(modems) > 0 and stats.num_completed < 1:
     raise Exception("No run completed.")
-completion_ratio = stats.num_attempted / stats.num_completed
+completion_ratio = stats.num_completed / stats.num_attempted
 
 # Verify that 99% of LUs completed.
 if completion_ratio < 0.99:

@@ -20,7 +20,7 @@ from . import log, util
 from osmo_ms_driver.cdf import cdfs
 from osmo_ms_driver.event_server import EventServer
 from osmo_ms_driver.simple_loop import SimpleLoop
-from osmo_ms_driver.location_update_test import MassUpdateLocationTest
+from osmo_ms_driver.location_update_test import MassUpdateLocationTest, MobileTestStarter
 from osmo_ms_driver.starter import BinaryOptions
 
 import os.path
@@ -92,14 +92,18 @@ class MsDriver(log.Origin):
 
         self._ev_server = EventServer("ev_server", event_server_path)
         self._ev_server.listen(self._loop)
+        self._results = {}
         options = self.build_binary_options()
-        self._test_case = MassUpdateLocationTest("mass", options, self._cdf,
-                                                 self._ev_server,
-                                                 util.Dir(self.event_server_sk_tmp_dir),
-                                                 suite_run=self._suite_run)
+        self._starter = MobileTestStarter("mass", options, self._cdf,
+                                          self._ev_server,
+                                          util.Dir(self.event_server_sk_tmp_dir),
+                                          self._results, suite_run=self._suite_run)
+        self._test_case = MassUpdateLocationTest("mass", self._ev_server, self._results)
 
         for sub in self._subscribers:
-            self._test_case.subscriber_add(sub)
+            self._starter.subscriber_add(sub)
+
+        self._test_case.configure(len(self._subscribers))
         self._configured = True
 
     def run_test(self):
@@ -110,7 +114,8 @@ class MsDriver(log.Origin):
         """
         if not self._configured:
             self.configure()
-        self._test_case.run_test(self._loop, self._test_duration)
+        deadline = self._starter.start_all(self._loop, self._test_duration)
+        self._test_case.wait_for_test(self._loop, deadline)
 
     def print_stats(self):
         """

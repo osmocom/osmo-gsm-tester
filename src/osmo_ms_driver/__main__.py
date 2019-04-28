@@ -18,7 +18,7 @@
 # Local modules
 from .event_server import EventServer
 from .simple_loop import SimpleLoop
-from .location_update_test import MassUpdateLocationTest
+from .location_update_test import MassUpdateLocationTest, MobileTestStarter
 from .cdf import cdfs
 from .starter import BinaryOptions
 from .test_support import imsi_ki_gen
@@ -86,7 +86,9 @@ def main():
 
     # Just a single test for now.
     options = BinaryOptions("virtphy", "mobile", os.environ)
-    test = MassUpdateLocationTest("lu_test", options, cdf, ev_server, tmp_dir)
+    result = {}
+    starter = MobileTestStarter("lu_test", options, cdf, ev_server, tmp_dir, result)
+    test = MassUpdateLocationTest("lu_test", ev_server, result)
 
     # Add subscribers to the test.
     imsi_gen = imsi_ki_gen()
@@ -97,12 +99,14 @@ def main():
             'ki': ki,
             'auth_algo': 'comp128v1',
         }
-        test.subscriber_add(ms_osmo_mobile.MSOsmoMobile("ms_%d" % i, conf))
+        starter.subscriber_add(ms_osmo_mobile.MSOsmoMobile("ms_%d" % i, conf))
+    test.configure(args.num_ms)
 
-    atexit.register(test.stop_all)
+    atexit.register(starter.stop_all)
 
     # Run until everything has been launched
-    test.run_test(loop, timedelta(seconds=args.test_duration))
+    deadline = starter.start_all(loop, timedelta(seconds=args.test_duration))
+    test.wait_for_test(loop, deadline)
 
     # Print stats
     test.print_stats()

@@ -107,8 +107,10 @@ class OsmoMobile(Launcher):
         generator.
         """
         self._cfg['test'][key] = value
+        print("SET", self._cfg)
 
     def write_lua_cfg(self):
+        print("NOW", self._cfg)
         lua_cfg_file = os.path.join(self._tmp_dir, "lua_" + self._name_number + ".lua")
         lua_script = template.render(self._lua_template, self._cfg)
         with open(lua_cfg_file, 'w') as w:

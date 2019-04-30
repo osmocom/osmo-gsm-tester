@@ -22,6 +22,7 @@ from osmo_ms_driver.event_server import EventServer
 from osmo_ms_driver.simple_loop import SimpleLoop
 from osmo_ms_driver.location_update_test import MassUpdateLocationTest
 from osmo_ms_driver.starter import BinaryOptions, MobileTestStarter
+from osmo_ms_driver.test_support import TestExecutor
 
 import os.path
 import shutil
@@ -39,13 +40,19 @@ class MsDriver(log.Origin):
         self._test_duration = timedelta(seconds=120)
         self._cdf = cdfs["ease_in_out"](self._time_start, self._time_step)
         self._loop = SimpleLoop()
-        self._test_case = None
+        self._executor = TestExecutor()
         self.event_server_sk_tmp_dir = None
         self._subscribers = []
         self._configured = False
+        self._results = {}
 
-        if len(self.event_server_path().encode()) > 107:
+        # Set-up and start the event server
+        event_server_path = self.event_server_path()
+        if len(event_server_path.encode()) > 107:
             raise log.Error('Path for event_server socket is longer than max allowed len for unix socket path (107):', self.event_server_path())
+
+        self._ev_server = EventServer("ev_server", event_server_path)
+        self._ev_server.listen(self._loop)
 
     def event_server_path(self):
         if self.event_server_sk_tmp_dir is None:
@@ -83,27 +90,39 @@ class MsDriver(log.Origin):
         """Adds a subscriber to the list of subscribers."""
         self._subscribers.append(subscriber)
 
+    def add_test(self, test_name, **kwargs):
+        """
+        Instantiates and returns a test for the given name.
+
+        The instance created and added will be returned.
+        """
+        if test_name == 'update_location':
+            test = MassUpdateLocationTest("mass",
+                                          self._ev_server, self._results)
+
+        # Verify that a test was instantiated.
+        if test_name is None:
+            raise Exception("Unknown test_name: " + test_name)
+
+        # Add it to the executor and return it.
+        self._executor.add_test(test)
+        return test
+
     def configure(self):
         """
         Configures the subscribers, tests and registration server. Needs to be
         called after the complete configuration of this driver.
         """
-        event_server_path = self.event_server_path()
-
-        self._ev_server = EventServer("ev_server", event_server_path)
-        self._ev_server.listen(self._loop)
-        self._results = {}
         options = self.build_binary_options()
         self._starter = MobileTestStarter("mass", options, self._cdf,
                                           self._ev_server,
                                           util.Dir(self.event_server_sk_tmp_dir),
                                           self._results, suite_run=self._suite_run)
-        self._test_case = MassUpdateLocationTest("mass", self._ev_server, self._results)
 
         for sub in self._subscribers:
             self._starter.subscriber_add(sub)
 
-        self._test_case.configure(len(self._subscribers))
+        self._executor.configure(len(self._subscribers))
         self._configured = True
 
     def run_test(self):
@@ -114,34 +133,16 @@ class MsDriver(log.Origin):
         """
         if not self._configured:
             self.configure()
-        self._test_case.before_start()
+        self._executor.before_start()
         deadline = self._starter.start_all(self._loop, self._test_duration)
-        self._test_case.after_start()
-        self._test_case.wait_for_test(self._loop, deadline)
+        self._executor.after_start()
+        self._executor.wait_for_test(self._loop, deadline)
 
     def print_stats(self):
         """
         Prints statistics about the test run.
         """
-        self._test_case.print_stats()
-
-    def get_stats(self):
-        """
-        Returns a statistical summary of the test.
-        """
-        return self._test_case.get_stats()
-
-    def get_result_values(self):
-        """
-        Returns the raw result values of the test run in any order.
-        """
-        return self._test_case.get_result_values()
-
-    def lus_less_than(self, acceptable_delay):
-        """
-        Returns the results that completed their LU within the acceptable delay.
-        """
-        return self._test_case.lus_less_than(acceptable_delay)
+        self._executor.print_stats()
 
     def cleanup(self):
         """

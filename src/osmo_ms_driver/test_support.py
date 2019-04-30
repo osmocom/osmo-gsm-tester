@@ -18,6 +18,8 @@
 from abc import ABCMeta
 from osmo_gsm_tester import log
 
+import time
+
 def imsi_ki_gen():
     """
     Generate IMSIs and KIs to be used by test.
@@ -93,3 +95,48 @@ class TestBase(log.Origin, metaclass=ABCMeta):
     def print_stats(self):
         """Prints statistics/results of the test."""
         pass
+
+
+class TestExecutor(log.Origin):
+    """Execute/Wait for a list of tests to complete."""
+
+    def __init__(self):
+        super().__init__(log.C_RUN, "executor")
+        self._tests = []
+
+    def add_test(self, test):
+        self._tests.append(test)
+
+    def configure(self, num_subscriber):
+        for test in self._tests:
+            test.configure(num_subscriber)
+
+    def before_start(self):
+        for test in self._tests:
+            test.before_start()
+
+    def after_start(self):
+        for test in self._tests:
+            test.after_start()
+
+    def print_stats(self):
+        """Prints statistics/results of the test."""
+        for test in self._tests:
+            test.print_stats()
+
+    def all_tests_completed(self):
+        """Returns true if all tests completed."""
+        for test in self._tests:
+            if not test.has_completed():
+                return False
+        return True
+
+    def wait_for_test(self, loop, deadline):
+        """Waits up to the absolute deadline for all tests to complete."""
+        while not self.all_tests_completed():
+            now_time = time.clock_gettime(time.CLOCK_MONOTONIC)
+            sleep_time = deadline - now_time
+            if sleep_time < 0:
+                break
+            loop.schedule_timeout(sleep_time)
+            loop.select()

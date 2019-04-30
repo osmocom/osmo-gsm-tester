@@ -10,6 +10,7 @@ print('Claiming resources for the test')
 nitb = suite.nitb()
 bts = suite.bts()
 ms_driver = suite.ms_driver()
+ul = ms_driver.add_test('update_location')
 modems = suite.all_resources(suite.modem)
 
 print('Launching a simple network')
@@ -35,7 +36,7 @@ ms_driver.print_stats()
 #
 # 99% of LUs should complete
 # 99% of successful LUs should complete within 10s.
-stats = ms_driver.get_stats()
+stats = ul.get_stats()
 if len(modems) > 0 and stats.num_completed < 1:
     raise Exception("No run completed.")
 completion_ratio = stats.num_completed / stats.num_attempted
@@ -46,7 +47,7 @@ if completion_ratio < 0.99:
 
 # Check how many results are below our threshold.
 acceptable_delay = timedelta(seconds=30)
-quick_enough = len(ms_driver.lus_less_than(acceptable_delay))
+quick_enough = len(ul.lus_less_than(acceptable_delay))
 latency_ratio = quick_enough / stats.num_attempted
 if latency_ratio < 0.99:
     raise Exception("Latency ratio of %f%% lower than threshold." % (latency_ratio * 100.0))

@@ -60,9 +60,13 @@ class MassUpdateLocationTest(TestBase):
         super().__init__(name, event_server, results)
         self._event_server.register(self.handle_msg)
 
-    def configure(self, num_subscribers):
-        self._num_subscribers = num_subscribers
-        self._outstanding = num_subscribers
+    def configure(self, subscribers, mobiles):
+        # Enable the LU test script in each mobile
+        for mobile in mobiles:
+            mobile.set_cfg_item('run_lu_test', True)
+
+        self._num_subscribers = len(subscribers)
+        self._outstanding = self._num_subscribers
 
     def handle_msg(self, _data, addr, time):
         data = json.loads(_data.decode())

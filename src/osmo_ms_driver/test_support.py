@@ -76,8 +76,13 @@ class TestBase(log.Origin, metaclass=ABCMeta):
         self._event_server = event_server
         self._results = results
 
-    def configure(self, num_subscribers):
-        """Configures the test given the (number) of subscribers."""
+    def configure(self, subscribers, mobiles):
+        """
+        Configures the test given the subscribers.
+
+        The subscriber at index _i_ belongs to the mobile at the
+        same index. subscribers[i] == mobiles[i].subscriber().
+        """
         pass
 
     def before_start(self):
@@ -107,9 +112,9 @@ class TestExecutor(log.Origin):
     def add_test(self, test):
         self._tests.append(test)
 
-    def configure(self, num_subscriber):
+    def configure(self, subscribers, mobiles):
         for test in self._tests:
-            test.configure(num_subscriber)
+            test.configure(subscribers, mobiles)
 
     def before_start(self):
         for test in self._tests:

@@ -98,8 +98,10 @@ def main():
             'imsi': imsi,
             'ki': ki,
             'auth_algo': 'comp128v1',
+            'run_lu_test': False,
         }
         starter.subscriber_add(ms_osmo_mobile.MSOsmoMobile("ms_%d" % i, conf))
+    starter.configure_tasks()
     test.configure(args.num_ms)
 
     atexit.register(starter.stop_all)

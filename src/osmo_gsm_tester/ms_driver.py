@@ -122,7 +122,8 @@ class MsDriver(log.Origin):
         for sub in self._subscribers:
             self._starter.subscriber_add(sub)
 
-        self._executor.configure(len(self._subscribers))
+        self._starter.configure_tasks()
+        self._executor.configure(self._subscribers, self._starter.mobiles())
         self._configured = True
 
     def run_test(self):

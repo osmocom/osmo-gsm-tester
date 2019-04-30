@@ -100,6 +100,7 @@ def main():
             'auth_algo': 'comp128v1',
         }
         starter.subscriber_add(ms_osmo_mobile.MSOsmoMobile("ms_%d" % i, conf))
+    starter.configure_tasks()
     test.configure(args.num_ms)
 
     atexit.register(starter.stop_all)

@@ -85,23 +85,32 @@ class OsmoMobile(Launcher):
         self._ki = subscriber.ki()
         self._omob_proc = None
 
+        lua_support = os.path.join(os.path.dirname(__file__), 'lua')
+        self._cfg = {
+            'test': {
+                'event_path': self._ev_server_path,
+                'lua_support': lua_support,
+            }
+        }
+
     def imsi(self):
         return self._imsi
 
     def ki(self):
         return self._ki
 
+    def set_cfg_item(self, key, value):
+        """
+        Sets `key` to `value` inside the test dictionary.
+
+        Used by testcases to pass per MS settings into the lua script
+        generator.
+        """
+        self._cfg['test'][key] = value
+
     def write_lua_cfg(self):
-        lua_support = os.path.join(os.path.dirname(__file__), 'lua')
-        cfg = {
-            'test': {
-                'event_path': self._ev_server_path,
-                'lua_support': lua_support,
-                'run_lu_test': True,
-            }
-        }
         lua_cfg_file = os.path.join(self._tmp_dir, "lua_" + self._name_number + ".lua")
-        lua_script = template.render(self._lua_template, cfg)
+        lua_script = template.render(self._lua_template, self._cfg)
         with open(lua_cfg_file, 'w') as w:
             w.write(lua_script)
         return lua_cfg_file
@@ -220,7 +229,6 @@ class MobileTestStarter(log.Origin):
     def prepare(self, loop):
         self.log("Starting testcase")
 
-        self.configure_tasks()
         self.pre_launch(loop)
 
         self._start_time = time.clock_gettime(time.CLOCK_MONOTONIC)
@@ -296,3 +304,7 @@ class MobileTestStarter(log.Origin):
             ms.set_start_time(time)
             launch_delay = ms.start_time() - ms.launch_time()
             self.log("MS start registered ", ms=ms, at=time, delay=launch_delay)
+
+    def mobiles(self):
+        """Returns the list of mobiles configured."""
+        return self._mobiles

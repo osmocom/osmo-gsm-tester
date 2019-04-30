@@ -16,9 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from osmo_gsm_tester import log
-
 from datetime import timedelta
+
+from .test_support import TestBase
 
 import collections
 import json
@@ -55,12 +55,10 @@ def set_lu_time(result, time):
 LUStats = collections.namedtuple("LUStats", ["num_attempted", "num_completed",
                                  "min_latency", "max_latency"])
 
-class MassUpdateLocationTest(log.Origin):
+class MassUpdateLocationTest(TestBase):
     def __init__(self, name, event_server, results):
-        super().__init__(log.C_RUN, name)
-        self._event_server = event_server
+        super().__init__(name, event_server, results)
         self._event_server.register(self.handle_msg)
-        self._results = results
 
     def configure(self, num_subscribers):
         self._num_subscribers = num_subscribers
@@ -77,12 +75,12 @@ class MassUpdateLocationTest(log.Origin):
                 set_lu_time(ms, time)
                 self.log("MS performed LU ", ms=ms, at=time, lu_delay=lu_delay(ms))
 
-    def all_completed(self):
+    def has_completed(self):
         return self._outstanding == 0
 
     def wait_for_test(self, loop, deadline):
         """Waits up to the absolute deadline for the test to complete."""
-        while not self.all_completed():
+        while not self.has_completed():
             now_time = time.clock_gettime(time.CLOCK_MONOTONIC)
             sleep_time = deadline - now_time
             if sleep_time < 0:

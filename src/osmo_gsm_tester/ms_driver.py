@@ -114,7 +114,9 @@ class MsDriver(log.Origin):
         """
         if not self._configured:
             self.configure()
+        self._test_case.before_start()
         deadline = self._starter.start_all(self._loop, self._test_duration)
+        self._test_case.after_start()
         self._test_case.wait_for_test(self._loop, deadline)
 
     def print_stats(self):

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from abc import ABCMeta
 from osmo_gsm_tester import log
 
 def imsi_ki_gen():
@@ -63,3 +64,32 @@ class ResultStore(log.Origin):
     def has_result(self, key):
         """Returns true if there is a value for the key."""
         return self._results.get(key) is not None
+
+
+class TestBase(log.Origin, metaclass=ABCMeta):
+    """Base class for all mass test cases."""
+
+    def __init__(self, name, event_server, results):
+        super().__init__(log.C_RUN, name)
+        self._event_server = event_server
+        self._results = results
+
+    def configure(self, num_subscribers):
+        """Configures the test given the (number) of subscribers."""
+        pass
+
+    def before_start(self):
+        """Prepares the test for starting."""
+        pass
+
+    def after_start(self):
+        """Finishes the test after starting."""
+        pass
+
+    def has_completed(self):
+        """Returns true if the test has completed."""
+        pass
+
+    def print_stats(self):
+        """Prints statistics/results of the test."""
+        pass

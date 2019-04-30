@@ -18,9 +18,9 @@
 # Local modules
 from .event_server import EventServer
 from .simple_loop import SimpleLoop
-from .location_update_test import MassUpdateLocationTest, MobileTestStarter
+from .location_update_test import MassUpdateLocationTest
 from .cdf import cdfs
-from .starter import BinaryOptions
+from .starter import BinaryOptions, MobileTestStarter
 from .test_support import imsi_ki_gen
 from osmo_gsm_tester import log, util
 from osmo_gsm_tester import ms_osmo_mobile

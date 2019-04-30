@@ -23,7 +23,7 @@ from .cdf import cdfs
 from .starter import BinaryOptions
 from .test_support import imsi_ki_gen
 from osmo_gsm_tester import log, util
-from osmo_gsm_tester import ms
+from osmo_gsm_tester import ms_osmo_mobile
 
 # System modules
 from datetime import timedelta
@@ -97,7 +97,7 @@ def main():
             'ki': ki,
             'auth_algo': 'comp128v1',
         }
-        test.subscriber_add(ms.MS("ms_%d" % i, conf))
+        test.subscriber_add(ms_osmo_mobile.MSOsmoMobile("ms_%d" % i, conf))
 
     atexit.register(test.stop_all)
 

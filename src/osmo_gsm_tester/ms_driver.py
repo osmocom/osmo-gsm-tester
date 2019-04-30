@@ -20,8 +20,8 @@ from . import log, util
 from osmo_ms_driver.cdf import cdfs
 from osmo_ms_driver.event_server import EventServer
 from osmo_ms_driver.simple_loop import SimpleLoop
-from osmo_ms_driver.location_update_test import MassUpdateLocationTest, MobileTestStarter
-from osmo_ms_driver.starter import BinaryOptions
+from osmo_ms_driver.location_update_test import MassUpdateLocationTest
+from osmo_ms_driver.starter import BinaryOptions, MobileTestStarter
 
 import os.path
 import shutil

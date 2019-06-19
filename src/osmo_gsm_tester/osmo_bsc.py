@@ -32,6 +32,7 @@ class OsmoBsc(log.Origin):
         self.process = None
         self.encryption = None
         self.rsl_ip = None
+        self.use_osmux = "off"
         self.suite_run = suite_run
         self.ip_address = ip_address
         self.bts = []
@@ -90,6 +91,7 @@ class OsmoBsc(log.Origin):
         else:
             encryption_vty = util.encryption2osmovty(values['bsc']['net']['encryption'])
         config.overlay(values, dict(bsc=dict(net=dict(encryption=encryption_vty))))
+        config.overlay(values, dict(bsc=dict(use_osmux=self.use_osmux)))
 
         if self.rsl_ip is not None:
             config.overlay(values, dict(bsc=dict(net=dict(rsl_ip=self.rsl_ip))))
@@ -112,6 +114,15 @@ class OsmoBsc(log.Origin):
         for tests only willing to use osmo-bsc to do the OML setup but using
         other external entities to test the RSL path, such as TTCN3 tests.'''
         self.rsl_ip = ip_addr
+
+    def set_use_osmux(self, use=False, force=False):
+        if not use:
+            self.use_osmux = "off"
+        else:
+            if not force:
+                self.use_osmux = "on"
+            else:
+                self.use_osmux = "only"
 
     def bts_add(self, bts):
         self.bts.append(bts)

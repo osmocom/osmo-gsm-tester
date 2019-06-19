@@ -31,6 +31,7 @@ class OsmoMgw(log.Origin):
         self.process = None
         self.suite_run = suite_run
         self.ip_address = ip_address
+        self.use_osmux = "off"
 
     def start(self):
         self.log('Starting osmo-mgw')
@@ -63,7 +64,11 @@ class OsmoMgw(log.Origin):
 
         values = dict(mgw=config.get_defaults('mgw'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(mgw=dict(ip_address=self.ip_address)))
+        config.overlay(values, { 'mgw': {
+                                        'ip_address': self.ip_address,
+                                        'use_osmux': self.use_osmux
+                                        }
+                                })
 
         self.dbg('MGW CONFIG:\n' + pprint.pformat(values))
 
@@ -80,5 +85,15 @@ class OsmoMgw(log.Origin):
 
     def running(self):
         return not self.process.terminated()
+
+    def set_use_osmux(self, use=False, force=False):
+        if not use:
+            self.use_osmux = "off"
+        else:
+            if not force:
+                self.use_osmux = "on"
+            else:
+                self.use_osmux = "only"
+
 
 # vim: expandtab tabstop=4 shiftwidth=4

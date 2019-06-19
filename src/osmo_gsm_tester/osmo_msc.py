@@ -32,6 +32,7 @@ class OsmoMsc(log.Origin):
         self.config = None
         self.encryption = None
         self.authentication = None
+        self.use_osmux = "off"
         self.suite_run = suite_run
         self.ip_address = ip_address
         self.hlr = hlr
@@ -84,6 +85,7 @@ class OsmoMsc(log.Origin):
         config.overlay(values, dict(msc=dict(net=dict(encryption=encryption_vty))))
         if self.authentication is not None:
             config.overlay(values, dict(msc=dict(net=dict(authentication=self.authentication))))
+        config.overlay(values, dict(msc=dict(use_osmux=self.use_osmux)))
 
 
         self.config = values
@@ -106,6 +108,15 @@ class OsmoMsc(log.Origin):
             self.authroziation = None
             return
         self.authentication = "required" if val else "optional"
+
+    def set_use_osmux(self, use=False, force=False):
+        if not use:
+            self.use_osmux = "off"
+        else:
+            if not force:
+                self.use_osmux = "on"
+            else:
+                self.use_osmux = "only"
 
     def mcc(self):
         return self.config['msc']['net']['mcc']

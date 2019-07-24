@@ -75,6 +75,7 @@ RESOURCES_SCHEMA = {
         'bts[].osmo_trx.remote_user': schema.STR,
         'bts[].osmo_trx.dev_args': schema.STR,
         'bts[].osmo_trx.multi_arfcn': schema.BOOL_STR,
+        'bts[].osmo_trx.max_trxd_version': schema.UINT,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].type': schema.STR,

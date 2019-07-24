@@ -23,6 +23,9 @@ ctrl
 phy 0
  osmotrx ip local ${osmo_bts_trx.osmo_trx.bts_ip}
  osmotrx ip remote ${osmo_bts_trx.osmo_trx.trx_ip}
+%if osmo_bts_trx.get('osmo_trx').get('max_trxd_version', False):
+ osmotrx trxd-max-version ${osmo_bts_trx.osmo_trx.max_trxd_version}
+%endif
 %for chan in osmo_bts_trx.osmo_trx.channels:
  instance ${loop.index}
   osmotrx rx-gain 25

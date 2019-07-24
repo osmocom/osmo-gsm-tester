@@ -73,6 +73,7 @@ bts:
         launch_trx: false
         clock_reference: external
         trx_ip: 10.42.42.112
+        max_trxd_version: 0
 
 - label: OCTBTS 3500
   type: osmo-bts-octphy

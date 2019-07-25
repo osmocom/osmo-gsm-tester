@@ -60,6 +60,7 @@ RESOURCES_SCHEMA = {
         'bts[].num_trx': schema.UINT,
         'bts[].max_trx': schema.UINT,
         'bts[].trx_list[].addr': schema.IPV4,
+        'bts[].trx_list[].arfcn': schema.INT,
         'bts[].trx_list[].hw_addr': schema.HWADDR,
         'bts[].trx_list[].net_device': schema.STR,
         'bts[].trx_list[].nominal_power': schema.UINT,

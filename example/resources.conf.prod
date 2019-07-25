@@ -69,6 +69,8 @@ bts:
   addr: 10.42.42.51
   band: GSM-1800
   ciphers: [a5_0, a5_1]
+  trx_list:
+    - arfcn: 878
   osmo_trx:
         launch_trx: false
         clock_reference: external

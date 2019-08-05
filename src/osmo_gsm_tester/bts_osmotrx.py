@@ -135,8 +135,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
         self.proc_bts = self.launch_process(keepalive, OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
-                            '-i', self.bsc.addr(),
-                            '-t', str(self.num_trx()))
+                            '-i', self.bsc.addr())
         self.suite_run.poll()
 
 class OsmoTrx(log.Origin, metaclass=ABCMeta):

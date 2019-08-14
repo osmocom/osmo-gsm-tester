@@ -224,12 +224,14 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
                     echo "received signal handler $sig, killing $mypid"
                     kill $mypid
             }
+            trap 'sign_handler SIGTERM' SIGTERM
             trap 'sign_handler SIGINT' SIGINT
             trap 'sign_handler SIGHUP' SIGHUP
             "$@" &
             mypid=$!
             echo "waiting for $mypid"
             wait $mypid
+            echo "process $mypid finished"
             """
             f.write(r)
         st = os.stat(wrapper_script)

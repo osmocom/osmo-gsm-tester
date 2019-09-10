@@ -205,7 +205,7 @@ class Process(log.Origin):
         assert not self.is_running()
         self.result = None
         self.killed = None
-        self.launch()
+        return self.launch()
 
     def _poll_termination(self, time_to_wait_for_term=5):
         wait_step = 0.001

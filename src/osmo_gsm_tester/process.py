@@ -207,6 +207,13 @@ class Process(log.Origin):
         self.killed = None
         return self.launch()
 
+    def respawn_sync(self, raise_nonsuccess=True):
+        self.dbg('respawn_sync')
+        assert not self.is_running()
+        self.result = None
+        self.killed = None
+        return self.launch_sync(raise_nonsuccess)
+
     def _poll_termination(self, time_to_wait_for_term=5):
         wait_step = 0.001
         waited_time = 0

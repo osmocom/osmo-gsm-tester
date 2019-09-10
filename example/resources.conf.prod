@@ -71,8 +71,14 @@ bts:
   ciphers: [a5_0, a5_1]
   trx_list:
     - arfcn: 878
+      power_supply:
+        type: 'intellinet'
+        device: '10.42.42.250'
+        port: '5'
   osmo_trx:
-    launch_trx: false
+    type: sc5
+    launch_trx: true
+    remote_user: root
     clock_reference: external
     trx_ip: 10.42.42.112
     max_trxd_version: 0

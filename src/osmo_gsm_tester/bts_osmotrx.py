@@ -22,6 +22,7 @@ import stat
 import pprint
 from abc import ABCMeta, abstractmethod
 from . import log, config, util, template, process, bts_osmo
+from . import powersupply
 from .event_loop import MainLoop
 
 class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
@@ -39,6 +40,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         self.run_dir = None
         self.inst = None
         self.trx = None
+        self.pwsup_list = []
         self.env = {}
         self.gen_conf = {}
 
@@ -92,6 +94,20 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
             self.dbg(r)
             f.write(r)
 
+        self.pwsup_list = [None] * self.num_trx()
+        # Construct trx_list appending with empty dicts if needed:
+        conf_trx_list = self.conf.get('trx_list', [])
+        conf_trx_list = conf_trx_list + [{}] * (self.num_trx() - len(conf_trx_list))
+        for trx_i in range(self.num_trx()):
+            pwsup_opt = conf_trx_list[trx_i].get('power_supply', {})
+            if not pwsup_opt:
+                self.dbg('no power_supply configured for TRX %d' % trx_i)
+                continue
+            pwsup_type = pwsup_opt.get('type')
+            if not pwsup_type:
+                raise log.Error('No type attribute provided in power_supply conf for TRX %d!' % trx_i)
+            self.pwsup_list[trx_i] = powersupply.get_instance_by_type(pwsup_type, pwsup_opt)
+
     def launch_trx_enabled(self):
         return util.str2bool(self.gen_conf['osmo_bts_trx'].get('osmo_trx', {}).get('launch_trx'))
 
@@ -109,6 +125,15 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
     def conf_for_osmotrx(self):
         return dict(osmo_trx=self.gen_conf['osmo_bts_trx'].get('osmo_trx', {}))
 
+    def cleanup(self):
+        i = 0
+        for pwsup in self.pwsup_list:
+            if pwsup:
+                self.dbg('Powering off TRX %d' % i)
+                pwsup.power_set(False)
+            i = i + 1
+        self.pwsup_list = []
+
 ###################
 # PUBLIC (test API included)
 ###################
@@ -120,6 +145,14 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         self.log('Starting to connect to', self.bsc)
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
+
+        # Power cycle all TRX if needed (right now only TRX0 for SC5):
+        i = 0
+        for pwsup in self.pwsup_list:
+            if pwsup:
+                self.dbg('Powering cycling TRX %d' % i)
+                pwsup.power_cycle(1.0)
+            i = i + 1
 
         if self.launch_trx_enabled():
             self.trx = OsmoTrx.get_instance_by_type(self.get_osmo_trx_type(), self.suite_run, self.conf_for_osmotrx())
@@ -138,7 +171,45 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
                             '-i', self.bsc.addr())
         self.suite_run.poll()
 
-class OsmoTrx(log.Origin, metaclass=ABCMeta):
+
+################################################################################
+# TRX
+################################################################################
+
+class Trx(log.Origin, metaclass=ABCMeta):
+##############
+# PROTECTED
+##############
+    def __init__(self, suite_run, conf, name):
+        super().__init__(log.C_RUN, name)
+        self.suite_run = suite_run
+        self.conf = conf
+        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.listen_ip = conf.get('osmo_trx', {}).get('trx_ip')
+        self.remote_user = conf.get('osmo_trx', {}).get('remote_user', None)
+
+    @classmethod
+    def get_instance_by_type(cls, type, suite_run, conf):
+        KNOWN_OSMOTRX_TYPES = {
+            'uhd': OsmoTrxUHD,
+            'lms': OsmoTrxLMS,
+            'sc5': TrxSC5
+        }
+        osmo_trx_class = KNOWN_OSMOTRX_TYPES.get(type)
+        return osmo_trx_class(suite_run, conf)
+
+##############
+# PUBLIC (test API included)
+##############
+    @abstractmethod
+    def start(self, keepalive=False):
+        pass
+
+    @abstractmethod
+    def trx_ready(self):
+        pass
+
+class OsmoTrx(Trx, metaclass=ABCMeta):
 
     CONF_OSMO_TRX = 'osmo-trx.cfg'
     REMOTE_DIR = '/osmo-gsm-tester-trx/last_run'
@@ -148,26 +219,12 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
 # PROTECTED
 ##############
     def __init__(self, suite_run, conf):
-        super().__init__(log.C_RUN, self.binary_name())
-        self.suite_run = suite_run
-        self.conf = conf
+        super().__init__(suite_run, conf, self.binary_name())
         self.env = {}
         self.log("OSMOTRX CONF: %r" % conf)
-        self.listen_ip = conf.get('osmo_trx', {}).get('trx_ip')
         self.bts_ip = conf.get('osmo_trx', {}).get('bts_ip')
-        self.remote_user = conf.get('osmo_trx', {}).get('remote_user', None)
-        self.run_dir = None
         self.inst = None
         self.proc_trx = None
-
-    @classmethod
-    def get_instance_by_type(cls, type, suite_run, conf):
-        KNOWN_OSMOTRX_TYPES = {
-            'uhd': OsmoTrxUHD,
-            'lms': OsmoTrxLMS,
-        }
-        osmo_trx_class = KNOWN_OSMOTRX_TYPES.get(type)
-        return osmo_trx_class(suite_run, conf)
 
     @abstractmethod
     def binary_name(self):
@@ -242,7 +299,6 @@ class OsmoTrx(log.Origin, metaclass=ABCMeta):
 # PUBLIC (test API included)
 ##############
     def start(self, keepalive=False):
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
         if not self.remote_user:
@@ -292,5 +348,31 @@ class OsmoTrxLMS(OsmoTrx):
 
     def binary_name(self):
         return OsmoTrxLMS.BIN_TRX
+
+class TrxSC5(Trx):
+
+    def __init__(self, suite_run, conf):
+        super().__init__(suite_run, conf, "sc5-trx")
+        self.ready = False
+
+    def start(self, keepalive=False):
+        name = "ssh_sc5_ccli"
+        run_dir = self.run_dir.new_dir(name)
+        popen_args = ('/cx/bin/ccli', '-c', 'gsm.unlock')
+        proc = process.RemoteProcess(name, run_dir, self.remote_user, self.listen_ip, None,
+                                     popen_args)
+        keep_trying = 10
+        while keep_trying > 0:
+            if proc.respawn_sync(raise_nonsuccess=False) == 0 and 'OK' in (proc.get_stdout() or ''):
+                break
+            keep_trying = keep_trying - 1
+            self.log('Configuring SC5 TRX failed, retrying %d more times' % keep_trying)
+            MainLoop.sleep(self, 5)
+        if keep_trying == 0:
+            raise log.Error('Failed configuring SC5!')
+        self.ready = True
+
+    def trx_ready(self):
+        return self.ready
 
 # vim: expandtab tabstop=4 shiftwidth=4

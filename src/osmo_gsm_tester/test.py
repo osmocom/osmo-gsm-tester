@@ -42,6 +42,7 @@ class Test(log.Origin):
         self.duration = 0
         self.fail_type = None
         self.fail_message = None
+        self.log_target = None
 
     def get_run_dir(self):
         if self._run_dir is None:
@@ -50,6 +51,7 @@ class Test(log.Origin):
 
     def run(self):
         try:
+            self.log_target = log.FileLogTarget(self.get_run_dir().new_child('log')).set_all_levels(log.L_DBG).style_change(trace=True)
             log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
@@ -81,6 +83,10 @@ class Test(log.Origin):
             # when the program is aborted by a signal (like Ctrl-C), escalate to abort all.
             self.err('TEST RUN ABORTED: %s' % type(e).__name__)
             raise
+        finally:
+            if self.log_target:
+                self.log_target.remove()
+                self.log_target = None
 
     def name(self):
         l = log.get_line_for_src(self.path)

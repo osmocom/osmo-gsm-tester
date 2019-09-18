@@ -1,9 +1,25 @@
 #!/usr/bin/env python3
 import os
 import _prep
-from osmo_gsm_tester import log, suite, config, report
+import shutil
+from osmo_gsm_tester import log, suite, config, report, util
 
 config.ENV_CONF = './suite_test'
+
+example_trial_dir = os.path.join('test_trial_tmp')
+
+class FakeTrial(log.Origin):
+    def __init__(self):
+        super().__init__(log.C_TST, 'trial')
+        self.dir = util.Dir(example_trial_dir)
+        self._run_dir = None
+
+    def get_run_dir(self):
+        if self._run_dir is not None:
+            return self._run_dir
+        self._run_dir = util.Dir(self.dir.new_child('test_run'))
+        self._run_dir.mkdir()
+        return self._run_dir
 
 #log.style_change(trace=True)
 
@@ -20,7 +36,7 @@ assert(isinstance(s_def, suite.SuiteDefinition))
 print(config.tostr(s_def.conf))
 
 print('- run hello world test')
-trial = log.Origin(log.C_TST, 'trial')
+trial = FakeTrial()
 s = suite.SuiteRun(trial, 'test_suite', s_def)
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
@@ -43,7 +59,7 @@ output = report.suite_to_text(s)
 print(output)
 
 print('- test with half empty scenario')
-trial = log.Origin(log.C_TST, 'trial')
+trial = FakeTrial()
 scenario = config.Scenario('foo', 'bar')
 scenario['resources'] = { 'bts': [{'type': 'osmo-bts-trx'}] }
 s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
@@ -51,7 +67,7 @@ results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
 
 print('- test with scenario')
-trial = log.Origin(log.C_TST, 'trial')
+trial = FakeTrial()
 scenario = config.Scenario('foo', 'bar')
 scenario['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
 s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
@@ -59,7 +75,7 @@ results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
 
 print('- test with scenario and modifiers')
-trial = log.Origin(log.C_TST, 'trial')
+trial = FakeTrial()
 scenario = config.Scenario('foo', 'bar')
 scenario['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
 scenario['modifiers'] = { 'bts': [{ 'times': '2', 'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'type': 'sysmo'}] }
@@ -70,4 +86,7 @@ results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
 
 print('\n- graceful exit.')
+#deleting generated tmp trial dir:
+shutil.rmtree(example_trial_dir, ignore_errors=True)
+
 # vim: expandtab tabstop=4 shiftwidth=4

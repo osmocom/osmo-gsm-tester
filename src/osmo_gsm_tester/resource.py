@@ -27,6 +27,7 @@ from . import config
 from . import util
 from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
+from . import hnb_nano3g
 from . import modem
 from . import ms_osmo_mobile
 
@@ -41,10 +42,11 @@ RESERVED_RESOURCES_FILE = 'reserved_resources.state'
 
 R_IP_ADDRESS = 'ip_address'
 R_BTS = 'bts'
+R_HNB = 'hnb'
 R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
 R_OSMOCON = 'osmocon_phone'
-R_ALL = (R_IP_ADDRESS, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON)
+R_ALL = (R_IP_ADDRESS, R_BTS, R_HNB, R_ARFCN, R_MODEM, R_OSMOCON)
 
 RESOURCES_SCHEMA = {
         'ip_address[].addr': schema.IPV4,
@@ -76,6 +78,13 @@ RESOURCES_SCHEMA = {
         'bts[].osmo_trx.dev_args': schema.STR,
         'bts[].osmo_trx.multi_arfcn': schema.BOOL_STR,
         'bts[].osmo_trx.max_trxd_version': schema.UINT,
+        'hnb[].label': schema.STR,
+        'hnb[].type': schema.STR,
+        'hnb[].addr': schema.IPV4,
+        'hnb[].band': schema.BAND,
+        'hnb[].power_supply.type': schema.STR,
+        'hnb[].power_supply.device': schema.STR,
+        'hnb[].power_supply.port': schema.STR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].type': schema.STR,
@@ -106,6 +115,10 @@ KNOWN_BTS_TYPES = {
         'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
         'osmo-bts-virtual': bts_osmovirtual.OsmoBtsVirtual,
         'nanobts': bts_nanobts.NanoBts,
+    }
+
+KNOWN_HNB_TYPES = {
+        'nano3g': hnb_nano3g.HnbNano3g,
     }
 
 

@@ -39,7 +39,7 @@ def match_re(name, regex, val):
     raise ValueError('Invalid %s: %r' % (name, val))
 
 def band(val):
-    if val in ('GSM-900', 'GSM-1800', 'GSM-1900'):
+    if val in ('GSM-900', 'GSM-1800', 'GSM-1900', 'PCS-1900'):
         return
     raise ValueError('Unknown GSM band: %r' % val)
 

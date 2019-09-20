@@ -46,6 +46,16 @@ bts:
         device: '01:01:55:2e:b6'
         port: '1'
 
+hnb:
+- label: nano3GS8
+  type: nano3g
+  addr: 10.42.42.121
+  band: PCS-1900
+  power_supply:
+    type: 'sispm'
+    device: '01:01:55:2e:b6'
+    port: '3'
+
 arfcn:
   - arfcn: 512
     band: GSM-1800

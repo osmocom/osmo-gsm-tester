@@ -21,9 +21,9 @@ import os
 import sys
 import time
 import pprint
-from . import config, log, util, resource, test
+from . import config, log, util, resource, test, process
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, esme, osmocon, ms_driver, iperf3, process
+from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, esme, osmocon, ms_driver, iperf3, osmo_hnbgw
 
 class Timeout(Exception):
     pass
@@ -327,6 +327,19 @@ class SuiteRun(log.Origin):
         self.register_for_cleanup(bts)
         return bts
 
+    def hnbgw(self, stp, ip_address=None):
+        if ip_address is None:
+            ip_address = self.ip_address()
+        return osmo_hnbgw.OsmoHnbgw(self, stp, ip_address)
+
+    def hnb(self, specifics=None):
+        hnb = hnb_obj(self, self.reserved_resources.get(resource.R_HNB, specifics=specifics))
+        hnb.set_lac(self.lac())
+        hnb.set_rac(self.rac())
+        hnb.set_cellid(self.cellid())
+        self.register_for_cleanup(hnb)
+        return hnb
+
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
         ms_type = conf.get('type')
@@ -476,5 +489,13 @@ def bts_obj(suite_run, conf):
     if bts_class is None:
         raise RuntimeError('No such BTS type is defined: %r' % bts_type)
     return bts_class(suite_run, conf)
+
+def hnb_obj(suite_run, conf):
+    hnb_type = conf.get('type')
+    log.dbg('create HNB object', type=hnb_type)
+    hnb_class = resource.KNOWN_HNB_TYPES.get(hnb_type)
+    if hnb_class is None:
+        raise RuntimeError('No such HNB type is defined: %r' % hnb_type)
+    return hnb_class(suite_run, conf)
 
 # vim: expandtab tabstop=4 shiftwidth=4

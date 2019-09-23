@@ -353,7 +353,7 @@ class Process(log.Origin):
 
 class RemoteProcess(Process):
 
-    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, **popen_kwargs):
+    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, ssh_args=[], **popen_kwargs):
         super().__init__(name, run_dir, popen_args, **popen_kwargs)
         self.remote_user = remote_user
         self.remote_host = remote_host
@@ -369,9 +369,10 @@ class RemoteProcess(Process):
         # We need double -t to force tty and be able to forward signals to
         # processes (SIGHUP) when we close ssh on the local side. As a result,
         # stderr seems to be merged into stdout in ssh client.
-        self.popen_args = ['ssh', '-t', '-t', self.remote_user+'@'+self.remote_host,
-                           '%s%s' % (cd,
-                                     ' '.join(self.popen_args))]
+        self.popen_args = ['ssh', '-t', '-t']
+        self.popen_args.extend(ssh_args)
+        self.popen_args.append(self.remote_user+'@'+self.remote_host)
+        self.popen_args.append('%s%s' % (cd, ' '.join(self.popen_args)))
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
 
 class NetNSProcess(Process):
@@ -405,9 +406,9 @@ def run_local_netns_sync(run_dir, name, netns, popen_args):
     proc = NetNSProcess(name, run_dir, netns, popen_args)
     proc.launch_sync()
 
-def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):
+def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None, ssh_args=[]):
     run_dir = run_dir.new_dir(name)
-    proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd, popen_args)
+    proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd, popen_args, ssh_args)
     proc.launch_sync()
 
 def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):

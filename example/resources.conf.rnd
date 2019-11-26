@@ -33,7 +33,7 @@ bts:
     remote_user: jenkins
     trx_ip: 127.0.0.1
     dev_args: "type=b200,serial=30A9FFB"
-  ciphers: [a5_0, a5_1]
+  ciphers: [a5_0, a5_1, a5_3]
 
 - label: NanoBTS-ONW-1900
   type: nanobts

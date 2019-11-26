@@ -25,7 +25,7 @@ bts:
   ipa_unit_id: 6
   addr: 10.42.42.50
   band: GSM-1800
-  ciphers: [a5_0, a5_1]
+  ciphers: [a5_0, a5_1, a5_3]
   osmo_trx:
     type: uhd
     launch_trx: true
@@ -40,7 +40,7 @@ bts:
   ipa_unit_id: 12
   addr: 10.42.42.54
   band: GSM-1800
-  ciphers: [a5_0, a5_1]
+  ciphers: [a5_0, a5_1, a5_3]
   osmo_trx:
     type: uhd
     launch_trx: true
@@ -54,7 +54,7 @@ bts:
   ipa_unit_id: 11
   addr: 10.42.42.53
   band: GSM-1800
-  ciphers: [a5_0, a5_1]
+  ciphers: [a5_0, a5_1, a5_3]
   osmo_trx:
     type: lms
     launch_trx: true
@@ -68,7 +68,7 @@ bts:
   ipa_unit_id: 7
   addr: 10.42.42.51
   band: GSM-1800
-  ciphers: [a5_0, a5_1]
+  ciphers: [a5_0, a5_1, a5_3]
   trx_list:
     - power_supply:
         type: 'intellinet'

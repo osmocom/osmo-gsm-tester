@@ -399,16 +399,19 @@ def run_local_sync(run_dir, name, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = Process(name, run_dir, popen_args)
     proc.launch_sync()
+    return proc
 
 def run_local_netns_sync(run_dir, name, netns, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = NetNSProcess(name, run_dir, netns, popen_args)
     proc.launch_sync()
+    return proc
 
 def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):
     run_dir = run_dir.new_dir(name)
     proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd, popen_args)
     proc.launch_sync()
+    return proc
 
 def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):
     run_local_sync(run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (remote_user, remote_addr, remote_path)))

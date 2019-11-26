@@ -76,6 +76,8 @@ RESOURCES_SCHEMA = {
         'bts[].osmo_trx.dev_args': schema.STR,
         'bts[].osmo_trx.multi_arfcn': schema.BOOL_STR,
         'bts[].osmo_trx.max_trxd_version': schema.UINT,
+        'bts[].osmo_trx.channels[].rx_path': schema.STR,
+        'bts[].osmo_trx.channels[].tx_path': schema.STR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].type': schema.STR,

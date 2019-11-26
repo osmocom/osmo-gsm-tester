@@ -344,7 +344,6 @@ class OsmoTrxLMS(OsmoTrx):
 
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf)
-        self.conf['osmo_trx']['channels'][0]['rx_path'] = 'LNAW'
 
     def binary_name(self):
         return OsmoTrxLMS.BIN_TRX

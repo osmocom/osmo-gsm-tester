@@ -295,35 +295,55 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
         os.chmod(wrapper_script, st.st_mode | stat.S_IEXEC)
         return wrapper_script
 
+    def inst_compatible_for_remote(self):
+        proc = process.run_remote_sync(self.run_dir, self.remote_user, self.listen_ip, 'uname-m', ('uname', '-m'))
+        if "x86_64" in (proc.get_stdout() or ''):
+            return True
+        return False
+
+    def start_remotely(self, keepalive):
+        # Run remotely through ssh. We need to run osmo-trx under a wrapper
+        # script since osmo-trx ignores SIGHUP and will keep running after
+        # we close local ssh session. The wrapper script catches SIGHUP and
+        # sends SIGINT to it.
+        remote_run_dir = util.Dir(OsmoTrx.REMOTE_DIR)
+        remote_config_file = remote_run_dir.child(OsmoTrx.CONF_OSMO_TRX)
+
+        have_inst = self.inst_compatible_for_remote()
+        if have_inst:
+            self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
+
+        # if self.inst is None, we still want to copy config file, create remote run dir, etc.
+        self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
+                                                 self.listen_ip, self.binary_name(), self.config_file)
+
+        wrapper_script = self.generate_wrapper_script()
+        remote_wrapper_script = remote_run_dir.child(OsmoTrx.WRAPPER_SCRIPT)
+        process.scp(self.run_dir, self.remote_user, self.listen_ip, 'scp-wrapper-to-remote', wrapper_script, remote_wrapper_script)
+
+        if have_inst:
+            remote_lib = self.remote_inst.child('lib')
+            remote_binary = self.remote_inst.child('bin', self.binary_name())
+            args = ('LD_LIBRARY_PATH=%s' % remote_lib, remote_wrapper_script, remote_binary, '-C', remote_config_file)
+        else: # Use whatever is available i nremote system PATH:
+            args = (remote_wrapper_script, self.binary_name(), '-C', remote_config_file)
+
+        self.proc_trx = self.launch_process_remote(self.binary_name(), args, remote_cwd=remote_run_dir, keepalive=keepalive)
+
 ##############
 # PUBLIC (test API included)
 ##############
     def start(self, keepalive=False):
         self.configure()
+        if self.remote_user:
+            self.start_remotely(keepalive)
+            return
+        # Run locally if ssh user is not set
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
-        if not self.remote_user:
-            # Run locally if ssh user is not set
-            lib = self.inst.child('lib')
-            self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-            self.proc_trx = self.launch_process_local(keepalive, self.binary_name(),
-                                            '-C', os.path.abspath(self.config_file))
-        else:
-            # Run remotely through ssh. We need to run osmo-trx under a wrapper
-            # script since osmo-trx ignores SIGHUP and will keep running after
-            # we close local ssh session. The wrapper script catches SIGHUP and
-            # sends SIGINT to it.
-            wrapper_script = self.generate_wrapper_script()
-            remote_run_dir = util.Dir(OsmoTrx.REMOTE_DIR)
-            self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
-                                                self.listen_ip, self.binary_name(), self.config_file)
-            remote_wrapper_script = remote_run_dir.child(OsmoTrx.WRAPPER_SCRIPT)
-            remote_config_file = remote_run_dir.child(OsmoTrx.CONF_OSMO_TRX)
-            remote_lib = self.remote_inst.child('lib')
-            remote_binary = self.remote_inst.child('bin', self.binary_name())
-            process.scp(self.run_dir, self.remote_user, self.listen_ip, 'scp-wrapper-to-remote', wrapper_script, remote_wrapper_script)
-
-            args = ('LD_LIBRARY_PATH=%s' % remote_lib, remote_wrapper_script, remote_binary, '-C', remote_config_file)
-            self.proc_trx = self.launch_process_remote(self.binary_name(), args, remote_cwd=remote_run_dir, keepalive=keepalive)
+        lib = self.inst.child('lib')
+        self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
+        self.proc_trx = self.launch_process_local(keepalive, self.binary_name(),
+                                        '-C', os.path.abspath(self.config_file))
 
     def trx_ready(self):
         if not self.proc_trx or not self.proc_trx.is_running:

@@ -65,6 +65,20 @@ bts:
     channels:
       - rx_path: "LNAW"
 
+- label: LimeNET-Micro
+  type: osmo-bts-trx
+  ipa_unit_id: 15
+  addr: 10.42.42.53
+  band: GSM-1800
+  ciphers: [a5_0, a5_1]
+  osmo_trx:
+    type: lms
+    launch_trx: true
+    remote_user: pi
+    trx_ip: 10.42.42.123
+    clock_reference: external
+    dev_args: "LimeNET-Micro,serial=005839AF25B352"
+
 - label: sysmoCell 5000
   type: osmo-bts-trx
   ipa_unit_id: 7

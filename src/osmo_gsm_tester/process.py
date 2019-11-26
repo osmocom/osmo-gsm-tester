@@ -416,12 +416,16 @@ def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_
 def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):
     run_local_sync(run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (remote_user, remote_addr, remote_path)))
 
+# If no inst binaries copying is required (eg. because binary+libs is already available in distro), inst can be None.
 def copy_inst_ssh(run_dir, inst, remote_dir, remote_user, remote_addr, remote_rundir_append, cfg_file_name):
-    remote_inst = Dir(remote_dir.child(os.path.basename(str(inst))))
     remote_dir_str = str(remote_dir)
     run_remote_sync(run_dir, remote_user, remote_addr, 'rm-remote-dir', ('test', '!', '-d', remote_dir_str, '||', 'rm', '-rf', remote_dir_str))
     run_remote_sync(run_dir, remote_user, remote_addr, 'mk-remote-dir', ('mkdir', '-p', remote_dir_str))
-    scp(run_dir, remote_user, remote_addr, 'scp-inst-to-remote', str(inst), remote_dir_str)
+    if inst is not None:
+        remote_inst = Dir(remote_dir.child(os.path.basename(str(inst))))
+        scp(run_dir, remote_user, remote_addr, 'scp-inst-to-remote', str(inst), remote_dir_str)
+    else:
+        remote_inst = None
 
     remote_run_dir = remote_dir.child(remote_rundir_append)
     run_remote_sync(run_dir, remote_user, remote_addr, 'mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))

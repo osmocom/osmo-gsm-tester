@@ -5,7 +5,7 @@ name="osmo-nitb"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
 build_repo libosmocore --disable-doxygen
-build_repo libosmo-abis
+build_repo libosmo-abis --disable-dahdi
 build_repo libosmo-netif --disable-doxygen
 build_repo openggsn
 build_repo libsmpp34

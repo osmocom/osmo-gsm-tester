@@ -41,14 +41,6 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
     def _direct_pcu_enabled(self):
         return util.str2bool(self.conf.get('direct_pcu'))
 
-    def launch_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
-        run_dir = self.run_dir.new_dir(name)
-        proc = process.RemoteProcess(name, run_dir, self.remote_user, self.remote_addr(), remote_cwd,
-                                     popen_args)
-        self.suite_run.remember_to_stop(proc, keepalive)
-        proc.launch()
-        return proc
-
     def create_pcu(self):
         return pcu_oc2g.OsmoPcuOC2G(self.suite_run, self, self.conf)
 
@@ -116,15 +108,19 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         if not self.inst.isfile('bin', OsmoBtsOC2G.BTS_OC2G_BIN):
             raise log.Error('No osmo-bts-oc2g binary in', self.inst)
 
-        remote_run_dir = util.Dir(OsmoBtsOC2G.REMOTE_DIR)
-
-        self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
-                                         self.remote_addr(), OsmoBtsOC2G.BTS_OC2G_BIN, self.config_file)
-
+        rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self.remote_addr())
+        remote_prefix_dir = util.Dir(OsmoBtsOC2G.REMOTE_DIR)
+        self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
+        remote_run_dir = util.Dir(remote_prefix_dir.child(OsmoBtsOC2G.BTS_OC2G_BIN))
         remote_config_file = remote_run_dir.child(OsmoBtsOC2G.BTS_OC2G_CFG)
-        remote_lib = self.remote_inst.child('lib')
-        remote_binary = self.remote_inst.child('bin', 'osmo-bts-oc2g')
 
+        rem_host.recreate_remote_dir(self.remote_inst)
+        rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
+        rem_host.create_remote_dir(remote_run_dir)
+        rem_host.scp('scp-cfg-to-remote', self.config_file, remote_config_file)
+
+        remote_lib = self.remote_inst.child('lib')
+        remote_binary = self.remote_inst.child('bin', OsmoBtsOC2G.BTS_OC2G_BIN)
         args = ('LD_LIBRARY_PATH=%s' % remote_lib,
          remote_binary, '-c', remote_config_file, '-r', '1',
          '-i', self.bsc.addr())
@@ -132,6 +128,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         if self._direct_pcu_enabled():
             args += ('-M',)
 
-        self.proc_bts = self.launch_remote('osmo-bts-oc2g', args, remote_cwd=remote_run_dir, keepalive=keepalive)
-
+        proc = rem_host.RemoteProcess(OsmoBtsOC2G.BTS_OC2G_BIN, args)
+        self.suite_run.remember_to_stop(proc, keepalive)
+        proc.launch()
 # vim: expandtab tabstop=4 shiftwidth=4

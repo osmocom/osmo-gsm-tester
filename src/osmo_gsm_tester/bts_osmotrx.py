@@ -18,10 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import stat
 import pprint
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, bts_osmo
+from . import log, config, util, template, process, remote, bts_osmo
 from . import powersupply
 from .event_loop import MainLoop
 
@@ -263,72 +262,41 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
         proc.launch()
         return proc
 
-    def launch_process_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
-        run_dir = self.run_dir.new_dir(name)
-        proc = process.RemoteProcess(name, run_dir, self.remote_user, self.listen_ip, remote_cwd,
-                                     popen_args)
-        self.suite_run.remember_to_stop(proc, keepalive)
-        proc.launch()
-        return proc
-
-    def generate_wrapper_script(self):
-        wrapper_script = self.run_dir.new_file(OsmoTrx.WRAPPER_SCRIPT)
-        with open(wrapper_script, 'w') as f:
-            r = """#!/bin/bash
-            mypid=0
-            sign_handler() {
-                    sig=$1
-                    echo "received signal handler $sig, killing $mypid"
-                    kill $mypid
-            }
-            trap 'sign_handler SIGTERM' SIGTERM
-            trap 'sign_handler SIGINT' SIGINT
-            trap 'sign_handler SIGHUP' SIGHUP
-            "$@" &
-            mypid=$!
-            echo "waiting for $mypid"
-            wait $mypid
-            echo "process $mypid finished"
-            """
-            f.write(r)
-        st = os.stat(wrapper_script)
-        os.chmod(wrapper_script, st.st_mode | stat.S_IEXEC)
-        return wrapper_script
-
-    def inst_compatible_for_remote(self):
-        proc = process.run_remote_sync(self.run_dir, self.remote_user, self.listen_ip, 'uname-m', ('uname', '-m'))
-        if "x86_64" in (proc.get_stdout() or ''):
-            return True
-        return False
-
     def start_remotely(self, keepalive):
         # Run remotely through ssh. We need to run osmo-trx under a wrapper
         # script since osmo-trx ignores SIGHUP and will keep running after
         # we close local ssh session. The wrapper script catches SIGHUP and
         # sends SIGINT to it.
-        remote_run_dir = util.Dir(OsmoTrx.REMOTE_DIR)
+
+        rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self.listen_ip)
+
+        remote_prefix_dir = util.Dir(OsmoTrx.REMOTE_DIR)
+        remote_run_dir = util.Dir(remote_prefix_dir.child(self.binary_name()))
         remote_config_file = remote_run_dir.child(OsmoTrx.CONF_OSMO_TRX)
 
-        have_inst = self.inst_compatible_for_remote()
+        have_inst = rem_host.inst_compatible_for_remote()
         if have_inst:
             self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
 
-        # if self.inst is None, we still want to copy config file, create remote run dir, etc.
-        self.remote_inst = process.copy_inst_ssh(self.run_dir, self.inst, remote_run_dir, self.remote_user,
-                                                 self.listen_ip, self.binary_name(), self.config_file)
-
-        wrapper_script = self.generate_wrapper_script()
-        remote_wrapper_script = remote_run_dir.child(OsmoTrx.WRAPPER_SCRIPT)
-        process.scp(self.run_dir, self.remote_user, self.listen_ip, 'scp-wrapper-to-remote', wrapper_script, remote_wrapper_script)
+        rem_host.recreate_remote_dir(remote_prefix_dir)
+        if have_inst:
+            self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
+            rem_host.create_remote_dir(self.remote_inst)
+            rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
+        rem_host.create_remote_dir(remote_run_dir)
+        rem_host.scp('scp-cfg-to-remote', self.config_file, remote_config_file)
 
         if have_inst:
             remote_lib = self.remote_inst.child('lib')
             remote_binary = self.remote_inst.child('bin', self.binary_name())
-            args = ('LD_LIBRARY_PATH=%s' % remote_lib, remote_wrapper_script, remote_binary, '-C', remote_config_file)
+            args = (remote_binary, '-C', remote_config_file)
         else: # Use whatever is available i nremote system PATH:
-            args = (remote_wrapper_script, self.binary_name(), '-C', remote_config_file)
-
-        self.proc_trx = self.launch_process_remote(self.binary_name(), args, remote_cwd=remote_run_dir, keepalive=keepalive)
+            remote_lib = None
+            remote_binary = self.binary_name()
+        args = (remote_binary, '-C', remote_config_file)
+        self.proc_trx = rem_host.RemoteProcessFixIgnoreSIGHUP(self.binary_name(), remote_run_dir, args, prepend_ldlibpath=remote_lib)
+        self.suite_run.remember_to_stop(self.proc_trx, keepalive)
+        self.proc_trx.launch()
 
 ##############
 # PUBLIC (test API included)

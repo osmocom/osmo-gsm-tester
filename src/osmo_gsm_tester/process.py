@@ -406,32 +406,4 @@ def run_local_netns_sync(run_dir, name, netns, popen_args):
     proc = NetNSProcess(name, run_dir, netns, popen_args)
     proc.launch_sync()
     return proc
-
-def run_remote_sync(run_dir, remote_user, remote_addr, name, popen_args, remote_cwd=None):
-    run_dir = run_dir.new_dir(name)
-    proc = RemoteProcess(name, run_dir, remote_user, remote_addr, remote_cwd, popen_args)
-    proc.launch_sync()
-    return proc
-
-def scp(run_dir, remote_user, remote_addr, name, local_path, remote_path):
-    run_local_sync(run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (remote_user, remote_addr, remote_path)))
-
-# If no inst binaries copying is required (eg. because binary+libs is already available in distro), inst can be None.
-def copy_inst_ssh(run_dir, inst, remote_dir, remote_user, remote_addr, remote_rundir_append, cfg_file_name):
-    remote_dir_str = str(remote_dir)
-    run_remote_sync(run_dir, remote_user, remote_addr, 'rm-remote-dir', ('test', '!', '-d', remote_dir_str, '||', 'rm', '-rf', remote_dir_str))
-    run_remote_sync(run_dir, remote_user, remote_addr, 'mk-remote-dir', ('mkdir', '-p', remote_dir_str))
-    if inst is not None:
-        remote_inst = Dir(remote_dir.child(os.path.basename(str(inst))))
-        scp(run_dir, remote_user, remote_addr, 'scp-inst-to-remote', str(inst), remote_dir_str)
-    else:
-        remote_inst = None
-
-    remote_run_dir = remote_dir.child(remote_rundir_append)
-    run_remote_sync(run_dir, remote_user, remote_addr, 'mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
-
-    remote_config_file = remote_dir.child(os.path.basename(cfg_file_name))
-    scp(run_dir, remote_user, remote_addr, 'scp-cfg-to-remote', cfg_file_name, remote_config_file)
-    return remote_inst
-
 # vim: expandtab tabstop=4 shiftwidth=4

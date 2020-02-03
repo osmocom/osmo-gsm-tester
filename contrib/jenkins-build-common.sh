@@ -142,10 +142,18 @@ build_repo_dir() {
 
   cd "$dep/${dir}"
 
-  set +x; echo; echo; set -x
-  autoreconf -fi
-  set +x; echo; echo; set -x
-  ./configure --prefix="$prefix" --with-systemdsystemunitdir=no $CONFIGURE_FLAGS $configure_opts
+  if [ -f configure.ac ]; then
+    set +x; echo; echo; set -x
+    autoreconf -fi
+    set +x; echo; echo; set -x
+    ./configure --prefix="$prefix" --with-systemdsystemunitdir=no $CONFIGURE_FLAGS $configure_opts
+  elif [ -f CMakeLists.txt ]; then
+    rm -rf build && mkdir build && cd build || exit 1
+    set +x; echo; echo; set -x
+    cmake -DCMAKE_INSTALL_PREFIX=$prefix ../
+  else
+    echo "Unknwown build system" && exit 1
+  fi
   set +x; echo; echo; set -x
   make -j8 || make  # libsmpp34 can't build in parallel
   set +x; echo; echo; set -x
@@ -213,6 +221,9 @@ create_bin_tgz() {
 
   prune_files bin "$wanted_binaries_bin"
   prune_files sbin "$wanted_binaries_sbin"
+  # Drop all static libraries if exist:
+  rm -f $prefix_real/lib/*.a
+  rm -f $prefix_real/lib/*.la
 
   cd "$prefix_real"
   add_rpath

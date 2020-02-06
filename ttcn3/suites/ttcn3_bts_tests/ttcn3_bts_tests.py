@@ -4,6 +4,8 @@ from mako.template import Template
 
 from osmo_gsm_tester.testenv import *
 
+ttcn3_test_execute="BTS_Tests.control"
+
 hlr_dummy = suite.hlr()
 mgw_dummy = suite.mgw()
 stp_dummy = suite.stp()
@@ -57,7 +59,7 @@ docker_cmd = (script_file, str(script_run_dir), junit_ttcn3_dst_file, nat_rsl_ip
 
 print('Creating template')
 mytemplate = Template(filename=bts_tmpl_file)
-r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available)
+r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available, ttcn3_test_execute=ttcn3_test_execute)
 with open(bts_cfg_file, 'w') as f:
     f.write(r)
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import os
-from mako.template import Template
 
 from osmo_gsm_tester.testenv import *
+import testlib
+suite.test_import_modules_register_for_cleanup(testlib)
+from testlib import run_ttcn3
 
 ttcn3_test_execute="BTS_Tests.control"
 
@@ -43,38 +45,5 @@ bts.start(keepalive=True)
 print('Starting osmocon')
 osmocon.start()
 
-own_dir = os.path.dirname(os.path.realpath(__file__))
-script_file = os.path.join(own_dir, 'scripts', 'run_ttcn3_docker.sh')
-bts_tmpl_file = os.path.join(own_dir, 'scripts', 'BTS_Tests.cfg.tmpl')
-script_run_dir = test.get_run_dir().new_dir('ttcn3')
-bts_cfg_file = os.path.join(str(script_run_dir), 'BTS_Tests.cfg')
-junit_ttcn3_dst_file = os.path.join(str(suite.trial.get_run_dir()), 'trial-') + suite.name() + '.xml'
-if bts.bts_type() == 'osmo-bts-trx':
-    pcu_available = True
-    pcu_sk = bts.pcu_socket_path()
-else: # PCU unix socket not available locally
-    pcu_available = False
-    pcu_sk = ''
-docker_cmd = (script_file, str(script_run_dir), junit_ttcn3_dst_file, nat_rsl_ip, osmocon.l2_socket_path(), pcu_sk)
-
-print('Creating template')
-mytemplate = Template(filename=bts_tmpl_file)
-r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available, ttcn3_test_execute=ttcn3_test_execute)
-with open(bts_cfg_file, 'w') as f:
-    f.write(r)
-
-
-print('Starting TTCN3 tests')
-proc = process.Process('ttcn3', script_run_dir, docker_cmd)
-try:
-    proc.launch()
-    print('Starting TTCN3 launched, waiting until it finishes')
-    proc.wait(timeout=3600)
-except Exception as e:
-    proc.terminate()
-    raise e
-
-if proc.result != 0:
-    raise RuntimeError("run_ttcn3_docker.sh exited with error code %d" % proc.result)
-
-print('Done')
+testdir = os.path.dirname(os.path.realpath(__file__))
+run_ttcn3(suite, test, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute)

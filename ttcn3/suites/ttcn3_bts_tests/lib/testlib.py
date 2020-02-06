@@ -4,7 +4,7 @@ from mako.template import Template
 
 from osmo_gsm_tester.testenv import *
 
-def run_ttcn3(suite, test_obj, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute):
+def run_ttcn3(suite, test_obj, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute, ttcn3_test_extra_module_params=""):
     own_dir = testdir
     script_file = os.path.join(testdir, 'scripts', 'run_ttcn3_docker.sh')
     bts_tmpl_file = os.path.join(testdir, 'scripts', 'BTS_Tests.cfg.tmpl')
@@ -21,7 +21,7 @@ def run_ttcn3(suite, test_obj, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_exe
 
     print('Creating template')
     mytemplate = Template(filename=bts_tmpl_file)
-    r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available, ttcn3_test_execute=ttcn3_test_execute)
+    r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available, ttcn3_test_execute=ttcn3_test_execute, ttcn3_test_extra_module_params=ttcn3_test_extra_module_params)
     with open(bts_cfg_file, 'w') as f:
         f.write(r)
 

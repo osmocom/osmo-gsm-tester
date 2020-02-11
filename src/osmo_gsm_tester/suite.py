@@ -24,6 +24,7 @@ import pprint
 from . import config, log, util, resource, test
 from .event_loop import MainLoop
 from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, esme, osmocon, ms_driver, iperf3, process
+from . import run_node
 
 class Timeout(Exception):
     pass
@@ -357,6 +358,9 @@ class SuiteRun(log.Origin):
         esme_obj = esme.Esme(self.msisdn())
         self.register_for_cleanup(esme_obj)
         return esme_obj
+
+    def run_node(self, specifics=None):
+        return run_node.RunNode.from_conf(self.reserved_resources.get(resource.R_RUN_NODE, specifics=specifics))
 
     def osmocon(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_OSMOCON, specifics=specifics)

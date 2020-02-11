@@ -40,14 +40,19 @@ RESOURCES_CONF = 'resources.conf'
 RESERVED_RESOURCES_FILE = 'reserved_resources.state'
 
 R_IP_ADDRESS = 'ip_address'
+R_RUN_NODE = 'run_node'
 R_BTS = 'bts'
 R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
 R_OSMOCON = 'osmocon_phone'
-R_ALL = (R_IP_ADDRESS, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON)
+R_ALL = (R_IP_ADDRESS, R_RUN_NODE, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON)
 
 RESOURCES_SCHEMA = {
         'ip_address[].addr': schema.IPV4,
+        'run_node[].run_type': schema.STR,
+        'run_node[].run_addr': schema.IPV4,
+        'run_node[].ssh_user': schema.STR,
+        'run_node[].ssh_addr': schema.IPV4,
         'bts[].label': schema.STR,
         'bts[].type': schema.STR,
         'bts[].ipa_unit_id': schema.UINT,

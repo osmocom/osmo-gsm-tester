@@ -151,3 +151,36 @@ class RemoteHost(log.Origin):
 
     def scp(self, name, local_path, remote_path):
         process.run_local_sync(self.run_dir, name, ('scp', '-r', local_path, '%s@%s:%s' % (self.user(), self.host(), remote_path)))
+
+    def scpfrom(self, name, remote_path, local_path):
+        process.run_local_sync(self.run_dir, name, ('scp', '-r', '%s@%s:%s' % (self.user(), self.host(), remote_path), local_path))
+
+    def setcap_net_admin(self, binary_path):
+        '''
+        This functionality requires specific setup on the host running
+        osmo-gsm-tester. See osmo-gsm-tester manual for more information.
+        '''
+        SETCAP_NET_ADMIN_BIN = 'osmo-gsm-tester_setcap_net_admin.sh'
+        self.run_remote_sync('setcap-netadm', ('sudo', SETCAP_NET_ADMIN_BIN, binary_path))
+
+    def setcap_netsys_admin(self, binary_path):
+        '''
+        This functionality requires specific setup on the host running
+        osmo-gsm-tester. See osmo-gsm-tester manual for more information.
+        '''
+        SETCAP_NETSYS_ADMIN_BIN = 'osmo-gsm-tester_setcap_netsys_admin.sh'
+        self.run_remote_sync('setcap-netsysadm', ('sudo', SETCAP_NETSYS_ADMIN_BIN, binary_path))
+
+    def change_elf_rpath(self, binary_path, paths):
+        '''
+        Change RPATH field in ELF executable binary.
+        This feature can be used to tell the loaded to load the trial libraries, as
+        LD_LIBRARY_PATH is disabled for paths with modified capabilities.
+        '''
+        patchelf_bin = self.remote_env.get('PATCHELF_BIN', None)
+        if not patchelf_bin:
+            patchelf_bin = 'patchelf'
+        else:
+            self.dbg('Using specific patchelf from %s', patchelf_bin)
+
+        self.run_remote_sync('patchelf', (patchelf_bin, '--set-rpath', paths, binary_path))

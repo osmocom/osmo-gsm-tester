@@ -93,6 +93,10 @@ class RemoteHost(log.Origin):
         args = (remote_wrapper_script,) + popen_args
         return self.RemoteProcess(name, args, remote_env, **popen_kwargs)
 
+    def RemoteNetNSProcess(self, name, netns, popen_args, **popen_kwargs):
+        run_dir = self.run_dir.new_dir(name)
+        return self.RemoteNetNSProcess(name, run_dir, self.user(), self.host(), self.cwd(), netns, popen_args, **popen_kwargs)
+
     def run_remote_sync(self, name, popen_args):
         proc = self.RemoteProcess(name, popen_args, remote_env=self.remote_env)
         proc.launch_sync()

@@ -399,9 +399,9 @@ class NetNSProcess(Process):
 class RemoteNetNSProcess(RemoteProcess):
     NETNS_EXEC_BIN = 'osmo-gsm-tester_netns_exec.sh'
     def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, netns, popen_args, **popen_kwargs):
+        self.netns = netns
         args = ['sudo', self.NETNS_EXEC_BIN, self.netns] + list(popen_args)
         super().__init__(name, run_dir, remote_user, remote_host, remote_cwd, args, **popen_kwargs)
-        self.netns = netns
 
 def run_local_sync(run_dir, name, popen_args):
     run_dir =run_dir.new_dir(name)

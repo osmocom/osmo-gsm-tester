@@ -29,6 +29,7 @@ from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
 from . import modem
 from . import ms_osmo_mobile
+from . import srs_ue, srs_enb
 
 from .util import is_dict, is_list
 
@@ -45,7 +46,8 @@ R_BTS = 'bts'
 R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
 R_OSMOCON = 'osmocon_phone'
-R_ALL = (R_IP_ADDRESS, R_RUN_NODE, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON)
+R_ENB = 'enb'
+R_ALL = (R_IP_ADDRESS, R_RUN_NODE, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON, R_ENB)
 
 RESOURCES_SCHEMA = {
         'ip_address[].addr': schema.IPV4,
@@ -83,6 +85,11 @@ RESOURCES_SCHEMA = {
         'bts[].osmo_trx.max_trxd_version': schema.UINT,
         'bts[].osmo_trx.channels[].rx_path': schema.STR,
         'bts[].osmo_trx.channels[].tx_path': schema.STR,
+        'enb[].label': schema.STR,
+        'enb[].type': schema.STR,
+        'enb[].remote_user': schema.STR,
+        'enb[].addr': schema.IPV4,
+        'enb[].band': schema.BAND,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].type': schema.STR,
@@ -91,6 +98,8 @@ RESOURCES_SCHEMA = {
         'modem[].imsi': schema.IMSI,
         'modem[].ki': schema.KI,
         'modem[].auth_algo': schema.AUTH_ALGO,
+        'modem[].remote_user': schema.STR,
+        'modem[].addr': schema.IPV4,
         'modem[].ciphers[]': schema.CIPHER,
         'modem[].features[]': schema.MODEM_FEATURE,
         'osmocon_phone[].serial_device': schema.STR,
@@ -115,12 +124,16 @@ KNOWN_BTS_TYPES = {
         'nanobts': bts_nanobts.NanoBts,
     }
 
+KNOWN_ENB_TYPES = {
+        'srsenb': srs_enb.srsENB,
+}
 
 KNOWN_MS_TYPES = {
         # Map None to ofono for forward compability
         None: modem.Modem,
         'ofono': modem.Modem,
         'osmo-mobile': ms_osmo_mobile.MSOsmoMobile,
+        'srsue': srs_ue.srsUE,
 }
 
 

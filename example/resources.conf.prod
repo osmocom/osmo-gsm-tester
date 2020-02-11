@@ -11,6 +11,12 @@ ip_address:
 - addr: 10.42.42.9
 - addr: 10.42.42.10
 
+run_node:
+- run_type: ssh
+  run_addr: 10.42.42.118
+  ssh_user: jenkins
+  ssh_addr: 10.42.42.116
+
 bts:
 - label: sysmoBTS 1002
   type: osmo-bts-sysmo
@@ -148,6 +154,12 @@ bts:
   direct_pcu: true
   ciphers: [a5_0, a5_1, a5_3]
 
+enb:
+- label: srsENB-zmq
+  type: srsenb
+  remote_user: jenkins
+  addr: 10.42.42.117
+
 arfcn:
   - arfcn: 512
     band: GSM-1800
@@ -226,6 +238,15 @@ modem:
   auth_algo: 'comp128v1'
   ciphers: [a5_0, a5_1]
   features: ['sms', 'voice', 'ussd', 'gprs', 'sim']
+
+- label: srsUE-zmq_1
+  type: srsue
+  remote_user: jenkins
+  addr: 10.42.42.116
+  imsi: '001010123456789'
+  ki: '00112233445566778899aabbccddeeff'
+  auth_algo: 'xor'
+
 
 osmocon_phone:
   - serial_device: '/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00897B41-if00-port0'

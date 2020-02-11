@@ -353,26 +353,28 @@ class Process(log.Origin):
 
 class RemoteProcess(Process):
 
-    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, **popen_kwargs):
+    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, remote_env={}, **popen_kwargs):
         super().__init__(name, run_dir, popen_args, **popen_kwargs)
         self.remote_user = remote_user
         self.remote_host = remote_host
         self.remote_cwd = remote_cwd
+        self.remote_env = remote_env
 
         # hacky: instead of just prepending ssh, i.e. piping stdout and stderr
         # over the ssh link, we should probably run on the remote side,
         # monitoring the process remotely.
         if self.remote_cwd:
-            cd = 'cd "%s"; ' % self.remote_cwd
+            cd = 'cd "%s";' % self.remote_cwd
         else:
             cd = ''
         # We need double -t to force tty and be able to forward signals to
         # processes (SIGHUP) when we close ssh on the local side. As a result,
         # stderr seems to be merged into stdout in ssh client.
         self.popen_args = ['ssh', '-t', '-t', self.remote_user+'@'+self.remote_host,
-                           '%s%s' % (cd,
-                                     ' '.join(self.popen_args))]
-        self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
+                           '%s %s %s' % (cd,
+                                         ' '.join(['%s=%r'%(k,v) for k,v in self.remote_env.items()]),
+                                         ' '.join(self.popen_args))]
+        self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs, remote_env=self.remote_env)
 
 class NetNSProcess(Process):
     NETNS_EXEC_BIN = 'osmo-gsm-tester_netns_exec.sh'

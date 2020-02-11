@@ -34,6 +34,7 @@ class RemoteHost(log.Origin):
         self.remote_user = remote_user
         self.remote_host = remote_host
         self.remote_cwd = remote_cwd
+        self.remote_env = {}
 
     def user(self):
         return self.remote_user
@@ -44,9 +45,15 @@ class RemoteHost(log.Origin):
     def cwd(self):
         return self.remote_cwd
 
-    def RemoteProcess(self, name, popen_args, **popen_kwargs):
+    def set_remote_env(self, remote_env_dict):
+        self.remote_env = remote_env_dict
+
+    def get_remote_env(self):
+        return self.remote_env
+
+    def RemoteProcess(self, name, popen_args, remote_env={}, **popen_kwargs):
         run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.user(), self.host(), self.cwd(), popen_args, **popen_kwargs)
+        return process.RemoteProcess(name, run_dir, self.user(), self.host(), self.cwd(), popen_args, remote_env=remote_env, **popen_kwargs)
 
     def generate_wrapper_script(self):
         wrapper_script = self.run_dir.new_file(RemoteHost.WRAPPER_SCRIPT)
@@ -72,7 +79,7 @@ class RemoteHost(log.Origin):
         os.chmod(wrapper_script, st.st_mode | stat.S_IEXEC)
         return wrapper_script
 
-    def RemoteProcessFixIgnoreSIGHUP(self, name, remote_dir, popen_args,  prepend_ldlibpath=None, **popen_kwargs):
+    def RemoteProcessFixIgnoreSIGHUP(self, name, remote_dir, popen_args, remote_env={}, **popen_kwargs):
         # Run remotely through ssh. We need to run binary under a wrapper
         # script since osmo-trx ignores SIGHUP and will keep running after
         # we close local ssh session. The wrapper script catches SIGHUP and
@@ -83,15 +90,11 @@ class RemoteHost(log.Origin):
         remote_wrapper_script = remote_dir.child(RemoteHost.WRAPPER_SCRIPT)
         self.scp('scp-wrapper-to-remote', wrapper_script, remote_wrapper_script)
 
-        # Used fi to run stuff from an osmo-gsm-tester copied inst
-        if prepend_ldlibpath is not None:
-            args = ('LD_LIBRARY_PATH=%s' % prepend_ldlibpath, remote_wrapper_script,) + popen_args
-        else:
-            args = (remote_wrapper_script,) + popen_args
-        return self.RemoteProcess(name, args, **popen_kwargs)
+        args = (remote_wrapper_script,) + popen_args
+        return self.RemoteProcess(name, args, remote_env, **popen_kwargs)
 
     def run_remote_sync(self, name, popen_args):
-        proc = self.RemoteProcess(name, popen_args)
+        proc = self.RemoteProcess(name, popen_args, remote_env=self.remote_env)
         proc.launch_sync()
         return proc
 

@@ -287,14 +287,14 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
         rem_host.scp('scp-cfg-to-remote', self.config_file, remote_config_file)
 
         if have_inst:
-            remote_lib = self.remote_inst.child('lib')
+            remote_env = { 'LD_LIBRARY_PATH': self.remote_inst.child('lib') }
             remote_binary = self.remote_inst.child('bin', self.binary_name())
             args = (remote_binary, '-C', remote_config_file)
         else: # Use whatever is available i nremote system PATH:
-            remote_lib = None
+            remote_env = {}
             remote_binary = self.binary_name()
         args = (remote_binary, '-C', remote_config_file)
-        self.proc_trx = rem_host.RemoteProcessFixIgnoreSIGHUP(self.binary_name(), remote_run_dir, args, prepend_ldlibpath=remote_lib)
+        self.proc_trx = rem_host.RemoteProcessFixIgnoreSIGHUP(self.binary_name(), remote_run_dir, args, remote_env=remote_env)
         self.suite_run.remember_to_stop(self.proc_trx, keepalive)
         self.proc_trx.launch()
 

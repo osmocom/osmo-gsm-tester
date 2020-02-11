@@ -20,7 +20,7 @@
 import os
 import json
 
-from . import log, util, process, pcap_recorder
+from . import log, util, process, pcap_recorder, run_node, remote
 
 def iperf3_result_to_json(file):
     with open(file) as f:
@@ -35,31 +35,76 @@ def iperf3_result_to_json(file):
 class IPerf3Server(log.Origin):
 
     DEFAULT_SRV_PORT = 5003
+    LOGFILE = 'iperf3_srv.json'
+    REMOTE_DIR = '/tmp'
 
     def __init__(self, suite_run, ip_address):
         super().__init__(log.C_RUN, 'iperf3-srv_%s' % ip_address.get('addr'))
         self.run_dir = None
-        self.config_file = None
         self.process = None
+        self._run_node = None
         self.suite_run = suite_run
         self.ip_address = ip_address
         self._port = IPerf3Server.DEFAULT_SRV_PORT
+        self.log_file = None
+        self.rem_host = None
+        self.remote_log_file = None
+        self.log_copied = False
+
+    def cleanup(self):
+        if self.process is None:
+            return
+        if self.runs_locally():
+            return
+        # copy back files (may not exist, for instance if there was an early error of process):
+        try:
+            self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+        except Exception as e:
+            self.log(repr(e))
+
+    def runs_locally(self):
+        locally = not self._run_node or self._run_node.is_local()
+        return locally
 
     def start(self):
         self.log('Starting iperf3-srv')
+        self.log_copied = False
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.log_file = self.run_dir.new_file(IPerf3Server.LOGFILE)
+        if self.runs_locally():
+            self.start_locally()
+        else:
+            self.start_remotely()
 
+    def start_remotely(self):
+        self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
+        remote_prefix_dir = util.Dir(IPerf3Server.REMOTE_DIR)
+        remote_run_dir = util.Dir(remote_prefix_dir.child('srv-' + str(self)))
+        self.remote_log_file = remote_run_dir.child(IPerf3Server.LOGFILE)
+
+        self.rem_host.recreate_remote_dir(remote_run_dir)
+
+        args = ('iperf3', '-s', '-B', self.addr(),
+                '-p', str(self._port), '-J',
+                '--logfile', self.remote_log_file)
+        self.process = self.rem_host.RemoteProcess(self.name(), args)
+        self.suite_run.remember_to_stop(self.process)
+        self.process.launch()
+
+    def start_locally(self):
         pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.addr())
 
-        self.log_file = self.run_dir.new_file('iperf3_srv.json')
-        self.process = process.Process(self.name(), self.run_dir,
-                                       ('iperf3', '-s', '-B', self.addr(),
-                                        '-p', str(self._port), '-J',
-                                        '--logfile', os.path.abspath(self.log_file)),
-                                       env={})
+        args = ('iperf3', '-s', '-B', self.addr(),
+                '-p', str(self._port), '-J',
+                '--logfile', os.path.abspath(self.log_file))
+
+        self.process = process.Process(self.name(), self.run_dir, args, env={})
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
+
+    def set_run_node(self, run_node):
+        self._run_node = run_node
 
     def set_port(self, port):
         self._port = port
@@ -68,6 +113,9 @@ class IPerf3Server(log.Origin):
         self.suite_run.stop_process(self.process)
 
     def get_results(self):
+        if not self.runs_locally() and not self.log_copied:
+            self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+            self.log_copied = True
         return iperf3_result_to_json(self.log_file)
 
     def addr(self):
@@ -87,22 +135,57 @@ class IPerf3Server(log.Origin):
 
 class IPerf3Client(log.Origin):
 
+    REMOTE_DIR = '/tmp'
+    LOGFILE = 'iperf3_cli.json'
+
     def __init__(self, suite_run, iperf3srv):
         super().__init__(log.C_RUN, 'iperf3-cli_%s' % iperf3srv.addr())
         self.run_dir = None
-        self.config_file = None
         self.process = None
+        self._run_node = None
         self.server = iperf3srv
         self.suite_run = suite_run
+        self.log_file = None
+        self.rem_host = None
+        self.remote_log_file = None
+        self.log_copied = False
+
+    def runs_locally(self):
+        locally = not self._run_node or self._run_node.is_local()
+        return locally
 
     def prepare_test_proc(self, netns=None):
         self.log('Starting iperf3-client connecting to %s:%d' % (self.server.addr(), self.server.port()))
+        self.log_copied = False
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
+        if self.runs_locally():
+            return self.prepare_test_proc_locally()
+        else:
+            return self.prepare_test_proc_remotely()
 
+    def prepare_test_proc_remotely(self, netns=None):
+        self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
+
+        remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
+        remote_run_dir = util.Dir(remote_prefix_dir.child('cli-' + str(self)))
+        self.remote_log_file = remote_run_dir.child(IPerf3Client.LOGFILE)
+
+        self.rem_host.recreate_remote_dir(remote_run_dir)
+
+        popen_args = ('iperf3', '-c',  self.server.addr(),
+                      '-p', str(self.server.port()), '-J',
+                      '--logfile', self.remote_log_file)
+        if netns:
+            self.process = self.rem_host.RemoteNetNSProcess(self.name(), netns, popen_args, env={})
+        else:
+            self.process = self.rem_host.RemoteProcess(self.name(), popen_args, env={})
+        return self.process
+
+    def prepare_test_proc_locally(self, netns=None):
         pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.server.addr(), netns)
 
-        self.log_file = self.run_dir.new_file('iperf3_cli.json')
         popen_args = ('iperf3', '-c',  self.server.addr(),
                       '-p', str(self.server.port()), '-J',
                       '--logfile', os.path.abspath(self.log_file))
@@ -118,6 +201,16 @@ class IPerf3Client(log.Origin):
         return self.get_results()
 
     def get_results(self):
+        if not self.runs_locally() and not self.log_copied:
+            self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+            self.log_copied = True
         return iperf3_result_to_json(self.log_file)
+
+    def set_run_node(self, run_node):
+        self._run_node = run_node
+
+    def __str__(self):
+        # FIXME: somehow differentiate between several clients connected to same server?
+        return "%s:%u" %(self.server.addr(), self.server.port())
 
 # vim: expandtab tabstop=4 shiftwidth=4

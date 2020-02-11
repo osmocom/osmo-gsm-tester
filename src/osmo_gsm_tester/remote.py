@@ -59,20 +59,49 @@ class RemoteHost(log.Origin):
         wrapper_script = self.run_dir.new_file(RemoteHost.WRAPPER_SCRIPT)
         with open(wrapper_script, 'w') as f:
             r = """#!/bin/bash
-            mypid=0
-            sign_handler() {
-                    sig=$1
-                    echo "received signal handler $sig, killing $mypid"
-                    kill $mypid
+            LOGFILE=/tmp/yes
+            kill_pid(){
+                mypid=$1
+                kill $mypid
+                if ! kill -0 $mypid; then
+                    return
+                fi
+                echo "sleeping some time waiting for child to die..." >>$LOGFILE
+                sleep 5
+                if ! kill -0 $mypid; then
+                    return
+                fi
+                echo "kill -9 the process and wait!" >>$LOGFILE
+                kill -9 $mypid
+                wait $mypid
             }
-            trap 'sign_handler SIGTERM' SIGTERM
-            trap 'sign_handler SIGINT' SIGINT
-            trap 'sign_handler SIGHUP' SIGHUP
+            prep_sighandler() {
+                unset term_child_pid
+                unset term_kill_needed
+                trap 'sign_handler SIGTERM' SIGTERM
+                trap 'sign_handler SIGINT' SIGINT
+                trap 'sign_handler SIGHUP' SIGHUP
+                echo "script started, traps set" >$LOGFILE
+            }
+            sign_handler() {
+                sig=$1
+                echo "$sig -> ${term_child_pid}" >>$LOGFILE
+                echo "received signal handler $sig, killing ${term_child_pid}" >>$LOGFILE
+                kill_pid ${term_child_pid}
+            }
+            wait_sighandler()
+            {
+                term_child_pid=$!
+                if [ "${term_kill_needed}" ]; then
+                    kill_pid "${term_child_pid}"
+                fi
+                echo "waiting for ${term_child_pid}" >>$LOGFILE
+                wait ${term_child_pid}
+                echo "process ${term_child_pid} finished" >>$LOGFILE
+            }
+            prep_sighandler
             $@ &
-            mypid=$!
-            echo "waiting for $mypid"
-            wait $mypid
-            echo "process $mypid finished"
+            wait_sighandler
             """
             f.write(r)
         st = os.stat(wrapper_script)

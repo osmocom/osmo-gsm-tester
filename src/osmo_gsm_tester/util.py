@@ -100,6 +100,16 @@ def setcap_net_admin(binary, run_dir):
     proc = Process(SETCAP_NET_ADMIN_BIN, run_dir, ['sudo', SETCAP_NET_ADMIN_BIN, binary])
     proc.launch_sync()
 
+def setcap_netsys_admin(self, binary, run_dir):
+    '''
+    This functionality requires specific setup on the host running
+    osmo-gsm-tester. See osmo-gsm-tester manual for more information.
+    '''
+    from .process import Process
+    SETCAP_NETSYS_ADMIN_BIN = 'osmo-gsm-tester_setcap_netsys_admin.sh'
+    proc = Process(SETCAP_NETSYS_ADMIN_BIN, run_dir, ['sudo', SETCAP_NETSYS_ADMIN_BIN, binary])
+    proc.launch_sync()
+
 def move_iface_to_netns(ifname, netns, run_dir):
     '''
     Moves an iface to a netns. It creates the netns if it doesn't exist.

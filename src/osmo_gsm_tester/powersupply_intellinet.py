@@ -88,10 +88,10 @@ class PowerSupplyIntellinet(PowerSupply):
     def power_set(self, onoff):
         """Turn on (onoff=True) or off (onoff=False) the device."""
         if onoff:
-            self.dbg('switchon')
+            self.dbg('switchon %s:%u' % (self.device_ip, self.port))
             self._set_port_status(self.PDU_CMD_ON)
         else:
-            self.dbg('switchoff')
+            self.dbg('switchoff %s:%u' % (self.device_ip, self.port))
             self._set_port_status(self.PDU_CMD_OFF)
 
 

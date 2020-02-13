@@ -26,8 +26,8 @@ tac = 0x0007
 mcc = ${enb.mcc}
 mnc = ${enb.mnc}
 mme_addr = ${enb.mme_addr}
-gtp_bind_addr = ${enb.run_addr}
-s1c_bind_addr = ${enb.run_addr}
+gtp_bind_addr = ${enb.addr}
+s1c_bind_addr = ${enb.addr}
 n_prb = 50
 #tm = 4
 #nof_ports = 2
@@ -70,7 +70,7 @@ dl_earfcn = 3400
 tx_gain = 80
 rx_gain = 40
 
-#device_name = auto
+device_name = ${enb.rf_dev_type}
 
 # For best performance in 2x2 MIMO and >= 15 MHz use the following device_args settings:
 #     USRP B210: num_recv_frames=64,num_send_frames=64
@@ -78,7 +78,7 @@ rx_gain = 40
 # For best performance when BW<5 MHz (25 PRB), use the following device_args settings:
 #     USRP B210: send_frame_size=512,recv_frame_size=512
 
-#device_args = auto
+device_args = ${enb.rf_dev_args}
 #time_adv_nsamples = auto
 #burst_preamble_us = auto
 

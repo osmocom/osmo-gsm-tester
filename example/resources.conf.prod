@@ -157,6 +157,15 @@ bts:
 enb:
 - label: srsENB-zmq
   type: srsenb
+  rf_dev_type: zmq
+  rf_dev_args: auto
+  remote_user: jenkins
+  addr: 10.42.42.117
+
+- label: srsENB-B200
+  type: srsenb
+  rf_dev_type: UHD
+  rf_dev_args: "type=b200,serial=306BD11,recv_frame_size=9232,send_frame_size=9232"
   remote_user: jenkins
   addr: 10.42.42.117
 
@@ -241,12 +250,23 @@ modem:
 
 - label: srsUE-zmq_1
   type: srsue
+  rf_dev_type: zmq
+  rf_dev_args: auto
   remote_user: jenkins
   addr: 10.42.42.116
   imsi: '001010123456789'
   ki: '00112233445566778899aabbccddeeff'
   auth_algo: 'xor'
 
+- label: srsUE-soapy-lms_1
+  type: srsue
+  rf_dev_type: soapy
+  rf_dev_args: driver=lime,serial=00090706024F0A22,rxant=LNAW,txant=BAND1
+  remote_user: jenkins
+  addr: 10.42.42.116
+  imsi: '001010123456789'
+  ki: '00112233445566778899aabbccddeeff'
+  auth_algo: 'xor'
 
 osmocon_phone:
   - serial_device: '/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00897B41-if00-port0'

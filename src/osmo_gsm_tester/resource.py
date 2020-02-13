@@ -89,7 +89,8 @@ RESOURCES_SCHEMA = {
         'enb[].type': schema.STR,
         'enb[].remote_user': schema.STR,
         'enb[].addr': schema.IPV4,
-        'enb[].band': schema.BAND,
+        'enb[].rf_dev_type': schema.STR,
+        'enb[].rf_dev_args': schema.STR,
         'arfcn[].arfcn': schema.INT,
         'arfcn[].band': schema.BAND,
         'modem[].type': schema.STR,
@@ -102,6 +103,8 @@ RESOURCES_SCHEMA = {
         'modem[].addr': schema.IPV4,
         'modem[].ciphers[]': schema.CIPHER,
         'modem[].features[]': schema.MODEM_FEATURE,
+        'modem[].rf_dev_type': schema.STR,
+        'modem[].rf_dev_args': schema.STR,
         'osmocon_phone[].serial_device': schema.STR,
     }
 

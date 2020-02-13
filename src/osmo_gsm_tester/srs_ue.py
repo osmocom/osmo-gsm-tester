@@ -24,6 +24,9 @@ from . import log, util, config, template, process, remote
 from .run_node import RunNode
 from .ms import MS
 
+def rf_type_valid(rf_type_str):
+    return rf_type_str in ('zmq', 'UHD', 'soapy', 'bladeRF')
+
 class srsUE(MS):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsue'
@@ -54,6 +57,8 @@ class srsUE(MS):
         else:
           self.base_srate=23.04e6
         self.remote_user = conf.get('remote_user', None)
+        if not rf_type_valid(conf.get('rf_dev_type', None)):
+            raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
 
     def cleanup(self):
         if self.process is None:
@@ -122,8 +127,6 @@ class srsUE(MS):
 
         #'strace', '-ff',
         args = (remote_binary, self.remote_config_file,
-                '--rf.device_name=zmq',
-                '--rf.device_args="tx_port=tcp://'+ self.addr() +':2001,rx_port=tcp://'+ self.enb.addr() +':2000,id=ue,base_srate='+ str(self.base_srate) + '"',
                 '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + 'stdout', #self.remote_log_file,
@@ -157,8 +160,6 @@ class srsUE(MS):
         util.setcap_netsys_admin(binary, self.run_dir.new_dir('setcap_netsys_admin'))
 
         args = (binary, os.path.abspath(self.config_file),
-                '--rf.device_name=zmq',
-                '--rf.device_args="tx_port=tcp://'+ self.addr() +':2001,rx_port=tcp://'+ self.enb.addr() +':2000,id=ue,base_srate='+ str(self.base_srate) + '"',
                 '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + self.log_file,
@@ -179,6 +180,10 @@ class srsUE(MS):
         values = dict(ue=config.get_defaults('srsue'))
         config.overlay(values, self.suite_run.config())
         config.overlay(values, dict(ue=self._conf))
+
+        # We need to set some specific variables programatically here to match IP addresses:
+        if self._conf.get('rf_dev_type') == 'zmq':
+            config.overlay(values, dict(ue=dict(rf_dev_args='tx_port=tcp://'+ self.addr() +':2001,rx_port=tcp://'+ self.enb.addr() +':2000,id=ue,base_srate='+ str(self.base_srate))))
 
         self.dbg('SRSUE CONFIG:\n' + pprint.pformat(values))
 

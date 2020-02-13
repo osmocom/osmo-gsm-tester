@@ -22,6 +22,9 @@ import pprint
 
 from . import log, util, config, template, process, remote
 
+def rf_type_valid(rf_type_str):
+    return rf_type_str in ('zmq', 'UHD', 'soapy', 'bladeRF')
+
 class srsENB(log.Origin):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsenb'
@@ -34,6 +37,7 @@ class srsENB(log.Origin):
 
     def __init__(self, suite_run, conf):
         super().__init__(log.C_RUN, 'srsenb')
+        self._conf = conf
         self._addr = conf.get('addr', None)
         if self._addr is None:
             raise log.Error('addr not set')
@@ -59,6 +63,8 @@ class srsENB(log.Origin):
         else:
           self.base_srate=23.04e6
         self.remote_user = conf.get('remote_user', None)
+        if not rf_type_valid(conf.get('rf_dev_type', None)):
+            raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
 
     def cleanup(self):
         if self.process is None:
@@ -117,8 +123,6 @@ class srsENB(log.Origin):
                 '--enb_files.sib_config=' + self.remote_config_sib_file,
                 '--enb_files.rr_config=' + self.remote_config_rr_file,
                 '--enb_files.drb_config=' + self.remote_config_drb_file,
-                '--rf.device_name=zmq',
-                '--rf.device_args="fail_on_disconnect=true,tx_port=tcp://'+ self.addr() +':2000,rx_port=tcp://'+ self.ue.addr() +':2001,id=enb,base_srate='+ str(self.base_srate) + '"',
                 '--expert.nof_phy_threads=1',
                 '--expert.rrc_inactivity_timer=1500',
                 '--enb.n_prb=' + str(self.nof_prb),
@@ -145,8 +149,6 @@ class srsENB(log.Origin):
                 '--enb_files.sib_config=' + os.path.abspath(self.config_sib_file),
                 '--enb_files.rr_config=' + os.path.abspath(self.config_rr_file),
                 '--enb_files.drb_config=' + os.path.abspath(self.config_drb_file),
-                '--rf.device_name=zmq',
-                '--rf.device_args="fail_on_disconnect=true,tx_port=tcp://'+ self.addr() +':2000,rx_port=tcp://'+ self.ue.addr() +':2001,id=enb,base_srate='+ str(self.base_srate) + '"',
                 '--expert.nof_phy_threads=1',
                 '--expert.rrc_inactivity_timer=1500',
                 '--enb.n_prb=' + str(self.nof_prb),
@@ -161,8 +163,12 @@ class srsENB(log.Origin):
 
         values = dict(enb=config.get_defaults('srsenb'))
         config.overlay(values, self.suite_run.config())
-        config.overlay(values, dict(enb={ 'run_addr': self.addr(),
-                                          'mme_addr': self.epc.addr()}))
+        config.overlay(values, dict(enb=self._conf))
+        config.overlay(values, dict(enb={ 'mme_addr': self.epc.addr() }))
+
+        # We need to set some specific variables programatically here to match IP addresses:
+        if self._conf.get('rf_dev_type') == 'zmq':
+            config.overlay(values, dict(enb=dict(rf_dev_args='fail_on_disconnect=true,tx_port=tcp://'+ self.addr() +':2000,rx_port=tcp://'+ self.ue.addr() +':2001,id=enb,base_srate='+ str(self.base_srate))))
 
         self.dbg('srsENB ' + filename + ':\n' + pprint.pformat(values))
 

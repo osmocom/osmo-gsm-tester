@@ -5,7 +5,7 @@ _poky_version="$POKY_VERSION"
 _poky_path="$POKY_PATH"
 
 [ -z "$_poky_version" ] && _poky_version="2.3.4"
-[ -z "$_poky_path" ] && _poky_path="/opt/poky/$_poky_version"
+[ -z "$_poky_path" ] && _poky_path="/opt/poky-sdk/$_poky_version"
 
 . "$_poky_path/environment-setup-armv5te-poky-linux-gnueabi"
 

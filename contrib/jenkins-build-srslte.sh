@@ -3,7 +3,7 @@ set -e -x
 
 base="$PWD"
 name="srslte"
-git_url="${git_url-"https://github.com/pespin/"}"
+git_url="${git_url:-https://github.com/srsLTE}"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
 #TODO: make sure libconfig, zeroMQ is installed

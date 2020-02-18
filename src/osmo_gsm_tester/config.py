@@ -176,6 +176,8 @@ def _tostr(config):
     return yaml.dump(config, default_flow_style=False)
 
 def _standardize_item(item):
+    if item is None:
+        return None
     if isinstance(item, (tuple, list)):
         return [_standardize_item(i) for i in item]
     if isinstance(item, dict):

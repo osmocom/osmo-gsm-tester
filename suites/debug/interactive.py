@@ -37,7 +37,7 @@ for m in modems:
   m.connect(msc.mcc_mnc())
 
 while True:
-  cmd = prompt('Enter command: (q)uit (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>, data-attach, data-wait, data-detach, data-activate')
+  cmd = prompt('Enter command: (q)uit (d)ebug (s)ms (g)et-registered (w)ait-registered, call-list [<ms_msisdn>], call-dial <src_msisdn> <dst_msisdn>, call-wait-incoming <src_msisdn> <dst_msisdn>, call-answer <mt_msisdn> <call_id>, call-hangup <ms_msisdn> <call_id>, ussd <command>, data-attach, data-wait, data-detach, data-activate')
   cmd = cmd.strip().lower()
 
   if not cmd:
@@ -47,6 +47,9 @@ while True:
 
   if 'quit'.startswith(cmd):
     break
+
+  elif 'debug'.startswith(cmd):
+    import pdb; pdb.set_trace()
 
   elif 'wait-registered'.startswith(cmd):
     try:

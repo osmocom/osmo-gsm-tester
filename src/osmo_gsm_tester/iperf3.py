@@ -160,11 +160,11 @@ class IPerf3Client(log.Origin):
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
         if self.runs_locally():
-            return self.prepare_test_proc_locally()
+            return self.prepare_test_proc_locally(netns)
         else:
-            return self.prepare_test_proc_remotely()
+            return self.prepare_test_proc_remotely(netns)
 
-    def prepare_test_proc_remotely(self, netns=None):
+    def prepare_test_proc_remotely(self, netns):
         self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
 
         remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
@@ -182,7 +182,7 @@ class IPerf3Client(log.Origin):
             self.process = self.rem_host.RemoteProcess(self.name(), popen_args, env={})
         return self.process
 
-    def prepare_test_proc_locally(self, netns=None):
+    def prepare_test_proc_locally(self, netns):
         pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.server.addr(), netns)
 

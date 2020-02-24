@@ -86,7 +86,6 @@ class Test(log.Origin):
         finally:
             if self.log_target:
                 self.log_target.remove()
-                self.log_target = None
 
     def name(self):
         l = log.get_line_for_src(self.path)
@@ -118,5 +117,10 @@ class Test(log.Origin):
     def set_skip(self):
         self.status = Test.SKIP
         self.duration = 0
+
+    def log_file_path(self):
+        if self.log_target is None:
+            return None
+        return self.log_target.log_file_path()
 
 # vim: expandtab tabstop=4 shiftwidth=4

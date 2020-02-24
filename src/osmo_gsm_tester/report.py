@@ -20,6 +20,7 @@
 import math
 from datetime import datetime
 import xml.etree.ElementTree as et
+from xml.sax.saxutils import escape
 from . import test
 
 def trial_to_junit_write(trial, junit_path):
@@ -63,6 +64,13 @@ def test_to_junit(t):
     elif t.status != test.Test.PASS:
         error = et.SubElement(testcase, 'error')
         error.text = 'could not run'
+    sout = et.SubElement(testcase, 'system-out')
+    log_file = t.log_file_path()
+    if log_file is not None:
+        with open(log_file, 'r') as myfile:
+            sout.text = escape(myfile.read())
+    else:
+        sout.text = 'test log file not available'
     return testcase
 
 def trial_to_text(trial):

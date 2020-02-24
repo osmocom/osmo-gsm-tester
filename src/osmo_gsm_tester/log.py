@@ -574,6 +574,9 @@ class FileLogTarget(LogTarget):
             self.log_file.flush()
             self.log_file.close()
 
+    def log_file_path(self):
+        return self.path
+
 def run_logging_exceptions(func, *func_args, return_on_failure=None, **func_kwargs):
     try:
         return func(*func_args, **func_kwargs)

@@ -171,6 +171,13 @@ class RemoteHost(log.Origin):
         SETCAP_NETSYS_ADMIN_BIN = 'osmo-gsm-tester_setcap_netsys_admin.sh'
         self.run_remote_sync('setcap-netsysadm', ('sudo', SETCAP_NETSYS_ADMIN_BIN, binary_path))
 
+    def create_netns(self, netns):
+        '''
+        It creates the netns if it doesn't already exist.
+        '''
+        NETNS_SETUP_BIN = 'osmo-gsm-tester_netns_setup.sh'
+        self.run_remote_sync('create_netns', ('sudo', NETNS_SETUP_BIN, netns))
+
     def change_elf_rpath(self, binary_path, paths):
         '''
         Change RPATH field in ELF executable binary.

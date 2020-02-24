@@ -125,6 +125,9 @@ class srsUE(MS):
         self.log('Applying CAP_SYS_ADMIN+CAP_NET_ADMIN capability to srsue')
         self.rem_host.setcap_netsys_admin(remote_binary)
 
+        self.log('Creating netns %s' % self.netns())
+        self.rem_host.create_netns(self.netns())
+
         #'strace', '-ff',
         args = (remote_binary, self.remote_config_file,
                 '--phy.nof_phy_threads=1',
@@ -158,6 +161,9 @@ class srsUE(MS):
         # srsue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
         self.log('Applying CAP_SYS_ADMIN+CAP_NET_ADMIN capability to srsue')
         util.setcap_netsys_admin(binary, self.run_dir.new_dir('setcap_netsys_admin'))
+
+        self.log('Creating netns %s' % self.netns())
+        util.create_netns(self.netns(), self.run_dir.new_dir('create_netns'))
 
         args = (binary, os.path.abspath(self.config_file),
                 '--phy.nof_phy_threads=1',

@@ -174,7 +174,7 @@ class RemoteHost(log.Origin):
     def change_elf_rpath(self, binary_path, paths):
         '''
         Change RPATH field in ELF executable binary.
-        This feature can be used to tell the loaded to load the trial libraries, as
+        This feature can be used to tell the loader to load the trial libraries, as
         LD_LIBRARY_PATH is disabled for paths with modified capabilities.
         '''
         patchelf_bin = self.remote_env.get('PATCHELF_BIN', None)

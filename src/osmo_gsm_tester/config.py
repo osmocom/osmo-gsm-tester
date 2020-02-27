@@ -54,7 +54,7 @@ import yaml
 import os
 import copy
 
-from . import log, schema, util
+from . import log, schema, util, template
 from .util import is_dict, is_list, Dir, get_tempdir
 
 ENV_PREFIX = 'OSMO_GSM_TESTER_'
@@ -193,19 +193,53 @@ def get_defaults(for_kind):
     return defaults.get(for_kind, {})
 
 class Scenario(log.Origin, dict):
-    def __init__(self, name, path):
+    def __init__(self, name, path, param_list=[]):
         super().__init__(log.C_TST, name)
         self.path = path
+        self.param_list = param_list
+
+    def read_from_file(self, validation_schema):
+        with open(self.path, 'r') as f:
+            config_str = f.read()
+        if len(self.param_list) != 0:
+            param_dict = {}
+            i = 1
+            for param in self.param_list:
+                param_dict['param' + str(i)] = param
+                i += 1
+            self.dbg(param_dict=param_dict)
+            config_str = template.render_strbuf_inline(config_str, param_dict)
+        config = yaml.safe_load(config_str)
+        config = _standardize(config)
+        if validation_schema:
+            schema.validate(config, validation_schema)
+        self.update(config)
 
 def get_scenario(name, validation_schema=None):
     scenarios_dir = get_scenarios_dir()
     if not name.endswith('.conf'):
         name = name + '.conf'
+    is_parametrized_file = '@' in name
+    param_list = []
     path = scenarios_dir.child(name)
-    if not os.path.isfile(path):
-        raise RuntimeError('No such scenario file: %r' % path)
-    sc = Scenario(name, path)
-    sc.update(read(path, validation_schema=validation_schema))
+    if not is_parametrized_file:
+        if not os.path.isfile(path):
+            raise RuntimeError('No such scenario file: %r' % path)
+    else: # parametrized scenario:
+        # Allow first matching complete matching names (eg: scenario@param1,param2.conf),
+        # this allows setting specific content in different files for specific values.
+        if not os.path.isfile(path):
+            # get "scenario@.conf" from "scenario@param1,param2.conf":
+            prefix_name = name[:name.index("@")+1] + '.conf'
+            path = scenarios_dir.child(prefix_name)
+            if not os.path.isfile(path):
+                raise RuntimeError('No such scenario file: %r (nor %s)' % (path, name))
+        # At this point, we have existing file path. Let's now scrap the parameter(s):
+        # get param1,param2 str from scenario@param1,param2.conf
+        param_list_str = name.split('@', 1)[1][:-len('.conf')]
+        param_list = param_list_str.split(',')
+    sc = Scenario(name, path, param_list)
+    sc.read_from_file(validation_schema)
     return sc
 
 def add(dest, src):

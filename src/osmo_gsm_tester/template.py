@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from mako.lookup import TemplateLookup
+from mako.lookup import TemplateLookup, Template
 
 from . import log
 from .util import dict2obj
@@ -52,5 +52,11 @@ def render(name, values):
     _logger.dbg('rendering', tmpl_name)
 
     return template.render(**dict2obj(values))
+
+def render_strbuf_inline(strbuf, values):
+    '''Receive a string containing template syntax, and generate output using
+       passed values.'''
+    mytemplate = Template(strbuf)
+    return mytemplate.render(**dict2obj(values))
 
 # vim: expandtab tabstop=4 shiftwidth=4

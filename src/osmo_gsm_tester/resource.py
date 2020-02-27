@@ -89,6 +89,7 @@ RESOURCES_SCHEMA = {
         'enb[].type': schema.STR,
         'enb[].remote_user': schema.STR,
         'enb[].addr': schema.IPV4,
+        'enb[].num_prb': schema.UINT,
         'enb[].rf_dev_type': schema.STR,
         'enb[].rf_dev_args': schema.STR,
         'arfcn[].arfcn': schema.INT,

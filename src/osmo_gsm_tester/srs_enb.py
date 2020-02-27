@@ -57,11 +57,6 @@ class srsENB(log.Origin):
         self.remote_config_drb_file = None
         self.remote_log_file = None
         self.suite_run = suite_run
-        self.nof_prb=100
-        if self.nof_prb == 75:
-          self.base_srate=15.36e6
-        else:
-          self.base_srate=23.04e6
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -125,7 +120,6 @@ class srsENB(log.Origin):
                 '--enb_files.drb_config=' + self.remote_config_drb_file,
                 '--expert.nof_phy_threads=1',
                 '--expert.rrc_inactivity_timer=1500',
-                '--enb.n_prb=' + str(self.nof_prb),
                 '--log.filename=' + self.remote_log_file)
 
         self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsENB.BINFILE, util.Dir(srsENB.REMOTE_DIR), args, remote_env=remote_env)
@@ -151,7 +145,6 @@ class srsENB(log.Origin):
                 '--enb_files.drb_config=' + os.path.abspath(self.config_drb_file),
                 '--expert.nof_phy_threads=1',
                 '--expert.rrc_inactivity_timer=1500',
-                '--enb.n_prb=' + str(self.nof_prb),
                 '--log.filename=' + self.log_file)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
@@ -168,7 +161,16 @@ class srsENB(log.Origin):
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            config.overlay(values, dict(enb=dict(rf_dev_args='fail_on_disconnect=true,tx_port=tcp://'+ self.addr() +':2000,rx_port=tcp://'+ self.ue.addr() +':2001,id=enb,base_srate='+ str(self.base_srate))))
+            num_prb = values['enb'].get('num_prb', None)
+            assert num_prb
+            if num_prb == 75:
+              base_srate=15.36e6
+            else:
+              base_srate=23.04e6
+            rf_dev_args = 'fail_on_disconnect=true,tx_port=tcp://' + self.addr() \
+                        + ':2000,rx_port=tcp://'+ self.ue.addr() \
+                        + ':2001,id=enb,base_srate='+ str(base_srate)
+            config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         self.dbg('srsENB ' + filename + ':\n' + pprint.pformat(values))
 

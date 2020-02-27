@@ -125,6 +125,17 @@ def osmo_trx_clock_ref(val):
         return
     raise ValueError('Unknown OsmoTRX clock reference value: %r' % val)
 
+def lte_transmission_mode(val):
+    n = int(val)
+    if n <= 4:
+        return
+    raise ValueError('LTE Transmission Mode %d not in expected range' % n)
+
+def lte_rlc_drb_mode(val):
+    if val.upper() in ('UM', 'AM'):
+        return
+    raise ValueError('Unknown LTE RLC DRB Mode value: %r' % val)
+
 INT = 'int'
 STR = 'str'
 UINT = 'uint'
@@ -144,6 +155,8 @@ CHAN_ALLOCATOR = 'chan_allocator'
 GPRS_MODE = 'gprs_mode'
 CODEC = 'codec'
 OSMO_TRX_CLOCK_REF = 'osmo_trx_clock_ref'
+LTE_TRANSMISSION_MODE = 'lte_transmission_mode'
+LTE_RLC_DRB_MODE = 'lte_rlc_drb_mode'
 
 SCHEMA_TYPES = {
         INT: int,
@@ -165,6 +178,8 @@ SCHEMA_TYPES = {
         GPRS_MODE: gprs_mode,
         CODEC: codec,
         OSMO_TRX_CLOCK_REF: osmo_trx_clock_ref,
+        LTE_TRANSMISSION_MODE: lte_transmission_mode,
+        LTE_RLC_DRB_MODE: lte_rlc_drb_mode,
     }
 
 def validate(config, schema):

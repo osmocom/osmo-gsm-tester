@@ -90,6 +90,7 @@ RESOURCES_SCHEMA = {
         'enb[].remote_user': schema.STR,
         'enb[].addr': schema.IPV4,
         'enb[].num_prb': schema.UINT,
+        'enb[].transmission_mode': schema.LTE_TRANSMISSION_MODE,
         'enb[].rf_dev_type': schema.STR,
         'enb[].rf_dev_args': schema.STR,
         'arfcn[].arfcn': schema.INT,
@@ -115,7 +116,8 @@ WANT_SCHEMA = util.dict_add(
 
 CONF_SCHEMA = util.dict_add(
     { 'defaults.timeout': schema.STR,
-      'config.bsc.net.codec_list[]': schema.CODEC },
+      'config.bsc.net.codec_list[]': schema.CODEC,
+      'config.epc.rlc_drb_mode': schema.LTE_RLC_DRB_MODE, },
     dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]),
     dict([('modifiers.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
 

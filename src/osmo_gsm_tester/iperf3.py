@@ -154,17 +154,17 @@ class IPerf3Client(log.Origin):
         locally = not self._run_node or self._run_node.is_local()
         return locally
 
-    def prepare_test_proc(self, netns=None):
+    def prepare_test_proc(self, downlink=False, netns=None):
         self.log('Starting iperf3-client connecting to %s:%d' % (self.server.addr(), self.server.port()))
         self.log_copied = False
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
         if self.runs_locally():
-            return self.prepare_test_proc_locally(netns)
+            return self.prepare_test_proc_locally(downlink, netns)
         else:
-            return self.prepare_test_proc_remotely(netns)
+            return self.prepare_test_proc_remotely(downlink, netns)
 
-    def prepare_test_proc_remotely(self, netns):
+    def prepare_test_proc_remotely(self, downlink, netns):
         self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
 
         remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
@@ -176,19 +176,25 @@ class IPerf3Client(log.Origin):
         popen_args = ('iperf3', '-c',  self.server.addr(),
                       '-p', str(self.server.port()), '-J',
                       '--logfile', self.remote_log_file)
+        if downlink:
+            popen_args += ('-R',)
+
         if netns:
             self.process = self.rem_host.RemoteNetNSProcess(self.name(), netns, popen_args, env={})
         else:
             self.process = self.rem_host.RemoteProcess(self.name(), popen_args, env={})
         return self.process
 
-    def prepare_test_proc_locally(self, netns):
+    def prepare_test_proc_locally(self, downlink, netns):
         pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.server.addr(), netns)
 
         popen_args = ('iperf3', '-c',  self.server.addr(),
                       '-p', str(self.server.port()), '-J',
                       '--logfile', os.path.abspath(self.log_file))
+        if downlink:
+            popen_args += ('-R',)
+
         if netns:
             self.process = process.NetNSProcess(self.name(), self.run_dir, netns, popen_args, env={})
         else:

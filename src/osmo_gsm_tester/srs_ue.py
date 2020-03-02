@@ -22,6 +22,7 @@ import pprint
 
 from . import log, util, config, template, process, remote
 from .run_node import RunNode
+from .event_loop import MainLoop
 from .ms import MS
 
 def rf_type_valid(rf_type_str):
@@ -91,16 +92,15 @@ class srsUE(MS):
             self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
         except Exception as e:
             self.log(repr(e))
-        try:
-            self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
-        except Exception as e:
-            self.log(repr(e))
 
     def setup_runs_locally(self):
         return self.remote_user is None
 
     def netns(self):
         return "srsue1"
+
+    def stop(self):
+        self.suite_run.stop_process(self.process)
 
     def connect(self, enb):
         self.log('Starting srsue')
@@ -246,5 +246,81 @@ class srsUE(MS):
         else:
             proc = self.rem_host.RemoteNetNSProcess(name, self.netns(), popen_args, env={})
         proc.launch_sync()
+
+    def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt'):
+        # file is not properly flushed until the process has stopped.
+        if self.running():
+            self.stop()
+            # metrics file is not flushed immediatelly by the OS during process
+            # tear down, we need to wait some extra time:
+            MainLoop.sleep(self, 2)
+            if not self.setup_runs_locally():
+                try:
+                    self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
+                except Exception as e:
+                    self.err('Failed copying back metrics file from remote host')
+                    raise e
+        metrics = srsUEMetrics(self.metrics_file)
+        return metrics.verify(value, operation, metric, criterion)
+
+import numpy
+
+class srsUEMetrics(log.Origin):
+
+    VALID_OPERATIONS = ['avg', 'sum']
+    VALID_CRITERION = ['eq','gt','lt']
+    CRITERION_TO_SYM = { 'eq' : '==', 'gt' : '>', 'lt' : '<' }
+    CRYTERION_TO_SYM_OPPOSITE = { 'eq' : '!=', 'gt' : '<=', 'lt' : '>=' }
+
+
+    def __init__(self, metrics_file):
+        super().__init__(log.C_RUN, 'srsue_metrics')
+        self.raw_data = None
+        self.metrics_file = metrics_file
+        # read CSV, guessing data type with first row being the legend
+        try:
+            self.raw_data = numpy.genfromtxt(self.metrics_file, names=True, delimiter=';', dtype=None)
+        except (ValueError, IndexError, IOError) as error:
+            self.err("Error parsing metrics CSV file %s" % self.metrics_file)
+            raise error
+
+    def verify(self, value, operation='avg', metric='dl_brate', criterion='gt'):
+        if operation not in self.VALID_OPERATIONS:
+            raise log.Error('Unknown operation %s not in %r' % (operation, self.VALID_OPERATIONS))
+        if criterion not in self.VALID_CRITERION:
+            raise log.Error('Unknown operation %s not in %r' % (operation, self.VALID_CRITERION))
+        # check if given metric exists in data
+        try:
+            sel_data = self.raw_data[metric]
+        except ValueError as err:
+            print('metric %s not available' % metric)
+            raise err
+
+        if operation == 'avg':
+            result = numpy.average(sel_data)
+        elif operation == 'sum':
+            result = numpy.sum(sel_data)
+        self.dbg(result=result, value=value)
+
+        success = False
+        if criterion == 'eq' and result == value or \
+           criterion == 'gt' and result > value or \
+           criterion == 'lt' and result < value:
+            success = True
+
+        # Convert bitrate in Mbit/s:
+        if metric.find('brate') > 0:
+            result /= 1e6
+            value /= 1e6
+            mbit_str = ' Mbit/s'
+        else:
+            mbit_str = ''
+
+        if not success:
+            result_msg = "{:.2f}{} {} {:.2f}{}".format(result, mbit_str, self.CRYTERION_TO_SYM_OPPOSITE[criterion], value, mbit_str)
+            raise log.Error(result_msg)
+        result_msg = "{:.2f}{} {} {:.2f}{}".format(result, mbit_str, self.CRITERION_TO_SYM[criterion], value, mbit_str)
+        # TODO: overwrite test system-out with this text.
+        return result_msg
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -28,5 +28,6 @@ import sispm
 import smpplib
 import urllib.request
 import xml.etree.ElementTree
+import numpy
 
 print('dependencies ok')

@@ -76,6 +76,7 @@ class srsENB(log.Origin):
         self.remote_config_drb_file = None
         self.remote_log_file = None
         self._num_prb = 0
+        self._txmode = 0
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -179,10 +180,13 @@ class srsENB(log.Origin):
         config.overlay(values, dict(enb=self._conf))
         config.overlay(values, dict(enb={ 'mme_addr': self.epc.addr() }))
 
+        self._num_prb = int(values['enb'].get('num_prb', None))
+        assert self._num_prb
+        self._txmode = int(values['enb'].get('transmission_mode', None))
+        assert self._txmode
+
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            self._num_prb = int(values['enb'].get('num_prb', None))
-            assert self._num_prb
             base_srate = num_prb2base_srate(self._num_prb)
             rf_dev_args = 'fail_on_disconnect=true,tx_port=tcp://' + self.addr() \
                         + ':2000,rx_port=tcp://' + self.ue.addr() \
@@ -221,5 +225,32 @@ class srsENB(log.Origin):
 
     def num_prb(self):
         return self._num_prb
+
+    def ue_max_rate(self, downlink=True):
+        # The max rate for a single UE per PRB in TM1
+        max_phy_rate_tm1_dl = { 6 : 2.3e6,
+                               15 : 8e6,
+                               25 : 16e6,
+                               50 : 36e6,
+                               75 : 54e6,
+                               100 : 75e6 }
+        # TODO: proper values for this table:
+        max_phy_rate_tm1_ul = { 6 : 0.23e6,
+                               15 : 0.8e6,
+                               25 : 1.6e6,
+                               50 : 3.6e6,
+                               75 : 5.4e6,
+                               100 : 7.5e6 }
+        if downlink:
+            max_rate = max_phy_rate_tm1_dl[self.num_prb()]
+        else:
+            max_rate = max_phy_rate_tm1_ul[self.num_prb()]
+        #TODO: calculate for non-standard prb numbers.
+        if self._txmode > 2:
+            max_rate *= 2
+        # We use 3 control symbols for 6, 15 and 25 PRBs which results in lower max rate
+        if self.num_prb() < 50:
+          max_rate *= 0.9
+        return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

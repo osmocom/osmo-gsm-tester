@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
+def print_result_node(result, node_str):
+    sent = result['end']['sum_sent']
+    recv = result['end']['sum_received']
+    print("Result %s:" % node_str)
+    print("\tSEND: %d KB, %d kbps, %d seconds (%s retrans)" % (sent['bytes']/1000, sent['bits_per_second']/1000, sent['seconds'], str(sent.get('retransmits', 'unknown'))))
+    print("\tRECV: %d KB, %d kbps, %d seconds" % (recv['bytes']/1000, recv['bits_per_second']/1000, recv['seconds']))
+
 def print_results(cli_res, srv_res):
-    cli_sent = cli_res['end']['sum_sent']
-    cli_recv = cli_res['end']['sum_received']
-    print("RESULT client:")
-    print("\tSEND: %d KB, %d kbps, %d seconds (%d retrans)" % (cli_sent['bytes']/1000, cli_sent['bits_per_second']/1000,  cli_sent['seconds'], cli_sent['retransmits']))
-    print("\tRECV: %d KB, %d kbps, %d seconds" % (cli_recv['bytes']/1000, cli_recv['bits_per_second']/1000, cli_recv['seconds']))
-    print("RESULT server:")
-    print("\tSEND: %d KB, %d kbps, %d seconds" % (cli_sent['bytes']/1000, cli_sent['bits_per_second']/1000, cli_sent['seconds']))
-    print("\tRECV: %d KB, %d kbps, %d seconds" % (cli_recv['bytes']/1000, cli_recv['bits_per_second']/1000, cli_recv['seconds']))
+    print_result_node(cli_res, 'client')
+    print_result_node(srv_res, 'server')
 
 def run_iperf3_cli_parallel(iperf3clients, ms_li, ready_cb):
     assert len(iperf3clients) == len(ms_li)

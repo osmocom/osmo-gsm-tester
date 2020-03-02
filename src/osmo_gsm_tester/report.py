@@ -18,10 +18,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
+import sys
+import re
 from datetime import datetime
 import xml.etree.ElementTree as et
 from xml.sax.saxutils import escape
 from . import test
+
+invalid_xml_char_ranges = [(0x00, 0x08), (0x0B, 0x0C), (0x0E, 0x1F), (0x7F, 0x84),
+                    (0x86, 0x9F), (0xFDD0, 0xFDDF), (0xFFFE, 0xFFFF)]
+if sys.maxunicode >= 0x10000:  # not narrow build
+    invalid_xml_char_ranges.extend([(0x1FFFE, 0x1FFFF), (0x2FFFE, 0x2FFFF),
+                             (0x3FFFE, 0x3FFFF), (0x4FFFE, 0x4FFFF),
+                             (0x5FFFE, 0x5FFFF), (0x6FFFE, 0x6FFFF),
+                             (0x7FFFE, 0x7FFFF), (0x8FFFE, 0x8FFFF),
+                             (0x9FFFE, 0x9FFFF), (0xAFFFE, 0xAFFFF),
+                             (0xBFFFE, 0xBFFFF), (0xCFFFE, 0xCFFFF),
+                             (0xDFFFE, 0xDFFFF), (0xEFFFE, 0xEFFFF),
+                             (0xFFFFE, 0xFFFFF), (0x10FFFE, 0x10FFFF)])
+invalid_xml_char_ranges_str = ['%s-%s' % (chr(low), chr(high))
+                   for (low, high) in invalid_xml_char_ranges]
+invalid_xml_char_ranges_regex = re.compile('[%s]' % ''.join(invalid_xml_char_ranges_str))
+
+def escape_xml_invalid_characters(str):
+    replacement_char = '\uFFFD' # Unicode replacement character
+    return invalid_xml_char_ranges_regex.sub(replacement_char, escape(str))
 
 def trial_to_junit_write(trial, junit_path):
     elements = et.ElementTree(element=trial_to_junit(trial))
@@ -68,7 +89,7 @@ def test_to_junit(t):
     log_file = t.log_file_path()
     if log_file is not None:
         with open(log_file, 'r') as myfile:
-            sout.text = escape(myfile.read())
+            sout.text = escape_xml_invalid_characters(myfile.read())
     else:
         sout.text = 'test log file not available'
     return testcase

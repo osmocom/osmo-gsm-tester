@@ -141,7 +141,6 @@ class srsUE(MS):
                 '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + 'stdout', #self.remote_log_file,
-                '--pcap.enable=true',
                 '--pcap.filename=' + self.remote_pcap_file,
                 '--general.metrics_csv_filename=' + self.remote_metrics_file)
 
@@ -178,7 +177,6 @@ class srsUE(MS):
                 '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + self.log_file,
-                '--pcap.enable=true',
                 '--pcap.filename=' + self.pcap_file,
                 '--general.metrics_csv_filename=' + self.metrics_file)
 

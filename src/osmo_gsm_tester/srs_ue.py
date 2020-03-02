@@ -34,6 +34,7 @@ class srsUE(MS):
     CFGFILE = 'srsue.conf'
     PCAPFILE = 'srsue.pcap'
     LOGFILE = 'srsue.log'
+    METRICSFILE = 'srsue_metrics.csv'
 
     def __init__(self, suite_run, conf):
         self._addr = conf.get('addr', None)
@@ -45,11 +46,13 @@ class srsUE(MS):
         self.config_file = None
         self.log_file = None
         self.pcap_file = None
+        self.metrics_file = None
         self.process = None
         self.rem_host = None
         self.remote_config_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
+        self.remote_metrics_file = None
         self.suite_run = suite_run
         self.nof_prb=50
         if self.nof_prb == 75:
@@ -72,6 +75,10 @@ class srsUE(MS):
             self.log(repr(e))
         try:
             self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
+        except Exception as e:
+            self.log(repr(e))
+        try:
+            self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
         except Exception as e:
             self.log(repr(e))
 
@@ -106,6 +113,7 @@ class srsUE(MS):
         self.remote_config_file = remote_run_dir.child(srsUE.CFGFILE)
         self.remote_log_file = remote_run_dir.child(srsUE.LOGFILE)
         self.remote_pcap_file = remote_run_dir.child(srsUE.PCAPFILE)
+        self.remote_metrics_file = remote_run_dir.child(srsUE.METRICSFILE)
 
         self.rem_host.recreate_remote_dir(remote_inst)
         self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
@@ -134,7 +142,8 @@ class srsUE(MS):
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + 'stdout', #self.remote_log_file,
                 '--pcap.enable=true',
-                '--pcap.filename=' + self.remote_pcap_file)
+                '--pcap.filename=' + self.remote_pcap_file,
+                '--general.metrics_csv_filename=' + self.remote_metrics_file)
 
         self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, util.Dir(srsUE.REMOTE_DIR), args)
         #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, remote_run_dir, args, remote_lib)
@@ -170,7 +179,8 @@ class srsUE(MS):
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + self.log_file,
                 '--pcap.enable=true',
-                '--pcap.filename=' + self.pcap_file)
+                '--pcap.filename=' + self.pcap_file,
+                '--general.metrics_csv_filename=' + self.metrics_file)
 
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
@@ -181,6 +191,7 @@ class srsUE(MS):
         self.config_file = self.run_dir.new_file(srsUE.CFGFILE)
         self.log_file = self.run_dir.child(srsUE.LOGFILE)
         self.pcap_file = self.run_dir.new_file(srsUE.PCAPFILE)
+        self.metrics_file = self.run_dir.child(srsUE.METRICSFILE)
         self.dbg(config_file=self.config_file)
 
         values = dict(ue=config.get_defaults('srsue'))

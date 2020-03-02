@@ -211,7 +211,6 @@ class srsUE(MS):
         return self._addr
 
     def run_node(self):
-        # TODO: move to an object
         return RunNode(RunNode.T_REM_SSH, self._addr, self.remote_user, self._addr)
 
     def run_netns_wait(self, name, popen_args):

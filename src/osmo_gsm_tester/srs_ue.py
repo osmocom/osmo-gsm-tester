@@ -27,6 +27,25 @@ from .ms import MS
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'UHD', 'soapy', 'bladeRF')
 
+#reference: srsLTE.git srslte_symbol_sz()
+def num_prb2symbol_sz(num_prb):
+    if num_prb <= 6:
+        return 128
+    if num_prb <= 15:
+        return 256
+    if num_prb <= 25:
+        return 384
+    if num_prb <= 50:
+        return 768
+    if num_prb <= 75:
+        return 1024
+    if num_prb <= 110:
+        return 1536
+    raise log.Error('invalid num_prb %r', num_prb)
+
+def num_prb2base_srate(num_prb):
+    return num_prb2symbol_sz(num_prb) * 15 * 1000
+
 class srsUE(MS):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsue'
@@ -54,11 +73,6 @@ class srsUE(MS):
         self.remote_pcap_file = None
         self.remote_metrics_file = None
         self.suite_run = suite_run
-        self.nof_prb=50
-        if self.nof_prb == 75:
-          self.base_srate=15.36e6
-        else:
-          self.base_srate=23.04e6
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -198,7 +212,11 @@ class srsUE(MS):
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            config.overlay(values, dict(ue=dict(rf_dev_args='tx_port=tcp://'+ self.addr() +':2001,rx_port=tcp://'+ self.enb.addr() +':2000,id=ue,base_srate='+ str(self.base_srate))))
+            base_srate = num_prb2base_srate(self.enb.num_prb())
+            config.overlay(values, dict(ue=dict(rf_dev_args='tx_port=tcp://' + self.addr()
+                                                           +':2001,rx_port=tcp://' + self.enb.addr()
+                                                           +':2000,id=ue,base_srate='+ str(base_srate)
+                                                )))
 
         self.dbg('SRSUE CONFIG:\n' + pprint.pformat(values))
 

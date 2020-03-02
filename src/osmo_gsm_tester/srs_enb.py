@@ -25,6 +25,25 @@ from . import log, util, config, template, process, remote
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'UHD', 'soapy', 'bladeRF')
 
+#reference: srsLTE.git srslte_symbol_sz()
+def num_prb2symbol_sz(num_prb):
+    if num_prb <= 6:
+        return 128
+    if num_prb <= 15:
+        return 256
+    if num_prb <= 25:
+        return 384
+    if num_prb <= 50:
+        return 768
+    if num_prb <= 75:
+        return 1024
+    if num_prb <= 110:
+        return 1536
+    raise log.Error('invalid num_prb %r', num_prb)
+
+def num_prb2base_srate(num_prb):
+    return num_prb2symbol_sz(num_prb) * 15 * 1000
+
 class srsENB(log.Origin):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsenb'
@@ -56,6 +75,7 @@ class srsENB(log.Origin):
         self.remote_config_rr_file = None
         self.remote_config_drb_file = None
         self.remote_log_file = None
+        self._num_prb = 0
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -161,15 +181,12 @@ class srsENB(log.Origin):
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            num_prb = values['enb'].get('num_prb', None)
-            assert num_prb
-            if num_prb == 75:
-              base_srate=15.36e6
-            else:
-              base_srate=23.04e6
+            self._num_prb = int(values['enb'].get('num_prb', None))
+            assert self._num_prb
+            base_srate = num_prb2base_srate(self._num_prb)
             rf_dev_args = 'fail_on_disconnect=true,tx_port=tcp://' + self.addr() \
-                        + ':2000,rx_port=tcp://'+ self.ue.addr() \
-                        + ':2001,id=enb,base_srate='+ str(base_srate)
+                        + ':2000,rx_port=tcp://' + self.ue.addr() \
+                        + ':2001,id=enb,base_srate=' + str(base_srate)
             config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         self.dbg('srsENB ' + filename + ':\n' + pprint.pformat(values))
@@ -201,5 +218,8 @@ class srsENB(log.Origin):
 
     def addr(self):
         return self._addr
+
+    def num_prb(self):
+        return self._num_prb
 
 # vim: expandtab tabstop=4 shiftwidth=4

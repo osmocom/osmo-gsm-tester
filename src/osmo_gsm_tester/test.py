@@ -43,6 +43,7 @@ class Test(log.Origin):
         self.fail_type = None
         self.fail_message = None
         self.log_target = None
+        self._report_stdout = None
 
     def get_run_dir(self):
         if self._run_dir is None:
@@ -118,9 +119,19 @@ class Test(log.Origin):
         self.status = Test.SKIP
         self.duration = 0
 
-    def log_file_path(self):
-        if self.log_target is None:
-            return None
-        return self.log_target.log_file_path()
+    def set_report_stdout(self, text):
+        'Overwrite stdout text stored in report from inside a test'
+        self._report_stdout = text
+
+    def report_stdout(self):
+        # If test overwrote the text, provide it:
+        if self._report_stdout is not None:
+            return self._report_stdout
+        # Otherwise vy default provide the entire test log:
+        if self.log_target is not None and self.log_target.log_file_path() is not None:
+            with open(self.log_target.log_file_path(), 'r') as myfile:
+                return myfile.read()
+        else:
+            return 'test log file not available'
 
 # vim: expandtab tabstop=4 shiftwidth=4

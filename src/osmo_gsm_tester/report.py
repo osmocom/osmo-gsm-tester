@@ -86,12 +86,7 @@ def test_to_junit(t):
         error = et.SubElement(testcase, 'error')
         error.text = 'could not run'
     sout = et.SubElement(testcase, 'system-out')
-    log_file = t.log_file_path()
-    if log_file is not None:
-        with open(log_file, 'r') as myfile:
-            sout.text = escape_xml_invalid_characters(myfile.read())
-    else:
-        sout.text = 'test log file not available'
+    sout.text = escape_xml_invalid_characters(t.report_stdout())
     return testcase
 
 def trial_to_text(trial):

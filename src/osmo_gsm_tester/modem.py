@@ -666,6 +666,7 @@ class Modem(MS):
         proc = process.NetNSProcess(name, self.run_dir.new_dir(name), self.netns(), popen_args,
                                        env={})
         proc.launch_sync()
+        return proc
 
     def setup_context_data_plane(self, ctx_id):
         self.dbg('setup_context_data', path=ctx_id)

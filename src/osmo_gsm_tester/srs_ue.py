@@ -246,6 +246,7 @@ class srsUE(MS):
         else:
             proc = self.rem_host.RemoteNetNSProcess(name, self.netns(), popen_args, env={})
         proc.launch_sync()
+        return proc
 
     def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt'):
         # file is not properly flushed until the process has stopped.

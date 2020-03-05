@@ -19,4 +19,7 @@ print('waiting for UE to attach...')
 wait(ue.is_connected, None)
 print('UE is attached')
 
-ue.run_netns_wait('ping', ('ping', '-c', '10', epc.tun_addr()))
+proc = ue.run_netns_wait('ping', ('ping', '-c', '10', epc.tun_addr()))
+output = proc.get_stdout()
+print(output)
+test.set_report_stdout(output)

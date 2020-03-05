@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# junit xml format: https://llg.cubic.org/docs/junit/
+
 import math
 import sys
 import re
@@ -50,9 +52,24 @@ def trial_to_junit_write(trial, junit_path):
 
 def trial_to_junit(trial):
     testsuites = et.Element('testsuites')
+    num_tests = 0
+    num_failures = 0
+    num_errors = 0
+    time = 0
+    id = 0
     for suite in trial.suites:
         testsuite = suite_to_junit(suite)
+        testsuite.set('id', str(id))
+        id += 1
         testsuites.append(testsuite)
+        num_tests += int(testsuite.get('tests'))
+        num_failures += int(testsuite.get('failures'))
+        num_errors += int(testsuite.get('errors'))
+        time += suite.duration
+    testsuites.set('tests', str(num_tests))
+    testsuites.set('errors', str(num_errors))
+    testsuites.set('failures', str(num_failures))
+    testsuites.set('time', str(math.ceil(time)))
     return testsuites
 
 def suite_to_junit(suite):
@@ -63,9 +80,14 @@ def suite_to_junit(suite):
         testsuite.set('timestamp', datetime.fromtimestamp(round(suite.start_timestamp)).isoformat())
         testsuite.set('time', str(math.ceil(suite.duration)))
     testsuite.set('tests', str(len(suite.tests)))
-    testsuite.set('failures', str(suite.count_test_results()[2]))
+    passed, skipped, failed, errors = suite.count_test_results()
+    testsuite.set('errors', str(errors))
+    testsuite.set('failures', str(failed))
+    testsuite.set('skipped', str(skipped))
+    testsuite.set('disabled', str(skipped))
     for suite_test in suite.tests:
         testcase = test_to_junit(suite_test)
+        testcase.set('classname', suite.name())
         testsuite.append(testcase)
     return testsuite
 
@@ -113,10 +135,12 @@ def suite_to_text(suite):
     if not suite.tests:
         return 'no tests were run.'
 
-    passed, skipped, failed = suite.count_test_results()
+    passed, skipped, failed, errors = suite.count_test_results()
     details = []
     if failed:
         details.append('fail: %d' % failed)
+    if errors:
+        details.append('errors: %d' % errors)
     if passed:
         details.append('pass: %d' % passed)
     if skipped:

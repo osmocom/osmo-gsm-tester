@@ -26,7 +26,7 @@ from . import testenv
 from . import log, util, resource
 
 class Test(log.Origin):
-    UNKNOWN = 'UNKNOWN'
+    UNKNOWN = 'UNKNOWN' # matches junit 'error'
     SKIP = 'skip'
     PASS = 'pass'
     FAIL = 'FAIL'

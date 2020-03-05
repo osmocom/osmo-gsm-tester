@@ -213,9 +213,9 @@ class SuiteRun(log.Origin):
             util.import_path_remove(suite_libdir)
             self.duration = time.time() - self.start_timestamp
 
-            passed, skipped, failed = self.count_test_results()
+            passed, skipped, failed, errors = self.count_test_results()
             # if no tests ran, count it as failure
-            if passed and not failed:
+            if passed and not failed and not errors:
                 self.status = SuiteRun.PASS
             else:
                 self.status = SuiteRun.FAIL
@@ -229,14 +229,17 @@ class SuiteRun(log.Origin):
         passed = 0
         skipped = 0
         failed = 0
+        errors = 0
         for t in self.tests:
-            if t.status == test.Test.PASS:
+            if t.status == test.Test.SKIP:
+                skipped += 1
+            elif t.status == test.Test.PASS:
                 passed += 1
             elif t.status == test.Test.FAIL:
                 failed += 1
-            else:
-                skipped += 1
-        return (passed, skipped, failed)
+            else: # error, could not run
+                errors += 1
+        return (passed, skipped, failed, errors)
 
     def remember_to_stop(self, process, respawn=False):
         '''Ask suite to monitor and manage lifecycle of the Process object. If a

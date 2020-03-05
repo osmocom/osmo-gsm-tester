@@ -59,7 +59,7 @@ class RemoteHost(log.Origin):
         wrapper_script = self.run_dir.new_file(RemoteHost.WRAPPER_SCRIPT)
         with open(wrapper_script, 'w') as f:
             r = """#!/bin/bash
-            LOGFILE=/tmp/yes
+            LOGFILE=/dev/null
             kill_pid(){
                 mypid=$1
                 kill $mypid

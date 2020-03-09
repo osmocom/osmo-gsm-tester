@@ -202,8 +202,8 @@ class srsEPC(log.Origin):
         return subscriber_id
 
     def enb_is_connected(self, enb):
-        # FIXME: srspec's stdout: "S1 Setup Request - eNB Id 0x66c0", but srsenb.conf has "enb_id = 0x19B"
-        return 'S1 Setup Request - eNB Id' in (self.process.get_stdout() or '')
+        # TODO: match against srsENB config: "S1 Setup Request - eNB Name: srsenb01, eNB id: 0x19"
+        return 'S1 Setup Request - eNB' in (self.process.get_stdout() or '')
 
     def running(self):
         return not self.process.terminated()

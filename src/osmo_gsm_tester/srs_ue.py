@@ -83,6 +83,12 @@ class srsUE(MS):
             return
         if self.setup_runs_locally():
             return
+        # When using zmq, srsUE is known to hang for a few seconds before
+        # exiting (3 seconds after alarm() watchdog kicks in). We hence need to
+        # wait to make sure the remote process terminated and the file was
+        # flushed, since cleanup() triggered means only the local ssh client was killed.
+        if self._conf and self._conf.get('rf_dev_type', '') == 'zmq':
+            MainLoop.sleep(self, 3)
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
@@ -154,7 +160,7 @@ class srsUE(MS):
         args = (remote_binary, self.remote_config_file,
                 '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
-                '--log.filename=' + 'stdout', #self.remote_log_file,
+                '--log.filename=' + self.remote_log_file,
                 '--pcap.filename=' + self.remote_pcap_file,
                 '--general.metrics_csv_filename=' + self.remote_metrics_file)
 

@@ -184,13 +184,17 @@ class srsENB(log.Origin):
         assert self._num_prb
         self._txmode = int(values['enb'].get('transmission_mode', None))
         assert self._txmode
+        config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self._num_prb)
-            rf_dev_args = 'fail_on_disconnect=true,tx_port=tcp://' + self.addr() \
-                        + ':2000,rx_port=tcp://' + self.ue.addr() \
-                        + ':2001,id=enb,base_srate=' + str(base_srate)
+            rf_dev_args = 'fail_on_disconnect=true' \
+                        + ',tx_port=tcp://' + self.addr() + ':2000' \
+                        + ',tx_port2=tcp://' + self.addr() + ':2002' \
+                        + ',rx_port=tcp://' + self.ue.addr() + ':2001' \
+                        + ',rx_port2=tcp://' + self.ue.addr() + ':2003' \
+                        + ',id=enb,base_srate=' + str(base_srate)
             config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         self.dbg('srsENB ' + filename + ':\n' + pprint.pformat(values))
@@ -225,6 +229,11 @@ class srsENB(log.Origin):
 
     def num_prb(self):
         return self._num_prb
+
+    def num_ports(self):
+        if self._txmode == 1:
+            return 1
+        return 2
 
     def ue_max_rate(self, downlink=True):
         # The max rate for a single UE per PRB in TM1

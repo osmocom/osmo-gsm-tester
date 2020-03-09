@@ -209,13 +209,16 @@ class srsUE(MS):
         values = dict(ue=config.get_defaults('srsue'))
         config.overlay(values, self.suite_run.config())
         config.overlay(values, dict(ue=self._conf))
+        config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.enb.num_prb())
-            config.overlay(values, dict(ue=dict(rf_dev_args='tx_port=tcp://' + self.addr()
-                                                           +':2001,rx_port=tcp://' + self.enb.addr()
-                                                           +':2000,id=ue,base_srate='+ str(base_srate)
+            config.overlay(values, dict(ue=dict(rf_dev_args = 'tx_port=tcp://' + self.addr() + ':2001' \
+                                                            + ',tx_port2=tcp://' + self.addr() + ':2003' \
+                                                            + ',rx_port=tcp://' + self.enb.addr() + ':2000' \
+                                                            + ',rx_port2=tcp://' + self.enb.addr() + ':2002' \
+                                                            + ',id=ue,base_srate='+ str(base_srate)
                                                 )))
 
         self.dbg('SRSUE CONFIG:\n' + pprint.pformat(values))

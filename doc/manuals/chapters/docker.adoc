@@ -1,0 +1,6 @@
+[[docker]]
+== Docker Setup
+
+Available in osmocom's docker-playground.git subdirectory 'osmo-gsm-tester/'.
+
+//TODO: Explain more where to find, how to build, how to use.

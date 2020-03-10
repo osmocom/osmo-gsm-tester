@@ -21,10 +21,21 @@
       <jobtitle>Senior Developer</jobtitle>
     </affiliation>
   </author>
+  <author>
+    <firstname>Pau</firstname>
+    <surname>Espin Pedrol</surname>
+    <email>pespin@sysmocom.de</email>
+    <authorinitials>PE</authorinitials>
+    <affiliation>
+      <shortaffil>sysmocom</shortaffil>
+      <orgname>sysmocom - s.f.m.c. GmbH</orgname>
+      <jobtitle>Software Developer</jobtitle>
+    </affiliation>
+  </author>
 </authorgroup>
 
 <copyright>
-  <year>2017</year>
+  <year>2017-2020</year>
   <holder>sysmocom - s.f.m.c. GmbH</holder>
 </copyright>
 

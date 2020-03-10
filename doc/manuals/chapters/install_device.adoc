@@ -1,0 +1,82 @@
+== Hardware Choice and Configuration
+
+=== SysmoBTS
+
+To use the SysmoBTS in the osmo-gsm-tester, the following systemd services must
+be disabled:
+
+----
+systemctl mask osmo-nitb osmo-bts-sysmo osmo-pcu sysmobts-mgr
+----
+
+This stops the stock setup keeping the BTS in operation and hence allows the
+osmo-gsm-tester to install and launch its own versions of the SysmoBTS
+software.
+
+==== IP Address
+
+To ensure that the SysmoBTS is always reachable at a fixed known IP address,
+configure the eth0 to use a static IP address:
+
+Adjust '/etc/network/interfaces' and replace the line
+
+----
+iface eth0 inet dhcp
+----
+
+with
+
+----
+iface eth0 inet static
+  address 10.42.42.114
+  netmask 255.255.255.0
+  gateway 10.42.42.1
+----
+
+You may set the name server in '/etc/resolve.conf' (most likely to the IP of
+the gateway), but this is not really needed by the osmo-gsm-tester.
+
+==== Allow Core Files
+
+In case a binary run for the test crashes, a core file of the crash should be
+written. This requires a limits rule. Append a line to /etc/limits like:
+
+----
+ssh root@10.42.42.114
+echo "* C16384" >> /etc/limits
+----
+
+==== Reboot
+
+Reboot the BTS and make sure that the IP address for eth0 is now indeed
+10.42.42.114, and that no osmo* programs are running.
+
+----
+ip a
+ps w | grep osmo
+----
+
+==== SSH Access
+
+Make sure that the jenkins user on the main unit is able to login on the
+sysmoBTS, possibly erasing outdated host keys after a new rootfs was loaded:
+
+On the main unit, for example do:
+
+----
+su - jenkins
+ssh root@10.42.42.114
+----
+
+Fix any problems until you get a login on the sysmoBTS.
+
+
+[[hardware_modems]]
+=== Modems
+
+TODO: describe modem choices and how to run ofono
+
+[[hardware_trx]]
+=== osmo-bts-trx
+
+TODO: describe B200 family

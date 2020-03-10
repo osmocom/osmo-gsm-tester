@@ -1,0 +1,15 @@
+== Troubleshooting
+
+=== Format: YAML, and its Drawbacks
+
+The general configuration format used is YAML. The stock python YAML parser
+does have several drawbacks: too many complex possibilities and alternative
+ways of formatting a configuration, but at the time of writing seems to be the
+only widely used configuration format that offers a simple and human readable
+formatting as well as nested structuring. It is recommended to use only the
+exact YAML subset seen in this manual in case the osmo-gsm-tester should move
+to a less bloated parser in the future.
+
+Careful: if a configuration item consists of digits and starts with a zero, you
+need to quote it, or it may be interpreted as an octal notation integer! Please
+avoid using the octal notation on purpose, it is not provided intentionally.

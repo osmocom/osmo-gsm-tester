@@ -1,0 +1,6 @@
+[[ansible]]
+== Ansible Setup
+
+Available in osmocom's osmo-ci.git subdirectory 'ansible/', see there 'gsm-tester/README.md'.
+
+//TODO: Explain more where to find, how to build, how to use.

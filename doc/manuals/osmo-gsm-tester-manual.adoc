@@ -1,20 +1,33 @@
-Osmo-GSM-Tester Manual
-======================
-Neels Hofmeyr <nhofmeyr@sysmocom.de>
+:app-name: Osmo-GSM-Tester
+
+{app-name} Manual
+=================
+Neels Hofmeyr <nhofmeyr@sysmocom.de>, Pau Espin Pedrol <pespin@sysmocom.de>
 
 == WARNING: Work in Progress
 
-*NOTE: The osmo-gsm-tester is still in pre-alpha stage: some parts are still
-incomplete, and details will still change and move around.*
+*NOTE: {app-name} is still under heavy development stage: some parts are still
+incomplete, and details can still change and move around as new features are
+added and improvements made.*
 
 include::{srcdir}/chapters/intro.adoc[]
 
-include::{srcdir}/chapters/install.adoc[]
+include::{srcdir}/chapters/trial.adoc[]
 
 include::{srcdir}/chapters/config.adoc[]
 
-include::{srcdir}/chapters/trial.adoc[]
+include::{srcdir}/chapters/resource_pool.adoc[]
 
 include::{srcdir}/chapters/test_api.adoc[]
 
+include::{srcdir}/chapters/install.adoc[]
+
+include::{srcdir}/chapters/install_device.adoc[]
+
+include::{srcdir}/chapters/ansible.adoc[]
+
+include::{srcdir}/chapters/docker.adoc[]
+
 include::{srcdir}/chapters/debugging.adoc[]
+
+include::{srcdir}/chapters/troubleshooting.adoc[]

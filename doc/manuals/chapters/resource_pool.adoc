@@ -1,0 +1,107 @@
+== Resource Resolution
+
+- A global configuration <<resources_conf,resources.conf>> defines which hardware is plugged to the
+  {app-name} setup, be it the main unit or any slave unit. This list becomes the
+  'resource pool'.
+- Each suite contains a number of test scripts. The amount of resources a test
+  may use is defined by the test suite's <<suite_conf,suite.conf>>.
+- Which specific modems, BTS models, NITB IP addresses etc. are made available
+  to a test run is typically determined by <<suite_conf,suite.conf>> and a combination of <<scenario_conf,scenario
+  configurations>> -- or picked automatically if not.
+
+.Example of how to select resources and configurations: scenarios may pick specific resources (here BTS and ARFCN), remaining requirements are picked as available (here two modems and a NITB interface)
+[graphviz]
+----
+digraph G {
+	rankdir=TB;
+
+	suite_scenarios [label="Suite+Scenarios selection\nsms:sysmo+band1800+mod-bts0-chanallocdescend"]
+
+	subgraph {
+		rank=same;
+		suite
+		scenarios
+                defaults_conf [label="defaults.conf:\nbsc: net: encryption: a5_0"]
+	}
+
+	subgraph cluster_scenarios {
+		label = "Scenarios";
+		u_sysmoBTS [label="Scenario: sysmo\nresources: bts: type: osmo-bts-sysmo"]
+		u_trx [label="Scenario: trx\nresources: bts: type: osmo-bts-trx"]
+		u_arfcn [label="Scenario: band1800\nresources: arfcn: band: GSM-1800"]
+		u_chanallocdesc [label="Scenario: band1800\nmodifiers: bts: channel_allocator: descending"]
+	}
+
+	subgraph cluster_suite {
+		label = "Suite: sms";
+		requires [label="Requirements (suite.conf):\nmodem: times: 2\nbts\nip_address\narfcn"]
+		subgraph cluster_tests {
+			label = "Test mo_mt_sms.py";
+			obj_nitb [label="object NITB\n(process using 10.42.42.2)"]
+			bts0 [label="object bts[0]"]
+			modem0 [label="object modem[0]"]
+			modem1 [label="object modem[1]"]
+		}
+	}
+
+	subgraph cluster_resources {
+		label = "Available Resources (not already allocated by other Osmo-GSM-Tester instance)";
+		rankdir=TB;
+			nitb_addrA [label="NITB interface addr\n10.42.42.1"]
+			nitb_addrA [label="NITB interface addr\n10.42.42.2"]
+			ModemA
+			ModemB
+			ModemC
+			sysmoBTS [label="osmo-bts-sysmo"]
+			osmo_bts_trx [label="osmo-bts-trx"]
+			arfcnA [label="arfcn: 512\nband: GSM-1800"]
+			arfcnB [label="arfcn: 540\nband: GSM-1900"]
+
+			arfcnA->arfcnB [style=invis]
+			nitb_addrA->nitb_addrB [style=invis]
+			ModemA -> ModemB -> ModemC [style=invis]
+			sysmoBTS -> osmo_bts_trx [style=invis]
+	}
+
+	suite_scenarios -> {suite scenarios}
+	scenarios -> { u_arfcn u_sysmoBTS u_chanallocdesc }
+
+	suite -> requires
+	requires -> ModemA
+	requires -> ModemB
+	requires -> sysmoBTS
+	requires -> arfcnA
+	requires -> nitb_addrA
+
+	{ u_sysmoBTS u_arfcn } -> requires [label="influences\nresource\nselection"]
+	u_chanallocdesc -> bts0 [label="influences\nbts[0]\nbehavior"]
+        defaults_conf -> obj_nitb [label="provides default values"]
+}
+----
+
+=== Resource Reservation for Concurrent Trials
+
+While a test suite runs, the used resources are noted in a global state
+directory in a reserved-resources file. This way, any number of trials may be
+run consecutively without resource conflicts. Any test trial will only use
+resources that are currently not reserved by any other test suite. The
+reservation state is human readable.
+
+The global state directory is protected by a file lock to allow access by
+separate processes.
+
+Also, the binaries from a trial are never installed system-wide, but are run
+with a specific 'LD_LIBRARY_PATH' pointing at the <<trials,trial's inst>>, so that
+several trials can run consecutively without conflicting binary versions. For
+some specific binaries which require extra permissions (such as osmo-bts-octphy
+requiring 'CAP_NET_RAW'), 'patchelf' program is used to modify the binary
+'RPATH' field instead because the OS dynamic linker skips 'LD_LIBRARY_PATH' for
+binaries with special permissions.
+
+Once a test suite run is complete, all its reserved resources are torn down (if
+the test scripts have not done so already), and the reservations are released
+automatically.
+
+If required resources are unavailable, the test trial fails. For consecutive
+test trials, a test run needs to either wait for resources to become available,
+or test suites need to be scheduled to make sense. (*<- TODO*)

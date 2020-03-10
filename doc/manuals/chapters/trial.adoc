@@ -1,13 +1,29 @@
 [[trials]]
 == Trial: Binaries to be Tested
 
-A trial is a set of pre-built binaries to be tested. They are typically built
+A trial is a set of pre-built sysroot archives to be tested. They are typically built
 by jenkins using the build scripts found in osmo-gsm-tester's source in the
 'contrib/' dir, see <<install_add_jenkins_slave>>.
 
-A trial comes in the form of a directory containing a number of '*.tgz' tar
-archives as well as a 'checksums.md5' file to verify the tar archives'
-integrity.
+A trial comes in the form of a directory containing a number of '<inst-name>.*tgz' tar
+archives (containing different sysroots) as well as a 'checksums.md5' file to
+verify the tar archives' integrity.
+
+.Example of a "trial" containing binaries built by a jenkins job
+[graphviz]
+----
+digraph G {
+	subgraph cluster_trial {
+		label = "Trial (binaries)"
+		sysmo [label="osmo-bts-sysmo.build-23.tgz\n(osmo-bts-sysmo\n+ deps\ncompiled for sysmoBTS)"]
+		trx [label="osmo-bts.build-5.tgz\n(osmo-bts-octphy + osmo-bts-trx\n+ deps\ncompiled for main unit)"]
+		nitb [label="osmo-nitb.build-42.tgz\n(osmo-nitb\n+ deps\ncompiled for main unit)"]
+		checksums [label="checksums.md5"]
+
+		checksums -> {sysmo trx nitb}
+	}
+}
+----
 
 When the osmo-gsm-tester is invoked to run on such a trial directory, it will
 create a sub directory named 'inst' and unpack the tar archives into it.
@@ -28,4 +44,22 @@ The script in 'contrib/jenkins-run.sh' takes care of related tasks such as
 * generating md5 sums for the various tar.gz containing software builds to be tested,
 * cleaning up after the build,
 * saving extra logs such as journalctl output from ofonod,
-* generating a final .tar.gz file with all the logs and reports.
+* generating a final .tar.gz file with all the logs and reports to store as jenkins archives.
+
+{app-name} tests create objects to manage the allocated resources during test
+lifetime. These objects, in turn, usually run and manage processes started from
+the trail's sysroot binaries. {app-name} provide APIs for those object classes
+to discover, unpack and run those binaries. An object class simply needs to
+request the name of the sysroot it wants to use (for instance 'osmo-bsc'), and
+{app-name} will take care of preparing everything and providing the sysroot path
+to it. It's a duty of the resource class to copy over the sysroot to the
+destination if the intention is to run the binary remotely on another host.
+
+When seeking a sysroot of a given name '<inst-name>' in the 'inst/' directory,
+{app-name} will look for 'tgz' files starting with the pattern '<inst-name>.'
+(up to the first dot). That means, suffixes are available for {app-name} user to
+identify the content, for instance having an incrementing version counter or a
+commit hash. Hence, these example files are considered valid and will be
+selected by {app-name} for 'osmo-bsc': 'osmo-bsc.tgz', 'osmo-bsc.build-23.tgz',
+'osmo-bsc.5f3e0dd2.tgz', 'osmo-bsc.armv7.build-2.tgz'. If either none or more
+than one valid file is found matching the pattern, an exception will be thrown.

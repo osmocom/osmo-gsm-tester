@@ -1,166 +1,43 @@
 == Configuration
 
-[[config_paths]]
-=== Config Paths
+=== Schemas
 
-The osmo-gsm-tester looks for configuration files in various standard
-directories in this order:
+All configuration attributes in {app-name} are stored and provided as YAML
+files, which are handled internally mostly as sets of dictionaries, lists and
+scalars. Each of these configurations have a known format, which is called
+'schema'. Each provided configuration is validated against its 'schema' at parse
+time. Hence, 'schemas' can be seen as a namespace containing a structured tree
+of configuration attributes. Each attribute has a schema type assigned which
+constrains the type of value it can hold.
 
-- '$HOME/.config/osmo-gsm-tester/'
-- '/usr/local/etc/osmo-gsm-tester/'
-- '/etc/osmo-gsm-tester/'
+There are several well-known schemas used across {app-name}, and they are
+described in following sub-sections.
 
-The config location can also be set by an environment variable
-'$OSMO_GSM_TESTER_CONF', which then overrides the above locations.
+[[schema_resources]]
+==== Schema 'resources'
 
-The osmo-gsm-tester expects to find the following configuration files in a
-configuration directory:
+This schema defines all the attributes which can be assigned to
+a _resource_, and it is used to validate the <<resources_conf,resources.conf>>
+file. Hence, the <<resources_conf,resources.conf>> contains a list of elements
+for each resource type.
 
-- 'paths.conf'
-- 'resources.conf'
-- 'default-suites.conf' (optional)
-- 'defaults.conf' (optional)
+It is important to understand that the content in this schema refers to a list of
+resources for each resource class. Since a list is ordered by definition, it
+clearly identifies specific resources by order. This is important when applying
+filters or modifiers, since they are applied per-resource in the list. One can
+for instance apply attribute A to first resource of class C, while not applying
+it or applying another attribute B to second resources of the same class. As a
+result, complex forms can be used to filter and modify a list of resources
+required by a testsuite.
 
-These are described in detail in the following sections.
+On the other hand, it's also important to note that lists for simple or scalar
+types are currently being treated as unordered sets, which mean combination of
+filters or modifiers apply differently. In the future, it may be possible to
+have both behaviors for scalar/simple types by using also the YAML 'set' type in
+{app-handle}.
 
-=== Format: YAML, and its Drawbacks
-
-The general configuration format used is YAML. The stock python YAML parser
-does have several drawbacks: too many complex possibilities and alternative
-ways of formatting a configuration, but at the time of writing seems to be the
-only widely used configuration format that offers a simple and human readable
-formatting as well as nested structuring. It is recommended to use only the
-exact YAML subset seen in this manual in case the osmo-gsm-tester should move
-to a less bloated parser in the future.
-
-Careful: if a configuration item consists of digits and starts with a zero, you
-need to quote it, or it may be interpreted as an octal notation integer! Please
-avoid using the octal notation on purpose, it is not provided intentionally.
-
-[[paths_conf]]
-=== 'paths.conf'
-
-The 'paths.conf' file defines where to store the global state (of reserved
-resources) and where to find suite and scenario definitions.
-
-Any relative paths found in a 'paths.conf' file are interpreted as relative to
-the directory of that 'paths.conf' file.
-
-Example:
-
-----
-state_dir: '/var/tmp/osmo-gsm-tester/state'
-suites_dir: '/usr/local/src/osmo-gsm-tester/suites'
-scenarios_dir: './scenarios'
-----
-
-[[state_dir]]
-==== 'state_dir'
-
-It contains global or system-wide state for osmo-gsm-tester. In a typical state
-dir you can find the following files:
-
-'last_used_msisdn.state'::
-	Contains last used msisdn number, which is automatically increased every
-	time osmo-gsm-tester needs to assign a new subscriber in a test.
-'lock'::
-	Lock file used to implement a mutual exclusion zone around the
-	'reserved_resources.state' file.
-'reserved_resources.state'::
-	File containing a set of reserved resources by any number of
-	osmo-gsm-tester instances. Each osmo-gsm-tester instance is responsible
-	to clear its resources from the list once it is done using them and are
-	no longer reserved.
-
-If you would like to set up several separate configurations (not typical), note
-that the 'state_dir' is used to reserve resources, which only works when all
-configurations that share resources also use the same 'state_dir'.
-
-This way, several concurrent users of osmo-gsm-tester (ie. several
-osmo-gsm-tester processes running in parallel) can run without interfering with
-each other (e.g. using same ARFCN, same IP or same ofono modem path).
-
-[[suites_dir]]
-==== 'suites_dir'
-
-Suites contain a set of tests which are designed to be run together to test a
-set of features given a specific set of resources. As a result, resources are
-allocated per suite and not per test.
-
-Tests for a given suite are located in the form of '.py' python scripts in the
-same directory where the 'suite.conf' lays.
-
-[[scenarios_dir]]
-==== 'scenarios_dir'
-
-This dir contains scenario configuration files.
-
-Scenarios define constraints to serve the resource requests of a 'suite.conf',
-to select specific resources from the general resource pool specified in 'resources.conf'.
-
-All 'times' attributes are expanded before matching. For example, if a 'suite.conf'
-requests two BTS, we may enforce that both BTS should be of type 'osmo-bts-sysmo' in
-these ways:
-
-----
-resources:
-  bts:
-  - type: osmo-bts-sysmo
-  - type: osmo-bts-sysmo
-----
-
-or alternatively,
-
-----
-resources:
-  bts:
-  - times: 2
-    type: osmo-bts-sysmo
-----
-
-If only one resource is specified in the scenario, then the resource allocator
-assumes the restriction is to be applied to the first resource and that remaining
-resources have no restrictions to be taken into consideration.
-
-To apply restrictions only on the second resource, the first element can be left
-emtpy, like:
-
-----
-resources:
-  bts:
-  - {}
-  - type: osmo-bts-sysmo
-----
-
-On the 'osmo_gsm_tester.py' command line and the 'default_suites.conf', any number of
-such scenario configurations can be combined in the form:
-
-----
-<suite_name>:<scenario>[+<scenario>[+...]]
-----
-
-e.g.
-
-----
-my_suite:sysmo+tch_f+amr
-----
-
-[[resources_conf]]
-=== 'resources.conf'
-
-The 'resources.conf' file defines which hardware is connected to the main unit,
-as well as which limited configuration items (like IP addresses or ARFCNs)
-should be used.
-
-These resources are allocated dynamically and are not configured explicitly:
-
-- MSISDN: phone numbers are dealt out to test scripts in sequence on request.
-
-A 'resources.conf' is structured as a list of items for each resource type,
-where each item has one or more settings -- for an example, see
-<<resources_conf_example>>.
-
-These kinds of resource are known:
+//TODO: update this list and use a table for each resource type
+These kinds of resources and their attributes are known:
 
 'ip_address'::
 	List of IP addresses to run osmo-nitb instances on. The main unit
@@ -251,6 +128,278 @@ These kinds of resource are known:
 	- 'voice'
 	- 'ussd'
 
+[[schema_want]]
+==== Schema 'want'
+
+This schema is basically the same as the <<schema_resources,resources>> one, but
+with an extra 'times' attribute for each resource item. All 'times' attributes
+are expanded before matching. For example, if a 'suite.conf' requests two BTS,
+one may enforce that both BTS should be of type 'osmo-bts-sysmo' in these ways:
+
+----
+resources:
+  bts:
+  - type: osmo-bts-sysmo
+  - type: osmo-bts-sysmo
+----
+
+or alternatively,
+
+----
+resources:
+  bts:
+  - times: 2
+    type: osmo-bts-sysmo
+----
+
+[[schema_conf]]
+==== Schema 'conf'
+
+This schema is used by <<suite_conf,suite.conf>> and <<scenario_conf,scenario.conf>> files. It contains 3 main element sections:::
+[[schema_conf_sec_resources]]
+- Section 'resources': Contains a set of elements validated with <<schema_resources,resources>>
+  schema. In  <<suite_conf,suite.conf>> it is used to construct the list of
+  requested resources. In  <<scenario_conf,scenario.conf>>, it is used to inject
+  attributes to the initial <<suites_conf,suites.conf>> _resources_ section and
+  hence further restrain it.
+[[schema_conf_sec_modifiers]]
+- Section 'modifiers': Both in <<suite_conf,suite.conf>> and
+  <<scenario_conf,scenario.conf>>, values presented in here are injected into
+  the content of the <<schema_conf_sec_resources,resources section>> after
+  _resource_ allocation, hereby overwriting attributes passed to the object
+  class instance managing the specific _resource_ (matches by resource type and
+  list position). Since it is combined with the content of
+  <<schema_conf_sec_resources,resources section>>, it is clear that the
+  <<schema_resources,resources schema>> is used to validate this content.
+[[schema_conf_sec_config]]
+- Section 'config': Contains configuration attributes for {app-name} classes which are
+  not _resources_, and hence cannot be configured with <<schema_modifiers,modifiers>>.
+  They can overwrite values provided in the <<defaults_conf,defaults.conf>> file.
+
+//TODO: defaults.timeout should be change in code to be config.test_timeout or similar
+//TODO: 'config' should be split into its own schema and validate defaults.conf
+
+[[config_paths]]
+=== Config Paths
+
+The osmo-gsm-tester looks for configuration files in various standard
+directories in this order:
+
+- '$HOME/.config/osmo-gsm-tester/'
+- '/usr/local/etc/osmo-gsm-tester/'
+- '/etc/osmo-gsm-tester/'
+
+The config location can also be set by an environment variable
+'$OSMO_GSM_TESTER_CONF', which then overrides the above locations.
+
+The osmo-gsm-tester expects to find the following configuration files in a
+configuration directory:
+
+- <<paths_conf,paths.conf>>
+- <<resource_conf,resources.conf>>
+- <<default_suites_conf,default-suites.conf>> (optional)
+- <<defaults_conf,defaults.conf>> (optional)
+
+These are described in detail in the following sections.
+
+[[paths_conf]]
+==== 'paths.conf'
+
+The 'paths.conf' file defines where to store the global state (of reserved
+resources) and where to find suite and scenario definitions.
+
+Any relative paths found in a 'paths.conf' file are interpreted as relative to
+the directory of that 'paths.conf' file.
+
+There's not yet any well-known schema to validate this file contents since it
+has only 3 attributes.
+
+.Sample paths.conf file:
+----
+state_dir: '/var/tmp/osmo-gsm-tester/state'
+suites_dir: '/usr/local/src/osmo-gsm-tester/suites'
+scenarios_dir: './scenarios'
+----
+
+[[state_dir]]
+===== 'state_dir'
+
+It contains global or system-wide state for osmo-gsm-tester. In a typical state
+dir you can find the following files:
+
+'last_used_*.state'::
+	Contains stateful content spanning accross {app-name} instances and
+	runs. For instance, 'last used msisdn number.state' is automatically
+	(and atomically) increased every time osmo-gsm-tester needs to assign a
+	new subscriber in a test, ensuring tests get unique msisdn numbers.
+'reserved_resources.state'::
+	File containing a set of reserved resources by any number of
+	osmo-gsm-tester instances (aka pool of allocated resources). Each
+	osmo-gsm-tester instance is responsible to clear its resources from the
+	list once it is done using them and are no longer reserved.
+'lock'::
+	Lock file used to implement a mutual exclusion zone around any state
+	files in the 'state_dir', to prevent race conditions between different
+	{app-name} instances running in parallel.
+
+This way, several concurrent users of osmo-gsm-tester (ie. several
+osmo-gsm-tester processes running in parallel) can run without interfering with
+each other (e.g. using same ARFCN, same IP or same ofono modem path).
+
+If you would like to set up several separate configurations (not typical), note
+that the 'state_dir' is used to reserve resources, which only works when all
+configurations that share resources also use the same 'state_dir'. It's also
+important to notice that since resources are stored in YAML dictionary form, if
+same physical device is described differently in several
+<<resource_conf,resources.conf>> files (used by different {app-name} instances),
+resource allocation may not work as expected.
+
+[[suites_dir]]
+===== 'suites_dir'
+
+Suites contain a set of tests which are designed to be run together to test a
+set of features given a specific set of resources. As a result, resources are
+allocated per suite and not per test.
+
+Tests for a given suite are located in the form of '.py' python scripts in the
+same directory where the <<suite_conf,suite.conf>> lays.
+
+Tests in the same testsuite willing to use some shared code can do so by putting
+it eg. in '$suites_dir/$suitename/lib/testlib.py':
+----
+#!/usr/bin/env python3
+from osmo_gsm_tester.testenv import *
+
+def my_shared_code(foo):
+    return foo.bar()
+----
+
+and then in the test itself use it this way:
+----
+#!/usr/bin/env python3
+from osmo_gsm_tester.testenv import *
+
+import testlib
+suite.test_import_modules_register_for_cleanup(testlib)
+from testlib import my_shared_code
+
+bar = my_shared_code(foo)
+----
+
+.Sample 'suites_dir' directory tree:
+----
+suites_dir/
+|-- suiteA
+|   |-- suite.conf
+|   '-- testA.py
+|-- suiteB
+|   |-- testB.py
+|   |-- testC.py
+|   |-- lib
+|   |   '-- testlib.py
+|   '-- suite.conf
+----
+
+[[suite_conf]]
+===== 'suite.conf'
+
+This file content is parsed using the <<schema_want,Want>> schema.
+
+It provides
+{app-name} with the base restrictions (later to be further filtered by
+<<scenario_conf,scenario>> files) to apply when allocating resources.
+
+It can also override attributes for the allocated resources through the
+<<schema_want,modifiers>> section (to be further modified by
+<<scenario_conf,scenario>> files later on). Similary it can do the same for
+general configuration options (no per-resource) through the
+<<schema_want,config>> section.
+
+.Sample 'suite.conf' file:
+----
+resources:
+  ip_address:
+  - times: 9 # msc, bsc, hlr, stp, mgw*2, sgsn, ggsn, iperf3srv
+  bts:
+  - times: 1
+  modem:
+  - times: 2
+    features:
+    - gprs
+    - voice
+  - times: 2
+    features:
+    - gprs
+
+config:
+  bsc:
+    net:
+      codec_list:
+      - fr1
+
+defaults:
+  timeout: 50s
+----
+
+[[scenarios_dir]]
+===== 'scenarios_dir'
+
+This dir contains scenario configuration files.
+
+.Sample 'scenarios_dir' directory tree:
+----
+scenarios_dir/
+|-- scenarioA.conf
+'-- scenarioB.conf
+----
+
+[[scenario_conf]]
+===== 'scenario conf file'
+Scenarios define further constraints to serve the resource requests of a
+<<suite_conf,suite.conf>>, ie. to select specific resources from the general
+resource pool specified in <<resource_conf,resources.conf>>.
+
+If only one resource is specified in the scenario, then the resource allocator
+assumes the restriction is to be applied to the first resource and that remaining
+resources have no restrictions to be taken into consideration.
+
+To apply restrictions only on the second resource, the first element can be left
+emtpy, like:
+
+----
+resources:
+  bts:
+  - {}
+  - type: osmo-bts-sysmo
+----
+
+On the 'osmo_gsm_tester.py' command line and the
+<<default_suites_conf,default_suites.conf>>, any number of such scenario
+configurations can be combined in the form:
+
+----
+<suite_name>:<scenario>[+<scenario>[+...]]
+----
+
+e.g.
+
+----
+my_suite:sysmo+tch_f+amr
+----
+
+[[resources_conf]]
+==== 'resources.conf'
+
+//TODO: update this section
+The 'resources.conf' file defines which hardware is connected to the main unit,
+as well as which limited configuration items (like IP addresses or ARFCNs)
+should be used.
+
+A 'resources.conf' is validated by the <<schema_resources,resources schema>>.
+That means it is structured as a list of items for each resource type, where
+each item has one or more attributes -- for an example, see
+<<resources_conf_example>>.
+
 Side note: at first sight it might make sense to the reader to rather structure
 e.g. the 'ip_address' or 'arfcn' configuration as +
 '"arfcn: GSM-1800: [512, 514, ...]"', +
@@ -262,25 +411,22 @@ that is repeated numerous times. No special notation for these cases is
 available (yet).
 
 [[default_suites]]
-=== 'default-suites.conf' (optional)
+==== 'default-suites.conf' (optional)
 
-The 'default-suites.conf' file contains a list of 'suite:scenario+scenario+...'
+The 'default-suites.conf' file contains a YAML list of 'suite:scenario+scenario+...'
 combination strings as defined by the 'osmo-gsm-tester.py -s' commandline
 option. If invoking the 'osmo-gsm-tester.py' without any suite definitions, the
 '-s' arguments are taken from this file instead. Each of these suite + scenario
 combinations is run in sequence.
 
-A suite name must match the name of a directory in the 'suites_dir' as defined
-by 'paths.conf'.
+A suite name must match the name of a directory in the
+<<suites_dir,suites_dir/>> as defined by <<paths_conf,paths.conf>>.
 
 A scenario name must match the name of a configuration file in the
-'scenarios_dir' as defined by 'paths.conf' (optionally without the '.conf'
-suffix).
+<<scenarios_dir,scnearios_dir/>> as defined by <<paths_conf,paths.conf>>
+(optionally without the '.conf' suffix).
 
-For 'paths.conf', see <<paths_conf>>.
-
-Example of a 'default-suites.conf' file:
-
+.Sample 'default-suites.conf' file:
 ----
 - sms:sysmo
 - voice:sysmo+tch_f
@@ -292,24 +438,28 @@ Example of a 'default-suites.conf' file:
 - voice:trx+dyn_ts
 ----
 
-=== 'defaults.conf' (optional)
+==== 'defaults.conf' (optional)
+
+In {app-name} object instances requested by the test and created by the suite
+relate to a specific allocated resource. That's not always the case, and even if
+it the case the information stored in <<resources_conf,resources.conf>> for that
+resource may not contain tons of attributes which the object class needs to
+manage the resource.
+
+For this exact reason, the 'defaults.conf' file exist. It contains a set of
+default attributes and values (in YAML format) that object classes can use to
+fill in the missing gaps, or to provide values which can easily be changed or
+overwritten by <<suite_conf,suite.conf>> or <<scenario_conf,scenario.conf>>
+files through modifiers.
 
 Each binary run by osmo-gsm-tester, e.g. 'osmo-nitb' or 'osmo-bts-sysmo',
 typically has a configuration file template that is populated with values for a
-trial run.
+trial run. Hence, a <<suite_conf,suite.conf>>, <<scenario_conf,scenario.conf>>
+or a <<resources_conf,resources.conf>> providing a similar setting always has
+precedence over the values given in a 'defaults.conf'
 
-Some of these values are provided by the 'resources.conf' from the allocated
-resource(s), but not all values can be populated this way: some osmo-nitb
-configuration values like the network name, encryption algorithm or timeslot
-channel combinations are in fact not resources (only the nitb's interface
-address is). These additional settings may be provided by the scenario
-configurations, but in case the provided scenarios leave some values unset,
-they are taken from this 'defaults.conf'. (A 'scenario.conf' or a
-'resources.conf' providing a similar setting always has precedence over the
-values given in a 'defaults.conf').
 
-Example of a 'defaults.conf':
-
+.Sample 'defaults.conf' file:
 ----
 nitb:
   net:
@@ -359,3 +509,53 @@ bsc_bts:
     - phys_chan_config: TCH/F_TCH/H_PDCH
     - phys_chan_config: TCH/F_TCH/H_PDCH
 ----
+
+=== Example Setup
+
+{app-name} comes with an example official setup which is the one used to run
+Osmocom's setup. There are actually two different available setups: a
+production one and an RnD one, used to develop {app-name} itself. These two set
+ups share mostly all configuration, main difference being the
+<<resources_conf,resources.conf>> file being used.
+
+All {app-name} related configuration for that environment is publicly available in 'osmo-gsm-tester.git' itself:::
+- <<paths_conf,paths.conf>>: Available Available under 'example/', with its paths already configured to take
+  required bits from inside the git repository.
+- <<suite_dir,suites_dir>>: Available under 'suites/'
+- <<scenarios_dir,scenarios_dir>>: Available under 'example/scenarios/'
+- <<resource_conf,resources.conf>>: Available under 'example/' as
+  'resources.conf.prod' for Production setup and as 'resources.conf.rnd' for the
+  RnD setup. One must use a symbolic link to have it available as 'resources.conf'.
+
+//TODO: resources.conf file path should be modifiable through paths.conf!
+
+==== Typical Invocations
+
+Each invocation of osmo-gsm-tester deploys a set of pre-compiled binaries for
+the Osmocom core network as well as for the Osmocom based BTS models. To create
+such a set of binaries, see <<trials>>.
+
+Examples for launching test trials:
+
+- Run the default suites (see <<default_suites>>) on a given set of binaries:
+
+----
+osmo-gsm-tester.py path/to/my-trial
+----
+
+- Run an explicit choice of 'suite:scenario' combinations:
+
+----
+osmo-gsm-tester.py path/to/my-trial -s sms:sysmo -s sms:trx -s sms:nanobts
+----
+
+- Run one 'suite:scenario1+scenario2' combination, setting log level to 'debug'
+  and enabling logging of full python tracebacks, and also only run just the
+  'mo_mt_sms.py' test from the suite, e.g. to investigate a test failure:
+
+----
+osmo-gsm-tester.py path/to/my-trial -s sms:sysmo+foobar -l dbg -T -t mo_mt
+----
+
+A test script may also be run step-by-step in a python debugger, see
+<<debugging>>.

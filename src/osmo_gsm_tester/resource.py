@@ -37,7 +37,6 @@ HASH_KEY = '_hash'
 RESERVED_KEY = '_reserved_by'
 USED_KEY = '_used'
 
-RESOURCES_CONF = 'resources.conf'
 RESERVED_RESOURCES_FILE = 'reserved_resources.state'
 
 R_IP_ADDRESS = 'ip_address'
@@ -151,7 +150,7 @@ class ResourcesPool(log.Origin):
     _registered_exit_handler = False
 
     def __init__(self):
-        self.config_path = config.get_config_file(RESOURCES_CONF)
+        self.config_path = config.get_config_file(config.RESOURCES_CONF)
         self.state_dir = config.get_state_dir()
         super().__init__(log.C_CNF, conf=self.config_path, state=self.state_dir.path)
         self.read_conf()

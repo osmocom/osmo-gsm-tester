@@ -72,6 +72,8 @@ DEFAULT_CONFIG_LOCATIONS = [
 PATHS_CONF = 'paths.conf'
 DEFAULT_SUITES_CONF = 'default-suites.conf'
 DEFAULTS_CONF = 'defaults.conf'
+RESOURCES_CONF = 'resources.conf'
+
 PATH_STATE_DIR = 'state_dir'
 PATH_SUITES_DIR = 'suites_dir'
 PATH_SCENARIOS_DIR = 'scenarios_dir'

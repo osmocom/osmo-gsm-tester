@@ -71,6 +71,7 @@ DEFAULT_CONFIG_LOCATIONS = [
 
 PATHS_CONF = 'paths.conf'
 DEFAULT_SUITES_CONF = 'default-suites.conf'
+DEFAULTS_CONF = 'defaults.conf'
 PATH_STATE_DIR = 'state_dir'
 PATH_SUITES_DIR = 'suites_dir'
 PATH_SCENARIOS_DIR = 'scenarios_dir'
@@ -189,7 +190,7 @@ def _standardize(config):
     return config
 
 def get_defaults(for_kind):
-    defaults = read_config_file('defaults.conf', if_missing_return={})
+    defaults = read_config_file(DEFAULTS_CONF, if_missing_return={})
     return defaults.get(for_kind, {})
 
 class Scenario(log.Origin, dict):

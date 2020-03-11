@@ -387,6 +387,49 @@ e.g.
 my_suite:sysmo+tch_f+amr
 ----
 
+*_Parametrized scenario conf files_*:
+
+Furthermore, scenario '.conf' files can be parametrized. The concept is similar to that
+of systemd's Template Unit Files. That is, an scenario file can be written so
+that some values inside it can be passed at the time of referencing the
+scenario name. The idea behind its existence is to re-use the same
+scenario file for a set of attributes which are changed and that can have a lot
+of different values. For instance, if a scenario is aimed at setting or
+filtering some specific attribute holding an integer value, without parametrized
+scenarios then a separate file would be needed for each value the user wanted to use.
+
+A parametrized scenario file, similar to systemd Template Unit Files,
+contain the character '@' in their file name, ie follow the syntax below:
+----
+scenario-name@param1,param2,param3,[...],paramN.conf
+----
+
+Then, its content can be written this way:
+----
+$ cat $scenario_dir/my-parametrized-scenario@.conf
+resources:
+  enb:
+  - type: srsenb
+    rf_dev_type: ${param1}
+modifiers:
+  enb:
+    - num_prb: ${param2}
+----
+
+Finally, it can be referenced during {app-name} execution this wya, for instance when running a suite named '4g':
+----
+- 4g:my-parametrized-scenario@UHD,6
+----
+This way {app-name} when parsing the scenarios and combining them with the suite will::
+. Find out it is parametrized (name contains '@').
+. Split the name
+  ('my-parametrized-scenario') from the parameter list (param1='UHD', param2='6')
+. Attempt to match a '.conf' file fully matching name and parameters (hence
+  specific content can be set for specific values while still using parameters
+  for general values), and otherwise match only by name.
+. Generate the final
+  scenario content from the template available in the matched '.conf' file.
+
 [[resources_conf]]
 ==== 'resources.conf'
 

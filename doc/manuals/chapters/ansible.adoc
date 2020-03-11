@@ -1,6 +1,56 @@
 [[ansible]]
 == Ansible Setup
 
-Available in osmocom's osmo-ci.git subdirectory 'ansible/', see there 'gsm-tester/README.md'.
+Since the set of steps to set up a full {app-name} environment can be quite long
+and tedious, nowadays the Osmocom RnD and Production {app-name} setups are
+installed and maintained using Ansible scripts. The set of ansible scripts is
+available  in Osmocom's git repository
+link:https://git.osmocom.org/osmo-ci/[osmo-ci.git] under 'ansible' subdirectory,
+with the rest of ansible scripts to set jenkins slaves, etc.
 
-//TODO: Explain more where to find, how to build, how to use.
+Since these set of scripts is mainly aimed at Osmocom's own setup, and debian is
+used there, so far only debian hosts are supported officially, though patches to
+support other distributions are welcome.
+
+In there, the 'setup-gsm-tester.yml' file is responsible of doing all required
+steps to set up a host to become either a <<install_main_unit,Main Unit>> or a a
+<<install_slave_unit,Slave Unit>>. The ansible file can be run as follows:
+----
+$ ansible-playbook -i hosts setup-gsm-tester.yml
+----
+
+You will need root-alike access in the remote host in order to let ansible
+install everything {app-name}, however, no root-specific user is required as
+long as your remote user has sudo access on that host. If that's your case, add
+the following parameters to 'ansible-playbook':
+----
+$ ansible-playbook -i hosts -b -K -u your_remote_user setup-gsm-tester.yml
+----
+
+The 'setup-gsm-tester.yml' file is mostly an aggregator of tasks. Most
+{app-name} related tasks can be found under subdirectory 'roles/gsm-tester-*'.
+
+Since different (for instance Production vs RnD) can have different
+characteristics, some per-host variables can be found under directory
+host_vars/, specifying for instance the number of expected modems attached to
+the Main Unit, the DHCP server static leasing for devices, etc.
+
+The different tasks usually have tags to differentiate which kind of {app-name}
+host they are required by. They are also set to differentiate sets of tasks
+required if a specific feature is being used in the host (for instance, willing
+to manage modems with ofono). This allows playing with the '-t' and
+'--skip-tags' when running 'ansible-playbooks' in order to run specific set of
+tasks on each host.
+
+For instance, to run tasks required to set up a Slave Unit, one can run:
+----
+$ ansible-playbook -i hosts setup-gsm-tester.yml -t osmo-gsm-tester-proc
+----
+
+To run all modem-related tasks:
+----
+$ ansible-playbook -i hosts setup-gsm-tester.yml -t modem
+----
+
+Don't forget to read all README.md files available in different subdirectories
+to find out more detailed information on how to run the scripts.

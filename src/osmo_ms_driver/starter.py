@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from osmo_gsm_tester import log, process, template
+from osmo_gsm_tester import log, util, process, template
 
 from .test_support import ResultStore
 
@@ -38,6 +38,7 @@ class Launcher(log.Origin):
         self._env = env
         self._name_number = name_number
         self._tmp_dir = tmp_dir.new_dir(self.name())
+        self.run_dir = self._tmp_dir
 
     def name_number(self):
         return self._name_number
@@ -52,14 +53,16 @@ class OsmoVirtPhy(Launcher):
         return self._phy_filename
 
     def start(self, loop, suite_run=None):
+        if suite_run is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
+            self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name()))
         if len(self._phy_filename.encode()) > 107:
             raise log.Error('Path for unix socket is longer than max allowed len for unix socket path (107):', self._phy_filename)
 
         self.log("Starting virtphy")
         args = [self._binary, "--l1ctl-sock=" + self._phy_filename]
-        self._vphy_proc = process.Process(self.name(), self._tmp_dir,
+        self._vphy_proc = process.Process(self.name(), self.run_dir,
                                           args, env=self._env)
-        if suite_run:
+        if suite_run is not None:
             suite_run.remember_to_stop(self._vphy_proc)
         self._vphy_proc.launch()
 
@@ -109,7 +112,7 @@ class OsmoMobile(Launcher):
         self._cfg['test'][key] = value
 
     def write_lua_cfg(self):
-        lua_cfg_file = os.path.join(self._tmp_dir, "lua_" + self._name_number + ".lua")
+        lua_cfg_file = self.run_dir.new_file("lua_" + self._name_number + ".lua")
         lua_script = template.render(self._lua_template, self._cfg)
         with open(lua_cfg_file, 'w') as w:
             w.write(lua_script)
@@ -125,22 +128,24 @@ class OsmoMobile(Launcher):
                 'ms_number': self._name_number,
             }
         }
-        mob_cfg_file = os.path.join(self._tmp_dir, "mob_" + self._name_number + ".cfg")
+        mob_cfg_file = self.run_dir.new_file("mob_" + self._name_number + ".cfg")
         mob_vty = template.render(self._cfg_template, cfg)
         with open(mob_cfg_file, 'w') as w:
             w.write(mob_vty)
         return mob_cfg_file
 
     def start(self, loop, suite_run=None):
+        if suite_run is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
+            self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name()))
         lua_filename = self.write_lua_cfg()
         mob_filename = self.write_mob_cfg(lua_filename, self._phy_filename)
 
         self.log("Starting mobile")
         # Let the kernel pick an unused port for the VTY.
         args = [self._binary, "-c", mob_filename]
-        self._omob_proc = process.Process(self.name(), self._tmp_dir,
+        self._omob_proc = process.Process(self.name(), self.run_dir,
                                           args, env=self._env)
-        if suite_run:
+        if suite_run is not None:
             suite_run.remember_to_stop(self._omob_proc)
         self._omob_proc.launch()
 

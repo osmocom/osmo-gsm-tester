@@ -447,7 +447,7 @@ on the Main Unit will need to be able to log in through SSH as the slave unit
 is required here.
 
 [[install_capture_packets]]
-===== Capture Packets
+==== Capture Packets
 
 In order to allow collecting pcap traces of the network communication for later
 reference, allow the osmo-gsm-tester group to capture packets using the 'tcpdump'
@@ -488,7 +488,7 @@ packets may result in a feedback loop: SSH activity to send tcpdump's output to
 your terminal is in turn is picked up in the tcpdump trace, and so forth. When
 testing 'tcpdump' access, make sure to have proper filter expressions in place.
 
-===== Allow Core Files
+==== Allow Core Files
 
 In case a binary run for the test crashes, a core file of the crash should be
 written. This requires a limit rule. Create a file with the required rule:
@@ -512,7 +512,7 @@ TIP: Files required to be installed under '/etc/security/limits.d/' can be found
 under 'osmo-gsm-tester.git/utils/limits.d/', so one can simply cp them from
 there.
 
-===== Allow Realtime Priority
+==== Allow Realtime Priority
 
 Certain binaries should be run with real-time priority, like 'osmo-bts-trx'.
 Add this permission on the main unit:
@@ -567,7 +567,7 @@ under 'osmo-gsm-tester.git/utils/bin/', so one can simply cp them from
 there.
 
 [[user_config_uhd]]
-===== UHD
+==== UHD
 
 Grant permission to use the UHD driver to run USRP devices for osmo-bts-trx, by
 adding the jenkins user to the 'usrp' group:

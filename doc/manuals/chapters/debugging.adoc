@@ -1,4 +1,67 @@
 [[debugging]]
 == Debugging
 
-*TODO*: describe how to invoke 'ipdb3' and step into a suite's test script
+{app-name} is a complex program which at the same time orchestrates sets of
+other complex programs to form a network of nodes. As such, it can be sometimes
+challenging to find out what is going on during a trial run. This section aims
+at providing some tips on how to debug possible issues.
+
+=== Logging level
+
+{app-name} runs by default under 'info' log level. As a first debugging step, it
+is always a good idea to increase log verbosity. By switching to debug level
+(command line argument '-l dbg'), a lot more information and events are displayed which
+can give a much better idea to understand possible misconfigurations or wrong
+steps.
+
+In any case, {app-name} usually provides several log files of interest. In
+general, both a 'log' and a 'log_brief' are stored directly under the trial's
+run directory, the first containing output up to debug level included, while the
+second contains output up to info level included. Furthermore, {app-name} writes
+a debug level log file per test case under each test's run directory.
+
+It is also in general useful to enable the '-T' command line argument. By using
+it, it will instruct {app-name} to write the full backtrace to the log output
+when something wrong happens, such an unexpected exception.
+
+[[pdb]]
+=== python debugger
+
+{app-name} can be further debugged using python's debugger 'pdb'. Easiest way to
+use it is to modify the python code were you want to break and add this code:
+----
+import pdb; pdb.set_trace()
+----
+
+When {app-name} runs over that code, it will pause and provide a debugging
+interactive shell, where one can inspect variables, execute code, etc.
+
+TIP: Remember {app-name} is managed by its internal main loop, meaning if you
+jump into a debugger console you will still need to give back control to the
+main loop for events to be processed and checks done. That can be done for
+instance by calling the 'MainLoop.sleep(log_obj, secs)' internal API in general
+or `sleep(secs)' under test context.
+
+=== debug suite
+
+Sometimes, however, one may be interested in debugging the behavior of the
+software under test by {app-name} rather than {app-name} itself. For instance,
+one may simply want to set up a full running network of nodes and keep it up
+until some manual tests are done, or one may want {app-name} to do so at a given
+point of time.
+
+To fulfill this kind of scenarios, {app-name} provides some code available for
+tests to gain access to a high-level interactive console which is fully
+integrated with {app-name}'s own main loop. So the approach here is usually to
+write a regular test (with its corresponding <<suite_conf,suite.conf>>) to set
+up and run all required processes and then allow it to jump into the interactive
+console instance. Then the test pulls received commands from it and it is
+responsible for parsing and implementing them. One command can for instance ask
+a modem to send an sms to another. Another command can for instance jump into a
+<<pdb,debugger console>>.
+
+The interactive console is available to tests through the 'prompt' method, and
+its implementation can be found under 'method input_polling' in 'util.py'.
+
+An interactive console example as explained in this section can be found under
+the 'debug/interactive.py' test in osmo-gsm-tester.git.

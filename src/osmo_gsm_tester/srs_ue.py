@@ -73,6 +73,7 @@ class srsUE(MS):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.remote_metrics_file = None
+        self.enable_pcap = False
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -94,10 +95,11 @@ class srsUE(MS):
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
             self.log(repr(e))
-        try:
-            self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
-        except Exception as e:
-            self.log(repr(e))
+        if self.enable_pcap:
+            try:
+                self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
+            except Exception as e:
+                self.log(repr(e))
 
     def setup_runs_locally(self):
         return self.remote_user is None
@@ -137,7 +139,7 @@ class srsUE(MS):
 
         self.rem_host.recreate_remote_dir(remote_inst)
         self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-        self.rem_host.create_remote_dir(remote_run_dir)
+        self.rem_host.recreate_remote_dir(remote_run_dir)
         self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
 
         remote_lib = remote_inst.child('lib')
@@ -206,16 +208,20 @@ class srsUE(MS):
         self.process.launch()
 
     def configure(self):
-        self.config_file = self.run_dir.new_file(srsUE.CFGFILE)
+        self.config_file = self.run_dir.child(srsUE.CFGFILE)
         self.log_file = self.run_dir.child(srsUE.LOGFILE)
-        self.pcap_file = self.run_dir.new_file(srsUE.PCAPFILE)
+        self.pcap_file = self.run_dir.child(srsUE.PCAPFILE)
         self.metrics_file = self.run_dir.child(srsUE.METRICSFILE)
         self.dbg(config_file=self.config_file)
 
         values = dict(ue=config.get_defaults('srsue'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, dict(ue=self.suite_run.config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
         config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
+
+        # Convert parsed boolean string to Python boolean:
+        self.enable_pcap = util.str2bool(values['ue'].get('enable_pcap', 'false'))
+        config.overlay(values, dict(ue={'enable_pcap': self.enable_pcap}))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':

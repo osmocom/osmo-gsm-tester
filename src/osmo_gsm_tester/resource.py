@@ -116,7 +116,11 @@ WANT_SCHEMA = util.dict_add(
 CONF_SCHEMA = util.dict_add(
     { 'defaults.timeout': schema.STR,
       'config.bsc.net.codec_list[]': schema.CODEC,
-      'config.epc.rlc_drb_mode': schema.LTE_RLC_DRB_MODE, },
+      'config.enb.enable_pcap': schema.BOOL_STR,
+      'config.epc.rlc_drb_mode': schema.LTE_RLC_DRB_MODE,
+      'config.epc.enable_pcap': schema.BOOL_STR,
+      'config.modem.enable_pcap': schema.BOOL_STR,
+    },
     dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]),
     dict([('modifiers.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
 

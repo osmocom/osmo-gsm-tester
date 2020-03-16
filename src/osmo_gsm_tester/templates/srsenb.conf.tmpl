@@ -98,7 +98,7 @@ device_args = ${enb.rf_dev_args}
 # filename: File path to use for packet captures
 #####################################################################
 [pcap]
-enable = false
+enable = ${'true' if enb.enable_pcap else 'false'}
 filename = /tmp/enb.pcap
 
 #####################################################################

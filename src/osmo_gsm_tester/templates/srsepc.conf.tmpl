@@ -71,7 +71,7 @@ max_paging_queue = 100
 #
 ####################################################################
 [pcap]
-enable   = false
+enable   = ${'true' if epc.enable_pcap else 'false'}
 filename = /tmp/epc.pcap
 
 ####################################################################

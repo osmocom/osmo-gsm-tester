@@ -53,6 +53,7 @@ class srsEPC(log.Origin):
         self.remote_db_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
+        self.enable_pcap = False
         self.subscriber_list = []
         self.suite_run = suite_run
         self._run_node = run_node
@@ -67,10 +68,11 @@ class srsEPC(log.Origin):
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
             self.log(repr(e))
-        try:
-            self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
-        except Exception as e:
-            self.log(repr(e))
+        if self.enable_pcap:
+            try:
+                self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
+            except Exception as e:
+                self.log(repr(e))
 
     def start(self):
         self.log('Starting srsepc')
@@ -100,7 +102,7 @@ class srsEPC(log.Origin):
 
         self.rem_host.recreate_remote_dir(remote_inst)
         self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-        self.rem_host.create_remote_dir(remote_run_dir)
+        self.rem_host.recreate_remote_dir(remote_run_dir)
         self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
         self.rem_host.scp('scp-db-to-remote', self.db_file, self.remote_db_file)
 
@@ -116,7 +118,6 @@ class srsEPC(log.Origin):
         args = (remote_binary, self.remote_config_file,
                 '--hss.db_file=' + self.remote_db_file,
                 '--log.filename=' + self.remote_log_file,
-                '--pcap.enable=true',
                 '--pcap.filename=' + self.remote_pcap_file)
 
         self.process = self.rem_host.RemoteProcess(srsEPC.BINFILE, args)
@@ -147,7 +148,6 @@ class srsEPC(log.Origin):
         args = (binary, os.path.abspath(self.config_file),
                 '--hss.db_file=' + self.db_file,
                 '--log.filename=' + self.log_file,
-                '--pcap.enable=true',
                 '--pcap.filename=' + self.pcap_file)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
@@ -155,15 +155,19 @@ class srsEPC(log.Origin):
         self.process.launch()
 
     def configure(self):
-        self.config_file = self.run_dir.new_file(srsEPC.CFGFILE)
-        self.db_file = self.run_dir.new_file(srsEPC.DBFILE)
-        self.log_file = self.run_dir.new_file(srsEPC.LOGFILE)
-        self.pcap_file = self.run_dir.new_file(srsEPC.PCAPFILE)
+        self.config_file = self.run_dir.child(srsEPC.CFGFILE)
+        self.db_file = self.run_dir.child(srsEPC.DBFILE)
+        self.log_file = self.run_dir.child(srsEPC.LOGFILE)
+        self.pcap_file = self.run_dir.child(srsEPC.PCAPFILE)
         self.dbg(config_file=self.config_file, db_file=self.db_file)
 
         values = dict(epc=config.get_defaults('srsepc'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, dict(epc=self.suite_run.config().get('epc', {})))
         config.overlay(values, dict(epc={'run_addr': self.addr()}))
+
+        # Convert parsed boolean string to Python boolean:
+        self.enable_pcap = util.str2bool(values['epc'].get('enable_pcap', 'false'))
+        config.overlay(values, dict(epc={'enable_pcap': self.enable_pcap}))
 
         # Set qci for each subscriber:
         rlc_drb_mode = values['epc'].get('rlc_drb_mode', None)

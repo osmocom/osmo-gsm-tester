@@ -53,6 +53,7 @@ class srsENB(log.Origin):
     CFGFILE_RR = 'srsenb_rr.conf'
     CFGFILE_DRB = 'srsenb_drb.conf'
     LOGFILE = 'srsenb.log'
+    PCAPFILE = 'srsenb.pcap'
 
     def __init__(self, suite_run, conf):
         super().__init__(log.C_RUN, 'srsenb')
@@ -68,6 +69,8 @@ class srsENB(log.Origin):
         self.config_sib_file = None
         self.config_rr_file = None
         self.config_drb_file = None
+        self.log_file = None
+        self.pcap_file = None
         self.process = None
         self.rem_host = None
         self.remote_config_file =  None
@@ -75,8 +78,10 @@ class srsENB(log.Origin):
         self.remote_config_rr_file = None
         self.remote_config_drb_file = None
         self.remote_log_file = None
+        self.remote_pcap_file = None
         self._num_prb = 0
         self._txmode = 0
+        self.enable_pcap = False
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -92,6 +97,11 @@ class srsENB(log.Origin):
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
             self.log(repr(e))
+        if self.enable_pcap:
+            try:
+                self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
+            except Exception as e:
+                self.log(repr(e))
 
     def setup_runs_locally(self):
         return self.remote_user is None
@@ -124,10 +134,11 @@ class srsENB(log.Origin):
         self.remote_config_rr_file = remote_run_dir.child(srsENB.CFGFILE_RR)
         self.remote_config_drb_file = remote_run_dir.child(srsENB.CFGFILE_DRB)
         self.remote_log_file = remote_run_dir.child(srsENB.LOGFILE)
+        self.remote_pcap_file = remote_run_dir.child(srsENB.PCAPFILE)
 
         self.rem_host.recreate_remote_dir(self.remote_inst)
         self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-        self.rem_host.create_remote_dir(remote_run_dir)
+        self.rem_host.recreate_remote_dir(remote_run_dir)
         self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
         self.rem_host.scp('scp-cfg-sib-to-remote', self.config_sib_file, self.remote_config_sib_file)
         self.rem_host.scp('scp-cfg-rr-to-remote', self.config_rr_file, self.remote_config_rr_file)
@@ -141,7 +152,8 @@ class srsENB(log.Origin):
                 '--enb_files.drb_config=' + self.remote_config_drb_file,
                 '--expert.nof_phy_threads=1',
                 '--expert.rrc_inactivity_timer=1500',
-                '--log.filename=' + self.remote_log_file)
+                '--log.filename=' + self.remote_log_file,
+                '--pcap.filename=' + self.remote_pcap_file)
 
         self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsENB.BINFILE, util.Dir(srsENB.REMOTE_DIR), args, remote_env=remote_env)
         self.suite_run.remember_to_stop(self.process)
@@ -166,7 +178,8 @@ class srsENB(log.Origin):
                 '--enb_files.drb_config=' + os.path.abspath(self.config_drb_file),
                 '--expert.nof_phy_threads=1',
                 '--expert.rrc_inactivity_timer=1500',
-                '--log.filename=' + self.log_file)
+                '--log.filename=' + self.log_file,
+                '--pcap.filename=' + self.pcap_file)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
         self.suite_run.remember_to_stop(self.process)
@@ -176,9 +189,13 @@ class srsENB(log.Origin):
         self.dbg(config_file=path)
 
         values = dict(enb=config.get_defaults('srsenb'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
         config.overlay(values, dict(enb=self._conf))
         config.overlay(values, dict(enb={ 'mme_addr': self.epc.addr() }))
+
+        # Convert parsed boolean string to Python boolean:
+        self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
+        config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
 
         self._num_prb = int(values['enb'].get('num_prb', None))
         assert self._num_prb
@@ -205,11 +222,12 @@ class srsENB(log.Origin):
             f.write(r)
 
     def configure(self):
-        self.config_file = self.run_dir.new_file(srsENB.CFGFILE)
-        self.config_sib_file = self.run_dir.new_file(srsENB.CFGFILE_SIB)
-        self.config_rr_file = self.run_dir.new_file(srsENB.CFGFILE_RR)
-        self.config_drb_file = self.run_dir.new_file(srsENB.CFGFILE_DRB)
-        self.log_file = self.run_dir.new_file(srsENB.LOGFILE)
+        self.config_file = self.run_dir.child(srsENB.CFGFILE)
+        self.config_sib_file = self.run_dir.child(srsENB.CFGFILE_SIB)
+        self.config_rr_file = self.run_dir.child(srsENB.CFGFILE_RR)
+        self.config_drb_file = self.run_dir.child(srsENB.CFGFILE_DRB)
+        self.log_file = self.run_dir.child(srsENB.LOGFILE)
+        self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
 
         self.gen_conf_file(self.config_file, srsENB.CFGFILE)
         self.gen_conf_file(self.config_sib_file, srsENB.CFGFILE_SIB)

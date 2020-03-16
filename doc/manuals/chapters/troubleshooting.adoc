@@ -13,3 +13,42 @@ to a less bloated parser in the future.
 Careful: if a configuration item consists of digits and starts with a zero, you
 need to quote it, or it may be interpreted as an octal notation integer! Please
 avoid using the octal notation on purpose, it is not provided intentionally.
+
+=== {app-name} not running but resources still allocated
+
+The <<state_dir,reserved_resources.state>> is used to keep shared state of the
+the resources allocated by any {app-name} instance. Each {app-name} instance
+being run is responsible to de-allocate the used resources before exiting. In
+general, upon receiving a shutdown action (ie. 'CTRL+C', 'SIGINT', python
+exception, etc.), {app-name} is able to handle properly the situation and
+de-allocate the resources before the process exits. Similarly, {app-name} also
+takes care of terminating all its children processes being managed before
+exiting itself.
+
+However, under some circumstances, {app-name} will be unable to de-allocate the
+resources and they will remain allocated for subsequent {app-name} instances
+which try to use them. That situation is usually reached when someone terminates
+{app-name} in a hard way. Main reasons are {app-name} process receiving a
+'SIGKILL' signal ('kill -9 $pid') which cannot be caught, or due to the entire
+host being shut down in a non proper way.
+
+As a noticeable example, SIGKILL is known to be sent to {app-name} when it runs
+under a jenkins shell script and any of the two following things happen:
+
+- User presses the red cross icon in the Jenkins UI to terminate the running
+  job.
+- Connection between Jenkins master (UI) and Jenkins slave running the job is
+  lost.
+
+Once this situation is reached, one needs to follow 2 steps:
+
+- Gain console access to the <<install_main_unit,Main Unit>> and manually clean
+  or completely remove the 'reserved_resources.state' in the
+  <<state_dir,state_dir>>. In general it's a good idea to make sure no
+  {app-name} instance is running at all and then remove completely all files in
+  <<state_dir,state_dir>>, since {app-name} could theoretically have been killed
+  while writing some file and it may have ended up with corrupt content.
+- Gain console access to the <<install_main_unit,Main Unit>> and each of the
+  <<install_slave_unit,Slave Units>> and kill any hanging long-termed processes
+  in there which may have been started by {app-name}. Some popular processes in
+  this list include 'tcpdump', 'osmo-\*', 'srs*', etc.

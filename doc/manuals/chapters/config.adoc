@@ -160,7 +160,7 @@ This schema is used by <<suite_conf,suite.conf>> and <<scenario_conf,scenario.co
 - Section 'resources': Contains a set of elements validated with <<schema_resources,resources>>
   schema. In  <<suite_conf,suite.conf>> it is used to construct the list of
   requested resources. In  <<scenario_conf,scenario.conf>>, it is used to inject
-  attributes to the initial <<suites_conf,suites.conf>> _resources_ section and
+  attributes to the initial <<suite_conf,suite.conf>> _resources_ section and
   hence further restrain it.
 [[schema_conf_sec_modifiers]]
 - Section 'modifiers': Both in <<suite_conf,suite.conf>> and
@@ -453,7 +453,7 @@ configurations look cumbersome because they exhibit only one trait / a trait
 that is repeated numerous times. No special notation for these cases is
 available (yet).
 
-[[default_suites]]
+[[default_suites_conf]]
 ==== 'default-suites.conf' (optional)
 
 The 'default-suites.conf' file contains a YAML list of 'suite:scenario+scenario+...'
@@ -561,14 +561,17 @@ production one and an RnD one, used to develop {app-name} itself. These two set
 ups share mostly all configuration, main difference being the
 <<resources_conf,resources.conf>> file being used.
 
-All {app-name} related configuration for that environment is publicly available in 'osmo-gsm-tester.git' itself:::
-- <<paths_conf,paths.conf>>: Available Available under 'example/', with its paths already configured to take
-  required bits from inside the git repository.
+All {app-name} related configuration for that environment is publicly available
+in 'osmo-gsm-tester.git' itself:
+
+- <<paths_conf,paths.conf>>: Available Available under 'example/', with its paths
+  already configured to take required bits from inside the git repository.
 - <<suite_dir,suites_dir>>: Available under 'suites/'
 - <<scenarios_dir,scenarios_dir>>: Available under 'example/scenarios/'
 - <<resource_conf,resources.conf>>: Available under 'example/' as
   'resources.conf.prod' for Production setup and as 'resources.conf.rnd' for the
-  RnD setup. One must use a symbolic link to have it available as 'resources.conf'.
+  RnD setup. One must use a symbolic link to have it available as
+  'resources.conf'.
 
 //TODO: resources.conf file path should be modifiable through paths.conf!
 
@@ -580,7 +583,8 @@ such a set of binaries, see <<trials>>.
 
 Examples for launching test trials:
 
-- Run the default suites (see <<default_suites>>) on a given set of binaries:
+- Run the default suites (see <<default_suites_conf,default_suites.conf>>) on a
+  given set of binaries:
 
 ----
 osmo-gsm-tester.py path/to/my-trial

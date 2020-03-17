@@ -1,0 +1,334 @@
+
+* Data processing can be understood as operations on sets (link:https://duckduckgo.com/?q=Venn+diagram[Venn diagram])
+
+----
+$ src/osmo-gsm-tester.py "$TRIAL_JOB_DIR" -s 4g:srsenb-rftype@zmq+srsue-rftype@zmq+mod-enb-nprb@6 -t ping.py
+----
+
+
+
+* First Suite and scenarios dictionaries ('resources', 'modifiers', 'config') are combined (set union operation):
+
+[cols="1,5a,5a,10a,10a"]
+.Manual replica of 'suite.py resource_requirements()' and 'resource_modifiers()' methods
+|===
+|File|original|after 'times' replication|python syntax|combined
+
+|4g
+|
+----
+run_node:
+- times: 1
+enb:
+- times: 1
+  type: srsenb
+modem:
+- times: 2
+  type: srsue
+----
+|
+----
+run_node:
+- {}
+enb:
+- type: srsenb
+modem:
+- type: srsue
+- type: srsue
+----
+|
+----
+'resources': {
+  'run_node': [{}],
+  'enb': [{'type': 'srsenb'}],
+  'modem': [{'type: 'srsue'},
+            {'type: 'srsue'}]
+}
+'modifiers': {}
+----
+|
+----
+'resources': {
+  'run_node': [{}],
+  'enb': [{'type': 'srsenb'}],
+  'modem': [{'type': 'srsue'},
+            {'type': 'srsue'}]
+
+}
+'modifiers': {}
+----
+|srsenb-rftype@zmq
+|
+----
+resources:
+  enb:
+  - type: srsenb
+    rf_dev_type: zmq
+----
+|
+----
+resources:
+  enb:
+  - type: srsenb
+    rf_dev_type: zmq
+----
+|
+----
+'resources': {
+  'enb': [{'type': 'srsenb',
+           'rf_dev_type': 'zmq'}]
+}
+'modifiers': {}
+----
+|
+----
+'resources': {
+  'run_node': [{}],
+  'enb': [{'type': 'srsenb',
+           'rf_dev_type': 'zmq'}],
+  'modem': [{'type': 'srsue'},
+            {'type': 'srsue'}]
+}
+'modifiers': {}
+----
+|srsue-rftype@zmq
+|
+----
+resources:
+  modem:
+  - type: srsue
+    rf_dev_type: zmq
+    times: 1
+----
+|
+----
+resources:
+  modem:
+  - type: srsue
+    rf_dev_type: zmq
+----
+|
+----
+'resources': {
+  'modem': [{'type': 'srsue',
+           'rf_dev_type': 'zmq'}]
+}
+'modifiers': {}
+----
+|
+----
+'resources': {
+  'run_node': [{}],
+  'enb': [{'type': 'srsenb',
+           'rf_dev_type': 'zmq'}],
+  'modem': [{'type': 'srsue',
+             'rf_dev_type': 'zmq'},
+            {'type': 'srsue'}]
+}
+'modifiers': {}
+----
+|mod-enb-nprb@6
+|
+----
+modifiers:
+  enb:
+  - num_prb: 6
+    times: 1
+----
+|
+----
+modifiers:
+  enb:
+  - num_prb: 6
+----
+|
+----
+'resources': {}
+'modifiers': {
+  'enb': [{'num_prb': 6}]
+}
+----
+|
+----
+'resources': {
+  'run_node': [{}],
+  'enb': [{'type': 'srsenb',
+           'rf_dev_type': 'zmq'}],
+  'modem': [{'type': 'srsue',
+             'rf_dev_type': 'zmq'},
+            {'type': 'srsue'}]
+}
+'modifiers': {
+  'enb': [{'num_prb': 6}]
+}
+----
+|===
+
+* Second, the resulting 'resources' set is used to match a set of resources from 'resources.list' in order to allocate them (intersection of sets):
+
+[cols="5a,5a,10a"]
+.Manual replica of 'resource.py reserve()' method
+|===
+|resources.conf|'resources' filters|matched
+
+|
+----
+run_node:
+- run_type: ssh
+  run_addr: 10.12.1.195
+  ssh_user: jenkins
+  ssh_addr: 10.12.1.195
+
+enb:
+- label: srsENB-zmq
+  type: srsenb
+  rf_dev_type: zmq
+  remote_user: jenkins
+  addr: 10.12.1.206
+
+- label: srsENB-B200
+  type: srsenb
+  rf_dev_type: UHD
+  rf_dev_args: "type=b200,serial=317B9FE"
+  remote_user: jenkins
+  addr: 10.12.1.206
+
+modem:
+- label: srsUE-zmq_1
+  type: srsue
+  rf_dev_type: zmq
+  remote_user: jenkins
+  addr: 10.12.1.195
+  imsi: '001010123456789'
+  ki: '001123'
+
+- label: srsUE-zq_2
+  type: srsue
+  rf_dev_type: zmq
+  remote_user: jenkins
+  addr: 10.12.1.180
+  imsi: '001010123456781'
+  ki: '001124'
+----
+|
+----
+'resources': {
+  'run_node': [{}],
+  'enb': [{'type': 'srsenb',
+           'rf_dev_type': 'zmq'}],
+  'modem': [
+            {'type': 'srsue',
+             'rf_dev_type': 'zmq'},
+            {'type': 'srsue'}
+	   ]
+}
+----
+|
+----
+'resources': {
+  'run_node': [{'run_type': 'ssh',
+                'run_addr': '10.12.1.195',
+                'ssh_user': 'jenkins',
+                'ssh_addr': '10.12.1.195'}],
+  'enb': [{'label': 'srsENB-zmq',
+           'type': 'srsenb',
+           'rf_dev_type': 'zmq',
+           'remote_user': 'jenkins',
+           'addr': 10.12.1.206}],
+  'modem': [
+            {'label': 'srsUE-zmq_1',
+             'type': 'srsue',
+             'remote_user': jenkins,
+             'addr': '10.12.1.195',
+             'imsi': '001010123456789'
+             'ki': '001123',
+             'rf_dev_type': 'zmq'},
+            {'label': 'srsUE-zmq_2',
+             'type': 'srsue',
+             'remote_user': jenkins,
+             'addr': '10.12.1.180',
+             'imsi': '001010123456781'
+             'ki': '001124'}
+           ]
+}
+----
+|===
+
+* Finally, modifiers are applied on top of the combined configuration before
+  being passed to the python class managing it:
+
+[cols="5a,5a,10a"]
+.Also done by 'resource.py reserve()' method after matching resources
+|===
+|Matched resources|modifiers|Result
+
+|
+----
+'resources': {
+  'run_node': [{'run_type': 'ssh',
+                'run_addr': '10.12.1.195',
+                'ssh_user': 'jenkins',
+                'ssh_addr': '10.12.1.195'}],
+  'enb': [{'label': 'srsENB-zmq',
+           'type': 'srsenb',
+           'rf_dev_type': 'zmq',
+           'remote_user': 'jenkins',
+           'addr': 10.12.1.206}],
+  'modem': [
+            {'label': 'srsUE-zmq_1',
+             'type': 'srsue',
+             'remote_user': jenkins,
+             'addr': '10.12.1.195',
+             'imsi': '001010123456789'
+             'ki': '001123',
+             'rf_dev_type': 'zmq'},
+            {'label': 'srsUE-zmq_2',
+             'type': 'srsue',
+             'remote_user': jenkins,
+             'addr': '10.12.1.180',
+             'imsi': '001010123456781'
+             'ki': '001124'}
+           ]
+}
+----
+|
+----
+'modifiers': {
+  'enb': [{'num_prb': 6}]
+}
+----
+|
+----
+'resources': {
+  'run_node': [{'run_type': 'ssh',
+                'run_addr': '10.12.1.195',
+                'ssh_user': 'jenkins',
+                'ssh_addr': '10.12.1.195'}],
+  'enb': [{'label': 'srsENB-zmq',
+           'type': 'srsenb',
+           'rf_dev_type': 'zmq',
+           'remote_user': 'jenkins',
+           'addr': '10.12.1.206',
+           'num_prb': 6}],
+  'modem': [
+            {'label': 'srsUE-zmq_1',
+             'type': 'srsue',
+             'remote_user': jenkins,
+             'addr': 10.12.1.195,
+             'imsi': '001010123456789'
+             'ki': '001123',
+             'rf_dev_type': 'zmq'},
+            {'label': 'srsUE-zmq_2',
+             'type': 'srsue',
+             'remote_user': jenkins,
+             'addr': 10.12.1.180,
+             'imsi': '001010123456781'
+             'ki': '001124'}
+           ]
+}
+----
+|===
+
+WARNING: Right now algorithms based on lists of scalar/simple types being
+unordered vs complex types (dictionaries, list) being ordered. Other ways can be
+supported by explicitly using 'set' type from yaml in lists of scalars.

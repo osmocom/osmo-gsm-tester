@@ -105,3 +105,7 @@ automatically.
 If required resources are unavailable, the test trial fails. For consecutive
 test trials, a test run needs to either wait for resources to become available,
 or test suites need to be scheduled to make sense. (*<- TODO*)
+
+=== Understanding config parsing process
+
+include::{srcdir}/chapters/config_mangling.adoc[]

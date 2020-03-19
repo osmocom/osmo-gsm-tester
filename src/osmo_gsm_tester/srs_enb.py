@@ -254,20 +254,19 @@ class srsENB(log.Origin):
         return 2
 
     def ue_max_rate(self, downlink=True):
-        # The max rate for a single UE per PRB in TM1
-        max_phy_rate_tm1_dl = { 6 : 2.3e6,
-                               15 : 8e6,
-                               25 : 16e6,
+        # The max rate for a single UE per PRB configuration in TM1
+        max_phy_rate_tm1_dl = { 6 : 3.5e6,
+                               15 : 11e6,
+                               25 : 18e6,
                                50 : 36e6,
-                               75 : 54e6,
+                               75 : 55e6,
                                100 : 75e6 }
-        # TODO: proper values for this table:
-        max_phy_rate_tm1_ul = { 6 : 0.23e6,
-                               15 : 0.8e6,
-                               25 : 1.6e6,
-                               50 : 3.6e6,
-                               75 : 5.4e6,
-                               100 : 7.5e6 }
+        max_phy_rate_tm1_ul = { 6 : 0.9e6,
+                               15 : 4.7e6,
+                               25 : 10e6,
+                               50 : 23e6,
+                               75 : 34e6,
+                               100 : 51e6 }
         if downlink:
             max_rate = max_phy_rate_tm1_dl[self.num_prb()]
         else:

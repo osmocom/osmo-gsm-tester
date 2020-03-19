@@ -44,6 +44,6 @@ iperf3srv.stop()
 print_results(iperf3cli.get_results(), iperf3srv.get_results())
 
 max_rate = enb.ue_max_rate(downlink=True)
-res_str = ue.verify_metric(max_rate * 0.9, operation='avg', metric='dl_brate', criterion='gt')
+res_str = ue.verify_metric(max_rate * 0.8, operation='avg', metric='dl_brate', criterion='gt')
 print(res_str)
 test.set_report_stdout(res_str)

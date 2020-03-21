@@ -120,6 +120,10 @@ class srsUE(MS):
         else:
             self.start_remotely()
 
+        # send t+Enter to enable console trace
+        self.dbg('Enabling console trace')
+        self.process.stdin_write('t\n')
+
     def start_remotely(self):
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
         lib = self.inst.child('lib')

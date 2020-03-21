@@ -135,11 +135,11 @@ enable = false
 #
 # max_aggr_level:    Optional maximum aggregation level index (l=log2(L) can be 0, 1, 2 or 3)
 # pdsch_mcs:         Optional fixed PDSCH MCS (ignores reported CQIs if specified)
-# pdsch_max_mcs:     Optional PDSCH MCS limit 
+# pdsch_max_mcs:     Optional PDSCH MCS limit
 # pusch_mcs:         Optional fixed PUSCH MCS (ignores reported CQIs if specified)
-# pusch_max_mcs:     Optional PUSCH MCS limit 
-# min_nof_ctrl_symbols: Minimum number of control symbols 
-# max_nof_ctrl_symbols: Maximum number of control symbols 
+# pusch_max_mcs:     Optional PUSCH MCS limit
+# min_nof_ctrl_symbols: Minimum number of control symbols
+# max_nof_ctrl_symbols: Maximum number of control symbols
 #
 #####################################################################
 [scheduler]
@@ -265,7 +265,9 @@ enable = false
 [expert]
 #pusch_max_its        = 8 # These are half iterations
 #pusch_8bit_decoder   = false
-#nof_phy_threads      = 3
+% if enb.get('rf_dev_type') == 'zmq':
+nof_phy_threads  = 1
+% endif
 #metrics_period_secs  = 1
 #metrics_csv_enable   = false
 #metrics_csv_filename = /tmp/enb_metrics.csv

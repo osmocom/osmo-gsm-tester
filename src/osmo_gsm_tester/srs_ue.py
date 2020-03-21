@@ -170,7 +170,7 @@ class srsUE(MS):
                 '--pcap.filename=' + self.remote_pcap_file,
                 '--general.metrics_csv_filename=' + self.remote_metrics_file)
 
-        self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, util.Dir(srsUE.REMOTE_DIR), args)
+        self.process = self.rem_host.RemoteProcess(srsUE.BINFILE, args)
         #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, remote_run_dir, args, remote_lib)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()

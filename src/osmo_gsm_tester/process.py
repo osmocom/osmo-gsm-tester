@@ -350,6 +350,13 @@ class Process(log.Origin):
     def wait(self, timeout=300):
         MainLoop.wait(self, self.terminated, timeout=timeout)
 
+    def stdin_write(self, cmd):
+        '''
+        Send a cmd to the stdin of a process (convert to byte before)
+        '''
+        if self.process_obj.stdin is not None:
+            self.process_obj.stdin.write(cmd.encode("utf-8"))
+            self.process_obj.stdin.flush()
 
 class RemoteProcess(Process):
 

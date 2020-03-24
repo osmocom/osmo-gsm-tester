@@ -116,6 +116,10 @@ class srsENB(log.Origin):
         else:
             self.start_locally()
 
+        # send t+Enter to enable console trace
+        self.dbg('Enabling console trace')
+        self.process.stdin_write('t\n')
+
     def start_remotely(self):
         self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
         lib = self.inst.child('lib')
@@ -155,7 +159,7 @@ class srsENB(log.Origin):
                 '--log.filename=' + self.remote_log_file,
                 '--pcap.filename=' + self.remote_pcap_file)
 
-        self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsENB.BINFILE, util.Dir(srsENB.REMOTE_DIR), args, remote_env=remote_env)
+        self.process = self.rem_host.RemoteProcess(srsENB.BINFILE, args, remote_env=remote_env)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
 

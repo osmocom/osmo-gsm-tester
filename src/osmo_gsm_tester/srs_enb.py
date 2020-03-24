@@ -154,8 +154,6 @@ class srsENB(log.Origin):
                 '--enb_files.sib_config=' + self.remote_config_sib_file,
                 '--enb_files.rr_config=' + self.remote_config_rr_file,
                 '--enb_files.drb_config=' + self.remote_config_drb_file,
-                '--expert.nof_phy_threads=1',
-                '--expert.rrc_inactivity_timer=1500',
                 '--log.filename=' + self.remote_log_file,
                 '--pcap.filename=' + self.remote_pcap_file)
 
@@ -180,8 +178,6 @@ class srsENB(log.Origin):
                 '--enb_files.sib_config=' + os.path.abspath(self.config_sib_file),
                 '--enb_files.rr_config=' + os.path.abspath(self.config_rr_file),
                 '--enb_files.drb_config=' + os.path.abspath(self.config_drb_file),
-                '--expert.nof_phy_threads=1',
-                '--expert.rrc_inactivity_timer=1500',
                 '--log.filename=' + self.log_file,
                 '--pcap.filename=' + self.pcap_file)
 

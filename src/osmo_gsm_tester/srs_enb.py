@@ -251,9 +251,6 @@ class srsENB(log.Origin):
     def num_prb(self):
         return self._num_prb
 
-    def num_cells(self):
-        return self._num_cells
-
     def num_ports(self):
         if self._txmode == 1:
             return 1

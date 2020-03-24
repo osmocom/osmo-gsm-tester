@@ -234,6 +234,7 @@ class srsUE(MS):
                                                             + ',tx_port2=tcp://' + self.addr() + ':2003' \
                                                             + ',rx_port=tcp://' + self.enb.addr() + ':2000' \
                                                             + ',rx_port2=tcp://' + self.enb.addr() + ':2002' \
+                                                            + ',tx_freq=2510e6,rx_freq=2630e6,tx_freq2=2530e6,rx_freq2=2650e6' \
                                                             + ',id=ue,base_srate='+ str(base_srate)
                                                 )))
 

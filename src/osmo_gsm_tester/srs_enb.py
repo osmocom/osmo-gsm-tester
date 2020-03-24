@@ -201,6 +201,8 @@ class srsENB(log.Origin):
         assert self._num_prb
         self._txmode = int(values['enb'].get('transmission_mode', None))
         assert self._txmode
+        self._num_cells = int(values['enb'].get('num_cells', None))
+        assert self._num_cells
         config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
 
         # We need to set some specific variables programatically here to match IP addresses:
@@ -247,6 +249,9 @@ class srsENB(log.Origin):
 
     def num_prb(self):
         return self._num_prb
+
+    def num_cells(self):
+        return self._num_cells
 
     def num_ports(self):
         if self._txmode == 1:

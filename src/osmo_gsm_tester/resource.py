@@ -90,6 +90,7 @@ RESOURCES_SCHEMA = {
         'enb[].addr': schema.IPV4,
         'enb[].num_prb': schema.UINT,
         'enb[].transmission_mode': schema.LTE_TRANSMISSION_MODE,
+        'enb[].num_cells': schema.UINT,
         'enb[].rf_dev_type': schema.STR,
         'enb[].rf_dev_args': schema.STR,
         'arfcn[].arfcn': schema.INT,

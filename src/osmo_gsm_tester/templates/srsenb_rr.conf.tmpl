@@ -86,5 +86,42 @@ cell_list =
       rsrq_config = 4;
     };
   }
+% if enb.get('num_cells') == '2':
+  ,
+  {
+    rf_port = 1;
+    cell_id = 0x02;
+    tac = 0x0002;
+    pci = 2;
+    root_seq_idx = 205;
+    dl_earfcn = 2910;
+    ul_earfcn = 20910;
+    ho_active = false;
+
+    // CA cells
+    scell_list = (
+      {cell_id = 0x01; cross_carrier_scheduling = false; scheduling_cell_id = 0x01; ul_allowed = true}
+    )
+
+    // Cells available for handover
+    meas_cell_list =
+    (
+      {
+        eci = 0x19C02;
+        dl_earfcn = 2850;
+        pci = 1;
+      }
+    );
+
+    // ReportCfg (only A3 supported)
+    meas_report_desc = {
+      a3_report_type = "RSRP";
+      a3_offset = 6;
+      a3_hysteresis = 0;
+      a3_time_to_trigger = 480;
+      rsrq_config = 4;
+    };
+  }
+% endif
   // Add here more cells
 );

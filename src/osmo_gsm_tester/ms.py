@@ -34,6 +34,9 @@ class MS(log.Origin, metaclass=ABCMeta):
     def ki(self):
         return self._conf.get('ki')
 
+    def apn_ipaddr(self):
+        return self._conf.get('apn_ipaddr', 'dynamic')
+
     def auth_algo(self):
         return self._conf.get('auth_algo', None)
 

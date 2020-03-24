@@ -100,6 +100,7 @@ RESOURCES_SCHEMA = {
         'modem[].imsi': schema.IMSI,
         'modem[].ki': schema.KI,
         'modem[].auth_algo': schema.AUTH_ALGO,
+        'modem[].apn_ipaddr': schema.IPV4,
         'modem[].remote_user': schema.STR,
         'modem[].addr': schema.IPV4,
         'modem[].ciphers[]': schema.CIPHER,

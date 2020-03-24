@@ -367,6 +367,7 @@ class Modem(MS):
         self.dbg('creating from syspath %s' % self.syspath)
         self._ki = None
         self._imsi = None
+        self._apn_ipaddr = None
         self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name().strip('/')))
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.dbuspath)
@@ -466,6 +467,11 @@ class Modem(MS):
         if self._ki is not None:
             return self._ki
         return super().ki()
+
+    def apn_ipaddr(self):
+        if self._apn_ipaddr is not None:
+            return self._apn_ipaddr
+        return 'dynamic'
 
     def features(self):
         return self._conf.get('features', [])

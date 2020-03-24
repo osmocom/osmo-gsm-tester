@@ -31,13 +31,18 @@
 #                     Default is auto (yes for UHD, no for rest)
 #####################################################################
 [rf]
-dl_earfcn = 3400
+% if ue.num_carriers == 2:
+dl_earfcn = 2850,3050
+% else:
+dl_earfcn = 2850
+% endif
 freq_offset = 0
 tx_gain = 80
 #rx_gain = 40
 
 #nof_radios = 1
 nof_antennas = ${ue.num_antennas}
+nof_carriers = ${ue.num_carriers}
 
 device_name = ${ue.rf_dev_type}
 
@@ -138,8 +143,13 @@ imei = 353490069873319
 # mbms_service_port: Port of the MBMS service
 #####################################################################
 [rrc]
+% if ue.num_carriers == 2:
+ue_category       = 7
+release           = 10
+% else:
 #ue_category       = 4
 #release           = 8
+% endif
 #feature_group     = 0xe6041000
 #mbms_service_id   = -1
 #mbms_service_port = 4321

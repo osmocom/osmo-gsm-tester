@@ -164,7 +164,6 @@ class srsUE(MS):
 
         #'strace', '-ff',
         args = (remote_binary, self.remote_config_file,
-                '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + self.remote_log_file,
                 '--pcap.filename=' + self.remote_pcap_file,
@@ -200,7 +199,6 @@ class srsUE(MS):
         util.create_netns(self.netns(), self.run_dir.new_dir('create_netns'))
 
         args = (binary, os.path.abspath(self.config_file),
-                '--phy.nof_phy_threads=1',
                 '--gw.netns=' + self.netns(),
                 '--log.filename=' + self.log_file,
                 '--pcap.filename=' + self.pcap_file,

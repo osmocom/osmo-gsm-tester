@@ -236,6 +236,25 @@ class srsUE(MS):
                                                             + ',id=ue,base_srate='+ str(base_srate)
                                                 )))
 
+        # Set UHD frame size as a function of the cell bandwidth on B2XX
+        if self._conf.get('rf_dev_type') == 'UHD' and values['ue'].get('rf_dev_args', None) is not None:
+            if 'b200' in values['ue'].get('rf_dev_args'):
+                rf_dev_args = values['ue'].get('rf_dev_args', '')
+                rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''
+
+                if self.enb.num_prb() < 25:
+                    rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
+                elif self.enb.num_prb() == 25:
+                    rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
+                elif self.enb.num_prb() > 50:
+                    rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
+
+                # For 15 and 20 MHz, further reduce over the wire format to sc12
+                if self.enb.num_prb() >= 75:
+                    rf_dev_args += ',otw_format=sc12'
+
+                config.overlay(values, dict(ue=dict(rf_dev_args=rf_dev_args)))
+
         self.dbg('SRSUE CONFIG:\n' + pprint.pformat(values))
 
         with open(self.config_file, 'w') as f:

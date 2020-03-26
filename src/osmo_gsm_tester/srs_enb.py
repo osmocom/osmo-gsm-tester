@@ -208,6 +208,25 @@ class srsENB(enb.eNodeB):
                         + ',id=enb,base_srate=' + str(base_srate)
             config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
+        # Set UHD frame size as a function of the cell bandwidth on B2XX
+        if self._conf.get('rf_dev_type') == 'UHD' and values['enb'].get('rf_dev_args', None) is not None:
+            if 'b200' in values['enb'].get('rf_dev_args'):
+                rf_dev_args = values['enb'].get('rf_dev_args', '')
+                rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''
+
+                if self._num_prb < 25:
+                    rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
+                elif self._num_prb == 25:
+                    rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
+                elif self._num_prb > 25:
+                    rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
+
+                if self._num_prb > 50:
+                    # Reduce over the wire format to sc12
+                    rf_dev_args += ',otw_format=sc12'
+
+                config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
+
         self.config_file = self.run_dir.child(srsENB.CFGFILE)
         self.config_sib_file = self.run_dir.child(srsENB.CFGFILE_SIB)
         self.config_rr_file = self.run_dir.child(srsENB.CFGFILE_RR)

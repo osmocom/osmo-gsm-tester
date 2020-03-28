@@ -32,7 +32,7 @@ print('ENB is connected to EPC')
 ue.connect(enb)
 
 iperf3srv.start()
-proc = iperf3cli.prepare_test_proc(True, ue.netns(), time_sec=60)
+proc = iperf3cli.prepare_test_proc(True, ue.netns())
 
 print('waiting for UE to attach...')
 wait(ue.is_connected, None)

@@ -20,7 +20,7 @@
 import os
 import json
 
-from . import log, util, process, pcap_recorder, run_node, remote
+from . import log, util, config, process, pcap_recorder, run_node, remote
 
 def iperf3_result_to_json(file):
     with open(file) as f:
@@ -154,8 +154,23 @@ class IPerf3Client(log.Origin):
         locally = not self._run_node or self._run_node.is_local()
         return locally
 
-    def prepare_test_proc(self, downlink=False, netns=None, time_sec=10):
-        self.log('Starting iperf3-client connecting to %s:%d' % (self.server.addr(), self.server.port()))
+    def prepare_test_proc(self, downlink=False, netns=None, time_sec=None):
+        if time_sec is None:
+            values = config.get_defaults('iperf3cli')
+            config.overlay(values, self.suite_run.config().get('iperf3cli', {}))
+            time_sec_str = values.get('time', time_sec)
+
+            # Convert duration to seconds
+            if isinstance(time_sec_str, str) and time_sec_str.endswith('h'):
+                time_sec = int(time_sec_str[:-1]) * 3600
+            elif isinstance(time_sec_str, str) and time_sec_str.endswith('m'):
+                time_sec = int(time_sec_str[:-1]) * 60
+            else:
+                time_sec = int(time_sec_str)
+
+        assert(time_sec)
+
+        self.log('Preparing iperf3-client connecting to %s:%d (time=%ds)' % (self.server.addr(), self.server.port(), time_sec))
         self.log_copied = False
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)

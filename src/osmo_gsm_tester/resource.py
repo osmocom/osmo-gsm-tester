@@ -127,6 +127,7 @@ CONF_SCHEMA = util.dict_add(
       'config.epc.enable_pcap': schema.BOOL_STR,
       'config.modem.enable_pcap': schema.BOOL_STR,
       'config.amarisoft.license_server_addr': schema.IPV4,
+      'config.iperf3cli.time': schema.DURATION,
     },
     dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]),
     dict([('modifiers.%s' % key, val) for key, val in WANT_SCHEMA.items()]))

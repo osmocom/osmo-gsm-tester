@@ -21,6 +21,7 @@ import os
 import pprint
 
 from . import log, util, config, template, process, remote
+from . import enb
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'UHD', 'soapy', 'bladeRF')
@@ -44,7 +45,7 @@ def num_prb2symbol_sz(num_prb):
 def num_prb2base_srate(num_prb):
     return num_prb2symbol_sz(num_prb) * 15 * 1000
 
-class srsENB(log.Origin):
+class srsENB(enb.eNodeB):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsenb'
     BINFILE = 'srsenb'
@@ -56,12 +57,7 @@ class srsENB(log.Origin):
     PCAPFILE = 'srsenb.pcap'
 
     def __init__(self, suite_run, conf):
-        super().__init__(log.C_RUN, 'srsenb')
-        self._conf = conf
-        self._addr = conf.get('addr', None)
-        if self._addr is None:
-            raise log.Error('addr not set')
-        self.set_name('srsenb_%s' % self._addr)
+        super().__init__(suite_run, conf, srsENB.BINFILE)
         self.ue = None
         self.epc = None
         self.run_dir = None
@@ -188,7 +184,8 @@ class srsENB(log.Origin):
     def gen_conf_file(self, path, filename):
         self.dbg(config_file=path)
 
-        values = dict(enb=config.get_defaults('srsenb'))
+        values = dict(enb=config.get_defaults('enb'))
+        config.overlay(values, dict(enb=config.get_defaults('srsenb')))
         config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
         config.overlay(values, dict(enb=self._conf))
         config.overlay(values, dict(enb={ 'mme_addr': self.epc.addr() }))
@@ -244,9 +241,6 @@ class srsENB(log.Origin):
 
     def running(self):
         return not self.process.terminated()
-
-    def addr(self):
-        return self._addr
 
     def num_prb(self):
         return self._num_prb

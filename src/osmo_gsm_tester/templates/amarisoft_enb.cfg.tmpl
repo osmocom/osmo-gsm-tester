@@ -1,0 +1,192 @@
+/* lteenb configuration file version 2018-10-18
+ * Copyright (C) 2015-2018 Amarisoft
+ */
+{
+
+  license_server: {
+    server_addr: "${enb.license_server_addr}",
+    name: "amarisoft",
+  },
+
+
+  /* Log filter: syntax: layer.field=value[,...]
+
+     Possible layers are phy, mac, rlc, pdcp, rrc, nas, s1ap, x2ap, gtpu and
+     all. The 'all' layer is used to address all the layers at the
+     same time.
+
+     field values:
+
+     - 'level': the log level of each layer can be set to 'none',
+     'error', 'info' or 'debug'. Use 'debug' to log all the messages.
+
+     - 'max_size': set the maximum size of the hex dump. 0 means no
+       hex dump. -1 means no limit.
+  */
+  //log_options: "all.level=debug,all.max_size=32",
+  log_options: "all.level=error,all.max_size=0,nas.level=debug,nas.max_size=1,s1ap.level=debug,s1ap.max_size=1,x2ap.level=debug,x2ap.max_size=1,rrc.level=debug,rrc.max_size=1",
+  log_filename: "${enb.log_filename}",
+
+  /* Enable remote API and Web interface */
+  com_addr: "${enb.addr}:9001",
+
+  /* RF driver configuration */
+  include "amarisoft_rf_driver.cfg",
+
+  mme_list: [
+    {
+      /* address of MME for S1AP connection. Must be modified if the MME
+         runs on a different host. */
+      mme_addr: "${enb.mme_addr}",
+    },
+  ],
+  /* GTP bind address (=address of the ethernet interface connected to
+     the MME). Must be modified if the MME runs on a different host. */
+  gtp_addr: "${enb.addr}",
+
+  /* high 20 bits of SIB1.cellIdentifier */
+  enb_id: 0x19B,
+
+  /* list of cells */
+  cell_list: [
+  {
+    /* Broadcasted PLMN identities */
+    plmn_list: [
+      "${enb.mcc}${enb.mnc}",
+    ],
+
+    //dl_earfcn: 300,   /* DL center frequency: 2132 MHz (Band 1) */
+    //dl_earfcn: 900,   /* DL center frequency: 1960 MHz (Band 2) */
+    //dl_earfcn: 1575,  /* DL center frequency: 1842.5 MHz (Band 3) */
+    //dl_earfcn: 2150,  /* DL center frequency: 2130 MHz (Band 4) */
+    //dl_earfcn: 2525,  /* DL center frequency: 881.5 MHz (Band 5) */
+    dl_earfcn: 2850,  /* DL center frequency: 2680 MHz (Band 7) */
+    //dl_earfcn: 6300,  /* 806 MHz (Band 20) */
+    //dl_earfcn: 38050, /* 2600 MHz (band 38) */
+    //dl_earfcn: 40620, /* 2593 MHz (band 41) */
+    //dl_earfcn: 42590, /* 3500 MHz (band 42) */
+
+    n_id_cell: 1,
+    cell_id: 0x01,
+    tac: 0x0001,
+    root_sequence_index: 204, /* PRACH root sequence index */
+  },
+  ], /* cell_list */
+
+  /* default cell parameters */
+  cell_default: {
+    n_antenna_dl: 1, /* number of DL antennas */
+    n_antenna_ul: 1, /* number of UL antennas */
+    n_rb_dl: ${enb.num_prb}, /* Bandwidth: 25: 5 MHz, 50: 10 MHz, 75: 15 MHz, 100: 20 MHz */
+    cyclic_prefix: "normal",
+
+    phich_duration: "normal",
+    phich_resource: "1", /* ratio of NG */
+
+    /* System Information Block type 1 */
+    sib1: "amarisoft_sib1.asn",
+
+    /* other SIBs, in same order as the scheduling list in SIB 1 */
+    sib_sched_list: [ "amarisoft_sib23.asn" ],
+
+    si_coderate: 0.30,   /* maximum code rate for SI/RA/P-RNTI messages */
+    si_pdcch_format: 2, /* 2 or 3. Log2 of the number of CCEs for PDCCH
+                           for SI/RA/P-RNTI */
+
+    n_symb_cch: 0, /* number of symbols for CCH (0 = auto) */
+
+    /* PDSCH dedicated config (currently same for all UEs) */
+    pdsch_dedicated: {
+      p_a: 0,
+    },
+
+    /* If defined, force for number of CCEs for UE specific PDCCH to
+       2^pdcch_format. Otherwise it is computed from the reported
+       CQI. Range: 0 to 3. */
+    pdcch_format: 1,
+
+    /* if defined, force the PDSCH MCS for all UEs. Otherwise it is
+       computed from the reported CQI */
+    /* pdsch_mcs: 12, */
+
+    /* PUSCH dedicated config (currently same for all UEs) */
+    pusch_dedicated: {
+      beta_offset_ack_index: 9,
+      beta_offset_ri_index: 6,
+      beta_offset_cqi_index: 6,
+    },
+
+    /* MCS for Msg3 (=CCCH RRC Connection Request) */
+    pusch_msg3_mcs: 0,
+
+    /* this CQI value is assumed when none is received from the UE */
+    initial_cqi: 5,
+
+    /* if defined, force the PUSCH MCS for all UEs. Otherwise it is
+       computed from the last received SRS/PUSCH. */
+    //  pusch_mcs: 18,
+
+    transmission_mode: ${enb.transmission_mode},
+
+    /* Scheduling request period (ms). Must be >= 40 for HD-FDD */
+    sr_period: 20,
+
+    /* CQI report config */
+    cqi_period: 40, /* period (ms). Must be >= 32 for HD-FDD */
+
+    /* RI reporting is done with a period of m_ri * cqi_period.
+       m_ri = 0 (default) disables RI reporting. */
+//    m_ri: 8,
+
+    /* SRS dedicated config. All UEs share these
+       parameters. srs_config_index and freq_domain_position are
+       allocated for each UE) */
+    srs_dedicated: {
+      srs_period: 80, /* period (ms). Must be >= 40 for HD-FDD */
+      srs_bandwidth: 1,
+      srs_hopping_bandwidth: 0,
+    },
+
+    /* MAC configuration (same for all UEs) */
+    mac_config: {
+       ul_max_harq_tx: 5, /* max number of HARQ transmissions for uplink */
+       dl_max_harq_tx: 5, /* max number of HARQ transmissions for downlink */
+    },
+
+    /* CPU load limitation */
+    pusch_max_its: 6, /* max number of turbo decoder iterations */
+
+    /* dynamic power control */
+    dpc: true,
+    dpc_pusch_snr_target: 15,
+    dpc_pucch_snr_target: 10,
+
+    /* RRC/UP ciphering algorithm preference. EEA0 is always the last. */
+    cipher_algo_pref: [],
+    /* RRC integrity algorithm preference. EIA0 is always the last. */
+    integ_algo_pref: [2, 1],
+
+    /* (in ms) send RRC connection release after this time of network
+       inactivity */
+    inactivity_timer: 10000,
+
+    /* SRB configuration */
+    srb_config: [
+      {
+        id: 1,
+        maxRetxThreshold: 32,
+        t_Reordering: 45,
+        t_PollRetransmit: 60,
+      },
+      {
+        id: 2 ,
+        maxRetxThreshold: 32,
+        t_Reordering: 45,
+        t_PollRetransmit: 60,
+      }
+    ],
+
+    /* DRB configuration */
+    drb_config: "amarisoft_drb.cfg",
+  },
+}

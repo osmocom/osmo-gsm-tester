@@ -29,7 +29,7 @@ from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
 from . import modem
 from . import ms_osmo_mobile
-from . import srs_ue, srs_enb
+from . import srs_ue, srs_enb, amarisoft_enb
 
 from .util import is_dict, is_list
 
@@ -140,6 +140,7 @@ KNOWN_BTS_TYPES = {
 
 KNOWN_ENB_TYPES = {
         'srsenb': srs_enb.srsENB,
+        'amarisoftenb': amarisoft_enb.AmarisoftENB,
 }
 
 KNOWN_MS_TYPES = {

@@ -59,7 +59,6 @@ class srsENB(enb.eNodeB):
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf, srsENB.BINFILE)
         self.ue = None
-        self.epc = None
         self.run_dir = None
         self.config_file = None
         self.config_sib_file = None
@@ -75,8 +74,6 @@ class srsENB(enb.eNodeB):
         self.remote_config_drb_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
-        self._num_prb = 0
-        self._txmode = 0
         self.enable_pcap = False
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
@@ -104,7 +101,7 @@ class srsENB(enb.eNodeB):
 
     def start(self, epc):
         self.log('Starting srsENB')
-        self.epc = epc
+        self._epc = epc
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         if self.remote_user:
@@ -190,27 +187,18 @@ class srsENB(enb.eNodeB):
             f.write(r)
 
     def configure(self):
-        values = dict(enb=config.get_defaults('enb'))
-        config.overlay(values, dict(enb=config.get_defaults('srsenb')))
-        config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
-        config.overlay(values, dict(enb=self._conf))
-        config.overlay(values, dict(enb={ 'mme_addr': self.epc.addr() }))
+        values = super().configure('srsenb')
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
 
-        self._num_prb = int(values['enb'].get('num_prb', None))
-        assert self._num_prb
-        self._txmode = int(values['enb'].get('transmission_mode', None))
-        assert self._txmode
         self._num_cells = int(values['enb'].get('num_cells', None))
         assert self._num_cells
-        config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            base_srate = num_prb2base_srate(self._num_prb)
+            base_srate = num_prb2base_srate(self.num_prb())
             rf_dev_args = 'fail_on_disconnect=true' \
                         + ',tx_port=tcp://' + self.addr() + ':2000' \
                         + ',tx_port2=tcp://' + self.addr() + ':2002' \
@@ -239,39 +227,5 @@ class srsENB(enb.eNodeB):
 
     def running(self):
         return not self.process.terminated()
-
-    def num_prb(self):
-        return self._num_prb
-
-    def num_ports(self):
-        if self._txmode == 1:
-            return 1
-        return 2
-
-    def ue_max_rate(self, downlink=True):
-        # The max rate for a single UE per PRB configuration in TM1
-        max_phy_rate_tm1_dl = { 6 : 3.5e6,
-                               15 : 11e6,
-                               25 : 18e6,
-                               50 : 36e6,
-                               75 : 55e6,
-                               100 : 75e6 }
-        max_phy_rate_tm1_ul = { 6 : 0.9e6,
-                               15 : 4.7e6,
-                               25 : 10e6,
-                               50 : 23e6,
-                               75 : 34e6,
-                               100 : 51e6 }
-        if downlink:
-            max_rate = max_phy_rate_tm1_dl[self.num_prb()]
-        else:
-            max_rate = max_phy_rate_tm1_ul[self.num_prb()]
-        #TODO: calculate for non-standard prb numbers.
-        if self._txmode > 2:
-            max_rate *= 2
-        # We use 3 control symbols for 6, 15 and 25 PRBs which results in lower max rate
-        if self.num_prb() < 50:
-          max_rate *= 0.9
-        return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

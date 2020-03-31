@@ -59,7 +59,6 @@ class AmarisoftENB(enb.eNodeB):
     def __init__(self, suite_run, conf):
         super().__init__(suite_run, conf, 'amarisoftenb')
         self.ue = None
-        self.epc = None
         self.run_dir = None
         self._bin_prefix = None
         self.config_file = None
@@ -76,8 +75,6 @@ class AmarisoftENB(enb.eNodeB):
         self.remote_config_rf_file = None
         self.remote_config_drb_file = None
         self.remote_log_file = None
-        self._num_prb = 0
-        self._txmode = 0
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -105,7 +102,7 @@ class AmarisoftENB(enb.eNodeB):
 
     def start(self, epc):
         self.log('Starting AmarisoftENB')
-        self.epc = epc
+        self._epc = epc
         self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
         self.configure()
         self._start()
@@ -138,7 +135,6 @@ class AmarisoftENB(enb.eNodeB):
             f.write(r)
 
     def configure(self):
-
         self.inst = util.Dir(os.path.abspath(self.bin_prefix()))
         lib = self.inst.child('lib')
         if not self.inst.isfile('', AmarisoftENB.BINFILE):
@@ -164,19 +160,9 @@ class AmarisoftENB(enb.eNodeB):
             self.remote_config_drb_file = remote_run_dir.child(AmarisoftENB.CFGFILE_DRB)
             self.remote_log_file = remote_run_dir.child(AmarisoftENB.LOGFILE)
 
-        values = dict(enb=config.get_defaults('enb'))
-        config.overlay(values, dict(enb=config.get_defaults('amarisoftenb')))
-        config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
-        config.overlay(values, dict(enb=self._conf))
-        config.overlay(values, dict(enb={ 'mme_addr': self.epc.addr() }))
-
-        self._num_prb = int(values['enb'].get('num_prb', None))
-        assert self._num_prb
-        self._txmode = int(values['enb'].get('transmission_mode', None))
-        assert self._txmode
+        values = super().configure('amarisoftenb')
         self._num_cells = int(values['enb'].get('num_cells', None))
         assert self._num_cells
-        config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
 
         logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
         config.overlay(values, dict(enb=dict(log_filename=logfile)))
@@ -204,39 +190,5 @@ class AmarisoftENB(enb.eNodeB):
 
     def running(self):
         return not self.process.terminated()
-
-    def num_prb(self):
-        return self._num_prb
-
-    def num_ports(self):
-        if self._txmode == 1:
-            return 1
-        return 2
-
-    def ue_max_rate(self, downlink=True):
-        # The max rate for a single UE per PRB configuration in TM1
-        max_phy_rate_tm1_dl = { 6 : 3.5e6,
-                               15 : 11e6,
-                               25 : 18e6,
-                               50 : 36e6,
-                               75 : 55e6,
-                               100 : 75e6 }
-        max_phy_rate_tm1_ul = { 6 : 0.9e6,
-                               15 : 4.7e6,
-                               25 : 10e6,
-                               50 : 23e6,
-                               75 : 34e6,
-                               100 : 51e6 }
-        if downlink:
-            max_rate = max_phy_rate_tm1_dl[self.num_prb()]
-        else:
-            max_rate = max_phy_rate_tm1_ul[self.num_prb()]
-        #TODO: calculate for non-standard prb numbers.
-        if self._txmode > 2:
-            max_rate *= 2
-        # We use 3 control symbols for 6, 15 and 25 PRBs which results in lower max rate
-        if self.num_prb() < 50:
-          max_rate *= 0.9
-        return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

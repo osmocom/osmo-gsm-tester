@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractmethod
-from . import log
+from . import log, config
 
 
 class eNodeB(log.Origin, metaclass=ABCMeta):
@@ -33,6 +33,28 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         if self._addr is None:
             raise log.Error('addr not set')
         self.set_name('%s_%s' % (name, self._addr))
+        self._txmode = 0
+        self._num_prb = 0
+        self._epc = None
+
+    def configure(self, default_specifics):
+        values = dict(enb=config.get_defaults('enb'))
+        config.overlay(values, dict(enb=config.get_defaults(default_specifics)))
+        config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
+        config.overlay(values, dict(enb=self._conf))
+        self._num_prb = int(values['enb'].get('num_prb', None))
+        assert self._num_prb
+        self._txmode = int(values['enb'].get('transmission_mode', None))
+        assert self._txmode
+        config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
+        assert self._epc is not None
+        config.overlay(values, dict(enb={ 'mme_addr': self._epc.addr() }))
+        return values
+
+    def num_ports(self):
+        if self._txmode == 1:
+            return 1
+        return 2
 
 ########################
 # PUBLIC - INTERNAL API
@@ -40,6 +62,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def cleanup(self):
         'Nothing to do by default. Subclass can override if required.'
         pass
+
+    def num_prb(self):
+        return self._num_prb
 
 ###################
 # PUBLIC (test API included)
@@ -63,5 +88,31 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 
     def addr(self):
         return self._addr
+
+    def ue_max_rate(self, downlink=True):
+        # The max rate for a single UE per PRB configuration in TM1
+        max_phy_rate_tm1_dl = { 6 : 3.5e6,
+                               15 : 11e6,
+                               25 : 18e6,
+                               50 : 36e6,
+                               75 : 55e6,
+                               100 : 75e6 }
+        max_phy_rate_tm1_ul = { 6 : 0.9e6,
+                               15 : 4.7e6,
+                               25 : 10e6,
+                               50 : 23e6,
+                               75 : 34e6,
+                               100 : 51e6 }
+        if downlink:
+            max_rate = max_phy_rate_tm1_dl[self.num_prb()]
+        else:
+            max_rate = max_phy_rate_tm1_ul[self.num_prb()]
+        #TODO: calculate for non-standard prb numbers.
+        if self._txmode > 2:
+            max_rate *= 2
+        # We use 3 control symbols for 6, 15 and 25 PRBs which results in lower max rate
+        if self.num_prb() < 50:
+          max_rate *= 0.9
+        return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

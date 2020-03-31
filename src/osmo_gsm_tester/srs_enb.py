@@ -160,7 +160,7 @@ class srsENB(enb.eNodeB):
     def start_locally(self):
         inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
 
-        binary = inst.child('bin', BINFILE)
+        binary = inst.child('bin', srsENB.BINFILE)
         if not os.path.isfile(binary):
             raise log.Error('Binary missing:', binary)
         lib = inst.child('lib')

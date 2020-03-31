@@ -136,7 +136,6 @@ class AmarisoftENB(enb.eNodeB):
 
     def configure(self):
         self.inst = util.Dir(os.path.abspath(self.bin_prefix()))
-        lib = self.inst.child('lib')
         if not self.inst.isfile('', AmarisoftENB.BINFILE):
             raise log.Error('No %s binary in' % AmarisoftENB.BINFILE, self.inst)
 

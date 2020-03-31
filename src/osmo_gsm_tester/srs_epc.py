@@ -21,6 +21,7 @@ import os
 import pprint
 
 from . import log, util, config, template, process, remote
+from . import epc
 
 def rlc_drb_mode2qci(rlc_drb_mode):
     if rlc_drb_mode.upper() == "UM":
@@ -29,7 +30,7 @@ def rlc_drb_mode2qci(rlc_drb_mode):
         return 9;
     raise log.Error('Unexpected rlc_drb_mode', rlc_drb_mode=rlc_drb_mode)
 
-class srsEPC(log.Origin):
+class srsEPC(epc.EPC):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsepc'
     BINFILE = 'srsepc'
@@ -39,9 +40,7 @@ class srsEPC(log.Origin):
     LOGFILE = 'srsepc.log'
 
     def __init__(self, suite_run, run_node):
-        super().__init__(log.C_RUN, 'srsepc')
-        self._addr = run_node.run_addr()
-        self.set_name('srsepc_%s' % self._addr)
+        super().__init__(suite_run, run_node, 'srsepc')
         self.run_dir = None
         self.config_file = None
         self.db_file = None
@@ -55,8 +54,6 @@ class srsEPC(log.Origin):
         self.remote_pcap_file = None
         self.enable_pcap = False
         self.subscriber_list = []
-        self.suite_run = suite_run
-        self._run_node = run_node
 
     def cleanup(self):
         if self.process is None:
@@ -161,9 +158,7 @@ class srsEPC(log.Origin):
         self.pcap_file = self.run_dir.child(srsEPC.PCAPFILE)
         self.dbg(config_file=self.config_file, db_file=self.db_file)
 
-        values = dict(epc=config.get_defaults('srsepc'))
-        config.overlay(values, dict(epc=self.suite_run.config().get('epc', {})))
-        config.overlay(values, dict(epc={'run_addr': self.addr()}))
+        values = super().configure('srsepc')
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['epc'].get('enable_pcap', 'false'))
@@ -212,13 +207,7 @@ class srsEPC(log.Origin):
     def running(self):
         return not self.process.terminated()
 
-    def addr(self):
-        return self._addr
-
     def tun_addr(self):
         return '172.16.0.1'
-
-    def run_node(self):
-        return self._run_node
 
 # vim: expandtab tabstop=4 shiftwidth=4

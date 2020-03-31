@@ -25,7 +25,6 @@ from . import config, log, util, resource, test
 from .event_loop import MainLoop
 from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, esme, osmocon, ms_driver, iperf3, process
 from . import run_node
-from . import srs_epc
 
 class Timeout(Exception):
     pass
@@ -374,9 +373,9 @@ class SuiteRun(log.Origin):
     def epc(self, run_node=None):
         if run_node is None:
             run_node = self.run_node()
-        epc_obj = srs_epc.srsEPC(self, run_node)
-        self.register_for_cleanup(epc_obj)
-        return epc_obj
+        epc = epc_obj(self, run_node)
+        self.register_for_cleanup(epc)
+        return epc
 
     def osmocon(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_OSMOCON, specifics=specifics)
@@ -504,5 +503,17 @@ def enb_obj(suite_run, conf):
     if enb_class is None:
         raise RuntimeError('No such ENB type is defined: %r' % enb_type)
     return enb_class(suite_run, conf)
+
+def epc_obj(suite_run, run_node):
+    values = dict(epc=config.get_defaults('epc'))
+    config.overlay(values, dict(epc=suite_run.config().get('epc', {})))
+    epc_type = values['epc'].get('type', None)
+    if epc_type is None:
+        raise RuntimeError('EPC type is not defined!')
+    log.dbg('create EPC object', type=epc_type)
+    epc_class = resource.KNOWN_EPC_TYPES.get(epc_type)
+    if epc_class is None:
+        raise RuntimeError('No such EPC type is defined: %r' % epc_type)
+    return epc_class(suite_run, run_node)
 
 # vim: expandtab tabstop=4 shiftwidth=4

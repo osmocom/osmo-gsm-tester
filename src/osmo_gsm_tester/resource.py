@@ -29,7 +29,7 @@ from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
 from . import modem
 from . import ms_osmo_mobile
-from . import srs_ue, srs_enb, amarisoft_enb
+from . import srs_ue, srs_enb, amarisoft_enb, srs_epc, amarisoft_epc
 
 from .util import is_dict, is_list
 
@@ -122,6 +122,7 @@ CONF_SCHEMA = util.dict_add(
     { 'defaults.timeout': schema.STR,
       'config.bsc.net.codec_list[]': schema.CODEC,
       'config.enb.enable_pcap': schema.BOOL_STR,
+      'config.epc.type': schema.STR,
       'config.epc.rlc_drb_mode': schema.LTE_RLC_DRB_MODE,
       'config.epc.enable_pcap': schema.BOOL_STR,
       'config.modem.enable_pcap': schema.BOOL_STR,
@@ -141,6 +142,11 @@ KNOWN_BTS_TYPES = {
 KNOWN_ENB_TYPES = {
         'srsenb': srs_enb.srsENB,
         'amarisoftenb': amarisoft_enb.AmarisoftENB,
+}
+
+KNOWN_EPC_TYPES = {
+        'srsepc': srs_epc.srsEPC,
+        'amarisoftepc': amarisoft_epc.AmarisoftEPC,
 }
 
 KNOWN_MS_TYPES = {

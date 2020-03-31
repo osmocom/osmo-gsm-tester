@@ -1,10 +1,10 @@
 rf_driver: {
-    name: "${enb.rf_dev_type}",
-    sync: "${'1' if enb.rf_dev_type == 'zmq' else 'none'}",
+    name: "${trx.rf_dev_type}",
+    sync: "${'1' if trx.rf_dev_type == 'zmq' else 'none'}",
 
     /* Use this for b2x0 devices. Bandwidth >= 10 Mhz */
-    args: "${enb.rf_dev_args}",
-% if enb.rf_dev_type == 'zmq':
+    args: "${trx.rf_dev_args}",
+% if trx.rf_dev_type == 'zmq':
         dl_sample_bits: 16,
         ul_sample_bits: 16,
 % endif
@@ -12,7 +12,7 @@ rf_driver: {
 
 tx_gain: 89.0, /* TX gain (in dB) B2x0: 0 to 89.8 dB */
 rx_gain: 60.0, /* RX gain (in dB) B2x0: 0 to 73 dB */
-% if enb.rf_dev_type == 'zmq':
+% if trx.rf_dev_type == 'zmq':
 tx_time_offset: 0,
 % else:
 tx_time_offset: -150,

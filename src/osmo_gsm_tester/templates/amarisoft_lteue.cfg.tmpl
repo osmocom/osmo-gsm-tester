@@ -1,0 +1,70 @@
+/* UE simulator configuration file version 2018-10-18
+ * Copyright (C) 2015-2018 Amarisoft
+ */
+{
+
+%if ue.license_server_addr != '0.0.0.0':
+  license_server: {
+    server_addr: "${ue.license_server_addr}",
+    name: "amarisoft",
+  },
+%endif
+
+% if ue.rf_dev_type == 'zmq':
+  /* Force sampling rate (if uncommented) */
+  sample_rate: ${ue.sample_rate},
+%endif
+
+
+//  log_options: "all.level=debug,all.max_size=32",
+  log_options: "all.level=error,all.max_size=0,nas.level=debug,nas.max_size=1,rrc.level=debug,rrc.max_size=1",
+  log_filename: "${ue.log_filename}",
+
+  /* Enable remote API and Web interface */
+  com_addr: "${ue.addr}:9002",
+
+  include "amarisoft_rf_driver.cfg",
+
+  bandwidth: 5,
+
+  /* If true, allow the simulation of several UEs at the same time and
+     allow dynamic UE creation from remote API */
+  multi_ue: false,
+
+  cells: [
+    {
+      dl_earfcn: 3350, /* 2850 MHz (band 7) */
+//      dl_earfcn: 40620, /* 3500 MHz (band 41) */
+      n_antenna_dl: 1, /* number of downlink antennas */
+      n_antenna_ul: 1,
+
+      /* must be provided if multi_ue = true */
+      //global_timing_advance: 1,
+    }
+  ],
+
+  ue_list: [
+    {
+      /* UE capabilities */
+      as_release: 8,
+      ue_category: 4,
+
+      /* USIM data */
+      imsi: "${ue.imsi}",
+      K: "${ue.ki}",
+
+      /* If enabled, will try to use external SIM card using libpcsclite */
+      //external_sim: true,
+
+      /* Enable it to create a TUN interface for each UE PDN */
+      //tun_setup_script: "ue-ifup",
+    }
+  ],
+
+  /* If case your system have a high SNR and you are running high number of
+   * UEs, enable this option to optimize PDCCH decoding and save CPU
+   */
+  pdcch_decode_opt: false,
+  pdcch_decode_opt_threshold: 0.1,
+
+}

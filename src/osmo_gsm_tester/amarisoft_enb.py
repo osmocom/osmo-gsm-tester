@@ -201,6 +201,11 @@ class AmarisoftENB(enb.eNodeB):
         logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
         config.overlay(values, dict(enb=dict(log_filename=logfile)))
 
+        # rf driver is shared between amarisoft enb and ue, so it has a
+        # different cfg namespace 'trx'. Copy needed values over there:
+        config.overlay(values, dict(trx=dict(rf_dev_type=values['enb'].get('rf_dev_type', None),
+                                             rf_dev_args=values['enb'].get('rf_dev_args', None))))
+
         self.gen_conf_file(self.config_file, AmarisoftENB.CFGFILE, values)
         self.gen_conf_file(self.config_sib1_file, AmarisoftENB.CFGFILE_SIB1, values)
         self.gen_conf_file(self.config_sib23_file, AmarisoftENB.CFGFILE_SIB23, values)

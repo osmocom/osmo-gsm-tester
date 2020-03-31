@@ -29,7 +29,7 @@ from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
 from . import modem
 from . import ms_osmo_mobile
-from . import srs_ue, srs_enb, amarisoft_enb, srs_epc, amarisoft_epc
+from . import srs_ue, amarisoft_ue, srs_enb, amarisoft_enb, srs_epc, amarisoft_epc
 
 from .util import is_dict, is_list
 
@@ -159,6 +159,7 @@ KNOWN_MS_TYPES = {
         'ofono': modem.Modem,
         'osmo-mobile': ms_osmo_mobile.MSOsmoMobile,
         'srsue': srs_ue.srsUE,
+        'amarisoftue': amarisoft_ue.AmarisoftUE,
 }
 
 

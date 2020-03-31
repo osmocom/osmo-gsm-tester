@@ -181,9 +181,15 @@ class srsENB(enb.eNodeB):
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
 
-    def gen_conf_file(self, path, filename):
-        self.dbg(config_file=path)
+    def gen_conf_file(self, path, filename, values):
+        self.dbg('srsENB ' + filename + ':\n' + pprint.pformat(values))
 
+        with open(path, 'w') as f:
+            r = template.render(filename, values)
+            self.dbg(r)
+            f.write(r)
+
+    def configure(self):
         values = dict(enb=config.get_defaults('enb'))
         config.overlay(values, dict(enb=config.get_defaults('srsenb')))
         config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
@@ -214,14 +220,6 @@ class srsENB(enb.eNodeB):
                         + ',id=enb,base_srate=' + str(base_srate)
             config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
-        self.dbg('srsENB ' + filename + ':\n' + pprint.pformat(values))
-
-        with open(path, 'w') as f:
-            r = template.render(filename, values)
-            self.dbg(r)
-            f.write(r)
-
-    def configure(self):
         self.config_file = self.run_dir.child(srsENB.CFGFILE)
         self.config_sib_file = self.run_dir.child(srsENB.CFGFILE_SIB)
         self.config_rr_file = self.run_dir.child(srsENB.CFGFILE_RR)
@@ -229,10 +227,10 @@ class srsENB(enb.eNodeB):
         self.log_file = self.run_dir.child(srsENB.LOGFILE)
         self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
 
-        self.gen_conf_file(self.config_file, srsENB.CFGFILE)
-        self.gen_conf_file(self.config_sib_file, srsENB.CFGFILE_SIB)
-        self.gen_conf_file(self.config_rr_file, srsENB.CFGFILE_RR)
-        self.gen_conf_file(self.config_drb_file, srsENB.CFGFILE_DRB)
+        self.gen_conf_file(self.config_file, srsENB.CFGFILE, values)
+        self.gen_conf_file(self.config_sib_file, srsENB.CFGFILE_SIB, values)
+        self.gen_conf_file(self.config_rr_file, srsENB.CFGFILE_RR, values)
+        self.gen_conf_file(self.config_drb_file, srsENB.CFGFILE_DRB, values)
 
     def ue_add(self, ue):
         if self.ue is not None:

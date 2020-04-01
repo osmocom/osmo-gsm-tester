@@ -30,22 +30,32 @@ phy_cnfg =
     beta_offset_ri_idx  = 6;
     beta_offset_cqi_idx = 6;
   };
-  
-  // PUCCH-SR resources are scheduled on time-frequeny domain first, then multiplexed in the same resource. 
+
+  // PUCCH-SR resources are scheduled on time-frequeny domain first, then multiplexed in the same resource.
   sched_request_cnfg =
   {
     dsr_trans_max = 64;
     period = 20;       // in ms
-    subframe = [1];    // vector of subframe indices allowed for SR transmissions 
-    nof_prb = 2;       // number of PRBs on each extreme used for SR (total prb is twice this number)
+    subframe = [1];    // vector of subframe indices allowed for SR transmissions
+
+    // number of PRBs on each extreme used for SR (total prb is twice this number)
+% if int(enb['num_prb']) <= 6:
+    nof_prb = 1;
+% else:
+    nof_prb = 2;
+% endif
   };
   cqi_report_cnfg =
-  { 
+  {
     mode = "periodic";
-    simultaneousAckCQI = true; 
+    simultaneousAckCQI = true;
     period = 40; // in ms
     subframe = [0];
-    nof_prb = 2; 
+% if int(enb['num_prb']) <= 6:
+    nof_prb = 1;
+% else:
+    nof_prb = 2;
+% endif
     m_ri = 8; // RI period in CQI period
   };
 };

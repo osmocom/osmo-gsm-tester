@@ -33,10 +33,13 @@ class EPC(log.Origin, metaclass=ABCMeta):
         self.suite_run = suite_run
         self._run_node = run_node
 
-    def configure(self, default_specifics):
+    def configure(self, config_specifics_li):
         values = dict(epc=config.get_defaults('epc'))
-        config.overlay(values, dict(epc=config.get_defaults(default_specifics)))
+        for config_specifics in config_specifics_li:
+            config.overlay(values, dict(epc=config.get_defaults(config_specifics)))
         config.overlay(values, dict(epc=self.suite_run.config().get('epc', {})))
+        for config_specifics in config_specifics_li:
+            config.overlay(values, dict(epc=self.suite_run.config().get(config_specifics, {})))
         config.overlay(values, dict(epc={'run_addr': self.addr()}))
         return values
 

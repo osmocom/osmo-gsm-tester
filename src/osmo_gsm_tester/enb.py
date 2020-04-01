@@ -37,10 +37,13 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self._num_prb = 0
         self._epc = None
 
-    def configure(self, default_specifics):
+    def configure(self, config_specifics_li):
         values = dict(enb=config.get_defaults('enb'))
-        config.overlay(values, dict(enb=config.get_defaults(default_specifics)))
+        for config_specifics in config_specifics_li:
+            config.overlay(values, dict(enb=config.get_defaults(config_specifics)))
         config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
+        for config_specifics in config_specifics_li:
+            config.overlay(values, dict(enb=self.suite_run.config().get(config_specifics, {})))
         config.overlay(values, dict(enb=self._conf))
         self._num_prb = int(values['enb'].get('num_prb', None))
         assert self._num_prb

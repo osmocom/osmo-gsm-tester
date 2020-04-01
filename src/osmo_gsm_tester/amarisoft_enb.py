@@ -159,7 +159,7 @@ class AmarisoftENB(enb.eNodeB):
             self.remote_config_drb_file = remote_run_dir.child(AmarisoftENB.CFGFILE_DRB)
             self.remote_log_file = remote_run_dir.child(AmarisoftENB.LOGFILE)
 
-        values = super().configure('amarisoftenb')
+        values = super().configure(['amarisoft', 'amarisoftenb'])
         self._num_cells = int(values['enb'].get('num_cells', None))
         assert self._num_cells
 

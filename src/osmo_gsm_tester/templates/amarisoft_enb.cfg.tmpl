@@ -3,11 +3,12 @@
  */
 {
 
+%if enb.license_server_addr != '0.0.0.0':
   license_server: {
     server_addr: "${enb.license_server_addr}",
     name: "amarisoft",
   },
-
+%endif
 
   /* Log filter: syntax: layer.field=value[,...]
 

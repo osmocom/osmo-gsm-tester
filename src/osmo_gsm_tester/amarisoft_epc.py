@@ -141,7 +141,7 @@ class AmarisoftEPC(epc.EPC):
             self.remote_log_file = remote_run_dir.child(AmarisoftEPC.LOGFILE)
             self.remote_ifup_file = remote_run_dir.child(AmarisoftEPC.IFUPFILE)
 
-        values = super().configure('amarisoftepc')
+        values = super().configure(['amarisoft', 'amarisoftepc'])
 
         logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
         ifupfile = self.ifup_file if self._run_node.is_local() else self.remote_ifup_file

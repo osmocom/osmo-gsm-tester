@@ -187,7 +187,7 @@ class srsENB(enb.eNodeB):
             f.write(r)
 
     def configure(self):
-        values = super().configure('srsenb')
+        values = super().configure(['srsenb'])
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))

@@ -158,7 +158,7 @@ class srsEPC(epc.EPC):
         self.pcap_file = self.run_dir.child(srsEPC.PCAPFILE)
         self.dbg(config_file=self.config_file, db_file=self.db_file)
 
-        values = super().configure('srsepc')
+        values = super().configure(['srsepc'])
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['epc'].get('enable_pcap', 'false'))

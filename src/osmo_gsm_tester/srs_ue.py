@@ -76,6 +76,7 @@ class srsUE(MS):
         self.enable_pcap = False
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
+        self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
 
@@ -168,6 +169,7 @@ class srsUE(MS):
                 '--log.filename=' + self.remote_log_file,
                 '--pcap.filename=' + self.remote_pcap_file,
                 '--general.metrics_csv_filename=' + self.remote_metrics_file)
+        args += tuple(self._additional_args)
 
         self.process = self.rem_host.RemoteProcess(srsUE.BINFILE, args)
         #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, remote_run_dir, args, remote_lib)
@@ -203,6 +205,7 @@ class srsUE(MS):
                 '--log.filename=' + self.log_file,
                 '--pcap.filename=' + self.pcap_file,
                 '--general.metrics_csv_filename=' + self.metrics_file)
+        args += tuple(self._additional_args)
 
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
@@ -224,6 +227,8 @@ class srsUE(MS):
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['ue'].get('enable_pcap', 'false'))
         config.overlay(values, dict(ue={'enable_pcap': self.enable_pcap}))
+
+        self._additional_args = values['ue'].get('additional_args', '').split()
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':

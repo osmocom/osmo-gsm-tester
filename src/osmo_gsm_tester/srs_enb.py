@@ -77,6 +77,7 @@ class srsENB(enb.eNodeB):
         self.enable_pcap = False
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
+        self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
 
@@ -149,6 +150,7 @@ class srsENB(enb.eNodeB):
                 '--enb_files.drb_config=' + self.remote_config_drb_file,
                 '--log.filename=' + self.remote_log_file,
                 '--pcap.filename=' + self.remote_pcap_file)
+        args += tuple(self._additional_args)
 
         self.process = self.rem_host.RemoteProcess(srsENB.BINFILE, args, remote_env=remote_env)
         self.suite_run.remember_to_stop(self.process)
@@ -173,6 +175,7 @@ class srsENB(enb.eNodeB):
                 '--enb_files.drb_config=' + os.path.abspath(self.config_drb_file),
                 '--log.filename=' + self.log_file,
                 '--pcap.filename=' + self.pcap_file)
+        args += tuple(self._additional_args)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
         self.suite_run.remember_to_stop(self.process)
@@ -192,6 +195,8 @@ class srsENB(enb.eNodeB):
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
+
+        self._additional_args = values['enb'].get('additional_args', '').split()
 
         self._num_cells = int(values['enb'].get('num_cells', None))
         assert self._num_cells

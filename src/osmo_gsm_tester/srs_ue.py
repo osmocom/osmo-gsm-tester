@@ -26,7 +26,7 @@ from .event_loop import MainLoop
 from .ms import MS
 
 def rf_type_valid(rf_type_str):
-    return rf_type_str in ('zmq', 'UHD', 'soapy', 'bladeRF')
+    return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
 
 #reference: srsLTE.git srslte_symbol_sz()
 def num_prb2symbol_sz(num_prb):

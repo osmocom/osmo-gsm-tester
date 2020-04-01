@@ -164,7 +164,7 @@ enb:
 
 - label: srsENB-B200
   type: srsenb
-  rf_dev_type: UHD
+  rf_dev_type: uhd
   rf_dev_args: "type=b200,serial=306BD11"
   remote_user: jenkins
   addr: 10.42.42.117

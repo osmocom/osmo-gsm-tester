@@ -201,6 +201,49 @@ class Scenario(log.Origin, dict):
         self.path = path
         self.param_list = param_list
 
+    @classmethod
+    def count_cont_char_backward(cls, str, before_pos, c):
+        n = 0
+        i = before_pos - 1
+        while i >= 0:
+            if str[i] != c:
+                break
+            n += 1
+            i -= 1
+        return n
+
+    @classmethod
+    def split_scenario_parameters(cls, str):
+        cur_pos = 0
+        param_li = []
+        saved = ''
+        # Split into a list, but we want to escape '\,' to avoid splitting parameters containing commas.
+        while True:
+            prev_pos = cur_pos
+            cur_pos = str.find(',', prev_pos)
+            if cur_pos == -1:
+                param_li.append(str[prev_pos:])
+                break
+            if cur_pos == 0:
+                param_li.append('')
+            elif cur_pos != 0 and str[cur_pos - 1] == '\\' and cls.count_cont_char_backward(str, cur_pos, '\\') % 2 == 1:
+                saved += str[prev_pos:cur_pos - 1] + ','
+            else:
+                param_li.append(saved + str[prev_pos:cur_pos])
+                saved = ''
+            cur_pos += 1
+        i = 0
+        # Also escape '\\' -> '\'
+        while i < len(param_li):
+            param_li[i] = param_li[i].replace('\\\\', '\\')
+            i += 1
+        return param_li
+
+    @classmethod
+    def from_param_list_str(cls, name, path, param_list_str):
+        param_list = cls.split_scenario_parameters(param_list_str)
+        return cls(name, path, param_list)
+
     def read_from_file(self, validation_schema):
         with open(self.path, 'r') as f:
             config_str = f.read()
@@ -228,6 +271,7 @@ def get_scenario(name, validation_schema=None):
     if not is_parametrized_file:
         if not os.path.isfile(path):
             raise RuntimeError('No such scenario file: %r' % path)
+        sc = Scenario(name, path)
     else: # parametrized scenario:
         # Allow first matching complete matching names (eg: scenario@param1,param2.conf),
         # this allows setting specific content in different files for specific values.
@@ -240,8 +284,7 @@ def get_scenario(name, validation_schema=None):
         # At this point, we have existing file path. Let's now scrap the parameter(s):
         # get param1,param2 str from scenario@param1,param2.conf
         param_list_str = name.split('@', 1)[1][:-len('.conf')]
-        param_list = param_list_str.split(',')
-    sc = Scenario(name, path, param_list)
+        sc = Scenario.from_param_list_str(name, path, param_list_str)
     sc.read_from_file(validation_schema)
     return sc
 

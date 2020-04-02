@@ -1,0 +1,69 @@
+#!/bin/sh
+set -e -x
+
+amarisoft_tgz="$1"
+
+if [ ! -f "$amarisoft_tgz" ]; then
+        echo "Amarisoft tgz doesn't exist: $amarisoft_tgz"
+        exit 1
+fi
+
+base="$PWD"
+name="srslte"
+git_url="${git_url:-https://github.com/srsLTE}"
+project_name_srslte="${project_name:-srsLTE}"
+. "$(dirname "$0")/jenkins-build-common.sh"
+
+#TODO: make sure libconfig, zeroMQ is installed
+build_repo $project_name_srslte
+
+git_url="git@github.com:softwareradiosystems"
+project_name_zmq="amarisoft_dummy_trx"
+branch="trx_zmq"
+have_repo $project_name_zmq $branch
+cd $project_name_zmq
+rm -rf build && mkdir build && cd build || exit 1
+cmake -DSRSLTE_BUILD_PATH=${base}/${project_name_srslte}/build ../
+make -j8
+cd $base
+
+rm -rf inst-tmp && mkdir inst-tmp
+rm -rf inst-tmp-uhd && mkdir inst-tmp-uhd
+tar -zxf $amarisoft_tgz -C inst-tmp/
+tar -zxf inst-tmp/*/trx_uhd*.tar.gz -C inst-tmp/
+#tar -zxf inst-tmp/trx_uhd-linux*/trx_uhd.so.tar.gz -C inst-tmp-uhd/
+
+# Build trx_uhd.so:
+cd ${base}/inst-tmp/trx_uhd-linux*/
+make
+cd ${base}
+
+# Create amarisoftenb inst:
+rm -rf inst-amarisoftenb && mkdir inst-amarisoftenb || exit 1
+tar --strip-components=1 -zxf inst-tmp/*/lteenb-linux*.tar.gz -C inst-amarisoftenb/
+cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftenb/
+cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftenb/trx_zmq.so
+cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftenb/
+this="amarisoftenb.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
+tar="${this}.tgz"
+tar -czf "$tar" -C inst-amarisoftenb/ .
+md5sum "$tar" > "${this}.md5"
+
+# Create amarisoftue inst:
+rm -rf inst-amarisoftue && mkdir inst-amarisoftue || exit 1
+tar --strip-components=1 -zxf inst-tmp/*/lteue-linux*.tar.gz -C inst-amarisoftue/
+cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftue/
+cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftue/trx_zmq.so
+cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftenb/
+this="amarisoftue.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
+tar="${this}.tgz"
+tar -czf "$tar" -C inst-amarisoftue/ .
+md5sum "$tar" > "${this}.md5"
+
+# Create amarisoftepc inst:
+rm -rf inst-amarisoftepc && mkdir inst-amarisoftepc || exit 1
+tar --strip-components=1 -zxf inst-tmp/*/ltemme-linux*.tar.gz -C inst-amarisoftepc/
+this="amarisoftepc.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
+tar="${this}.tgz"
+tar -czf "$tar" -C inst-amarisoftepc/ .
+md5sum "$tar" > "${this}.md5"

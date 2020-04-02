@@ -24,7 +24,7 @@ from . import log, util, config, template, process, remote
 from . import enb
 
 def rf_type_valid(rf_type_str):
-    return rf_type_str in ('uhd')
+    return rf_type_str in ('uhd', 'zmq')
 
 #reference: srsLTE.git srslte_symbol_sz()
 def num_prb2symbol_sz(num_prb):
@@ -166,6 +166,38 @@ class AmarisoftENB(enb.eNodeB):
         values = super().configure(['amarisoft', 'amarisoftenb'])
         self._num_cells = int(values['enb'].get('num_cells', None))
         assert self._num_cells
+
+        # We need to set some specific variables programatically here to match IP addresses:
+        if self._conf.get('rf_dev_type') == 'zmq':
+            base_srate = num_prb2base_srate(self.num_prb())
+            rf_dev_args = 'fail_on_disconnect=true' \
+                        + ',tx_port0=tcp://' + self.addr() + ':2000' \
+                        + ',tx_port1=tcp://' + self.addr() + ':2002' \
+                        + ',rx_port0=tcp://' + self.ue.addr() + ':2001' \
+                        + ',rx_port1=tcp://' + self.ue.addr() + ':2003' \
+                        + ',tx_freq=2630e6,rx_freq=2510e6,tx_freq2=2650e6,rx_freq2=2530e6' \
+                        + ',id=enb,base_srate=' + str(base_srate)
+            config.overlay(values, dict(enb=dict(sample_rate = base_srate / (1000*1000),
+                                                 rf_dev_args=rf_dev_args)))
+
+        # Set UHD frame size as a function of the cell bandwidth on B2XX
+        if self._conf.get('rf_dev_type') == 'UHD' and values['enb'].get('rf_dev_args', None) is not None:
+            if 'b200' in values['enb'].get('rf_dev_args'):
+                rf_dev_args = values['enb'].get('rf_dev_args', '')
+                rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''
+
+                if self._num_prb < 25:
+                    rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
+                elif self._num_prb == 25:
+                    rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
+                elif self._num_prb > 25:
+                    rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
+
+                if self._num_prb > 50:
+                    # Reduce over the wire format to sc12
+                    rf_dev_args += ',otw_format=sc12'
+
+                config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
         config.overlay(values, dict(enb=dict(log_filename=logfile)))

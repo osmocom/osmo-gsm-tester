@@ -10,6 +10,11 @@
   },
 %endif
 
+% if enb.rf_dev_type == 'zmq':
+  /* Force sampling rate (if uncommented) */
+  sample_rate: ${enb.sample_rate},
+%endif
+
   /* Log filter: syntax: layer.field=value[,...]
 
      Possible layers are phy, mac, rlc, pdcp, rrc, nas, s1ap, x2ap, gtpu and

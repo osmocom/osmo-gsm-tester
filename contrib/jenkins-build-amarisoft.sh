@@ -61,7 +61,7 @@ if [ "x${BUILD_AMARISOFT_TRX_ZMQ}" = "x1" ]; then
         cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftue/
         cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftue/trx_zmq.so
 fi
-cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftenb/
+cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftue/
 this="amarisoftue.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
 tar="${this}.tgz"
 tar -czf "$tar" -C inst-amarisoftue/ .

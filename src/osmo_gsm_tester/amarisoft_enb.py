@@ -60,6 +60,7 @@ class AmarisoftENB(enb.eNodeB):
         super().__init__(suite_run, conf, 'amarisoftenb')
         self.ue = None
         self.run_dir = None
+        self.inst = None
         self._bin_prefix = None
         self.config_file = None
         self.config_sib1_file = None
@@ -69,6 +70,7 @@ class AmarisoftENB(enb.eNodeB):
         self.log_file = None
         self.process = None
         self.rem_host = None
+        self.remote_inst = None
         self.remote_config_file =  None
         self.remote_config_sib1_file = None
         self.remote_config_sib23_file = None

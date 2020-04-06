@@ -68,6 +68,7 @@ class OsmoPcu(pcu.Pcu):
         config.overlay(values, self.suite_run.config())
         config.overlay(values, {
                         'osmo_pcu': {
+                            'bts_addr': self.bts.remote_addr(),
                             'pcu_socket_path': self.bts.pcu_socket_path(),
                         }
         })

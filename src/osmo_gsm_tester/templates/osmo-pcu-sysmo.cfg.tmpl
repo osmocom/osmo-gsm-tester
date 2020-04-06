@@ -1,8 +1,13 @@
 log stderr
-  logging color 1
-  logging print extended-timestamp 1
-  logging print category 1
-  logging level set-all info
+ logging color 1
+ logging print extended-timestamp 1
+ logging print category 1
+ logging print category-hex 0
+ logging print file basename
+ logging level set-all info
+line vty
+ no login
+ bind ${osmo_pcu_sysmo.bts_addr}
 pcu
  pcu-socket ${osmo_pcu_sysmo.pcu_socket_path}
  flow-control-interval 10
@@ -10,3 +15,17 @@ pcu
  alloc-algorithm dynamic
  alpha 0
  gamma 0
+ gsmtap-category dl-unknown
+ !gsmtap-category dl-dummy
+ gsmtap-category dl-ctrl
+ gsmtap-category dl-data-gprs
+ gsmtap-category dl-data-egprs
+ gsmtap-category dl-ptcch
+ gsmtap-category dl-agch
+ gsmtap-category dl-pch
+ gsmtap-category ul-unknown
+ !gsmtap-category ul-dummy
+ gsmtap-category ul-ctrl
+ gsmtap-category ul-data-gprs
+ gsmtap-category ul-data-egprs
+ gsmtap-category ul-rach

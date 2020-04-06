@@ -109,7 +109,7 @@ RESOURCES_SCHEMA = {
         'modem[].features[]': schema.MODEM_FEATURE,
         'modem[].rf_dev_type': schema.STR,
         'modem[].rf_dev_args': schema.STR,
-        'modem[].num_carriers': schema.STR,
+        'modem[].num_carriers': schema.UINT,
         'modem[].additional_args': schema.STR,
         'modem[].airplane_t_on_ms': schema.INT,
         'modem[].airplane_t_off_ms': schema.INT,

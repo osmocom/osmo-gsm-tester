@@ -31,7 +31,7 @@
 #                     Default is auto (yes for UHD, no for rest)
 #####################################################################
 [rf]
-% if ue.num_carriers == 2:
+% if int(ue.num_carriers) == 2:
 dl_earfcn = 2850,3050
 % else:
 dl_earfcn = 2850
@@ -143,7 +143,7 @@ imei = 353490069873319
 # mbms_service_port: Port of the MBMS service
 #####################################################################
 [rrc]
-% if ue.num_carriers == 2:
+% if int(ue.num_carriers) == 2:
 ue_category       = 7
 release           = 10
 % else:

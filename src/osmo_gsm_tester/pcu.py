@@ -34,6 +34,13 @@ class Pcu(log.Origin, metaclass=ABCMeta):
         self.bts = bts
         self.conf = conf
 
+########################
+# PUBLIC - INTERNAL API
+########################
+
+    def egprs_enabled(self):
+        return self.bts.egprs_enabled()
+
 ###################
 # PUBLIC (test API included)
 ###################

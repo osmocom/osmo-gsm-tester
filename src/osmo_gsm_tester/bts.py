@@ -131,6 +131,9 @@ class Bts(log.Origin, metaclass=ABCMeta):
     def remote_addr(self):
         return self.conf.get('addr')
 
+    def egprs_enabled(self):
+        return self.conf_for_bsc()['gprs_mode'] == 'egprs'
+
     def cleanup(self):
         'Nothing to do by default. Subclass can override if required.'
         pass

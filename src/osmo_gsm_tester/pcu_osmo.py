@@ -70,6 +70,7 @@ class OsmoPcu(pcu.Pcu):
                         'osmo_pcu': {
                             'bts_addr': self.bts.remote_addr(),
                             'pcu_socket_path': self.bts.pcu_socket_path(),
+                            'egprs_enabled': self.egprs_enabled(),
                         }
         })
         config.overlay(values, { 'osmo_pcu': self.conf })

@@ -111,7 +111,8 @@ class OsmoPcuOC2G(log.Origin):
         config.overlay(values, {
                         'osmo_pcu_oc2g': {
                             'bts_addr': self.btsoc2g.remote_addr(),
-                            'pcu_socket_path': self.btsoc2g.pcu_socket_path()
+                            'pcu_socket_path': self.btsoc2g.pcu_socket_path(),
+                            'egprs_enabled': self.egprs_enabled(),
                         }
         })
         config.overlay(values, { 'osmo_pcu_oc2g': self.conf })

@@ -78,7 +78,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
                             'osmo_trx': {
                                 'bts_ip': self.remote_addr(),
                                 'trx_ip': self.trx_remote_ip(),
-                                'egprs': 'enable' if self.conf_for_bsc()['gprs_mode'] == 'egprs' else 'disable',
+                                'egprs': 'enable' if self.egprs_enabled() else 'disable',
                                 'channels': [{} for trx_i in range(self.num_trx())]
                             }
                         }

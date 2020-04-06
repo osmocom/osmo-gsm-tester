@@ -15,6 +15,9 @@ pcu
  alloc-algorithm dynamic
  alpha 0
  gamma 0
+%if osmo_pcu_oc2g.egprs_enabled:
+ egprs only
+%endif
  gsmtap-category dl-unknown
  !gsmtap-category dl-dummy
  gsmtap-category dl-ctrl

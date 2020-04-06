@@ -13,9 +13,10 @@ ctrl
 e1_input
  e1_line 0 driver ipa
  ipa bind ${bsc.ip_address.addr}
-cs7 instance 1
+cs7 instance 0
  point-code 0.0.2
  asp asp0 2905 0 m3ua
+  local-ip ${bsc.ip_address.addr}
   remote-ip ${stp.ip_address.addr}
  as as0 m3ua
   asp asp0

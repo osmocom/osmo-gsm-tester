@@ -2,11 +2,11 @@ rf_driver: {
     name: "${trx.rf_dev_type}",
     sync: "${'1' if trx.rf_dev_type == 'zmq' else 'none'}",
 
-    /* Use this for b2x0 devices. Bandwidth >= 10 Mhz */
     args: "${trx.rf_dev_args}",
+
 % if trx.rf_dev_type == 'zmq':
-        dl_sample_bits: 16,
-        ul_sample_bits: 16,
+    dl_sample_bits: 16,
+    ul_sample_bits: 16,
 % endif
 },
 

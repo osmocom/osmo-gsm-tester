@@ -15,7 +15,6 @@
   sample_rate: ${ue.sample_rate},
 %endif
 
-
 //  log_options: "all.level=debug,all.max_size=32",
   log_options: "all.level=error,all.max_size=0,nas.level=debug,nas.max_size=1,rrc.level=debug,rrc.max_size=1",
   log_filename: "${ue.log_filename}",
@@ -25,17 +24,14 @@
 
   include "amarisoft_rf_driver.cfg",
 
-  bandwidth: 5,
-
   /* If true, allow the simulation of several UEs at the same time and
      allow dynamic UE creation from remote API */
-  multi_ue: false,
+  multi_ue: true,
 
   cells: [
     {
-      dl_earfcn: 3350, /* 2850 MHz (band 7) */
-//      dl_earfcn: 40620, /* 3500 MHz (band 41) */
-      n_antenna_dl: 1, /* number of downlink antennas */
+      dl_earfcn: 2850,
+      n_antenna_dl: 1,
       n_antenna_ul: 1,
 
       /* must be provided if multi_ue = true */
@@ -58,6 +54,12 @@
 
       /* Enable it to create a TUN interface for each UE PDN */
       //tun_setup_script: "ue-ifup",
+
+      sim_events: [{
+        event: "power_on",
+        start_time: 1,
+      }],
+      ue_count: 1,
     }
   ],
 

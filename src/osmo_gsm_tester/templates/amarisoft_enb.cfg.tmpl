@@ -56,31 +56,44 @@
   /* list of cells */
   cell_list: [
   {
+    // First cell
+    dl_earfcn: 2850,
+    rf_port: 0,
+    cell_id: 0x01,
+    n_id_cell: 1,
+    tac: 0x0001,
+    root_sequence_index: 204, /* PRACH root sequence index */
+
+% if enb.get('num_cells') == '2':
+    scell_list: [
+      { cell_id: 0x02, cross_carrier_scheduling: false, scheduling_cell_id: 0x01, ul_allowed: true},
+    ],
+% endif
+  },
+% if enb.get('num_cells') == '2':
+  {
+    // Second Cell
+    dl_earfcn: 3050,
+    rf_port: 1,
+    cell_id: 0x02,
+    n_id_cell: 2,
+    tac: 0x0001,
+    root_sequence_index: 205,
+
+    scell_list: [
+      { cell_id: 0x01, cross_carrier_scheduling: false, scheduling_cell_id: 0x02, ul_allowed: true},
+    ],
+  },
+% endif
+  ], /* cell_list */
+
+  /* default cell parameters */
+  cell_default: {
     /* Broadcasted PLMN identities */
     plmn_list: [
       "${enb.mcc}${enb.mnc}",
     ],
 
-    //dl_earfcn: 300,   /* DL center frequency: 2132 MHz (Band 1) */
-    //dl_earfcn: 900,   /* DL center frequency: 1960 MHz (Band 2) */
-    //dl_earfcn: 1575,  /* DL center frequency: 1842.5 MHz (Band 3) */
-    //dl_earfcn: 2150,  /* DL center frequency: 2130 MHz (Band 4) */
-    //dl_earfcn: 2525,  /* DL center frequency: 881.5 MHz (Band 5) */
-    dl_earfcn: 2850,  /* DL center frequency: 2680 MHz (Band 7) */
-    //dl_earfcn: 6300,  /* 806 MHz (Band 20) */
-    //dl_earfcn: 38050, /* 2600 MHz (band 38) */
-    //dl_earfcn: 40620, /* 2593 MHz (band 41) */
-    //dl_earfcn: 42590, /* 3500 MHz (band 42) */
-
-    n_id_cell: 1,
-    cell_id: 0x01,
-    tac: 0x0001,
-    root_sequence_index: 204, /* PRACH root sequence index */
-  },
-  ], /* cell_list */
-
-  /* default cell parameters */
-  cell_default: {
     n_antenna_dl: 1, /* number of DL antennas */
     n_antenna_ul: 1, /* number of UL antennas */
     n_rb_dl: ${enb.num_prb}, /* Bandwidth: 25: 5 MHz, 50: 10 MHz, 75: 15 MHz, 100: 20 MHz */
@@ -143,6 +156,28 @@
     /* RI reporting is done with a period of m_ri * cqi_period.
        m_ri = 0 (default) disables RI reporting. */
 //    m_ri: 8,
+
+    pucch_dedicated: {
+        /* ack/nack feedback mode when carrier aggregation is
+           enabled. It can be "cs" (for at most two scells) or "pucch3"
+           (used in all cases if more than two cells).  */
+        ack_nack_feedback_mode_ca: "cs",
+
+        /* TDD ack/nack feedback mode when a rel 10 UE is detected. It
+           can be "bundling", "multiplexing", "cs" or "pucch3". By
+           default is it the same as tdd_ack_nack_feedback_mode. */
+        // tdd_ack_nack_feedback_mode_r10: "cs",
+
+        /* number of PUCCH 1b CS resources. It determines
+           the maximum number of UEs that can be scheduled in one TTI
+           using carrier aggregation with PUCCH 1b CS ack/nack feedback. */
+        n1_pucch_an_cs_count: 1,
+
+        /* number of resource blocks for PUCCH 3. It determines
+           the maximum number of UEs that can be scheduled in one TTI
+           using carrier aggregation with PUCCH 3 ack/nack feedback. */
+        n3_pucch_an_n_rb: 0,
+    },
 
     /* SRS dedicated config. All UEs share these
        parameters. srs_config_index and freq_domain_position are

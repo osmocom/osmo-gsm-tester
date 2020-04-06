@@ -175,7 +175,6 @@ class AmarisoftENB(enb.eNodeB):
                         + ',tx_port1=tcp://' + self.addr() + ':2002' \
                         + ',rx_port0=tcp://' + self.ue.addr() + ':2001' \
                         + ',rx_port1=tcp://' + self.ue.addr() + ':2003' \
-                        + ',tx_freq=2630e6,rx_freq=2510e6,tx_freq2=2650e6,rx_freq2=2530e6' \
                         + ',id=enb,base_srate=' + str(base_srate)
             config.overlay(values, dict(enb=dict(sample_rate = base_srate / (1000*1000),
                                                  rf_dev_args=rf_dev_args)))

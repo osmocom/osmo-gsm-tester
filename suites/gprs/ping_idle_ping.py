@@ -55,12 +55,27 @@ wait(ms.is_attached)
 ctx_id_v4 = ms.activate_context(apn='inet46', protocol=ms.CTX_PROT_IPv4)
 print("Setting up data plane for %r" % repr(ctx_id_v4))
 ms.setup_context_data_plane(ctx_id_v4)
-print("[1] Running 10 ping requests for %r" % repr(ctx_id_v4))
-ms.run_netns_wait('ping1', ('ping', '-c', '10', ggsn.addr()))
+str = "[1] Running 10 ping requests for %r" % repr(ctx_id_v4)
+output = str + '\n'
+print(str)
+proc = ms.run_netns_wait('ping1', ('ping', '-c', '10', ggsn.addr()))
+str = proc.get_stdout()
+output += str
+print(str)
 
-print("Sleeping for 60 seconds")
+str = "Sleeping for 60 seconds"
+output += str + '\n'
+print(str)
 sleep(60)
 
-print("[2] Running 10 ping requests for %r" % repr(ctx_id_v4))
-ms.run_netns_wait('ping2', ('ping', '-c', '10', ggsn.addr()))
+str = "[2] Running 10 ping requests for %r" % repr(ctx_id_v4)
+output += str + '\n'
+print(str)
+proc = ms.run_netns_wait('ping2', ('ping', '-c', '10', ggsn.addr()))
+str = proc.get_stdout()
+output += str
+print(str)
+
 ms.deactivate_context(ctx_id_v4)
+
+test.set_report_stdout(output)

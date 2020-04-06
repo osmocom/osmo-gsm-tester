@@ -131,11 +131,6 @@ def lte_transmission_mode(val):
         return
     raise ValueError('LTE Transmission Mode %d not in expected range' % n)
 
-def lte_rlc_drb_mode(val):
-    if val.upper() in ('UM', 'AM'):
-        return
-    raise ValueError('Unknown LTE RLC DRB Mode value: %r' % val)
-
 def duration(val):
     if val.isdecimal() or val.endswith('m') or val.endswith('h'):
         return
@@ -161,7 +156,6 @@ GPRS_MODE = 'gprs_mode'
 CODEC = 'codec'
 OSMO_TRX_CLOCK_REF = 'osmo_trx_clock_ref'
 LTE_TRANSMISSION_MODE = 'lte_transmission_mode'
-LTE_RLC_DRB_MODE = 'lte_rlc_drb_mode'
 DURATION = 'duration'
 
 SCHEMA_TYPES = {
@@ -185,7 +179,6 @@ SCHEMA_TYPES = {
         CODEC: codec,
         OSMO_TRX_CLOCK_REF: osmo_trx_clock_ref,
         LTE_TRANSMISSION_MODE: lte_transmission_mode,
-        LTE_RLC_DRB_MODE: lte_rlc_drb_mode,
         DURATION: duration,
     }
 

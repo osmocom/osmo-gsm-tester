@@ -23,13 +23,6 @@ import pprint
 from . import log, util, config, template, process, remote
 from . import epc
 
-def rlc_drb_mode2qci(rlc_drb_mode):
-    if rlc_drb_mode.upper() == "UM":
-        return 7;
-    elif rlc_drb_mode.upper() == "AM":
-        return 9;
-    raise log.Error('Unexpected rlc_drb_mode', rlc_drb_mode=rlc_drb_mode)
-
 class srsEPC(epc.EPC):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsepc'
@@ -165,10 +158,10 @@ class srsEPC(epc.EPC):
         config.overlay(values, dict(epc={'enable_pcap': self.enable_pcap}))
 
         # Set qci for each subscriber:
-        rlc_drb_mode = values['epc'].get('rlc_drb_mode', None)
-        assert rlc_drb_mode is not None
+        qci = values['epc'].get('qci', None)
+        assert qci is not None
         for i in range(len(self.subscriber_list)):
-            self.subscriber_list[i]['qci'] = rlc_drb_mode2qci(rlc_drb_mode)
+            self.subscriber_list[i]['qci'] = qci
         config.overlay(values, dict(epc=dict(hss=dict(subscribers=self.subscriber_list))))
 
         self.dbg('SRSEPC CONFIG:\n' + pprint.pformat(values))

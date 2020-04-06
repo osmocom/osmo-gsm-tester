@@ -125,7 +125,7 @@ CONF_SCHEMA = util.dict_add(
       'config.bsc.net.codec_list[]': schema.CODEC,
       'config.enb.enable_pcap': schema.BOOL_STR,
       'config.epc.type': schema.STR,
-      'config.epc.rlc_drb_mode': schema.LTE_RLC_DRB_MODE,
+      'config.epc.qci': schema.UINT,
       'config.epc.enable_pcap': schema.BOOL_STR,
       'config.modem.enable_pcap': schema.BOOL_STR,
       'config.amarisoft.license_server_addr': schema.IPV4,

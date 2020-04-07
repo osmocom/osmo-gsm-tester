@@ -229,5 +229,30 @@
 
     /* DRB configuration */
     drb_config: "amarisoft_drb.cfg",
+
+% if enb.enable_measurements:
+    /* measurement configuration */
+    meas_config_desc: {
+        a1_report_type: "${enb.a1_report_type}",
+        a1_${enb.a1_report_type}: ${enb.a1_report_value},
+        a1_hysteresis: ${enb.a1_hysteresis},
+        a1_time_to_trigger: ${enb.a1_time_to_trigger},
+        a2_report_type: "${enb.a2_report_type}",
+        a2_${enb.a2_report_type}: ${enb.a2_report_value},
+        a2_hysteresis: ${enb.a2_hysteresis},
+        a2_time_to_trigger: ${enb.a2_time_to_trigger},
+        a3_report_type: "${enb.a3_report_type}",
+        a3_offset: ${enb.a3_report_value},
+        a3_hysteresis: ${enb.a3_hysteresis},
+        a3_time_to_trigger: ${enb.a3_time_to_trigger},
+    },
+
+    /* measurement gap configuration */
+    meas_gap_config: "gp0",
+
+    /* if true, initiate a handover when a suitable measurement report
+       is received */
+    ho_from_meas: true,
+% endif
   },
 }

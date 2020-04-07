@@ -77,6 +77,7 @@ class AmarisoftENB(enb.eNodeB):
         self.remote_config_rf_file = None
         self.remote_config_drb_file = None
         self.remote_log_file = None
+        self.enable_measurements = False
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -166,6 +167,10 @@ class AmarisoftENB(enb.eNodeB):
         values = super().configure(['amarisoft', 'amarisoftenb'])
         self._num_cells = int(values['enb'].get('num_cells', None))
         assert self._num_cells
+
+        # Convert parsed boolean string to Python boolean:
+        self.enable_measurements = util.str2bool(values['enb'].get('enable_measurements', 'false'))
+        config.overlay(values, dict(enb={'enable_measurements': self.enable_measurements}))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':

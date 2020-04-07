@@ -566,7 +566,7 @@ in 'osmo-gsm-tester.git' itself:
 
 - <<paths_conf,paths.conf>>: Available Available under 'example/', with its paths
   already configured to take required bits from inside the git repository.
-- <<suite_dir,suites_dir>>: Available under 'suites/'
+- <<suite_dir,suites_dir>>: Available under 'example/suites/'
 - <<scenarios_dir,scenarios_dir>>: Available under 'example/scenarios/'
 - <<resource_conf,resources.conf>>: Available under 'example/' as
   'resources.conf.prod' for Production setup and as 'resources.conf.rnd' for the

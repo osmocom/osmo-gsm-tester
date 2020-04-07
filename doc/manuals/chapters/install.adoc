@@ -642,7 +642,7 @@ adjust your own configuration as needed. For example:
 ----
 cd /etc
 cp -R /usr/local/src/osmo-gsm-tester/example osmo-gsm-tester
-sed -i 's#\.\./suites#/usr/local/src/osmo-gsm-tester/suites#' osmo-gsm-tester/paths.conf
+sed -i 's#\./suites#/usr/local/src/osmo-gsm-tester/suites#' osmo-gsm-tester/paths.conf
 ----
 
 NOTE: The configuration will be looked up in various places, see

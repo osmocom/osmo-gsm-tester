@@ -47,6 +47,21 @@ def num_prb2symbol_sz(num_prb):
 def num_prb2base_srate(num_prb):
     return num_prb2symbol_sz(num_prb) * 15 * 1000
 
+def num_prb2bandwidth(num_prb):
+    if num_prb <= 6:
+        return 1.4
+    if num_prb <= 15:
+        return 3
+    if num_prb <= 25:
+        return 5
+    if num_prb <= 50:
+        return 10
+    if num_prb <= 75:
+        return 15
+    if num_prb <= 110:
+        return 20
+    raise log.Error('invalid num_prb %r', num_prb)
+
 class AmarisoftUE(MS):
 
     REMOTE_DIR = '/osmo-gsm-tester-amarisoftue'
@@ -210,8 +225,13 @@ class AmarisoftUE(MS):
             config.overlay(values, dict(ue=dict(sample_rate = base_srate / (1000*1000),
                                                 rf_dev_args = rf_dev_args)))
 
+        # The UHD rf driver seems to require the bandwidth configuration
+        if self._conf.get('rf_dev_type') == 'uhd':
+            bandwidth = num_prb2bandwidth(self.enb.num_prb())
+            config.overlay(values, dict(ue=dict(bandwidth = bandwidth)))
+
         # Set UHD frame size as a function of the cell bandwidth on B2XX
-        if self._conf.get('rf_dev_type') == 'UHD' and values['ue'].get('rf_dev_args', None) is not None:
+        if self._conf.get('rf_dev_type') == 'uhd' and values['ue'].get('rf_dev_args', None) is not None:
             if 'b200' in values['ue'].get('rf_dev_args'):
                 rf_dev_args = values['ue'].get('rf_dev_args', '')
                 rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''

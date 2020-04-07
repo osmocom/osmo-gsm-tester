@@ -13,6 +13,8 @@
 % if ue.rf_dev_type == 'zmq':
   /* Force sampling rate (if uncommented) */
   sample_rate: ${ue.sample_rate},
+% else:
+  bandwidth: ${ue.bandwidth},
 %endif
 
 //  log_options: "all.level=debug,all.max_size=32",

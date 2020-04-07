@@ -416,14 +416,15 @@ modifiers:
     - num_prb: ${param2}
 ----
 
-Finally, it can be referenced during {app-name} execution this wya, for instance when running a suite named '4g':
+Finally, it can be referenced during {app-name} execution this way, for instance
+when running a suite named '4g':
 ----
-- 4g:my-parametrized-scenario@UHD,6
+- 4g:my-parametrized-scenario@uhd,6
 ----
 This way {app-name} when parsing the scenarios and combining them with the suite will::
 . Find out it is parametrized (name contains '@').
 . Split the name
-  ('my-parametrized-scenario') from the parameter list (param1='UHD', param2='6')
+  ('my-parametrized-scenario') from the parameter list (param1='uhd', param2='6')
 . Attempt to match a '.conf' file fully matching name and parameters (hence
   specific content can be set for specific values while still using parameters
   for general values), and otherwise match only by name.

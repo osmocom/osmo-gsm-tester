@@ -185,7 +185,7 @@ class AmarisoftENB(enb.eNodeB):
                                                  rf_dev_args=rf_dev_args)))
 
         # Set UHD frame size as a function of the cell bandwidth on B2XX
-        if self._conf.get('rf_dev_type') == 'UHD' and values['enb'].get('rf_dev_args', None) is not None:
+        if self._conf.get('rf_dev_type') == 'uhd' and values['enb'].get('rf_dev_args', None) is not None:
             if 'b200' in values['enb'].get('rf_dev_args'):
                 rf_dev_args = values['enb'].get('rf_dev_args', '')
                 rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''

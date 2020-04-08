@@ -69,6 +69,7 @@ class AmarisoftUE(MS):
     CFGFILE = 'amarisoft_lteue.cfg'
     CFGFILE_RF = 'amarisoft_rf_driver.cfg'
     LOGFILE = 'lteue.log'
+    IFUPFILE = 'ue-ifup'
 
     def __init__(self, suite_run, conf):
         self._addr = conf.get('addr', None)
@@ -81,6 +82,7 @@ class AmarisoftUE(MS):
         self._bin_prefix = None
         self.config_file = None
         self.config_rf_file = None
+        self.ifup_file = None
         self.log_file = None
         self.process = None
         self.rem_host = None
@@ -88,6 +90,7 @@ class AmarisoftUE(MS):
         self.remote_config_file = None
         self.remote_config_rf_file =  None
         self.remote_log_file = None
+        self.remote_ifup_file = None
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -138,17 +141,16 @@ class AmarisoftUE(MS):
         remote_binary = self.remote_inst.child('', AmarisoftUE.BINFILE)
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for ltetue')
-        # amarisoftue binary needs patchelf >= 0.9+52 to avoid failing during patch. OS#4389, patchelf-GH#192.
+        # patchelf >= 0.10 is required to support passing several files at once:
         self.rem_host.set_remote_env({'PATCHELF_BIN': '/opt/bin/patchelf-v0.10' })
         self.rem_host.change_elf_rpath(remote_binary, str(self.remote_inst))
+        # We also need to patch the arch-optimized binaries that lteue() will exec() into:
+        self.rem_host.change_elf_rpath(self.remote_inst.child('', 'lteue-*'), str(self.remote_inst))
 
-        # amarisoftue requires CAP_SYS_ADMIN to cjump to net network namespace: netns(CLONE_NEWNET):
-        # amarisoftue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
-        self.log('Applying CAP_SYS_ADMIN+CAP_NET_ADMIN capability to ltetue')
-        self.rem_host.setcap_netsys_admin(remote_binary)
-
-        self.log('Creating netns %s' % self.netns())
-        self.rem_host.create_netns(self.netns())
+        # lteue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
+        self.log('Applying CAP_NET_ADMIN capability to ltetue')
+        self.rem_host.setcap_net_admin(remote_binary)
+        self.rem_host.setcap_net_admin(self.remote_inst.child('', 'lteue-*'))
 
         args = (remote_binary, self.remote_config_file)
         self.process = self.rem_host.RemoteProcess(AmarisoftUE.BINFILE, args)
@@ -162,14 +164,13 @@ class AmarisoftUE(MS):
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for lteue')
         util.change_elf_rpath(binary, util.prepend_library_path(self.inst), self.run_dir.new_dir('patchelf'))
+        # We also need to patch the arch-optimized binaries that lteue() will exec() into:
+        util.change_elf_rpath(self.inst.child('', 'lteue-*'), util.prepend_library_path(self.inst), self.run_dir.new_dir('patchelf2'))
 
-        # amarisoftue requires CAP_SYS_ADMIN to cjump to net network namespace: netns(CLONE_NEWNET):
-        # amarisoftue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
-        self.log('Applying CAP_SYS_ADMIN+CAP_NET_ADMIN capability to lteue')
-        util.setcap_netsys_admin(binary, self.run_dir.new_dir('setcap_netsys_admin'))
-
-        self.log('Creating netns %s' % self.netns())
-        util.create_netns(self.netns(), self.run_dir.new_dir('create_netns'))
+        # lteue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
+        self.log('Applying CAP_NET_ADMIN capability to lteue')
+        util.setcap_net_admin(binary, self.run_dir.new_dir('setcap_net_admin'))
+        util.setcap_net_admin(self.inst.child('', 'lteue-*'), self.run_dir.new_dir('setcap_net_admin2'))
 
         args = (binary, os.path.abspath(self.config_file))
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
@@ -192,6 +193,24 @@ class AmarisoftUE(MS):
         self.config_file = self.run_dir.child(AmarisoftUE.CFGFILE)
         self.config_rf_file = self.run_dir.child(AmarisoftUE.CFGFILE_RF)
         self.log_file = self.run_dir.child(AmarisoftUE.LOGFILE)
+        self.ifup_file = self.run_dir.new_file(AmarisoftUE.IFUPFILE)
+        os.chmod(self.ifup_file, 0o744) # add execution permission
+        with open(self.ifup_file, 'w') as f:
+            r = '''#!/bin/sh
+            set -x -e
+            ue_id="$1"           # UE ID
+            pdn_id="$2"          # PDN unique id (start from 0)
+            ifname="$3"          # Interface name
+            ipv4_addr="$4"       # IPv4 address
+            ipv4_dns="$5"        # IPv4 DNS
+            ipv6_local_addr="$6" # IPv6 local address
+            ipv6_dns="$7"        # IPv6 DNS
+            old_link_local=""
+            # script + sudoers file available in osmo-gsm-tester.git/utils/{bin,sudoers.d}
+            sudo /usr/local/bin/osmo-gsm-tester_netns_setup.sh "%s" "$ifname" "$ipv4_addr"
+            echo "${ue_id}: netns %s configured"
+            ''' % (self.netns(), self.netns())
+            f.write(r)
 
         if not self.setup_runs_locally():
             self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
@@ -202,6 +221,7 @@ class AmarisoftUE(MS):
             self.remote_config_file = remote_run_dir.child(AmarisoftUE.CFGFILE)
             self.remote_config_rf_file = remote_run_dir.child(AmarisoftUE.CFGFILE_RF)
             self.remote_log_file = remote_run_dir.child(AmarisoftUE.LOGFILE)
+            self.remote_ifup_file = remote_run_dir.child(AmarisoftUE.IFUPFILE)
 
         values = dict(ue=config.get_defaults('amarisoft'))
         config.overlay(values, dict(ue=config.get_defaults('amarisoftue')))
@@ -211,7 +231,9 @@ class AmarisoftUE(MS):
         config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
 
         logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
-        config.overlay(values, dict(ue=dict(log_filename=logfile)))
+        ifupfile = self.ifup_file if self.setup_runs_locally() else self.remote_ifup_file
+        config.overlay(values, dict(ue=dict(log_filename=logfile,
+                                            ifup_filename=ifupfile)))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
@@ -263,9 +285,12 @@ class AmarisoftUE(MS):
             self.rem_host.recreate_remote_dir(remote_run_dir)
             self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
             self.rem_host.scp('scp-cfg-rf-to-remote', self.config_rf_file, self.remote_config_rf_file)
+            self.rem_host.scp('scp-ifup-to-remote', self.ifup_file, self.remote_ifup_file)
 
     def is_connected(self, mcc_mnc=None):
-        return 'Network attach successful.' in (self.process.get_stdout() or '')
+        # lteue doesn't call the ifup script until after it becomes attached, so
+        # simply look for our ifup script output at the end of it:
+        return 'netns %s configured' % (self.netns()) in (self.process.get_stdout() or '')
 
     def is_attached(self):
         return self.is_connected()

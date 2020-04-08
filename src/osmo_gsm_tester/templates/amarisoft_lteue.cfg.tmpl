@@ -55,7 +55,7 @@
       //external_sim: true,
 
       /* Enable it to create a TUN interface for each UE PDN */
-      //tun_setup_script: "ue-ifup",
+      tun_setup_script: "${ue.ifup_filename}",
 
       sim_events: [{
         event: "power_on",

@@ -1,2 +1,5 @@
 #!/bin/sh
-/sbin/setcap cap_net_admin+ep "$1"
+set -x
+for filename in "$@"; do
+        /sbin/setcap cap_net_admin+ep "$filename"
+done

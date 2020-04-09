@@ -19,25 +19,21 @@
 
 import os
 import pprint
-from . import log, config, util, template, process
+from . import log, config, util, template, process, pcu
 
-class OsmoPcuOC2G(log.Origin):
+class OsmoPcuOC2G(pcu.Pcu):
 
     REMOTE_DIR = '/osmo-gsm-tester-pcu'
     PCU_OC2G_BIN = 'osmo-pcu'
     PCU_OC2G_CFG = 'osmo-pcu-oc2g.cfg'
 
     def __init__(self, suite_run, btsoc2g, conf):
-        super().__init__(log.C_RUN, self.PCU_OC2G_BIN)
+        super().__init__(suite_run, btsoc2g, conf, self.PCU_OC2G_BIN)
         self.run_dir = None
         self.bsc = None
         self.inst = None
         self.remote_inst = None
         self.remote_dir = None
-        self.btsoc2g = None
-        self.suite_run = suite_run
-        self.btsoc2g = btsoc2g
-        self.conf = conf
         self.remote_env = {}
         self.remote_user = 'root'
 
@@ -58,26 +54,26 @@ class OsmoPcuOC2G(log.Origin):
         self.run_remote('rm-remote-dir', ('test', '!', '-d', OsmoPcuOC2G.REMOTE_DIR, '||', 'rm', '-rf', OsmoPcuOC2G.REMOTE_DIR))
         self.run_remote('mk-remote-dir', ('mkdir', '-p', OsmoPcuOC2G.REMOTE_DIR))
         self.run_local('scp-inst-to-btsoc2g',
-            ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.btsoc2g.remote_addr(), str(self.remote_inst))))
+            ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.bts.remote_addr(), str(self.remote_inst))))
 
         remote_run_dir = self.remote_dir.child(OsmoPcuOC2G.PCU_OC2G_BIN)
         self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
 
         remote_config_file = self.remote_dir.child(OsmoPcuOC2G.PCU_OC2G_CFG)
         self.run_local('scp-cfg-to-btsoc2g',
-            ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.btsoc2g.remote_addr(), remote_config_file)))
+            ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.bts.remote_addr(), remote_config_file)))
 
         remote_lib = self.remote_inst.child('lib')
         remote_binary = self.remote_inst.child('bin', OsmoPcuOC2G.PCU_OC2G_BIN)
         self.launch_remote(OsmoPcuOC2G.PCU_OC2G_BIN,
             ('LD_LIBRARY_PATH=%s' % remote_lib,
              remote_binary, '-c', remote_config_file, '-r', '1',
-             '-i', self.btsoc2g.bsc.addr()),
+             '-i', self.bts.bsc.addr()),
             remote_cwd=remote_run_dir, keepalive=keepalive)
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.remote_user, self.btsoc2g.remote_addr(), remote_cwd,
+        return process.RemoteProcess(name, run_dir, self.remote_user, self.bts.remote_addr(), remote_cwd,
                                      popen_args)
 
     def run_remote(self, name, popen_args, remote_cwd=None):
@@ -110,8 +106,8 @@ class OsmoPcuOC2G(log.Origin):
         config.overlay(values, self.suite_run.config())
         config.overlay(values, {
                         'osmo_pcu_oc2g': {
-                            'bts_addr': self.btsoc2g.remote_addr(),
-                            'pcu_socket_path': self.btsoc2g.pcu_socket_path(),
+                            'bts_addr': self.bts.remote_addr(),
+                            'pcu_socket_path': self.bts.pcu_socket_path(),
                             'egprs_enabled': self.egprs_enabled(),
                         }
         })

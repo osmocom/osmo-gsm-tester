@@ -19,25 +19,21 @@
 
 import os
 import pprint
-from . import log, config, util, template, process
+from . import log, config, util, template, process, pcu
 
-class OsmoPcuSysmo(log.Origin):
+class OsmoPcuSysmo(pcu.Pcu):
 
     REMOTE_DIR = '/osmo-gsm-tester-pcu'
     PCU_SYSMO_BIN = 'osmo-pcu'
     PCU_SYSMO_CFG = 'osmo-pcu-sysmo.cfg'
 
     def __init__(self, suite_run, sysmobts, conf):
-        super().__init__(log.C_RUN, self.PCU_SYSMO_BIN)
+        super().__init__(suite_run, sysmobts, conf, self.PCU_SYSMO_BIN)
         self.run_dir = None
         self.bsc = None
         self.inst = None
         self.remote_inst = None
         self.remote_dir = None
-        self.sysmobts = None
-        self.suite_run = suite_run
-        self.sysmobts = sysmobts
-        self.conf = conf
         self.remote_env = {}
         self.remote_user = 'root'
 
@@ -57,27 +53,27 @@ class OsmoPcuSysmo(log.Origin):
 
         self.run_remote('rm-remote-dir', ('test', '!', '-d', OsmoPcuSysmo.REMOTE_DIR, '||', 'rm', '-rf', OsmoPcuSysmo.REMOTE_DIR))
         self.run_remote('mk-remote-dir', ('mkdir', '-p', OsmoPcuSysmo.REMOTE_DIR))
-        self.run_local('scp-inst-to-sysmobts',
-            ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.sysmobts.remote_addr(), str(self.remote_inst))))
+        self.run_local('scp-inst-to-bts',
+            ('scp', '-r', str(self.inst), '%s@%s:%s' % (self.remote_user, self.bts.remote_addr(), str(self.remote_inst))))
 
         remote_run_dir = self.remote_dir.child(OsmoPcuSysmo.PCU_SYSMO_BIN)
         self.run_remote('mk-remote-run-dir', ('mkdir', '-p', remote_run_dir))
 
         remote_config_file = self.remote_dir.child(OsmoPcuSysmo.PCU_SYSMO_CFG)
         self.run_local('scp-cfg-to-sysmobts',
-            ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.sysmobts.remote_addr(), remote_config_file)))
+            ('scp', '-r', self.config_file, '%s@%s:%s' % (self.remote_user, self.bts.remote_addr(), remote_config_file)))
 
         remote_lib = self.remote_inst.child('lib')
         remote_binary = self.remote_inst.child('bin', OsmoPcuSysmo.PCU_SYSMO_BIN)
         self.launch_remote(OsmoPcuSysmo.PCU_SYSMO_BIN,
             ('LD_LIBRARY_PATH=%s' % remote_lib,
              remote_binary, '-c', remote_config_file, '-r', '1',
-             '-i', self.sysmobts.bsc.addr()),
+             '-i', self.bts.bsc.addr()),
             remote_cwd=remote_run_dir, keepalive=keepalive)
 
     def _process_remote(self, name, popen_args, remote_cwd=None):
         run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.remote_user, self.sysmobts.remote_addr(), remote_cwd,
+        return process.RemoteProcess(name, run_dir, self.remote_user, self.bts.remote_addr(), remote_cwd,
                                      popen_args)
 
     def run_remote(self, name, popen_args, remote_cwd=None):
@@ -110,8 +106,8 @@ class OsmoPcuSysmo(log.Origin):
         config.overlay(values, self.suite_run.config())
         config.overlay(values, {
                         'osmo_pcu_sysmo': {
-                            'bts_addr': self.sysmobts.remote_addr(),
-                            'pcu_socket_path': self.sysmobts.pcu_socket_path(),
+                            'bts_addr': self.bts.remote_addr(),
+                            'pcu_socket_path': self.bts.pcu_socket_path(),
                             'egprs_enabled': self.egprs_enabled(),
                         }
         })

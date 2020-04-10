@@ -29,7 +29,7 @@ from . import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
 from . import modem
 from . import ms_osmo_mobile
-from . import srs_ue, amarisoft_ue, srs_enb, amarisoft_enb, srs_epc, amarisoft_epc
+from . import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
 
 from .util import is_dict, is_list
 
@@ -157,13 +157,13 @@ KNOWN_BTS_TYPES = {
     }
 
 KNOWN_ENB_TYPES = {
-        'srsenb': srs_enb.srsENB,
-        'amarisoftenb': amarisoft_enb.AmarisoftENB,
+        'srsenb': enb_srs.srsENB,
+        'amarisoftenb': enb_amarisoft.AmarisoftENB,
 }
 
 KNOWN_EPC_TYPES = {
-        'srsepc': srs_epc.srsEPC,
-        'amarisoftepc': amarisoft_epc.AmarisoftEPC,
+        'srsepc': epc_srs.srsEPC,
+        'amarisoftepc': epc_amarisoft.AmarisoftEPC,
 }
 
 KNOWN_MS_TYPES = {
@@ -171,8 +171,8 @@ KNOWN_MS_TYPES = {
         None: modem.Modem,
         'ofono': modem.Modem,
         'osmo-mobile': ms_osmo_mobile.MSOsmoMobile,
-        'srsue': srs_ue.srsUE,
-        'amarisoftue': amarisoft_ue.AmarisoftUE,
+        'srsue': ms_srs.srsUE,
+        'amarisoftue': ms_amarisoft.AmarisoftUE,
 }
 
 

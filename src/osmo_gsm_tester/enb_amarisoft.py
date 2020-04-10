@@ -49,7 +49,7 @@ class AmarisoftENB(enb.eNodeB):
 
     REMOTE_DIR = '/osmo-gsm-tester-amarisoftenb'
     BINFILE = 'lteenb'
-    CFGFILE = 'amarisoft_enb.cfg'
+    CFGFILE = 'enb_amarisoft.cfg'
     CFGFILE_SIB1 = 'amarisoft_sib1.asn'
     CFGFILE_SIB23 = 'amarisoft_sib23.asn'
     CFGFILE_RF = 'amarisoft_rf_driver.cfg'

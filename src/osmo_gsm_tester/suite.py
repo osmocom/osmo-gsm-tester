@@ -23,7 +23,7 @@ import time
 import pprint
 from . import config, log, util, resource, test
 from .event_loop import MainLoop
-from . import osmo_nitb, osmo_hlr, osmo_mgcpgw, osmo_mgw, osmo_msc, osmo_bsc, osmo_stp, osmo_ggsn, osmo_sgsn, esme, osmocon, ms_driver, iperf3, process
+from . import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3, process
 from . import run_node
 
 class Timeout(Exception):
@@ -275,47 +275,47 @@ class SuiteRun(log.Origin):
     def nitb(self, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_nitb.OsmoNitb(self, ip_address)
+        return nitb_osmo.OsmoNitb(self, ip_address)
 
     def hlr(self, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_hlr.OsmoHlr(self, ip_address)
+        return hlr_osmo.OsmoHlr(self, ip_address)
 
     def ggsn(self, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_ggsn.OsmoGgsn(self, ip_address)
+        return ggsn_osmo.OsmoGgsn(self, ip_address)
 
     def sgsn(self, hlr, ggsn, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_sgsn.OsmoSgsn(self, hlr, ggsn, ip_address)
+        return sgsn_osmo.OsmoSgsn(self, hlr, ggsn, ip_address)
 
     def mgcpgw(self, ip_address=None, bts_ip=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_mgcpgw.OsmoMgcpgw(self, ip_address, bts_ip)
+        return mgcpgw_osmo.OsmoMgcpgw(self, ip_address, bts_ip)
 
     def mgw(self, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_mgw.OsmoMgw(self, ip_address)
+        return mgw_osmo.OsmoMgw(self, ip_address)
 
     def msc(self, hlr, mgcpgw, stp, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_msc.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
+        return msc_osmo.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
 
     def bsc(self, msc, mgw, stp, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_bsc.OsmoBsc(self, msc, mgw, stp, ip_address)
+        return bsc_osmo.OsmoBsc(self, msc, mgw, stp, ip_address)
 
     def stp(self, ip_address=None):
         if ip_address is None:
             ip_address = self.ip_address()
-        return osmo_stp.OsmoStp(self, ip_address)
+        return stp_osmo.OsmoStp(self, ip_address)
 
     def ms_driver(self):
         ms = ms_driver.MsDriver(self)

@@ -36,6 +36,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         self.inst = None
         self.remote_inst = None
         self.remote_dir = None
+        self.proc_bts = None
         self.remote_user = 'root'
 
     def _direct_pcu_enabled(self):
@@ -128,7 +129,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         if self._direct_pcu_enabled():
             args += ('-M',)
 
-        proc = rem_host.RemoteProcess(OsmoBtsOC2G.BTS_OC2G_BIN, args)
-        self.suite_run.remember_to_stop(proc, keepalive)
-        proc.launch()
+        self.proc_bts = rem_host.RemoteProcess(OsmoBtsOC2G.BTS_OC2G_BIN, args)
+        self.suite_run.remember_to_stop(self.proc_bts, keepalive)
+        self.proc_bts.launch()
 # vim: expandtab tabstop=4 shiftwidth=4

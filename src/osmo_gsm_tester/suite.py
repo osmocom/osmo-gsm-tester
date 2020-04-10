@@ -23,9 +23,9 @@ import time
 import pprint
 from .core import config, log, util, process
 from .core.event_loop import MainLoop
+from .obj import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
+from .obj import run_node
 from . import resource, test
-from . import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
-from . import run_node
 
 class Timeout(Exception):
     pass

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import _prep
-from osmo_gsm_tester import sms
+from osmo_gsm_tester.obj import sms
 
 print(sms.Sms())
 print(sms.Sms())

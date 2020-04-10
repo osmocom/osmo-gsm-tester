@@ -59,7 +59,8 @@ class Test(log.Origin):
             self.start_timestamp = time.time()
             from .core import process
             from .core.event_loop import MainLoop
-            from . import suite, sms
+            from .obj import sms
+            from . import suite
             testenv.setup(self.suite_run, self, suite, MainLoop, sms, process)
             with self.redirect_stdout():
                 util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),

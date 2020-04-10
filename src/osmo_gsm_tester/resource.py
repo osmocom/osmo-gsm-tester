@@ -26,10 +26,10 @@ from .core import log
 from .core import config
 from .core import util
 from .core import schema
-from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
-from .  import modem
-from .  import ms_osmo_mobile
-from .  import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
+from .obj import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
+from .obj  import modem
+from .obj  import ms_osmo_mobile
+from .obj  import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
 
 from .core.util import is_dict, is_list
 

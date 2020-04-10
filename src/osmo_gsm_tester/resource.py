@@ -27,7 +27,7 @@ from .core import config
 from .core import util
 from .core import schema
 from .obj import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
-from .obj  import modem
+from .obj  import ms_ofono
 from .obj  import ms_osmo_mobile
 from .obj  import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
 
@@ -168,8 +168,8 @@ KNOWN_EPC_TYPES = {
 
 KNOWN_MS_TYPES = {
         # Map None to ofono for forward compability
-        None: modem.Modem,
-        'ofono': modem.Modem,
+        None: ms_ofono.Modem,
+        'ofono': ms_ofono.Modem,
         'osmo-mobile': ms_osmo_mobile.MSOsmoMobile,
         'srsue': ms_srs.srsUE,
         'amarisoftue': ms_amarisoft.AmarisoftUE,

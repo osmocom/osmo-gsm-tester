@@ -20,8 +20,8 @@
 import os
 import tempfile
 
-from . import log, util, process
-from .event_loop import MainLoop
+from .core import log, util, process
+from .core.event_loop import MainLoop
 
 class Osmocon(log.Origin):
 

@@ -19,7 +19,8 @@
 
 import os
 import pprint
-from . import log, config, util, template, process, pcu
+from .core import log, config, util, template, process
+from . import pcu
 
 class OsmoPcuSysmo(pcu.Pcu):
 

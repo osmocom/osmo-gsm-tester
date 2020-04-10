@@ -20,9 +20,10 @@
 import os
 import re
 import json
-from . import log, config, util, process, pcap_recorder, bts, pcu
+from .core import log, config, util, process
+from .core.event_loop import MainLoop
+from . import pcap_recorder, bts, pcu
 from . import powersupply
-from .event_loop import MainLoop
 
 class NanoBts(bts.Bts):
 

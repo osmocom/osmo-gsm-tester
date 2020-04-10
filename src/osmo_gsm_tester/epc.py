@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractmethod
-from . import log, config
+from .core import log, config
 
 
 class EPC(log.Origin, metaclass=ABCMeta):

@@ -20,7 +20,8 @@
 import os
 import json
 
-from . import log, util, config, process, pcap_recorder, run_node, remote
+from .core import log, util, config, process, remote
+from . import pcap_recorder, run_node
 
 def iperf3_result_to_json(file):
     with open(file) as f:

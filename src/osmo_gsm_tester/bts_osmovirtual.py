@@ -20,7 +20,8 @@
 
 import os
 import pprint
-from . import config, util, template, process, bts_osmo
+from .core import config, util, template, process
+from . import bts_osmo
 
 class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
 ##############
@@ -112,4 +113,3 @@ class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
         self.suite_run.poll()
 
 # vim: expandtab tabstop=4 shiftwidth=4
-

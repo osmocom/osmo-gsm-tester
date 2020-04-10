@@ -2,7 +2,8 @@
 import os
 import _prep
 import shutil
-from osmo_gsm_tester import log, suite, config, report, util
+from osmo_gsm_tester.core import log, config, util
+from osmo_gsm_tester import suite, report
 
 config.ENV_CONF = './suite_test'
 

@@ -20,9 +20,9 @@
 import os
 import pprint
 
-from . import log, util, config, template, process, remote
+from .core import log, util, config, template, process, remote
 from .run_node import RunNode
-from .event_loop import MainLoop
+from .core.event_loop import MainLoop
 from .ms import MS
 
 def rf_type_valid(rf_type_str):

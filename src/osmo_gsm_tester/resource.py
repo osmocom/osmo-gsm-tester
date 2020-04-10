@@ -22,16 +22,16 @@ import copy
 import atexit
 import pprint
 
-from . import log
-from . import config
-from . import util
-from . import schema
+from .core import log
+from .core import config
+from .core import util
+from .core import schema
 from . import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
-from . import modem
-from . import ms_osmo_mobile
-from . import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
+from .  import modem
+from .  import ms_osmo_mobile
+from .  import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
 
-from .util import is_dict, is_list
+from .core.util import is_dict, is_list
 
 HASH_KEY = '_hash'
 RESERVED_KEY = '_reserved_by'

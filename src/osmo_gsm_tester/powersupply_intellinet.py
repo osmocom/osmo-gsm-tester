@@ -20,7 +20,7 @@
 import urllib.request
 import xml.etree.ElementTree as ET
 
-from . import log
+from .core import log
 from .powersupply import PowerSupply
 
 class PowerSupplyIntellinet(PowerSupply):

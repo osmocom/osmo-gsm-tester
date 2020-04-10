@@ -5,7 +5,7 @@ import _prep
 import sys
 import os
 
-from osmo_gsm_tester import template, log
+from osmo_gsm_tester.core import template, log
 
 log.set_level(log.C_CNF, log.L_DBG)
 

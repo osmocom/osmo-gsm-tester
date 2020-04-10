@@ -19,7 +19,7 @@
 
 import copy
 from abc import ABCMeta, abstractmethod
-from . import log, config, schema
+from .core import log, config, schema
 
 class Bts(log.Origin, metaclass=ABCMeta):
 

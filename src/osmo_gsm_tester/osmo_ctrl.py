@@ -21,7 +21,7 @@
 import socket
 import struct
 
-from . import log
+from .core import log
 
 class CtrlInterfaceExn(Exception):
     pass

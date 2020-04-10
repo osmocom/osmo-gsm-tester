@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractmethod
-from . import log
+from .core import log
 
 class Pcu(log.Origin, metaclass=ABCMeta):
     """PCU Abstract Base Class."""

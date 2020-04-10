@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import timedelta
-from . import log, util
+from .core import log, util
 from osmo_ms_driver.cdf import cdfs
 from osmo_ms_driver.event_server import EventServer
 from osmo_ms_driver.simple_loop import SimpleLoop

@@ -6,7 +6,8 @@ import pprint
 import shutil
 import atexit
 import _prep
-from osmo_gsm_tester import config, log, resource, util
+from osmo_gsm_tester.core import config, log, util
+from osmo_gsm_tester import resource
 
 workdir = util.get_tempdir()
 

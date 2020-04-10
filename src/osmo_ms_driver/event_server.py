@@ -1,5 +1,5 @@
 
-from osmo_gsm_tester import log
+from osmo_gsm_tester.core import log
 
 import time
 

@@ -20,7 +20,8 @@
 import os
 import pprint
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder, smsc
+from .core import log, util, config, template, process
+from . import osmo_ctrl, pcap_recorder, smsc
 
 class OsmoMsc(log.Origin):
 

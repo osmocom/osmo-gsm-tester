@@ -20,7 +20,8 @@
 import os
 import tempfile
 from abc import ABCMeta, abstractmethod
-from . import log, bts, pcu_osmo
+from .core import log
+from . import bts, pcu_osmo
 
 class OsmoBts(bts.Bts, metaclass=ABCMeta):
 

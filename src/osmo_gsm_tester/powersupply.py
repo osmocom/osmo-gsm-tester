@@ -18,8 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractmethod
-from . import log
-from .event_loop import MainLoop
+from .core import log
+from .core.event_loop import MainLoop
 
 class PowerSupply(log.Origin, metaclass=ABCMeta):
 

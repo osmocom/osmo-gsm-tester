@@ -19,7 +19,7 @@
 
 import os
 
-from . import log, process
+from .core import log, process
 
 class PcapRecorder(log.Origin):
 

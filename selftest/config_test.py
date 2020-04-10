@@ -8,7 +8,7 @@ import io
 import pprint
 import copy
 
-from osmo_gsm_tester import config, log, schema
+from osmo_gsm_tester.core import config, log, schema
 
 example_config_file = 'test.cfg'
 example_config = os.path.join(_prep.script_dir, 'config_test', example_config_file)

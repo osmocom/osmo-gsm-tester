@@ -20,7 +20,7 @@
 import os
 import pprint
 
-from . import log, util, config, template, process, remote
+from .core import log, util, config, template, process, remote
 from . import enb
 
 def rf_type_valid(rf_type_str):

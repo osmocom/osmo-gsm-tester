@@ -20,7 +20,8 @@
 import os
 import pprint
 
-from . import log, util, config, template, process, pcap_recorder
+from .core import log, util, config, template, process
+from . import pcap_recorder
 
 class OsmoStp(log.Origin):
 

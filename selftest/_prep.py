@@ -7,11 +7,10 @@ src_dir = os.path.join(top_dir, 'src')
 # to find the osmo_gsm_tester py module
 sys.path.append(src_dir)
 
-from osmo_gsm_tester import log
+from osmo_gsm_tester.core import log
 
 log.TestsTarget()
 log.set_all_levels(log.L_DBG)
 
 if '-v' in sys.argv:
     log.style_change(trace=True)
-

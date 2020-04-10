@@ -4,7 +4,7 @@ import _prep
 import time
 import os
 
-from osmo_gsm_tester import process, util, log
+from osmo_gsm_tester.core import process, util, log
 
 tmpdir = util.Dir(util.get_tempdir())
 

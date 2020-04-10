@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from abc import ABCMeta
-from osmo_gsm_tester import log
+from osmo_gsm_tester.core import log
 
 import time
 

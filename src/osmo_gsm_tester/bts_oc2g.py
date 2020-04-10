@@ -19,7 +19,8 @@
 
 import os
 import pprint
-from . import log, config, util, template, process, remote, pcu_oc2g, bts_osmo
+from .core import log, config, util, template, process, remote
+from . import pcu_oc2g, bts_osmo
 
 class OsmoBtsOC2G(bts_osmo.OsmoBts):
 ##############

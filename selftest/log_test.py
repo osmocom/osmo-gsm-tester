@@ -24,7 +24,7 @@ import _prep
 import sys
 import os
 
-from osmo_gsm_tester import log
+from osmo_gsm_tester.core import log
 
 #log.targets[0].get_time_str = lambda: '01:02:03'
 fake_time = '01:02:03'
@@ -45,7 +45,7 @@ class LogTest(log.Origin):
         super().__init__(log.C_TST, *name_items, **detail_items)
 
 t = LogTest('some', 'name', some="detail")
-	
+
 t.log("hello log")
 t.err("hello err")
 t.dbg("hello dbg not visible")

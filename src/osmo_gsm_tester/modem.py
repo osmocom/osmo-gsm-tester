@@ -17,9 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from . import log, util, sms, process
-from .event_loop import MainLoop
+from .core import log, util, process
+from .core.event_loop import MainLoop
 from .ms import MS
+from . import sms
 
 from pydbus import SystemBus, Variant
 import os

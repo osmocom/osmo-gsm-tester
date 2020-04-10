@@ -21,7 +21,8 @@ import os
 import pprint
 import sqlite3
 
-from . import log, util, config, template, process, pcap_recorder
+from .core import log, util, config, template, process
+from . import pcap_recorder
 
 class OsmoHlr(log.Origin):
     run_dir = None

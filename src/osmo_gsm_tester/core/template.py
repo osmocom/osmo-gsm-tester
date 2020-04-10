@@ -32,7 +32,7 @@ def set_templates_dir(*templates_dirs):
     global _logger
     if not templates_dirs:
         # default templates dir is relative to this source file
-        templates_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
+        templates_dirs = [os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')]
     for d in templates_dirs:
         if not os.path.isdir(d):
             raise RuntimeError('templates dir is not a dir: %r'

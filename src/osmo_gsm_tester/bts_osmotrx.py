@@ -20,9 +20,9 @@
 import os
 import pprint
 from abc import ABCMeta, abstractmethod
-from . import log, config, util, template, process, remote, bts_osmo
-from . import powersupply
-from .event_loop import MainLoop
+from .core import log, config, util, template, process, remote
+from .core.event_loop import MainLoop
+from . import powersupply, bts_osmo
 
 class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 ##############

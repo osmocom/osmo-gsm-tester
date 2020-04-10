@@ -22,7 +22,7 @@ import os
 import re
 import pprint
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
+from . import log, util, config, template, process
 
 class RemoteHost(log.Origin):
 

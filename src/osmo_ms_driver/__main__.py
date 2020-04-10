@@ -22,7 +22,7 @@ from .location_update_test import MassUpdateLocationTest
 from .cdf import cdfs
 from .starter import BinaryOptions, MobileTestStarter
 from .test_support import imsi_ki_gen
-from osmo_gsm_tester import log, util
+from osmo_gsm_tester.core import log, util
 from osmo_gsm_tester import ms_osmo_mobile
 
 # System modules

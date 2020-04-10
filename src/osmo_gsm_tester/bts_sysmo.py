@@ -19,7 +19,8 @@
 
 import os
 import pprint
-from . import log, config, util, template, process, remote, pcu_sysmo, bts_osmo
+from .core import log, config, util, template, process, remote
+from . import pcu_sysmo, bts_osmo
 
 class SysmoBts(bts_osmo.OsmoBts):
 ##############

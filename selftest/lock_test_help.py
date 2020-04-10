@@ -4,7 +4,7 @@ import os
 
 import _prep
 
-from osmo_gsm_tester.util import FileLock, touch_file
+from osmo_gsm_tester.core.util import FileLock, touch_file
 
 testdir, name = sys.argv[1:]
 stop_signalling_file = os.path.join(testdir, name)

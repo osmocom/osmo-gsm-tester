@@ -21,7 +21,8 @@ import os
 import re
 import pprint
 
-from . import log, util, config, template, process, osmo_ctrl, pcap_recorder
+from .core import log, util, config, template, process
+from . import osmo_ctrl, pcap_recorder
 
 class OsmoBsc(log.Origin):
 

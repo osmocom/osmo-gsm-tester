@@ -20,8 +20,8 @@
 import sispm
 from usb.core import USBError
 
-from . import log
-from .event_loop import MainLoop
+from .core import log
+from .core.event_loop import MainLoop
 from .powersupply import PowerSupply
 
 class PowerSupplySispm(PowerSupply):

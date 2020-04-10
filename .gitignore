@@ -9,8 +9,8 @@ test_work
 state
 *.pyc
 selftest/trial_test/
-example/resources.conf
-ttcn3/resources.conf
+sysmocom/resources.conf
+sysmocom/ttcn3/resources.conf
 
 # manuals
 doc/manuals/*.html

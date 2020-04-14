@@ -89,8 +89,14 @@
       "${enb.mcc}${enb.mnc}",
     ],
 
+% if int(enb.get('transmission_mode')) == 1:
     n_antenna_dl: 1, /* number of DL antennas */
     n_antenna_ul: 1, /* number of UL antennas */
+% else:
+    n_antenna_dl: 2, /* number of DL antennas */
+    n_antenna_ul: 2, /* number of UL antennas */
+% endif
+
     n_rb_dl: ${enb.num_prb}, /* Bandwidth: 25: 5 MHz, 50: 10 MHz, 75: 15 MHz, 100: 20 MHz */
     cyclic_prefix: "normal",
 

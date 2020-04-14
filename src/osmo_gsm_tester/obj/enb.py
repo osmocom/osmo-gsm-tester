@@ -32,6 +32,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self._addr = conf.get('addr', None)
         if self._addr is None:
             raise log.Error('addr not set')
+        self._gtp_bind_addr = conf.get('gtp_bind_addr', None)
+        if self._gtp_bind_addr is None:
+            self._gtp_bind_addr = self._addr
         self.set_name('%s_%s' % (name, self._addr))
         self._txmode = 0
         self._num_prb = 0
@@ -52,6 +55,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
         assert self._epc is not None
         config.overlay(values, dict(enb={ 'mme_addr': self._epc.addr() }))
+        config.overlay(values, dict(enb={ 'gtp_bind_addr': self._gtp_bind_addr }))
         return values
 
     def num_ports(self):

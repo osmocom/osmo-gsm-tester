@@ -23,14 +23,20 @@ import json
 from ..core import log, util, config, process, remote
 from . import pcap_recorder, run_node
 
-def iperf3_result_to_json(file):
-    with open(file) as f:
-            # Sometimes iperf3 provides 2 dictionaries, the 2nd one being an error about being interrupted (by us).
-            # json parser doesn't support (raises exception) parsing several dictionaries at a time (not a valid json object).
-            # We are only interested in the first dictionary, the regular results one:
-            d = f.read().split("\n}\n")[0] + "\n}\n"
-            data = json.loads(d)
-    return data
+def iperf3_result_to_json(log_obj, data):
+    try:
+        # Drop non-interesting self-generated output before json:
+        if not data.startswith('{\n'):
+            data = "{\n" + data.split("\n{\n")[1]
+        # Sometimes iperf3 provides 2 dictionaries, the 2nd one being an error about being interrupted (by us).
+        # json parser doesn't support (raises exception) parsing several dictionaries at a time (not a valid json object).
+        # We are only interested in the first dictionary, the regular results one:
+        data = data.split("\n}")[0] + "\n}"
+        j = json.loads(data)
+        return j
+    except Exception as e:
+        log_obj.log('failed parsing iperf3 output: "%s"' % data)
+        raise e
 
 
 class IPerf3Server(log.Origin):
@@ -51,11 +57,12 @@ class IPerf3Server(log.Origin):
         self.rem_host = None
         self.remote_log_file = None
         self.log_copied = False
+        self.logfile_supported = False # some older versions of iperf doesn't support --logfile arg
 
     def cleanup(self):
         if self.process is None:
             return
-        if self.runs_locally():
+        if self.runs_locally() or not self.logfile_supported:
             return
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
@@ -86,8 +93,10 @@ class IPerf3Server(log.Origin):
         self.rem_host.recreate_remote_dir(remote_run_dir)
 
         args = ('iperf3', '-s', '-B', self.addr(),
-                '-p', str(self._port), '-J',
-                '--logfile', self.remote_log_file)
+                '-p', str(self._port), '-J')
+        if self.logfile_supported:
+            args += ('--logfile', self.remote_log_file,)
+
         self.process = self.rem_host.RemoteProcess(self.name(), args)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
@@ -97,8 +106,9 @@ class IPerf3Server(log.Origin):
                                    'host %s and port not 22' % self.addr())
 
         args = ('iperf3', '-s', '-B', self.addr(),
-                '-p', str(self._port), '-J',
-                '--logfile', os.path.abspath(self.log_file))
+                '-p', str(self._port), '-J')
+        if self.logfile_supported:
+            args += ('--logfile', os.path.abspath(self.log_file),)
 
         self.process = process.Process(self.name(), self.run_dir, args, env={})
         self.suite_run.remember_to_stop(self.process)
@@ -114,10 +124,14 @@ class IPerf3Server(log.Origin):
         self.suite_run.stop_process(self.process)
 
     def get_results(self):
-        if not self.runs_locally() and not self.log_copied:
-            self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
-            self.log_copied = True
-        return iperf3_result_to_json(self.log_file)
+        if self.logfile_supported:
+            if not self.runs_locally() and not self.log_copied:
+                self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+                self.log_copied = True
+            with open(self.log_file) as f:
+                return iperf3_result_to_json(self, f.read())
+        else:
+            return iperf3_result_to_json(self, self.process.get_stdout())
 
     def addr(self):
         return self.ip_address.get('addr')
@@ -150,6 +164,7 @@ class IPerf3Client(log.Origin):
         self.rem_host = None
         self.remote_log_file = None
         self.log_copied = False
+        self.logfile_supported = False # some older versions of iperf doesn't support --logfile arg
 
     def runs_locally(self):
         locally = not self._run_node or self._run_node.is_local()
@@ -191,8 +206,9 @@ class IPerf3Client(log.Origin):
 
         popen_args = ('iperf3', '-c',  self.server.addr(),
                       '-p', str(self.server.port()), '-J',
-                      '--logfile', self.remote_log_file,
                       '-t', str(time_sec))
+        if self.logfile_supported:
+            popen_args += ('--logfile', self.remote_log_file,)
         if downlink:
             popen_args += ('-R',)
 
@@ -208,8 +224,9 @@ class IPerf3Client(log.Origin):
 
         popen_args = ('iperf3', '-c',  self.server.addr(),
                       '-p', str(self.server.port()), '-J',
-                      '--logfile', os.path.abspath(self.log_file),
                       '-t', str(time_sec))
+        if self.logfile_supported:
+            popen_args += ('--logfile', os.path.abspath(self.log_file),)
         if downlink:
             popen_args += ('-R',)
 
@@ -225,10 +242,14 @@ class IPerf3Client(log.Origin):
         return self.get_results()
 
     def get_results(self):
-        if not self.runs_locally() and not self.log_copied:
-            self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
-            self.log_copied = True
-        return iperf3_result_to_json(self.log_file)
+        if self.logfile_supported:
+            if not self.runs_locally() and not self.log_copied:
+                self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+                self.log_copied = True
+            with open(self.log_file) as f:
+                return iperf3_result_to_json(self, f.read())
+        else:
+            return iperf3_result_to_json(self, self.process.get_stdout())
 
     def set_run_node(self, run_node):
         self._run_node = run_node

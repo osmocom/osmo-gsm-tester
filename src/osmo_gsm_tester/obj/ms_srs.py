@@ -69,6 +69,7 @@ class srsUE(MS):
         self.metrics_file = None
         self.process = None
         self.rem_host = None
+        self.remote_inst = None
         self.remote_config_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
@@ -126,29 +127,8 @@ class srsUE(MS):
         self.process.stdin_write('t\n')
 
     def start_remotely(self):
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
-        lib = self.inst.child('lib')
-        if not os.path.isdir(lib):
-            raise log.Error('No lib/ in', self.inst)
-        if not self.inst.isfile('bin', srsUE.BINFILE):
-            raise log.Error('No %s binary in' % srsUE.BINFILE, self.inst)
-
-        self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
-        remote_prefix_dir = util.Dir(srsUE.REMOTE_DIR)
-        remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-        remote_run_dir = util.Dir(remote_prefix_dir.child(srsUE.BINFILE))
-        self.remote_config_file = remote_run_dir.child(srsUE.CFGFILE)
-        self.remote_log_file = remote_run_dir.child(srsUE.LOGFILE)
-        self.remote_pcap_file = remote_run_dir.child(srsUE.PCAPFILE)
-        self.remote_metrics_file = remote_run_dir.child(srsUE.METRICSFILE)
-
-        self.rem_host.recreate_remote_dir(remote_inst)
-        self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-        self.rem_host.recreate_remote_dir(remote_run_dir)
-        self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
-
-        remote_lib = remote_inst.child('lib')
-        remote_binary = remote_inst.child('bin', srsUE.BINFILE)
+        remote_lib = self.remote_inst.child('lib')
+        remote_binary = self.remote_inst.child('bin', srsUE.BINFILE)
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for srsue')
         # srsue binary needs patchelf >= 0.9+52 to avoid failing during patch. OS#4389, patchelf-GH#192.
@@ -163,12 +143,7 @@ class srsUE(MS):
         self.log('Creating netns %s' % self.netns())
         self.rem_host.create_netns(self.netns())
 
-        #'strace', '-ff',
-        args = (remote_binary, self.remote_config_file,
-                '--gw.netns=' + self.netns(),
-                '--log.filename=' + self.remote_log_file,
-                '--pcap.filename=' + self.remote_pcap_file,
-                '--general.metrics_csv_filename=' + self.remote_metrics_file)
+        args = (remote_binary, self.remote_config_file, '--gw.netns=' + self.netns())
         args += tuple(self._additional_args)
 
         self.process = self.rem_host.RemoteProcess(srsUE.BINFILE, args)
@@ -177,15 +152,8 @@ class srsUE(MS):
         self.process.launch()
 
     def start_locally(self):
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
-
-        binary = inst.child('bin', srsUE.BINFILE)
-        if not os.path.isfile(binary):
-            raise log.Error('Binary missing:', binary)
-        lib = inst.child('lib')
-        if not os.path.isdir(lib):
-            raise log.Error('No lib/ in', inst)
-
+        binary = self.inst.child('bin', srsUE.BINFILE)
+        lib = self.inst.child('lib')
         env = {}
 
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
@@ -200,29 +168,46 @@ class srsUE(MS):
         self.log('Creating netns %s' % self.netns())
         util.create_netns(self.netns(), self.run_dir.new_dir('create_netns'))
 
-        args = (binary, os.path.abspath(self.config_file),
-                '--gw.netns=' + self.netns(),
-                '--log.filename=' + self.log_file,
-                '--pcap.filename=' + self.pcap_file,
-                '--general.metrics_csv_filename=' + self.metrics_file)
+        args = (binary, os.path.abspath(self.config_file), '--gw.netns=' + self.netns())
         args += tuple(self._additional_args)
 
-        self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
+        if not os.path.isdir(self.inst.child('lib')):
+            raise log.Error('No lib/ in', self.inst)
+        if not self.inst.isfile('bin', srsUE.BINFILE):
+            raise log.Error('No %s binary in' % srsUE.BINFILE, self.inst)
+
         self.config_file = self.run_dir.child(srsUE.CFGFILE)
         self.log_file = self.run_dir.child(srsUE.LOGFILE)
         self.pcap_file = self.run_dir.child(srsUE.PCAPFILE)
         self.metrics_file = self.run_dir.child(srsUE.METRICSFILE)
-        self.dbg(config_file=self.config_file)
+
+        if not self.setup_runs_locally():
+                self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
+                remote_prefix_dir = util.Dir(srsUE.REMOTE_DIR)
+                self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
+                remote_run_dir = util.Dir(remote_prefix_dir.child(srsUE.BINFILE))
+                self.remote_config_file = remote_run_dir.child(srsUE.CFGFILE)
+                self.remote_log_file = remote_run_dir.child(srsUE.LOGFILE)
+                self.remote_pcap_file = remote_run_dir.child(srsUE.PCAPFILE)
+                self.remote_metrics_file = remote_run_dir.child(srsUE.METRICSFILE)
 
         values = dict(ue=config.get_defaults('srsue'))
         config.overlay(values, dict(ue=self.suite_run.config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
         config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
+
+        metricsfile = self.metrics_file if self.setup_runs_locally() else self.remote_metrics_file
+        logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
+        pcapfile = self.pcap_file if self.setup_runs_locally() else self.remote_pcap_file
+        config.overlay(values, dict(ue=dict(metrics_filename=metricsfile,
+                                             log_filename=logfile,
+                                             pcap_filename=pcapfile)))
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['ue'].get('enable_pcap', 'false'))
@@ -266,6 +251,12 @@ class srsUE(MS):
             r = template.render(srsUE.CFGFILE, values)
             self.dbg(r)
             f.write(r)
+
+        if not self.setup_runs_locally():
+            self.rem_host.recreate_remote_dir(self.remote_inst)
+            self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
+            self.rem_host.recreate_remote_dir(remote_run_dir)
+            self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
 
     def is_connected(self, mcc_mnc=None):
         return 'Network attach successful.' in (self.process.get_stdout() or '')

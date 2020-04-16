@@ -115,41 +115,9 @@ class srsENB(enb.eNodeB):
         self.process.stdin_write('t\n')
 
     def start_remotely(self):
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
-        lib = self.inst.child('lib')
-        if not os.path.isdir(lib):
-            raise log.Error('No lib/ in', self.inst)
-        if not self.inst.isfile('bin', srsENB.BINFILE):
-            raise log.Error('No %s binary in' % srsENB.BINFILE, self.inst)
-
-        self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
-        remote_prefix_dir = util.Dir(srsENB.REMOTE_DIR)
-        self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-        remote_run_dir = util.Dir(remote_prefix_dir.child(srsENB.BINFILE))
-
-        self.remote_config_file = remote_run_dir.child(srsENB.CFGFILE)
-        self.remote_config_sib_file = remote_run_dir.child(srsENB.CFGFILE_SIB)
-        self.remote_config_rr_file = remote_run_dir.child(srsENB.CFGFILE_RR)
-        self.remote_config_drb_file = remote_run_dir.child(srsENB.CFGFILE_DRB)
-        self.remote_log_file = remote_run_dir.child(srsENB.LOGFILE)
-        self.remote_pcap_file = remote_run_dir.child(srsENB.PCAPFILE)
-
-        self.rem_host.recreate_remote_dir(self.remote_inst)
-        self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-        self.rem_host.recreate_remote_dir(remote_run_dir)
-        self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
-        self.rem_host.scp('scp-cfg-sib-to-remote', self.config_sib_file, self.remote_config_sib_file)
-        self.rem_host.scp('scp-cfg-rr-to-remote', self.config_rr_file, self.remote_config_rr_file)
-        self.rem_host.scp('scp-cfg-drb-to-remote', self.config_drb_file, self.remote_config_drb_file)
-
         remote_env = { 'LD_LIBRARY_PATH': self.remote_inst.child('lib') }
         remote_binary = self.remote_inst.child('bin', srsENB.BINFILE)
-        args = (remote_binary, self.remote_config_file,
-                '--enb_files.sib_config=' + self.remote_config_sib_file,
-                '--enb_files.rr_config=' + self.remote_config_rr_file,
-                '--enb_files.drb_config=' + self.remote_config_drb_file,
-                '--log.filename=' + self.remote_log_file,
-                '--pcap.filename=' + self.remote_pcap_file)
+        args = (remote_binary, self.remote_config_file)
         args += tuple(self._additional_args)
 
         self.process = self.rem_host.RemoteProcess(srsENB.BINFILE, args, remote_env=remote_env)
@@ -157,24 +125,10 @@ class srsENB(enb.eNodeB):
         self.process.launch()
 
     def start_locally(self):
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
-
-        binary = inst.child('bin', srsENB.BINFILE)
-        if not os.path.isfile(binary):
-            raise log.Error('Binary missing:', binary)
-        lib = inst.child('lib')
-        if not os.path.isdir(lib):
-            raise log.Error('No lib/ in', inst)
-
+        binary = self.inst.child('bin', srsENB.BINFILE)
+        lib = self.inst.child('lib')
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
-
-        self.dbg(run_dir=self.run_dir, binary=binary, env=env)
-        args = (binary, os.path.abspath(self.config_file),
-                '--enb_files.sib_config=' + os.path.abspath(self.config_sib_file),
-                '--enb_files.rr_config=' + os.path.abspath(self.config_rr_file),
-                '--enb_files.drb_config=' + os.path.abspath(self.config_drb_file),
-                '--log.filename=' + self.log_file,
-                '--pcap.filename=' + self.pcap_file)
+        args = (binary, os.path.abspath(self.config_file))
         args += tuple(self._additional_args)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
@@ -190,7 +144,45 @@ class srsENB(enb.eNodeB):
             f.write(r)
 
     def configure(self):
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
+        if not os.path.isdir(self.inst.child('lib')):
+            raise log.Error('No lib/ in', self.inst)
+        if not self.inst.isfile('bin', srsENB.BINFILE):
+            raise log.Error('No %s binary in' % srsENB.BINFILE, self.inst)
+
+        self.config_file = self.run_dir.child(srsENB.CFGFILE)
+        self.config_sib_file = self.run_dir.child(srsENB.CFGFILE_SIB)
+        self.config_rr_file = self.run_dir.child(srsENB.CFGFILE_RR)
+        self.config_drb_file = self.run_dir.child(srsENB.CFGFILE_DRB)
+        self.log_file = self.run_dir.child(srsENB.LOGFILE)
+        self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
+
+        if not self.setup_runs_locally():
+            self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
+            remote_prefix_dir = util.Dir(srsENB.REMOTE_DIR)
+            self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
+            remote_run_dir = util.Dir(remote_prefix_dir.child(srsENB.BINFILE))
+
+            self.remote_config_file = remote_run_dir.child(srsENB.CFGFILE)
+            self.remote_config_sib_file = remote_run_dir.child(srsENB.CFGFILE_SIB)
+            self.remote_config_rr_file = remote_run_dir.child(srsENB.CFGFILE_RR)
+            self.remote_config_drb_file = remote_run_dir.child(srsENB.CFGFILE_DRB)
+            self.remote_log_file = remote_run_dir.child(srsENB.LOGFILE)
+            self.remote_pcap_file = remote_run_dir.child(srsENB.PCAPFILE)
+
         values = super().configure(['srsenb'])
+
+        sibfile = self.config_sib_file if self.setup_runs_locally() else self.remote_config_sib_file
+        rrfile = self.config_rr_file if self.setup_runs_locally() else self.remote_config_rr_file
+        drbfile = self.config_drb_file if self.setup_runs_locally() else self.remote_config_drb_file
+        logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
+        pcapfile = self.pcap_file if self.setup_runs_locally() else self.remote_pcap_file
+        config.overlay(values, dict(enb=dict(sib_filename=sibfile,
+                                             rr_filename=rrfile,
+                                             drb_filename=drbfile,
+                                             log_filename=logfile,
+                                             pcap_filename=pcapfile,
+                                             )))
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
@@ -232,17 +224,19 @@ class srsENB(enb.eNodeB):
 
                 config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
-        self.config_file = self.run_dir.child(srsENB.CFGFILE)
-        self.config_sib_file = self.run_dir.child(srsENB.CFGFILE_SIB)
-        self.config_rr_file = self.run_dir.child(srsENB.CFGFILE_RR)
-        self.config_drb_file = self.run_dir.child(srsENB.CFGFILE_DRB)
-        self.log_file = self.run_dir.child(srsENB.LOGFILE)
-        self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
-
         self.gen_conf_file(self.config_file, srsENB.CFGFILE, values)
         self.gen_conf_file(self.config_sib_file, srsENB.CFGFILE_SIB, values)
         self.gen_conf_file(self.config_rr_file, srsENB.CFGFILE_RR, values)
         self.gen_conf_file(self.config_drb_file, srsENB.CFGFILE_DRB, values)
+
+        if not self.setup_runs_locally():
+            self.rem_host.recreate_remote_dir(self.remote_inst)
+            self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
+            self.rem_host.recreate_remote_dir(remote_run_dir)
+            self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
+            self.rem_host.scp('scp-cfg-sib-to-remote', self.config_sib_file, self.remote_config_sib_file)
+            self.rem_host.scp('scp-cfg-rr-to-remote', self.config_rr_file, self.remote_config_rr_file)
+            self.rem_host.scp('scp-cfg-drb-to-remote', self.config_drb_file, self.remote_config_drb_file)
 
     def ue_add(self, ue):
         if self.ue is not None:

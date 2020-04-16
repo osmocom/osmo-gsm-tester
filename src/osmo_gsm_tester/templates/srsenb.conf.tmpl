@@ -38,9 +38,9 @@ nof_ports = ${enb.num_ports}
 # drb_config:  DRB configuration file
 #####################################################################
 [enb_files]
-sib_config = sib.conf
-rr_config  = rr.conf
-drb_config = drb.conf
+sib_config = ${enb.sib_filename}
+rr_config  = ${enb.rr_filename}
+drb_config = ${enb.drb_filename}
 
 #####################################################################
 # RF configuration
@@ -98,7 +98,7 @@ device_args = ${enb.rf_dev_args}
 #####################################################################
 [pcap]
 enable = ${'true' if enb.enable_pcap else 'false'}
-filename = /tmp/enb.pcap
+filename = ${enb.pcap_filename}
 
 #####################################################################
 # Log configuration
@@ -123,7 +123,7 @@ filename = /tmp/enb.pcap
 [log]
 all_level = warning
 all_hex_limit = 32
-filename = /tmp/enb.log
+filename = ${enb.log_filename}
 file_max_size = -1
 
 [gui]

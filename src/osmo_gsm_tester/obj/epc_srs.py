@@ -41,6 +41,7 @@ class srsEPC(epc.EPC):
         self.pcap_file = None
         self.process = None
         self.rem_host = None
+        self.remote_inst = None
         self.remote_config_file = None
         self.remote_db_file = None
         self.remote_log_file = None
@@ -74,30 +75,9 @@ class srsEPC(epc.EPC):
             self.start_remotely()
 
     def start_remotely(self):
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
-        lib = self.inst.child('lib')
-        if not os.path.isdir(lib):
-            raise log.Error('No lib/ in', self.inst)
-        if not self.inst.isfile('bin', srsEPC.BINFILE):
-            raise log.Error('No %s binary in' % srsEPC.BINFILE, self.inst)
+        remote_lib = self.remote_inst.child('lib')
+        remote_binary = self.remote_inst.child('bin', srsEPC.BINFILE)
 
-        self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
-        remote_prefix_dir = util.Dir(srsEPC.REMOTE_DIR)
-        remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-        remote_run_dir = util.Dir(remote_prefix_dir.child(srsEPC.BINFILE))
-        self.remote_config_file = remote_run_dir.child(srsEPC.CFGFILE)
-        self.remote_db_file = remote_run_dir.child(srsEPC.DBFILE)
-        self.remote_log_file = remote_run_dir.child(srsEPC.LOGFILE)
-        self.remote_pcap_file = remote_run_dir.child(srsEPC.PCAPFILE)
-
-        self.rem_host.recreate_remote_dir(remote_inst)
-        self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-        self.rem_host.recreate_remote_dir(remote_run_dir)
-        self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
-        self.rem_host.scp('scp-db-to-remote', self.db_file, self.remote_db_file)
-
-        remote_lib = remote_inst.child('lib')
-        remote_binary = remote_inst.child('bin', srsEPC.BINFILE)
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for srsepc')
         self.rem_host.change_elf_rpath(remote_binary, remote_lib)
@@ -105,27 +85,17 @@ class srsEPC(epc.EPC):
         self.log('Applying CAP_NET_ADMIN capability to srsepc')
         self.rem_host.setcap_net_admin(remote_binary)
 
-        args = (remote_binary, self.remote_config_file,
-                '--hss.db_file=' + self.remote_db_file,
-                '--log.filename=' + self.remote_log_file,
-                '--pcap.filename=' + self.remote_pcap_file)
+        args = (remote_binary, self.remote_config_file)
 
         self.process = self.rem_host.RemoteProcess(srsEPC.BINFILE, args)
-        #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsEPC.BINFILE, remote_run_dir, args)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
 
     def start_locally(self):
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
-
         binary = inst.child('bin', BINFILE)
-        if not os.path.isfile(binary):
-            raise log.Error('Binary missing:', binary)
         lib = inst.child('lib')
-        if not os.path.isdir(lib):
-            raise log.Error('No lib/ in', inst)
-
         env = {}
+
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for srsepc')
         # srsepc binary needs patchelf <= 0.9 (0.10 and current master fail) to avoid failing during patch. OS#4389, patchelf-GH#192.
@@ -134,24 +104,43 @@ class srsEPC(epc.EPC):
         self.log('Applying CAP_NET_ADMIN capability to srsepc')
         util.setcap_net_admin(binary, self.run_dir.new_dir('setcap_net_admin'))
 
-        self.dbg(run_dir=self.run_dir, binary=binary, env=env)
-        args = (binary, os.path.abspath(self.config_file),
-                '--hss.db_file=' + self.db_file,
-                '--log.filename=' + self.log_file,
-                '--pcap.filename=' + self.pcap_file)
+        args = (binary, os.path.abspath(self.config_file))
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
         self.suite_run.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
+        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
+        if not os.path.isdir(self.inst.child('lib')):
+            raise log.Error('No lib/ in', self.inst)
+        if not self.inst.isfile('bin', srsEPC.BINFILE):
+            raise log.Error('No %s binary in' % srsEPC.BINFILE, self.inst)
+
         self.config_file = self.run_dir.child(srsEPC.CFGFILE)
         self.db_file = self.run_dir.child(srsEPC.DBFILE)
         self.log_file = self.run_dir.child(srsEPC.LOGFILE)
         self.pcap_file = self.run_dir.child(srsEPC.PCAPFILE)
-        self.dbg(config_file=self.config_file, db_file=self.db_file)
+
+        if not self._run_node.is_local():
+            self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
+            remote_prefix_dir = util.Dir(srsEPC.REMOTE_DIR)
+            self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
+            remote_run_dir = util.Dir(remote_prefix_dir.child(srsEPC.BINFILE))
+
+            self.remote_config_file = remote_run_dir.child(srsEPC.CFGFILE)
+            self.remote_db_file = remote_run_dir.child(srsEPC.DBFILE)
+            self.remote_log_file = remote_run_dir.child(srsEPC.LOGFILE)
+            self.remote_pcap_file = remote_run_dir.child(srsEPC.PCAPFILE)
 
         values = super().configure(['srsepc'])
+
+        dbfile = self.db_file if self._run_node.is_local() else self.remote_db_file
+        logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
+        pcapfile = self.pcap_file if self._run_node.is_local() else self.remote_pcap_file
+        config.overlay(values, dict(epc=dict(db_filename=dbfile,
+                                             log_filename=logfile,
+                                             pcap_filename=pcapfile)))
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['epc'].get('enable_pcap', 'false'))
@@ -174,6 +163,13 @@ class srsEPC(epc.EPC):
             r = template.render(srsEPC.DBFILE, values)
             self.dbg(r)
             f.write(r)
+
+        if not self._run_node.is_local():
+            self.rem_host.recreate_remote_dir(self.remote_inst)
+            self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
+            self.rem_host.recreate_remote_dir(remote_run_dir)
+            self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
+            self.rem_host.scp('scp-db-to-remote', self.db_file, self.remote_db_file)
 
     def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:

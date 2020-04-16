@@ -40,7 +40,7 @@ paging_timer = 2
 #
 #####################################################################
 [hss]
-db_file = user_db.csv
+db_file = ${epc.db_filename}
 
 #####################################################################
 # SP-GW configuration
@@ -72,7 +72,7 @@ max_paging_queue = 100
 ####################################################################
 [pcap]
 enable   = ${'true' if epc.enable_pcap else 'false'}
-filename = /tmp/epc.pcap
+filename = ${epc.pcap_filename}
 
 ####################################################################
 # Log configuration
@@ -95,7 +95,7 @@ filename = /tmp/epc.pcap
 [log]
 all_level = info
 all_hex_limit = 32
-filename = /tmp/epc.log
+filename = ${epc.log_filename}
 
 #nas_level = debug
 #s1ap_level = debug

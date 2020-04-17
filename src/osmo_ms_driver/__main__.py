@@ -23,7 +23,7 @@ from .cdf import cdfs
 from .starter import BinaryOptions, MobileTestStarter
 from .test_support import imsi_ki_gen
 from osmo_gsm_tester.core import log, util
-from osmo_gsm_tester import ms_osmo_mobile
+from osmo_gsm_tester.obj import ms_osmo_mobile
 
 # System modules
 from datetime import timedelta

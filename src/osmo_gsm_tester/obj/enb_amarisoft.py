@@ -165,8 +165,6 @@ class AmarisoftENB(enb.eNodeB):
             self.remote_log_file = remote_run_dir.child(AmarisoftENB.LOGFILE)
 
         values = super().configure(['amarisoft', 'amarisoftenb'])
-        self._num_cells = int(values['enb'].get('num_cells', None))
-        assert self._num_cells
 
         # Convert parsed boolean string to Python boolean:
         self.enable_measurements = util.str2bool(values['enb'].get('enable_measurements', 'false'))

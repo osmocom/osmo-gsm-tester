@@ -38,6 +38,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self.set_name('%s_%s' % (name, self._addr))
         self._txmode = 0
         self._num_prb = 0
+        self._num_cells = None
         self._epc = None
 
     def configure(self, config_specifics_li):
@@ -56,6 +57,25 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         assert self._epc is not None
         config.overlay(values, dict(enb={ 'mme_addr': self._epc.addr() }))
         config.overlay(values, dict(enb={ 'gtp_bind_addr': self._gtp_bind_addr }))
+        self._num_cells = int(values['enb'].get('num_cells', None))
+        assert self._num_cells
+
+        # adjust cell_list to num_cells length:
+        len_cell_list = len(values['enb']['cell_list'])
+        if len_cell_list >= self._num_cells:
+            values['enb']['cell_list'] = values['enb']['cell_list'][:self._num_cells]
+        else:
+            raise log.Error('enb.cell_list items (%d) < enb.num_cells (%d) attribute!' % (len_cell_list, self._num_cells))
+        # adjust scell list (to only contain values available in cell_list):
+        cell_id_list = [c['cell_id'] for c in values['enb']['cell_list']]
+        for i in range(len(values['enb']['cell_list'])):
+            scell_list_old = values['enb']['cell_list'][i]['scell_list']
+            scell_list_new = []
+            for scell_id in scell_list_old:
+                if scell_id in cell_id_list:
+                    scell_list_new.append(scell_id)
+            values['enb']['cell_list'][i]['scell_list'] = scell_list_new
+
         return values
 
     def num_ports(self):

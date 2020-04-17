@@ -190,9 +190,6 @@ class srsENB(enb.eNodeB):
 
         self._additional_args = values['enb'].get('additional_args', '').split()
 
-        self._num_cells = int(values['enb'].get('num_cells', None))
-        assert self._num_cells
-
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.num_prb())

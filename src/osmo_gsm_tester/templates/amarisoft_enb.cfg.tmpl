@@ -55,36 +55,23 @@
 
   /* list of cells */
   cell_list: [
-  {
-    // First cell
-    dl_earfcn: 2850,
-    rf_port: 0,
-    cell_id: 0x01,
-    n_id_cell: 1,
-    tac: 0x0001,
-    root_sequence_index: 204, /* PRACH root sequence index */
 
-% if enb.get('num_cells') == '2':
-    scell_list: [
-      { cell_id: 0x02, cross_carrier_scheduling: false, scheduling_cell_id: 0x01, ul_allowed: true},
-    ],
-% endif
-  },
-% if enb.get('num_cells') == '2':
+%for cell in enb.cell_list:
   {
-    // Second Cell
-    dl_earfcn: 3050,
-    rf_port: 1,
-    cell_id: 0x02,
-    n_id_cell: 2,
+    dl_earfcn: ${cell.dl_earfcn},
+    rf_port: ${loop.index},
+    cell_id: ${cell.cell_id},
+    n_id_cell: ${loop.index + 1},
     tac: 0x0001,
-    root_sequence_index: 205,
+    root_sequence_index: ${loop.index + 204}, /* PRACH root sequence index */
 
     scell_list: [
-      { cell_id: 0x01, cross_carrier_scheduling: false, scheduling_cell_id: 0x02, ul_allowed: true},
+%for scell_id in cell.scell_list:
+      { cell_id: ${scell_id}, cross_carrier_scheduling: false, scheduling_cell_id: ${cell.cell_id}, ul_allowed: true},
+%endfor
     ],
   },
-% endif
+%endfor
   ], /* cell_list */
 
   /* default cell parameters */

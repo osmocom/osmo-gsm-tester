@@ -53,10 +53,10 @@ class PowerSupply(log.Origin, metaclass=ABCMeta):
 def get_instance_by_type(pwsupply_type, pwsupply_opt):
     """Allocate a PowerSupply child class based on type. Opts are passed to the newly created object."""
     if pwsupply_type == 'sispm':
-        from powersupply_sispm import PowerSupplySispm
+        from .powersupply_sispm import PowerSupplySispm
         obj = PowerSupplySispm
     elif pwsupply_type == 'intellinet':
-        from powersupply_intellinet import PowerSupplyIntellinet
+        from .powersupply_intellinet import PowerSupplyIntellinet
         obj = PowerSupplyIntellinet
     else:
         raise log.Error('PowerSupply type not supported:', pwsupply_type)

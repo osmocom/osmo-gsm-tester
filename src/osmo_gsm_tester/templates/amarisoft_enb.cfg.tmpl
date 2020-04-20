@@ -59,7 +59,7 @@
 %for cell in enb.cell_list:
   {
     dl_earfcn: ${cell.dl_earfcn},
-    rf_port: ${loop.index},
+    rf_port: 0, /* FIXME: this may need to be configurable based on device specifics (B2xx vs X310) */
     cell_id: ${cell.cell_id},
     n_id_cell: ${cell.pci},
     tac: 0x0001,

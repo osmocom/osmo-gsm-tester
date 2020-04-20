@@ -62,29 +62,46 @@ phy_cnfg =
 
 cell_list =
 (
+%for cell in enb.cell_list:
+  ${',' if loop.index != 0 else ''}
   {
-    // rf_port = 0;
-    cell_id = 0x01;
+    // rf_port = 0; Not yet implemented!
+    cell_id = ${cell.cell_id};
     tac = 0x0001;
-    pci = 1;
-    // root_seq_idx = 204;
-    dl_earfcn = 2850;
+    pci = ${loop.index + 1};
+    root_seq_idx = ${loop.index + 204};
+    dl_earfcn = ${cell.dl_earfcn};
     //ul_earfcn = 20850;
     ho_active = false;
 
     // CA cells
     scell_list = (
-      {cell_id = 0x02; cross_carrier_scheduling = false; scheduling_cell_id = 0x02; ul_allowed = true}
+%for scell_id in cell.scell_list:
+        ${',' if loop.index != 0 else ''}
+        {
+          cell_id = ${scell_id};
+          cross_carrier_scheduling = false;
+          scheduling_cell_id = ${cell.cell_id};
+          ul_allowed = true;
+        }
+%endfor
     )
 
     // Cells available for handover
     meas_cell_list =
     (
-      {
-        eci = 0x19C02;
-        dl_earfcn = 2850;
-        pci = 2;
-      }
+%for ncell in enb.cell_list:
+        <% loop.my_num_items = 0 if loop.index == 0 else loop.my_num_items %>
+%if ncell.cell_id in cell.ncell_list:
+        ${',' if loop.my_num_items != 0 else ''}
+        <% loop.my_num_items += 1 %>
+        {
+          eci = ${ncell.cell_id};
+          dl_earfcn = ${ncell.dl_earfcn};
+          pci = ${ncell.pci};
+        }
+%endif
+%endfor
     );
 
     // ReportCfg (only A3 supported)
@@ -96,42 +113,5 @@ cell_list =
       rsrq_config = 4;
     };
   }
-% if enb.get('num_cells') == '2':
-  ,
-  {
-    rf_port = 1;
-    cell_id = 0x02;
-    tac = 0x0002;
-    pci = 2;
-    root_seq_idx = 205;
-    dl_earfcn = 3050;
-    //ul_earfcn = 21050;
-    ho_active = false;
-
-    // CA cells
-    scell_list = (
-      {cell_id = 0x01; cross_carrier_scheduling = false; scheduling_cell_id = 0x01; ul_allowed = true}
-    )
-
-    // Cells available for handover
-    meas_cell_list =
-    (
-      {
-        eci = 0x19C02;
-        dl_earfcn = 2850;
-        pci = 1;
-      }
-    );
-
-    // ReportCfg (only A3 supported)
-    meas_report_desc = {
-      a3_report_type = "RSRP";
-      a3_offset = 6;
-      a3_hysteresis = 0;
-      a3_time_to_trigger = 480;
-      rsrq_config = 4;
-    };
-  }
-% endif
-  // Add here more cells
+%endfor
 );

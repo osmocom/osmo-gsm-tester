@@ -113,6 +113,7 @@ RESOURCES_SCHEMA = {
         'enb[].num_cells': schema.UINT,
         'enb[].cell_list[].cell_id': schema.UINT,
         'enb[].cell_list[].pci': schema.UINT,
+        'enb[].cell_list[].ncell_list[]': schema.UINT,
         'enb[].cell_list[].scell_list[]': schema.UINT,
         'enb[].cell_list[].dl_earfcn': schema.UINT,
         'enb[].cell_list[].dl_rfemu.type': schema.STR,

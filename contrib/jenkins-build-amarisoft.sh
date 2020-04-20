@@ -18,7 +18,7 @@ if [ "x${BUILD_AMARISOFT_TRX_ZMQ}" = "x1" ]; then
         . "$(dirname "$0")/jenkins-build-common.sh"
 
         #TODO: make sure libconfig, zeroMQ is installed
-        build_repo $project_name_srslte
+        build_repo $project_name_srslte -DENABLE_UHD=False -DENABLE_BLADERF=False -DENABLE_SOAPYSDR=False -DENABLE_ZEROMQ=True
 
         git_url="git@github.com:softwareradiosystems"
         project_name_zmq="amarisoft_dummy_trx"

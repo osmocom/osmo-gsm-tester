@@ -150,7 +150,7 @@ build_repo_dir() {
   elif [ -f CMakeLists.txt ]; then
     rm -rf build && mkdir build && cd build || exit 1
     set +x; echo; echo; set -x
-    cmake -DCMAKE_INSTALL_PREFIX=$prefix ../
+    cmake -DCMAKE_INSTALL_PREFIX=$prefix $configure_opts ../
   else
     echo "Unknwown build system" && exit 1
   fi

@@ -75,6 +75,7 @@ class srsUE(MS):
         self.remote_pcap_file = None
         self.remote_metrics_file = None
         self.enable_pcap = False
+        self.num_carriers = 1
         self.suite_run = suite_run
         self.remote_user = conf.get('remote_user', None)
         self._additional_args = []
@@ -215,16 +216,40 @@ class srsUE(MS):
 
         self._additional_args = values['ue'].get('additional_args', '').split()
 
+        self.num_carriers = int(values['ue'].get('num_carriers', 1))
+
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.enb.num_prb())
-            config.overlay(values, dict(ue=dict(rf_dev_args = 'tx_port=tcp://' + self.addr() + ':2001' \
-                                                            + ',tx_port2=tcp://' + self.addr() + ':2003' \
-                                                            + ',rx_port=tcp://' + self.enb.addr() + ':2000' \
-                                                            + ',rx_port2=tcp://' + self.enb.addr() + ':2002' \
-                                                            + ',tx_freq=2510e6,rx_freq=2630e6,tx_freq2=2530e6,rx_freq2=2650e6' \
-                                                            + ',id=ue,base_srate='+ str(base_srate)
-                                                )))
+            # Define all 8 possible RF ports (2x CA with 2x2 MIMO)
+            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':2001' \
+                        + ',tx_port1=tcp://' + self.addr() + ':2003' \
+                        + ',tx_port2=tcp://' + self.addr() + ':2005' \
+                        + ',tx_port3=tcp://' + self.addr() + ':2007' \
+                        + ',rx_port0=tcp://' + self.enb.addr() + ':2000' \
+                        + ',rx_port1=tcp://' + self.enb.addr() + ':2002' \
+                        + ',rx_port2=tcp://' + self.enb.addr() + ':2004' \
+                        + ',rx_port3=tcp://' + self.enb.addr() + ':2006'
+
+            if self.num_carriers == 1:
+                # Single carrier
+                if self.enb.num_ports() == 1:
+                    # SISO
+                    rf_dev_args += ',rx_freq0=2630e6,tx_freq0=2510e6'
+                elif self.enb.num_ports() == 2:
+                    # MIMO
+                    rf_dev_args += ',rx_freq0=2630e6,rx_freq1=2630e6,tx_freq0=2510e6,tx_freq1=2510e6'
+            elif self.num_carriers == 2:
+                # 2x CA
+                if self.enb.num_ports() == 1:
+                    # SISO
+                    rf_dev_args += ',rx_freq0=2630e6,rx_freq1=2650e6,tx_freq0=2510e6,tx_freq1=2530e6'
+                elif self.enb.num_ports() == 2:
+                    # MIMO
+                    rf_dev_args += ',rx_freq0=2630e6,rx_freq1=2630e6,rx_freq2=2650e6,rx_freq3=2650e6,tx_freq0=2510e6,tx_freq1=2510e6,tx_freq2=2530e6,tx_freq3=2530e6'
+
+            rf_dev_args += ',id=ue,base_srate='+ str(base_srate)
+            config.overlay(values, dict(ue=dict(rf_dev_args=rf_dev_args)))
 
         # Set UHD frame size as a function of the cell bandwidth on B2XX
         if self._conf.get('rf_dev_type') == 'uhd' and values['ue'].get('rf_dev_args', None) is not None:

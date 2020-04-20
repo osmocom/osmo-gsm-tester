@@ -92,6 +92,8 @@ RESOURCES_SCHEMA = {
         'enb[].id': schema.UINT,
         'enb[].num_prb': schema.UINT,
         'enb[].transmission_mode': schema.LTE_TRANSMISSION_MODE,
+        'enb[].tx_gain': schema.UINT,
+        'enb[].rx_gain': schema.UINT,
         'enb[].rf_dev_type': schema.STR,
         'enb[].rf_dev_args': schema.STR,
         'enb[].additional_args': schema.STR,
@@ -134,6 +136,8 @@ RESOURCES_SCHEMA = {
         'modem[].additional_args': schema.STR,
         'modem[].airplane_t_on_ms': schema.INT,
         'modem[].airplane_t_off_ms': schema.INT,
+        'modem[].tx_gain': schema.UINT,
+        'modem[].rx_gain': schema.UINT,
         'osmocon_phone[].serial_device': schema.STR,
     }
 

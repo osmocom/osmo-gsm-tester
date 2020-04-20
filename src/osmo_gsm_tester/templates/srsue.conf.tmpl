@@ -37,8 +37,8 @@ dl_earfcn = 2850,3050
 dl_earfcn = 2850
 % endif
 freq_offset = 0
-tx_gain = 80
-#rx_gain = 40
+tx_gain = ${ue.tx_gain}
+rx_gain = ${ue.rx_gain}
 
 #nof_radios = 1
 nof_antennas = ${ue.num_antennas}

@@ -274,7 +274,10 @@ class AmarisoftUE(MS):
         # rf driver is shared between amarisoft enb and ue, so it has a
         # different cfg namespace 'trx'. Copy needed values over there:
         config.overlay(values, dict(trx=dict(rf_dev_type=values['ue'].get('rf_dev_type', None),
-                                             rf_dev_args=values['ue'].get('rf_dev_args', None))))
+                                             rf_dev_args=values['ue'].get('rf_dev_args', None),
+                                             rx_gain=values['ue'].get('rx_gain', None),
+                                             tx_gain=values['ue'].get('tx_gain', None),
+                                            )))
 
         self.gen_conf_file(self.config_file, AmarisoftUE.CFGFILE, values)
         self.gen_conf_file(self.config_rf_file, AmarisoftUE.CFGFILE_RF, values)

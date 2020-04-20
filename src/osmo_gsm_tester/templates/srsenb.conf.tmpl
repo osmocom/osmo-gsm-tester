@@ -64,8 +64,8 @@ drb_config = ${enb.drb_filename}
 #                     Default "auto". B210 USRP: 400 us, bladeRF: 0 us.
 #####################################################################
 [rf]
-tx_gain = 80
-rx_gain = 40
+tx_gain = ${enb.tx_gain}
+rx_gain = ${enb.rx_gain}
 
 device_name = ${enb.rf_dev_type}
 

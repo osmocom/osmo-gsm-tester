@@ -10,8 +10,8 @@ rf_driver: {
 % endif
 },
 
-tx_gain: 89.0, /* TX gain (in dB) B2x0: 0 to 89.8 dB */
-rx_gain: 60.0, /* RX gain (in dB) B2x0: 0 to 73 dB */
+tx_gain: ${trx.tx_gain}, /* TX gain (in dB) B2x0: 0 to 89.8 dB */
+rx_gain: ${trx.rx_gain}, /* RX gain (in dB) B2x0: 0 to 73 dB */
 % if trx.rf_dev_type == 'zmq':
 tx_time_offset: 0,
 % else:

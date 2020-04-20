@@ -97,3 +97,6 @@ class MS(log.Origin, metaclass=ABCMeta):
 
     def msisdn(self):
         return self.msisdn
+
+    def get_counter(self, counter_name):
+        raise log.Error('get_counter() not implemented!')

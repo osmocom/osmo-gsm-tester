@@ -327,6 +327,20 @@ class srsUE(MS):
         proc.launch_sync()
         return proc
 
+    def _get_counter_handover_success(self):
+        # Match against sample line: "HO success"
+        n = 0
+        stdout_lines = (self.process.get_stdout() or '').splitlines()
+        for l in stdout_lines:
+            if l == 'HO successful':
+                n += 1
+        return n
+
+    def get_counter(self, counter_name):
+        if counter_name == 'handover_success':
+            return self._get_counter_handover_success()
+        raise log.Error('counter %s not implemented!' % counter_name)
+
     def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt'):
         # file is not properly flushed until the process has stopped.
         if self.running():

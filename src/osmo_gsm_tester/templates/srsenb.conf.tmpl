@@ -19,7 +19,8 @@
 #
 #####################################################################
 [enb]
-enb_id = 0x19B
+# need hex value here for enb_id due to bug: https://github.com/srsLTE/srsLTE/issues/485
+enb_id = ${hex(int(enb.id))}
 mcc = ${enb.mcc}
 mnc = ${enb.mnc}
 mme_addr = ${enb.mme_addr}

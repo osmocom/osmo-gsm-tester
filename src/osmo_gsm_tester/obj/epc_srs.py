@@ -190,8 +190,12 @@ class srsEPC(epc.EPC):
         return subscriber_id
 
     def enb_is_connected(self, enb):
-        # TODO: match against srsENB config: "S1 Setup Request - eNB Name: srsenb01, eNB id: 0x19"
-        return 'S1 Setup Request - eNB' in (self.process.get_stdout() or '')
+        # Match against sample line: "S1 Setup Request - eNB Name: srsenb01, eNB id: 0x19"
+        stdout_lines = (self.process.get_stdout() or '').splitlines()
+        for l in stdout_lines:
+            if l.startswith('S1 Setup Request') and l.endswith('eNB id: %s' % hex(enb.id()).lower()):
+                return True
+        return False
 
     def running(self):
         return not self.process.terminated()

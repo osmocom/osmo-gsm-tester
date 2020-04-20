@@ -51,7 +51,7 @@
   gtp_addr: "${enb.gtp_bind_addr}",
 
   /* high 20 bits of SIB1.cellIdentifier */
-  enb_id: 0x19B,
+  enb_id: ${enb.id},
 
   /* list of cells */
   cell_list: [

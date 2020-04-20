@@ -37,6 +37,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             self._gtp_bind_addr = self._addr
         self.set_name('%s_%s' % (name, self._addr))
         self._txmode = 0
+        self._id = None
         self._num_prb = 0
         self._num_cells = None
         self._epc = None
@@ -49,6 +50,8 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         for config_specifics in config_specifics_li:
             config.overlay(values, dict(enb=self.suite_run.config().get(config_specifics, {})))
         config.overlay(values, dict(enb=self._conf))
+        self._id = int(values['enb'].get('id', None))
+        assert self._id is not None
         self._num_prb = int(values['enb'].get('num_prb', None))
         assert self._num_prb
         self._txmode = int(values['enb'].get('transmission_mode', None))
@@ -77,6 +80,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             values['enb']['cell_list'][i]['scell_list'] = scell_list_new
 
         return values
+
+    def id(self):
+        return self._id
 
     def num_ports(self):
         if self._txmode == 1:

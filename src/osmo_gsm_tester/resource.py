@@ -112,6 +112,7 @@ RESOURCES_SCHEMA = {
         'enb[].a3_time_to_trigger': schema.INT,
         'enb[].num_cells': schema.UINT,
         'enb[].cell_list[].cell_id': schema.UINT,
+        'enb[].cell_list[].pci': schema.UINT,
         'enb[].cell_list[].scell_list[]': schema.UINT,
         'enb[].cell_list[].dl_earfcn': schema.UINT,
         'enb[].cell_list[].dl_rfemu.type': schema.STR,

@@ -27,25 +27,6 @@ from . import rfemu
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('uhd', 'zmq')
 
-#reference: srsLTE.git srslte_symbol_sz()
-def num_prb2symbol_sz(num_prb):
-    if num_prb <= 6:
-        return 128
-    if num_prb <= 15:
-        return 256
-    if num_prb <= 25:
-        return 384
-    if num_prb <= 50:
-        return 768
-    if num_prb <= 75:
-        return 1024
-    if num_prb <= 110:
-        return 1536
-    raise log.Error('invalid num_prb %r', num_prb)
-
-def num_prb2base_srate(num_prb):
-    return num_prb2symbol_sz(num_prb) * 15 * 1000
-
 class AmarisoftENB(enb.eNodeB):
 
     REMOTE_DIR = '/osmo-gsm-tester-amarisoftenb'
@@ -174,15 +155,10 @@ class AmarisoftENB(enb.eNodeB):
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            base_srate = num_prb2base_srate(self.num_prb())
-            rf_dev_args = 'fail_on_disconnect=true' \
-                        + ',tx_port0=tcp://' + self.addr() + ':2000' \
-                        + ',tx_port1=tcp://' + self.addr() + ':2002' \
-                        + ',rx_port0=tcp://' + self.ue.addr() + ':2001' \
-                        + ',rx_port1=tcp://' + self.ue.addr() + ':2003' \
-                        + ',id=enb,base_srate=' + str(base_srate)
+            base_srate = self.num_prb2base_srate(self.num_prb())
+            rf_dev_args = self.get_zmq_rf_dev_args()
             config.overlay(values, dict(enb=dict(sample_rate = base_srate / (1000*1000),
-                                                 rf_dev_args=rf_dev_args)))
+                                                 rf_dev_args = rf_dev_args)))
 
         # Set UHD frame size as a function of the cell bandwidth on B2XX
         if self._conf.get('rf_dev_type') == 'uhd' and values['enb'].get('rf_dev_args', None) is not None:

@@ -99,6 +99,59 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def num_prb(self):
         return self._num_prb
 
+    #reference: srsLTE.git srslte_symbol_sz()
+    def num_prb2symbol_sz(self, num_prb):
+        if num_prb <= 6:
+            return 128
+        if num_prb <= 15:
+            return 256
+        if num_prb <= 25:
+            return 384
+        if num_prb <= 50:
+            return 768
+        if num_prb <= 75:
+            return 1024
+        if num_prb <= 110:
+            return 1536
+        raise log.Error('invalid num_prb %r', num_prb)
+
+    def num_prb2base_srate(self, num_prb):
+        return self.num_prb2symbol_sz(num_prb) * 15 * 1000
+
+    def get_zmq_rf_dev_args(self):
+        base_srate = self.num_prb2base_srate(self.num_prb())
+        # Define all 8 possible RF ports (2x CA with 2x2 MIMO)
+        rf_dev_args = 'fail_on_disconnect=true' \
+                    + ',tx_port0=tcp://' + self.addr() + ':2000' \
+                    + ',tx_port1=tcp://' + self.addr() + ':2002' \
+                    + ',tx_port2=tcp://' + self.addr() + ':2004' \
+                    + ',tx_port3=tcp://' + self.addr() + ':2006' \
+                    + ',rx_port0=tcp://' + self.ue.addr() + ':2001' \
+                    + ',rx_port1=tcp://' + self.ue.addr() + ':2003' \
+                    + ',rx_port2=tcp://' + self.ue.addr() + ':2005' \
+                    + ',rx_port3=tcp://' + self.ue.addr() + ':2007'
+
+        if self._num_cells == 1:
+            # Single carrier
+            if self.num_ports() == 1:
+                # SISO
+                rf_dev_args += ',tx_freq0=2630e6,rx_freq0=2510e6'
+            elif self.num_ports() == 2:
+                # MIMO
+                rf_dev_args += ',tx_freq0=2630e6,tx_freq1=2630e6,rx_freq0=2510e6,rx_freq1=2510e6'
+        elif self._num_cells == 2:
+            # 2x class
+            if self.num_ports() == 1:
+                # SISO
+                rf_dev_args += ',tx_freq0=2630e6,tx_freq1=2650e6,rx_freq0=2510e6,rx_freq1=2530e6'
+            elif self.num_ports() == 2:
+                # MIMO
+                rf_dev_args += ',tx_freq0=2630e6,tx_freq1=2630e6,tx_freq2=2650e6,tx_freq3=2650e6,rx_freq0=2510e6,rx_freq1=2510e6,rx_freq2=2530e6,rx_freq3=2530e6'
+
+        rf_dev_args += ',id=enb,base_srate=' + str(base_srate)
+
+        return rf_dev_args
+
 ###################
 # PUBLIC (test API included)
 ###################

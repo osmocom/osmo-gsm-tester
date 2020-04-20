@@ -22,6 +22,7 @@ import pprint
 
 from ..core import log, util, config, template, process, remote
 from . import enb
+from . import rfemu
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
@@ -60,6 +61,7 @@ class srsENB(enb.eNodeB):
         super().__init__(suite_run, conf, srsENB.BINFILE)
         self.ue = None
         self.run_dir = None
+        self.gen_conf = None
         self.config_file = None
         self.config_sib_file = None
         self.config_rr_file = None
@@ -221,6 +223,8 @@ class srsENB(enb.eNodeB):
 
                 config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
+        self.gen_conf = values
+
         self.gen_conf_file(self.config_file, srsENB.CFGFILE, values)
         self.gen_conf_file(self.config_sib_file, srsENB.CFGFILE_SIB, values)
         self.gen_conf_file(self.config_rr_file, srsENB.CFGFILE_RR, values)
@@ -242,5 +246,15 @@ class srsENB(enb.eNodeB):
 
     def running(self):
         return not self.process.terminated()
+
+    def get_rfemu(self, cell=0, dl=True):
+        cell_list = self.gen_conf['enb'].get('cell_list', None)
+        if cell_list is None or len(cell_list) < cell + 1:
+            raise log.Error('cell_list attribute or subitem not found!')
+        rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
+        if rfemu_cfg is None: # craft amarisfot by default:
+            raise log.Error('rfemu attribute not found in cell_list item!')
+        rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
+        return rfemu_obj
 
 # vim: expandtab tabstop=4 shiftwidth=4

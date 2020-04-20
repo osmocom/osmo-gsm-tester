@@ -22,6 +22,7 @@ import pprint
 
 from ..core import log, util, config, template, process, remote
 from . import enb
+from . import rfemu
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('uhd', 'zmq')
@@ -62,6 +63,7 @@ class AmarisoftENB(enb.eNodeB):
         self.run_dir = None
         self.inst = None
         self._bin_prefix = None
+        self.gen_conf = None
         self.config_file = None
         self.config_sib1_file = None
         self.config_sib23_file = None
@@ -209,6 +211,8 @@ class AmarisoftENB(enb.eNodeB):
         config.overlay(values, dict(trx=dict(rf_dev_type=values['enb'].get('rf_dev_type', None),
                                              rf_dev_args=values['enb'].get('rf_dev_args', None))))
 
+        self.gen_conf = values
+
         self.gen_conf_file(self.config_file, AmarisoftENB.CFGFILE, values)
         self.gen_conf_file(self.config_sib1_file, AmarisoftENB.CFGFILE_SIB1, values)
         self.gen_conf_file(self.config_sib23_file, AmarisoftENB.CFGFILE_SIB23, values)
@@ -232,5 +236,20 @@ class AmarisoftENB(enb.eNodeB):
 
     def running(self):
         return not self.process.terminated()
+
+    def get_rfemu(self, cell=0, dl=True):
+        cell_list = self.gen_conf['enb'].get('cell_list', None)
+        if cell_list is None or len(cell_list) < cell + 1:
+            raise log.Error('cell_list attribute or subitem not found!')
+        rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
+        if rfemu_cfg is None: # craft amarisfot by default:
+            rfemu_cfg = {'type': 'amarisoftctl',
+                         'addr': self.addr(),
+                         'ports': [9001]
+                         }
+        if rfemu_cfg['type'] == 'amarisoftctl': # this one requires extra config:
+            config.overlay(rfemu_cfg, dict(cell_id=cell_list[cell]['cell_id']))
+        rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
+        return rfemu_obj
 
 # vim: expandtab tabstop=4 shiftwidth=4

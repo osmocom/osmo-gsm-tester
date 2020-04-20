@@ -113,6 +113,11 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def ue_max_rate(self, downlink=True):
         pass
 
+    @abstractmethod
+    def get_rfemu(self, cell=0, dl=True):
+        'Get rfemu.RFemulation subclass implementation object for given cell index and direction.'
+        pass
+
     def addr(self):
         return self._addr
 

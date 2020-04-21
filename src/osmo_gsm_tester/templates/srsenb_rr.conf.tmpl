@@ -65,7 +65,7 @@ cell_list =
 %for cell in enb.cell_list:
   ${',' if loop.index != 0 else ''}
   {
-    // rf_port = 0; Not yet implemented!
+    rf_port = ${cell.rf_port};
     cell_id = ${cell.cell_id};
     tac = 0x0001;
     pci = ${loop.index + 1};

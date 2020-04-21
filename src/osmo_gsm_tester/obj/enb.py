@@ -51,6 +51,7 @@ def on_register_schemas():
         'a3_time_to_trigger': schema.INT,
         'num_cells': schema.UINT,
         'cell_list[].cell_id': schema.UINT,
+        'cell_list[].rf_port': schema.UINT,
         'cell_list[].pci': schema.UINT,
         'cell_list[].ncell_list[]': schema.UINT,
         'cell_list[].scell_list[]': schema.UINT,

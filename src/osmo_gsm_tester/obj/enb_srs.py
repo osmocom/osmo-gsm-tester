@@ -199,10 +199,6 @@ class srsENB(enb.eNodeB):
                 elif self._num_prb > 25:
                     rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
 
-                if self._num_prb > 50:
-                    # Reduce over the wire format to sc12
-                    rf_dev_args += ',otw_format=sc12'
-
                 config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         self.gen_conf = values

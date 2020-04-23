@@ -285,10 +285,6 @@ class srsUE(MS):
                 elif self.enb.num_prb() > 50:
                     rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
 
-                # For 15 and 20 MHz, further reduce over the wire format to sc12
-                if self.enb.num_prb() >= 75:
-                    rf_dev_args += ',otw_format=sc12'
-
                 config.overlay(values, dict(ue=dict(rf_dev_args=rf_dev_args)))
 
         self.dbg('SRSUE CONFIG:\n' + pprint.pformat(values))

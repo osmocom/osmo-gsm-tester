@@ -21,9 +21,13 @@ import os
 import sys
 import time
 import traceback
-from .. import testenv
 
-from . import log, util, resource
+from . import log
+from . import  util
+from . import resource
+from .event_loop import MainLoop
+
+from .. import testenv
 
 class Test(log.Origin):
     UNKNOWN = 'UNKNOWN' # matches junit 'error'
@@ -51,12 +55,13 @@ class Test(log.Origin):
         return self._run_dir
 
     def run(self):
+        testenv_obj = None
         try:
             self.log_target = log.FileLogTarget(self.get_run_dir().new_child('log')).set_all_levels(log.L_DBG).style_change(trace=True)
             log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
-            testenv.setup(self.suite_run, self)
+            testenv_obj = testenv.setup(self.suite_run, self)
             with self.redirect_stdout():
                 util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
                                      self.path)
@@ -83,6 +88,8 @@ class Test(log.Origin):
             self.err('TEST RUN ABORTED: %s' % type(e).__name__)
             raise
         finally:
+            if testenv_obj:
+                testenv_obj.stop()
             if self.log_target:
                 self.log_target.remove()
 

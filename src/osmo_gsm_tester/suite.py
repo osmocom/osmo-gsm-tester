@@ -21,18 +21,12 @@ import os
 import sys
 import time
 import pprint
-from .core import config, log, util, process, schema, resource
+from .core import config
+from .core import log
+from .core import util
+from .core import schema
+from .core import resource
 from .core import test
-from .core.event_loop import MainLoop
-from .obj import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
-from .obj import run_node
-from .obj import epc
-from .obj import enb
-from .obj import bts
-from .obj import ms
-
-class Timeout(Exception):
-    pass
 
 class SuiteDefinition(log.Origin):
     '''A test suite reserves resources for a number of tests.
@@ -74,12 +68,9 @@ class SuiteRun(log.Origin):
         self.start_timestamp = None
         self.duration = None
         self.reserved_resources = None
-        self.objects_to_clean_up = None
-        self.test_import_modules_to_clean_up = []
         self._resource_requirements = None
         self._resource_modifiers = None
         self._config = None
-        self._processes = []
         self._run_dir = None
         self.trial = trial
         self.definition = suite_definition
@@ -92,40 +83,6 @@ class SuiteRun(log.Origin):
         self.tests = []
         for test_basename in self.definition.test_basenames:
             self.tests.append(test.Test(self, test_basename))
-
-    def register_for_cleanup(self, *obj):
-        assert all([hasattr(o, 'cleanup') for o in obj])
-        self.objects_to_clean_up = self.objects_to_clean_up or []
-        self.objects_to_clean_up.extend(obj)
-
-    def objects_cleanup(self):
-        while self.objects_to_clean_up:
-            obj = self.objects_to_clean_up.pop()
-            try:
-                obj.cleanup()
-            except Exception:
-                log.log_exn()
-
-    def test_import_modules_register_for_cleanup(self, mod):
-        '''
-        Tests are required to call this API for any module loaded from its own
-        lib subdir, because they are loaded in the global namespace. Otherwise
-        later tests importing modules with the same name will re-use an already
-        loaded module.
-        '''
-        if mod not in self.test_import_modules_to_clean_up:
-            self.dbg('registering module %r for cleanup' % mod)
-            self.test_import_modules_to_clean_up.append(mod)
-
-    def test_import_modules_cleanup(self):
-        while self.test_import_modules_to_clean_up:
-            mod = self.test_import_modules_to_clean_up.pop()
-            try:
-                self.dbg('Cleaning up module %r' % mod)
-                del sys.modules[mod.__name__]
-                del mod
-            except Exception:
-                log.log_exn()
 
     def mark_start(self):
         self.start_timestamp = time.time()
@@ -155,11 +112,6 @@ class SuiteRun(log.Origin):
             self._run_dir = util.Dir(self.trial.get_run_dir().new_dir(self.name()))
         return self._run_dir
 
-    def get_test_run_dir(self):
-        if self.current_test:
-            return self.current_test.get_run_dir()
-        return self.get_run_dir()
-
     def resource_requirements(self):
         if self._resource_requirements is None:
             self._resource_requirements = self.combined('resources')
@@ -175,11 +127,17 @@ class SuiteRun(log.Origin):
             self._config = self.combined('config', False)
         return self._config
 
+    def resource_pool(self):
+        return self.resources_pool
+
     def reserve_resources(self):
         if self.reserved_resources:
             raise RuntimeError('Attempt to reserve resources twice for a SuiteRun')
         self.log('reserving resources in', self.resources_pool.state_dir, '...')
         self.reserved_resources = self.resources_pool.reserve(self, self.resource_requirements(), self.resource_modifiers())
+
+    def get_reserved_resource(self, resource_class_str, specifics):
+        return self.reserved_resources.get(resource_class_str, specifics=specifics)
 
     def run_tests(self, names=None):
         suite_libdir = os.path.join(self.definition.suite_dir, 'lib')
@@ -187,7 +145,6 @@ class SuiteRun(log.Origin):
             log.large_separator(self.trial.name(), self.name(), sublevel=2)
             self.mark_start()
             util.import_path_prepend(suite_libdir)
-            MainLoop.register_poll_func(self.poll)
             if not self.reserved_resources:
                 self.reserve_resources()
             for t in self.tests:
@@ -196,9 +153,6 @@ class SuiteRun(log.Origin):
                     continue
                 self.current_test = t
                 t.run()
-                self.stop_processes()
-                self.objects_cleanup()
-                self.reserved_resources.put_all()
         except Exception:
             log.log_exn()
         except BaseException as e:
@@ -206,14 +160,7 @@ class SuiteRun(log.Origin):
             self.err('SUITE RUN ABORTED: %s' % type(e).__name__)
             raise
         finally:
-            # if sys.exit() called from signal handler (e.g. SIGINT), SystemExit
-            # base exception is raised. Make sure to stop processes in this
-            # finally section. Resources are automatically freed with 'atexit'.
-            self.stop_processes()
-            self.objects_cleanup()
             self.free_resources()
-            MainLoop.unregister_poll_func(self.poll)
-            self.test_import_modules_cleanup()
             util.import_path_remove(suite_libdir)
             self.duration = time.time() - self.start_timestamp
 
@@ -245,202 +192,10 @@ class SuiteRun(log.Origin):
                 errors += 1
         return (passed, skipped, failed, errors)
 
-    def remember_to_stop(self, process, respawn=False):
-        '''Ask suite to monitor and manage lifecycle of the Process object. If a
-        process managed by suite finishes before cleanup time, the current test
-        will be marked as FAIL and end immediatelly. If respwan=True, then suite
-        will respawn() the process instead.'''
-        self._processes.insert(0, (process, respawn))
-
-    def stop_processes(self):
-        if len(self._processes) == 0:
-            return
-        strategy = process.ParallelTerminationStrategy()
-        while self._processes:
-            proc, _ = self._processes.pop()
-            strategy.add_process(proc)
-        strategy.terminate_all()
-
-    def stop_process(self, process):
-        'Remove process from monitored list and stop it'
-        for proc_respawn in self._processes:
-            proc, respawn = proc_respawn
-            if proc == process:
-                self._processes.remove(proc_respawn)
-                proc.terminate()
-
     def free_resources(self):
         if self.reserved_resources is None:
             return
         self.reserved_resources.free()
-
-    def ip_address(self, specifics=None):
-        return self.reserved_resources.get(resource.R_IP_ADDRESS, specifics=specifics)
-
-    def nitb(self, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return nitb_osmo.OsmoNitb(self, ip_address)
-
-    def hlr(self, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return hlr_osmo.OsmoHlr(self, ip_address)
-
-    def ggsn(self, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return ggsn_osmo.OsmoGgsn(self, ip_address)
-
-    def sgsn(self, hlr, ggsn, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return sgsn_osmo.OsmoSgsn(self, hlr, ggsn, ip_address)
-
-    def mgcpgw(self, ip_address=None, bts_ip=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return mgcpgw_osmo.OsmoMgcpgw(self, ip_address, bts_ip)
-
-    def mgw(self, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return mgw_osmo.OsmoMgw(self, ip_address)
-
-    def msc(self, hlr, mgcpgw, stp, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return msc_osmo.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
-
-    def bsc(self, msc, mgw, stp, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return bsc_osmo.OsmoBsc(self, msc, mgw, stp, ip_address)
-
-    def stp(self, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        return stp_osmo.OsmoStp(self, ip_address)
-
-    def ms_driver(self):
-        ms = ms_driver.MsDriver(self)
-        self.register_for_cleanup(ms)
-        return ms
-
-    def bts(self, specifics=None):
-        bts_obj = bts.Bts.get_instance_by_type(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
-        bts_obj.set_lac(self.lac())
-        bts_obj.set_rac(self.rac())
-        bts_obj.set_cellid(self.cellid())
-        bts_obj.set_bvci(self.bvci())
-        self.register_for_cleanup(bts_obj)
-        return bts_obj
-
-    def modem(self, specifics=None):
-        conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
-        ms_obj = ms.MS.get_instance_by_type(self, conf)
-        self.register_for_cleanup(ms_obj)
-        return ms_obj
-
-    def modems(self, count):
-        l = []
-        for i in range(count):
-            l.append(self.modem())
-        return l
-
-    def all_resources(self, resource_func):
-        """Returns all yielded resource."""
-        l = []
-        while True:
-            try:
-                l.append(resource_func())
-            except resource.NoResourceExn:
-                return l
-
-    def esme(self):
-        esme_obj = esme.Esme(self.msisdn())
-        self.register_for_cleanup(esme_obj)
-        return esme_obj
-
-    def run_node(self, specifics=None):
-        return run_node.RunNode.from_conf(self.reserved_resources.get(resource.R_RUN_NODE, specifics=specifics))
-
-    def enb(self, specifics=None):
-        enb_obj = enb.eNodeB.get_instance_by_type(self, self.reserved_resources.get(resource.R_ENB, specifics=specifics))
-        self.register_for_cleanup(enb_obj)
-        return enb_obj
-
-    def epc(self, run_node=None):
-        if run_node is None:
-            run_node = self.run_node()
-        epc_obj = epc.EPC.get_instance_by_type(self, run_node)
-        self.register_for_cleanup(epc_obj)
-        return epc_obj
-
-    def osmocon(self, specifics=None):
-        conf = self.reserved_resources.get(resource.R_OSMOCON, specifics=specifics)
-        osmocon_obj = osmocon.Osmocon(self, conf=conf)
-        self.register_for_cleanup(osmocon_obj)
-        return osmocon_obj
-
-    def iperf3srv(self, ip_address=None):
-        if ip_address is None:
-            ip_address = self.ip_address()
-        iperf3srv_obj = iperf3.IPerf3Server(self, ip_address)
-        return iperf3srv_obj
-
-    def msisdn(self):
-        msisdn = self.resources_pool.next_msisdn(self)
-        self.log('using MSISDN', msisdn)
-        return msisdn
-
-    def lac(self):
-        lac = self.resources_pool.next_lac(self)
-        self.log('using LAC', lac)
-        return lac
-
-    def rac(self):
-        rac = self.resources_pool.next_rac(self)
-        self.log('using RAC', rac)
-        return rac
-
-    def cellid(self):
-        cellid = self.resources_pool.next_cellid(self)
-        self.log('using CellId', cellid)
-        return cellid
-
-    def bvci(self):
-        bvci = self.resources_pool.next_bvci(self)
-        self.log('using BVCI', bvci)
-        return bvci
-
-    def poll(self):
-        for proc, respawn in self._processes:
-            if proc.terminated():
-                if respawn == True:
-                    proc.respawn()
-                else:
-                    proc.log_stdout_tail()
-                    proc.log_stderr_tail()
-                    log.ctx(proc)
-                    raise log.Error('Process ended prematurely: %s' % proc.name())
-
-    def prompt(self, *msgs, **msg_details):
-        'ask for user interaction. Do not use in tests that should run automatically!'
-        if msg_details:
-            msgs = list(msgs)
-            msgs.append('{%s}' %
-                        (', '.join(['%s=%r' % (k,v)
-                                    for k,v in sorted(msg_details.items())])))
-        msg = ' '.join(msgs) or 'Hit Enter to continue'
-        self.log('prompt:', msg)
-        sys.__stdout__.write('\n\n--- PROMPT ---\n')
-        sys.__stdout__.write(msg)
-        sys.__stdout__.write('\n')
-        sys.__stdout__.flush()
-        entered = util.input_polling('> ', MainLoop.poll)
-        self.log('prompt entered:', repr(entered))
-        return entered
 
     def resource_status_str(self):
         return '\n'.join(('',

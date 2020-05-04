@@ -22,7 +22,10 @@ import time
 import shutil
 import tarfile
 
-from .core import log, util, report
+from .core import log
+from .core import util
+from .core import report
+
 from . import suite
 
 FILE_MARK_TAKEN = 'taken'

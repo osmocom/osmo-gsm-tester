@@ -21,8 +21,15 @@ import os
 import pprint
 
 from ..core import log, util, config, template, process, remote
+from ..core import schema
 from . import enb
 from . import rfemu
+
+def on_register_schemas():
+    config_schema = {
+        'license_server_addr': schema.IPV4,
+        }
+    schema.register_config_schema('amarisoft', config_schema)
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('uhd', 'zmq')

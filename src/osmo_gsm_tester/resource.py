@@ -46,120 +46,6 @@ R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
 R_OSMOCON = 'osmocon_phone'
 R_ENB = 'enb'
-R_ALL = (R_IP_ADDRESS, R_RUN_NODE, R_BTS, R_ARFCN, R_MODEM, R_OSMOCON, R_ENB)
-
-RESOURCES_SCHEMA = {
-        'ip_address[].addr': schema.IPV4,
-        'run_node[].run_type': schema.STR,
-        'run_node[].run_addr': schema.IPV4,
-        'run_node[].ssh_user': schema.STR,
-        'run_node[].ssh_addr': schema.IPV4,
-        'bts[].label': schema.STR,
-        'bts[].type': schema.STR,
-        'bts[].ipa_unit_id': schema.UINT,
-        'bts[].addr': schema.IPV4,
-        'bts[].band': schema.BAND,
-        'bts[].direct_pcu': schema.BOOL_STR,
-        'bts[].ciphers[]': schema.CIPHER,
-        'bts[].channel_allocator': schema.CHAN_ALLOCATOR,
-        'bts[].gprs_mode': schema.GPRS_MODE,
-        'bts[].num_trx': schema.UINT,
-        'bts[].max_trx': schema.UINT,
-        'bts[].trx_list[].addr': schema.IPV4,
-        'bts[].trx_list[].hw_addr': schema.HWADDR,
-        'bts[].trx_list[].net_device': schema.STR,
-        'bts[].trx_list[].nominal_power': schema.UINT,
-        'bts[].trx_list[].max_power_red': schema.UINT,
-        'bts[].trx_list[].timeslot_list[].phys_chan_config': schema.PHY_CHAN,
-        'bts[].trx_list[].power_supply.type': schema.STR,
-        'bts[].trx_list[].power_supply.device': schema.STR,
-        'bts[].trx_list[].power_supply.port': schema.STR,
-        'bts[].osmo_trx.launch_trx': schema.BOOL_STR,
-        'bts[].osmo_trx.type': schema.STR,
-        'bts[].osmo_trx.clock_reference': schema.OSMO_TRX_CLOCK_REF,
-        'bts[].osmo_trx.trx_ip': schema.IPV4,
-        'bts[].osmo_trx.remote_user': schema.STR,
-        'bts[].osmo_trx.dev_args': schema.STR,
-        'bts[].osmo_trx.multi_arfcn': schema.BOOL_STR,
-        'bts[].osmo_trx.max_trxd_version': schema.UINT,
-        'bts[].osmo_trx.channels[].rx_path': schema.STR,
-        'bts[].osmo_trx.channels[].tx_path': schema.STR,
-        'enb[].label': schema.STR,
-        'enb[].type': schema.STR,
-        'enb[].remote_user': schema.STR,
-        'enb[].addr': schema.IPV4,
-        'enb[].gtp_bind_addr': schema.IPV4,
-        'enb[].id': schema.UINT,
-        'enb[].num_prb': schema.UINT,
-        'enb[].transmission_mode': schema.LTE_TRANSMISSION_MODE,
-        'enb[].tx_gain': schema.UINT,
-        'enb[].rx_gain': schema.UINT,
-        'enb[].rf_dev_type': schema.STR,
-        'enb[].rf_dev_args': schema.STR,
-        'enb[].additional_args': schema.STR,
-        'enb[].enable_measurements': schema.BOOL_STR,
-        'enb[].a1_report_type': schema.STR,
-        'enb[].a1_report_value': schema.INT,
-        'enb[].a1_hysteresis': schema.INT,
-        'enb[].a1_time_to_trigger': schema.INT,
-        'enb[].a2_report_type': schema.STR,
-        'enb[].a2_report_value': schema.INT,
-        'enb[].a2_hysteresis': schema.INT,
-        'enb[].a2_time_to_trigger': schema.INT,
-        'enb[].a3_report_type': schema.STR,
-        'enb[].a3_report_value': schema.INT,
-        'enb[].a3_hysteresis': schema.INT,
-        'enb[].a3_time_to_trigger': schema.INT,
-        'enb[].num_cells': schema.UINT,
-        'enb[].cell_list[].cell_id': schema.UINT,
-        'enb[].cell_list[].pci': schema.UINT,
-        'enb[].cell_list[].ncell_list[]': schema.UINT,
-        'enb[].cell_list[].scell_list[]': schema.UINT,
-        'enb[].cell_list[].dl_earfcn': schema.UINT,
-        'enb[].cell_list[].dl_rfemu.type': schema.STR,
-        'enb[].cell_list[].dl_rfemu.addr': schema.IPV4,
-        'enb[].cell_list[].dl_rfemu.ports[]': schema.UINT,
-        'arfcn[].arfcn': schema.INT,
-        'arfcn[].band': schema.BAND,
-        'modem[].type': schema.STR,
-        'modem[].label': schema.STR,
-        'modem[].path': schema.STR,
-        'modem[].imsi': schema.IMSI,
-        'modem[].ki': schema.KI,
-        'modem[].auth_algo': schema.AUTH_ALGO,
-        'modem[].apn_ipaddr': schema.IPV4,
-        'modem[].remote_user': schema.STR,
-        'modem[].addr': schema.IPV4,
-        'modem[].ciphers[]': schema.CIPHER,
-        'modem[].features[]': schema.MODEM_FEATURE,
-        'modem[].rf_dev_type': schema.STR,
-        'modem[].rf_dev_args': schema.STR,
-        'modem[].num_carriers': schema.UINT,
-        'modem[].additional_args': schema.STR,
-        'modem[].airplane_t_on_ms': schema.INT,
-        'modem[].airplane_t_off_ms': schema.INT,
-        'modem[].tx_gain': schema.UINT,
-        'modem[].rx_gain': schema.UINT,
-        'osmocon_phone[].serial_device': schema.STR,
-    }
-
-WANT_SCHEMA = util.dict_add(
-    dict([('%s[].times' % r, schema.TIMES) for r in R_ALL]),
-    RESOURCES_SCHEMA)
-
-CONF_SCHEMA = util.dict_add(
-    { 'defaults.timeout': schema.STR,
-      'config.bsc.net.codec_list[]': schema.CODEC,
-      'config.enb.enable_pcap': schema.BOOL_STR,
-      'config.epc.type': schema.STR,
-      'config.epc.qci': schema.UINT,
-      'config.epc.enable_pcap': schema.BOOL_STR,
-      'config.modem.enable_pcap': schema.BOOL_STR,
-      'config.amarisoft.license_server_addr': schema.IPV4,
-      'config.iperf3cli.time': schema.DURATION,
-    },
-    dict([('resources.%s' % key, val) for key, val in WANT_SCHEMA.items()]),
-    dict([('modifiers.%s' % key, val) for key, val in WANT_SCHEMA.items()]))
 
 KNOWN_BTS_TYPES = {
         'osmo-bts-sysmo': bts_sysmo.SysmoBts,
@@ -204,7 +90,7 @@ class ResourcesPool(log.Origin):
         self.read_conf()
 
     def read_conf(self):
-        self.all_resources = Resources(config.read(self.config_path, RESOURCES_SCHEMA))
+        self.all_resources = Resources(config.read(self.config_path, schema.get_resources_schema()))
         self.all_resources.set_hashes()
 
     def reserve(self, origin, want, modifiers):
@@ -239,8 +125,8 @@ class ResourcesPool(log.Origin):
            'modem': [ {}, {} ],
          }
         '''
-        schema.validate(want, RESOURCES_SCHEMA)
-        schema.validate(modifiers, RESOURCES_SCHEMA)
+        schema.validate(want, schema.get_resources_schema())
+        schema.validate(modifiers, schema.get_resources_schema())
 
         origin_id = origin.origin_id()
 
@@ -480,7 +366,7 @@ class Resources(dict):
     def add(self, more):
         if more is self:
             raise RuntimeError('adding a list of resources to itself?')
-        config.add(self, copy.deepcopy(more))
+        schema.add(self, copy.deepcopy(more))
 
     def mark_reserved_by(self, origin_id):
         for key, item_list in self.items():

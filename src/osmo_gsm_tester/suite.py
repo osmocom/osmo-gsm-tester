@@ -21,7 +21,7 @@ import os
 import sys
 import time
 import pprint
-from .core import config, log, util, process
+from .core import config, log, util, process, schema
 from .core.event_loop import MainLoop
 from .obj import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
 from .obj import run_node
@@ -50,7 +50,7 @@ class SuiteDefinition(log.Origin):
             raise RuntimeError('No such directory: %r' % self.suite_dir)
         self.conf = config.read(os.path.join(self.suite_dir,
                                              SuiteDefinition.CONF_FILENAME),
-                                resource.CONF_SCHEMA)
+                                schema.get_all_schema())
         self.load_test_basenames()
 
     def load_test_basenames(self):
@@ -143,7 +143,7 @@ class SuiteRun(log.Origin):
             log.dbg(scenario=scenario.name(), conf=c)
             if c is None:
                 continue
-            config.combine(combination, c)
+            schema.combine(combination, c)
         return combination
 
     def get_run_dir(self):
@@ -486,7 +486,7 @@ def parse_suite_scenario_str(suite_scenario_str):
 def load_suite_scenario_str(suite_scenario_str):
     suite_name, scenario_names = parse_suite_scenario_str(suite_scenario_str)
     suite = load(suite_name)
-    scenarios = [config.get_scenario(scenario_name, resource.CONF_SCHEMA) for scenario_name in scenario_names]
+    scenarios = [config.get_scenario(scenario_name, schema.get_all_schema()) for scenario_name in scenario_names]
     return (suite_scenario_str, suite, scenarios)
 
 def bts_obj(suite_run, conf):

@@ -21,7 +21,14 @@ import os
 import json
 
 from ..core import log, util, config, process, remote
+from ..core import schema
 from . import pcap_recorder, run_node
+
+def on_register_schemas():
+    config_schema = {
+        'time': schema.DURATION,
+        }
+    schema.register_config_schema('iperf3cli', config_schema)
 
 def iperf3_result_to_json(log_obj, data):
     try:

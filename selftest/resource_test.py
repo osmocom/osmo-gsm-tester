@@ -7,6 +7,7 @@ import shutil
 import atexit
 import _prep
 from osmo_gsm_tester.core import config, log, util
+from osmo_gsm_tester.core.schema import generate_schemas
 from osmo_gsm_tester import resource
 
 workdir = util.get_tempdir()
@@ -15,6 +16,9 @@ workdir = util.get_tempdir()
 config.ENV_CONF = './conf'
 
 log.get_process_id = lambda: '123-1490837279'
+
+# Generate supported schemas dynamically from objects:
+generate_schemas()
 
 print('- expect solutions:')
 pprint.pprint(

@@ -21,7 +21,15 @@ import os
 import tempfile
 
 from ..core import log, util, process
+from ..core import schema
 from ..core.event_loop import MainLoop
+
+def on_register_schemas():
+    resource_schema = {
+        'serial_device': schema.STR,
+        }
+    schema.register_resource_schema('osmocon_phone', resource_schema)
+
 
 class Osmocon(log.Origin):
 

@@ -21,12 +21,33 @@ import os
 import pprint
 
 from ..core import log, util, config, template, process, remote
+from ..core import schema
 from .run_node import RunNode
 from ..core.event_loop import MainLoop
 from .ms import MS
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
+
+def on_register_schemas():
+    resource_schema = {
+        'remote_user': schema.STR,
+        'addr': schema.IPV4,
+        'rf_dev_type': schema.STR,
+        'rf_dev_args': schema.STR,
+        'num_carriers': schema.UINT,
+        'additional_args': schema.STR,
+        'airplane_t_on_ms': schema.INT,
+        'airplane_t_off_ms': schema.INT,
+        'tx_gain': schema.UINT,
+        'rx_gain': schema.UINT,
+        }
+    schema.register_resource_schema('modem', resource_schema)
+
+    config_schema = {
+        'enable_pcap': schema.BOOL_STR,
+        }
+    schema.register_config_schema('modem', config_schema)
 
 #reference: srsLTE.git srslte_symbol_sz()
 def num_prb2symbol_sz(num_prb):

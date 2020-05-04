@@ -19,7 +19,14 @@
 
 from abc import ABCMeta, abstractmethod
 from ..core import log, config
+from ..core import schema
 
+def on_register_schemas():
+    config_schema = {
+        'type': schema.STR,
+        'qci': schema.UINT,
+        }
+    schema.register_config_schema('epc', config_schema)
 
 class EPC(log.Origin, metaclass=ABCMeta):
 

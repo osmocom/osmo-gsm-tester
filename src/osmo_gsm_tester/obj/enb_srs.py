@@ -24,6 +24,14 @@ from ..core import log, util, config, template, process, remote
 from . import enb
 from . import rfemu
 
+from ..core import schema
+
+def on_register_schemas():
+    config_schema = {
+        'enable_pcap': schema.BOOL_STR,
+        }
+    schema.register_config_schema('enb', config_schema)
+
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
 

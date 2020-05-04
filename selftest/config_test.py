@@ -116,35 +116,35 @@ print('- Combine dicts:')
 a = {'times': '2'}
 b = {'type': 'osmo-bts-trx'}
 res = {'times': '2', 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine dicts 2:')
 a = {'times': '1', 'label': 'foo', 'type': 'osmo-bts-trx'}
 b = {'type': 'osmo-bts-trx'}
 res = {'times': '1', 'label': 'foo', 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists:')
 a = { 'a_list': ['x', 'y', 'z'] }
 b = { 'a_list': ['y'] }
 res = {'a_list': ['x', 'y', 'z']}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 2:')
 a = { 'a_list': ['x'] }
 b = { 'a_list': ['w', 'u', 'x', 'y', 'z'] }
 res = {'a_list': ['x', 'w', 'u', 'y', 'z']}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 3:')
 a = { 'a_list': ['x', 3] }
 b = { 'a_list': ['y', 'z'] }
 try:
-    config.combine(a, b)
+    schema.combine(a, b)
 except ValueError:
     print("ValueError expected")
 
@@ -152,7 +152,7 @@ print('- Combine lists 4:')
 a = { 'a_list': [2, 3] }
 b = { 'a_list': ['y', 'z'] }
 try:
-    config.combine(a, b)
+    schema.combine(a, b)
 except ValueError:
     print("ValueError expected")
 
@@ -160,7 +160,7 @@ print('- Combine lists 5:')
 a = { 'a_list': [{}, {}] }
 b = { 'a_list': ['y', 'z'] }
 try:
-    config.combine(a, b)
+    schema.combine(a, b)
 except ValueError:
     print("ValueError expected")
 
@@ -168,49 +168,49 @@ print('- Combine lists 6:')
 a = { 'a_list': [{}, {}] }
 b = { 'a_list': [{}] }
 res = {'a_list': [{}, {}]}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 7:')
 a = { 'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}] }
 b = { 'type': 'osmo-bts-trx', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}] }
 res = {'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}], 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 8:')
 a = { 'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}] }
 b = { 'type': 'osmo-bts-trx', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}] }
 res = {'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}], 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 9:')
 a = { 'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}] }
 b = { 'type': 'osmo-bts-trx', 'trx': [{'nominal power': '10'}] }
 res = {'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}], 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 10:')
 a = { 'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}] }
 b = { 'type': 'osmo-bts-trx', 'trx': [{}, {'nominal power': '12'}] }
 res = {'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}], 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 13:')
 a = { 'times': '1', 'label': 'foo', 'trx': [{}, {'nominal power': '12'}] }
 b = { 'type': 'osmo-bts-trx', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}] }
 res = {'times': '1', 'label': 'foo', 'trx': [{'nominal power': '10'}, {'nominal power': '12'}], 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 print('- Combine lists 14:')
 a = { 'times': '1', 'label': 'foo', 'trx': [] }
 b = { 'type': 'osmo-bts-trx', 'trx': [] }
 res = {'times': '1', 'label': 'foo', 'trx': [], 'type': 'osmo-bts-trx'}
-config.combine(a, b)
+schema.combine(a, b)
 assert a == res
 
 # vim: expandtab tabstop=4 shiftwidth=4

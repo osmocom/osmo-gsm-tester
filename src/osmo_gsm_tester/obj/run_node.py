@@ -18,6 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ..core import log
+from ..core import schema
+
+def on_register_schemas():
+    resource_schema = {
+        'run_type': schema.STR,
+        'run_addr': schema.IPV4,
+        'ssh_user': schema.STR,
+        'ssh_addr': schema.IPV4,
+        }
+    schema.register_resource_schema('run_node', resource_schema)
+
 
 class RunNode(log.Origin):
 

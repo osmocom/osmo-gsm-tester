@@ -54,7 +54,8 @@ import yaml
 import os
 import copy
 
-from . import log, schema, util, template
+from . import log, util, template
+from . import schema
 from .util import is_dict, is_list, Dir, get_tempdir
 
 ENV_PREFIX = 'OSMO_GSM_TESTER_'
@@ -287,68 +288,6 @@ def get_scenario(name, validation_schema=None):
         sc = Scenario.from_param_list_str(name, path, param_list_str)
     sc.read_from_file(validation_schema)
     return sc
-
-def add(dest, src):
-    if is_dict(dest):
-        if not is_dict(src):
-            raise ValueError('cannot add to dict a value of type: %r' % type(src))
-
-        for key, val in src.items():
-            dest_val = dest.get(key)
-            if dest_val is None:
-                dest[key] = val
-            else:
-                log.ctx(key=key)
-                add(dest_val, val)
-        return
-    if is_list(dest):
-        if not is_list(src):
-            raise ValueError('cannot add to list a value of type: %r' % type(src))
-        dest.extend(src)
-        return
-    if dest == src:
-        return
-    raise ValueError('cannot add dicts, conflicting items (values %r and %r)'
-                     % (dest, src))
-
-def combine(dest, src):
-    if is_dict(dest):
-        if not is_dict(src):
-            raise ValueError('cannot combine dict with a value of type: %r' % type(src))
-
-        for key, val in src.items():
-            log.ctx(key=key)
-            dest_val = dest.get(key)
-            if dest_val is None:
-                dest[key] = val
-            else:
-                combine(dest_val, val)
-        return
-    if is_list(dest):
-        if not is_list(src):
-            raise ValueError('cannot combine list with a value of type: %r' % type(src))
-        # Validate that all elements in both lists are of the same type:
-        t = util.list_validate_same_elem_type(src + dest)
-        if t is None:
-            return # both lists are empty, return
-        # For lists of complex objects, we expect them to be sorted lists:
-        if t in (dict, list, tuple):
-            for i in range(len(dest)):
-                log.ctx(idx=i)
-                src_it = src[i] if i < len(src) else util.empty_instance_type(t)
-                combine(dest[i], src_it)
-            for i in range(len(dest), len(src)):
-                log.ctx(idx=i)
-                dest.append(src[i])
-        else: # for lists of basic elements, we handle them as unsorted sets:
-            for elem in src:
-                if elem not in dest:
-                    dest.append(elem)
-        return
-    if dest == src:
-        return
-    raise ValueError('cannot combine dicts, conflicting items (values %r and %r)'
-                     % (dest, src))
 
 def overlay(dest, src):
     if is_dict(dest):

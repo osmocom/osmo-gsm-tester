@@ -370,6 +370,17 @@ else:
     def run_python_file(module_name, path):
         SourceFileLoader(module_name, path).load_module()
 
+def run_python_file_method(module_name, func_name, fail_if_missing=True):
+    module_obj = __import__(module_name, globals(), locals(), [func_name])
+    try:
+        func = getattr(module_obj, func_name)
+    except AttributeError as e:
+        if fail_if_missing:
+            raise RuntimeError('function %s not found in %s (%s)' % (func_name, module_name))
+        else:
+            return None
+    return func()
+
 def msisdn_inc(msisdn_str):
     'add 1 and preserve leading zeros'
     return ('%%0%dd' % len(msisdn_str)) % (int(msisdn_str) + 1)

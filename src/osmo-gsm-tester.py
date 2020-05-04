@@ -70,7 +70,9 @@ import sys
 import argparse
 from signal import *
 from osmo_gsm_tester import __version__
-from osmo_gsm_tester.core import log, config
+from osmo_gsm_tester.core import log
+from osmo_gsm_tester.core.config import read_config_file, DEFAULT_SUITES_CONF
+from osmo_gsm_tester.core.schema import generate_schemas
 from osmo_gsm_tester import trial, suite
 
 def sig_handler_cleanup(signum, frame):
@@ -161,6 +163,9 @@ OSMO_GSM_TESTER_CONF env and default locations)''')
 
     if not combination_strs:
         raise RuntimeError('Need at least one suite:scenario or series to run')
+
+    # Generate supported schemas dynamically from objects:
+    generate_schemas()
 
     # make sure all suite:scenarios exist
     suite_scenarios = []

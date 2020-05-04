@@ -21,7 +21,14 @@ import os
 import pprint
 
 from ..core import log, util, config, template, process
+from ..core import schema
 from . import osmo_ctrl, pcap_recorder, smsc
+
+def on_register_schemas():
+    resource_schema = {
+        'path': schema.STR,
+        }
+    schema.register_resource_schema('modem', resource_schema)
 
 class OsmoMsc(log.Origin):
 

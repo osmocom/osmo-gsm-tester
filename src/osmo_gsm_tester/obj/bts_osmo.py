@@ -21,7 +21,17 @@ import os
 import tempfile
 from abc import ABCMeta, abstractmethod
 from ..core import log
+from ..core import schema
 from . import bts, pcu_osmo
+
+def on_register_schemas():
+    resource_schema = {
+        'ipa_unit_id': schema.UINT,
+        'direct_pcu': schema.BOOL_STR,
+        'channel_allocator': schema.CHAN_ALLOCATOR,
+        'gprs_mode': schema.GPRS_MODE,
+        }
+    schema.register_resource_schema('bts', resource_schema)
 
 class OsmoBts(bts.Bts, metaclass=ABCMeta):
 

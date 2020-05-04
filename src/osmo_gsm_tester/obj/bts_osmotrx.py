@@ -21,8 +21,24 @@ import os
 import pprint
 from abc import ABCMeta, abstractmethod
 from ..core import log, config, util, template, process, remote
+from ..core import schema
 from ..core.event_loop import MainLoop
 from . import powersupply, bts_osmo
+
+def on_register_schemas():
+    resource_schema = {
+        'osmo_trx.launch_trx': schema.BOOL_STR,
+        'osmo_trx.type': schema.STR,
+        'osmo_trx.clock_reference': schema.OSMO_TRX_CLOCK_REF,
+        'osmo_trx.trx_ip': schema.IPV4,
+        'osmo_trx.remote_user': schema.STR,
+        'osmo_trx.dev_args': schema.STR,
+        'osmo_trx.multi_arfcn': schema.BOOL_STR,
+        'osmo_trx.max_trxd_version': schema.UINT,
+        'osmo_trx.channels[].rx_path': schema.STR,
+        'osmo_trx.channels[].tx_path': schema.STR,
+        }
+    schema.register_resource_schema('bts', resource_schema)
 
 class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 ##############

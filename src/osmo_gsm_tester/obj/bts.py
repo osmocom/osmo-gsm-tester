@@ -21,6 +21,30 @@ import copy
 from abc import ABCMeta, abstractmethod
 from ..core import log, config, schema
 
+def on_register_schemas():
+    resource_schema = {
+        'label': schema.STR,
+        'type': schema.STR,
+        'addr': schema.IPV4,
+        'band': schema.BAND,
+        'direct_pcu': schema.BOOL_STR,
+        'ciphers[]': schema.CIPHER,
+        'channel_allocator': schema.CHAN_ALLOCATOR,
+        'gprs_mode': schema.GPRS_MODE,
+        'num_trx': schema.UINT,
+        'max_trx': schema.UINT,
+        'trx_list[].addr': schema.IPV4,
+        'trx_list[].hw_addr': schema.HWADDR,
+        'trx_list[].net_device': schema.STR,
+        'trx_list[].nominal_power': schema.UINT,
+        'trx_list[].max_power_red': schema.UINT,
+        'trx_list[].timeslot_list[].phys_chan_config': schema.PHY_CHAN,
+        'trx_list[].power_supply.type': schema.STR,
+        'trx_list[].power_supply.device': schema.STR,
+        'trx_list[].power_supply.port': schema.STR,
+        }
+    schema.register_resource_schema('bts', resource_schema)
+
 class Bts(log.Origin, metaclass=ABCMeta):
 
 ##############

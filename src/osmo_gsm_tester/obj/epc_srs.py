@@ -21,7 +21,14 @@ import os
 import pprint
 
 from ..core import log, util, config, template, process, remote
+from ..core import schema
 from . import epc
+
+def on_register_schemas():
+    config_schema = {
+        'enable_pcap': schema.BOOL_STR,
+        }
+    schema.register_config_schema('epc', config_schema)
 
 class srsEPC(epc.EPC):
 

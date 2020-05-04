@@ -3,6 +3,7 @@ import os
 import _prep
 import shutil
 from osmo_gsm_tester.core import log, config, util
+from osmo_gsm_tester.core.schema import generate_schemas
 from osmo_gsm_tester import suite, report
 
 config.ENV_CONF = './suite_test'
@@ -23,6 +24,9 @@ class FakeTrial(log.Origin):
         return self._run_dir
 
 #log.style_change(trace=True)
+
+# Generate supported schemas dynamically from objects:
+generate_schemas()
 
 print('- non-existing suite dir')
 assert(log.run_logging_exceptions(suite.load, 'does_not_exist') == None)

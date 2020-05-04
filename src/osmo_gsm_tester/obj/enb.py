@@ -19,7 +19,47 @@
 
 from abc import ABCMeta, abstractmethod
 from ..core import log, config
+from ..core import schema
 
+def on_register_schemas():
+    resource_schema = {
+        'label': schema.STR,
+        'type': schema.STR,
+        'remote_user': schema.STR,
+        'addr': schema.IPV4,
+        'gtp_bind_addr': schema.IPV4,
+        'id': schema.UINT,
+        'num_prb': schema.UINT,
+        'transmission_mode': schema.LTE_TRANSMISSION_MODE,
+        'tx_gain': schema.UINT,
+        'rx_gain': schema.UINT,
+        'rf_dev_type': schema.STR,
+        'rf_dev_args': schema.STR,
+        'additional_args': schema.STR,
+        'enable_measurements': schema.BOOL_STR,
+        'a1_report_type': schema.STR,
+        'a1_report_value': schema.INT,
+        'a1_hysteresis': schema.INT,
+        'a1_time_to_trigger': schema.INT,
+        'a2_report_type': schema.STR,
+        'a2_report_value': schema.INT,
+        'a2_hysteresis': schema.INT,
+        'a2_time_to_trigger': schema.INT,
+        'a3_report_type': schema.STR,
+        'a3_report_value': schema.INT,
+        'a3_hysteresis': schema.INT,
+        'a3_time_to_trigger': schema.INT,
+        'num_cells': schema.UINT,
+        'cell_list[].cell_id': schema.UINT,
+        'cell_list[].pci': schema.UINT,
+        'cell_list[].ncell_list[]': schema.UINT,
+        'cell_list[].scell_list[]': schema.UINT,
+        'cell_list[].dl_earfcn': schema.UINT,
+        'cell_list[].dl_rfemu.type': schema.STR,
+        'cell_list[].dl_rfemu.addr': schema.IPV4,
+        'cell_list[].dl_rfemu.ports[]': schema.UINT,
+        }
+    schema.register_resource_schema('enb', resource_schema)
 
 class eNodeB(log.Origin, metaclass=ABCMeta):
 

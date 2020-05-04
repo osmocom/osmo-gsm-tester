@@ -22,7 +22,15 @@ import re
 import pprint
 
 from ..core import log, util, config, template, process
+from ..core import schema
 from . import osmo_ctrl, pcap_recorder
+
+def on_register_schemas():
+    config_schema = {
+        'net.codec_list[]': schema.CODEC,
+        }
+    schema.register_config_schema('bsc', config_schema)
+
 
 class OsmoBsc(log.Origin):
 

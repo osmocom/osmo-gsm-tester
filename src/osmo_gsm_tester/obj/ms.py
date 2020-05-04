@@ -19,6 +19,21 @@
 
 from abc import ABCMeta, abstractmethod
 from ..core import log
+from ..core import schema
+
+def on_register_schemas():
+    resource_schema = {
+        'type': schema.STR,
+        'label': schema.STR,
+        'path': schema.STR,
+        'imsi': schema.IMSI,
+        'ki': schema.KI,
+        'auth_algo': schema.AUTH_ALGO,
+        'apn_ipaddr': schema.IPV4,
+        'ciphers[]': schema.CIPHER,
+        'features[]': schema.MODEM_FEATURE
+        }
+    schema.register_resource_schema('modem', resource_schema)
 
 class MS(log.Origin, metaclass=ABCMeta):
     """Base for everything about mobile/modem and SIMs."""

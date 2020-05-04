@@ -22,12 +22,12 @@ import copy
 import atexit
 import pprint
 
-from .core import log
-from .core import config
-from .core import util
-from .core import schema
+from . import log
+from . import config
+from . import util
+from . import schema
 
-from .core.util import is_dict, is_list
+from .util import is_dict, is_list
 
 HASH_KEY = '_hash'
 RESERVED_KEY = '_reserved_by'

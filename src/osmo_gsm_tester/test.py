@@ -23,8 +23,7 @@ import time
 import traceback
 from . import testenv
 
-from .core import log, util
-from . import resource
+from .core import log, util, resource
 
 class Test(log.Origin):
     UNKNOWN = 'UNKNOWN' # matches junit 'error'

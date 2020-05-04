@@ -6,9 +6,8 @@ import pprint
 import shutil
 import atexit
 import _prep
-from osmo_gsm_tester.core import config, log, util
+from osmo_gsm_tester.core import config, log, util, resource
 from osmo_gsm_tester.core.schema import generate_schemas
-from osmo_gsm_tester import resource
 
 workdir = util.get_tempdir()
 

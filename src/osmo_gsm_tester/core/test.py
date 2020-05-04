@@ -21,9 +21,9 @@ import os
 import sys
 import time
 import traceback
-from . import testenv
+from .. import testenv
 
-from .core import log, util, resource
+from . import log, util, resource
 
 class Test(log.Origin):
     UNKNOWN = 'UNKNOWN' # matches junit 'error'
@@ -56,11 +56,7 @@ class Test(log.Origin):
             log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
-            from .core import process
-            from .core.event_loop import MainLoop
-            from .obj import sms
-            from . import suite
-            testenv.setup(self.suite_run, self, suite, MainLoop, sms, process)
+            testenv.setup(self.suite_run, self)
             with self.redirect_stdout():
                 util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
                                      self.path)

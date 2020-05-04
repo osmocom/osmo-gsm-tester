@@ -36,8 +36,14 @@ Timeout = None
 Sms = None
 process = None
 
-def setup(suite_run, _test, suite_module, event_module, sms_module, process_module):
+def setup(suite_run, _test):
+    from .core import process as process_module
+    from .core.event_loop import MainLoop
+    from .obj.sms import Sms as Sms_class
+    from . import suite as suite_module
+
     global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Timeout, Sms, process
+
     trial = suite_run.trial
     suite = suite_run
     test = _test
@@ -45,13 +51,13 @@ def setup(suite_run, _test, suite_module, event_module, sms_module, process_modu
     log = test.log
     dbg = test.dbg
     err = test.err
-    wait = lambda *args, **kwargs: event_module.wait(suite_run, *args, **kwargs)
-    wait_no_raise = lambda *args, **kwargs: event_module.wait_no_raise(suite_run, *args, **kwargs)
-    sleep = lambda *args, **kwargs: event_module.sleep(suite_run, *args, **kwargs)
-    poll = event_module.poll
+    wait = lambda *args, **kwargs: MainLoop.wait(suite_run, *args, **kwargs)
+    wait_no_raise = lambda *args, **kwargs: MainLoop.wait_no_raise(suite_run, *args, **kwargs)
+    sleep = lambda *args, **kwargs: MainLoop.sleep(suite_run, *args, **kwargs)
+    poll = MainLoop.poll
     prompt = suite_run.prompt
     Timeout = suite_module.Timeout
-    Sms = sms_module.Sms
+    Sms = Sms_class
     process = process_module
 
 # vim: expandtab tabstop=4 shiftwidth=4

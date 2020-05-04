@@ -22,6 +22,7 @@ import sys
 import time
 import pprint
 from .core import config, log, util, process, schema, resource
+from .core import test
 from .core.event_loop import MainLoop
 from .obj import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
 from .obj import run_node
@@ -29,7 +30,6 @@ from .obj import epc
 from .obj import enb
 from .obj import bts
 from .obj import ms
-from . import test
 
 class Timeout(Exception):
     pass

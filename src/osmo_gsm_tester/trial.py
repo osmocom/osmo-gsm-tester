@@ -22,8 +22,8 @@ import time
 import shutil
 import tarfile
 
-from .core import log, util
-from . import suite, report
+from .core import log, util, report
+from . import suite
 
 FILE_MARK_TAKEN = 'taken'
 FILE_CHECKSUMS = 'checksums.md5'

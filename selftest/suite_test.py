@@ -2,9 +2,9 @@
 import os
 import _prep
 import shutil
-from osmo_gsm_tester.core import log, config, util
+from osmo_gsm_tester.core import log, config, util, report
 from osmo_gsm_tester.core.schema import generate_schemas
-from osmo_gsm_tester import suite, report
+from osmo_gsm_tester import suite
 
 config.ENV_CONF = './suite_test'
 

@@ -25,6 +25,10 @@ from .core import config, log, util, process, schema
 from .core.event_loop import MainLoop
 from .obj import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
 from .obj import run_node
+from .obj import epc
+from .obj import enb
+from .obj import bts
+from .obj import ms
 from . import resource, test
 
 class Timeout(Exception):
@@ -324,24 +328,19 @@ class SuiteRun(log.Origin):
         return ms
 
     def bts(self, specifics=None):
-        bts = bts_obj(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
-        bts.set_lac(self.lac())
-        bts.set_rac(self.rac())
-        bts.set_cellid(self.cellid())
-        bts.set_bvci(self.bvci())
-        self.register_for_cleanup(bts)
-        return bts
+        bts_obj = bts.Bts.get_instance_by_type(self, self.reserved_resources.get(resource.R_BTS, specifics=specifics))
+        bts_obj.set_lac(self.lac())
+        bts_obj.set_rac(self.rac())
+        bts_obj.set_cellid(self.cellid())
+        bts_obj.set_bvci(self.bvci())
+        self.register_for_cleanup(bts_obj)
+        return bts_obj
 
     def modem(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_MODEM, specifics=specifics)
-        ms_type = conf.get('type')
-        ms_class = resource.KNOWN_MS_TYPES.get(ms_type)
-        if ms_class is None:
-            raise RuntimeError('No such Modem type is defined: %r' % ms_type)
-        self.dbg('create Modem object', conf=conf)
-        ms = ms_class(self, conf)
-        self.register_for_cleanup(ms)
-        return ms
+        ms_obj = ms.MS.get_instance_by_type(self, conf)
+        self.register_for_cleanup(ms_obj)
+        return ms_obj
 
     def modems(self, count):
         l = []
@@ -367,16 +366,16 @@ class SuiteRun(log.Origin):
         return run_node.RunNode.from_conf(self.reserved_resources.get(resource.R_RUN_NODE, specifics=specifics))
 
     def enb(self, specifics=None):
-        enb = enb_obj(self, self.reserved_resources.get(resource.R_ENB, specifics=specifics))
-        self.register_for_cleanup(enb)
-        return enb
+        enb_obj = enb.eNodeB.get_instance_by_type(self, self.reserved_resources.get(resource.R_ENB, specifics=specifics))
+        self.register_for_cleanup(enb_obj)
+        return enb_obj
 
     def epc(self, run_node=None):
         if run_node is None:
             run_node = self.run_node()
-        epc = epc_obj(self, run_node)
-        self.register_for_cleanup(epc)
-        return epc
+        epc_obj = epc.EPC.get_instance_by_type(self, run_node)
+        self.register_for_cleanup(epc_obj)
+        return epc_obj
 
     def osmocon(self, specifics=None):
         conf = self.reserved_resources.get(resource.R_OSMOCON, specifics=specifics)
@@ -488,33 +487,5 @@ def load_suite_scenario_str(suite_scenario_str):
     suite = load(suite_name)
     scenarios = [config.get_scenario(scenario_name, schema.get_all_schema()) for scenario_name in scenario_names]
     return (suite_scenario_str, suite, scenarios)
-
-def bts_obj(suite_run, conf):
-    bts_type = conf.get('type')
-    log.dbg('create BTS object', type=bts_type)
-    bts_class = resource.KNOWN_BTS_TYPES.get(bts_type)
-    if bts_class is None:
-        raise RuntimeError('No such BTS type is defined: %r' % bts_type)
-    return bts_class(suite_run, conf)
-
-def enb_obj(suite_run, conf):
-    enb_type = conf.get('type')
-    log.dbg('create ENB object', type=enb_type)
-    enb_class = resource.KNOWN_ENB_TYPES.get(enb_type)
-    if enb_class is None:
-        raise RuntimeError('No such ENB type is defined: %r' % enb_type)
-    return enb_class(suite_run, conf)
-
-def epc_obj(suite_run, run_node):
-    values = dict(epc=config.get_defaults('epc'))
-    config.overlay(values, dict(epc=suite_run.config().get('epc', {})))
-    epc_type = values['epc'].get('type', None)
-    if epc_type is None:
-        raise RuntimeError('EPC type is not defined!')
-    log.dbg('create EPC object', type=epc_type)
-    epc_class = resource.KNOWN_EPC_TYPES.get(epc_type)
-    if epc_class is None:
-        raise RuntimeError('No such EPC type is defined: %r' % epc_type)
-    return epc_class(suite_run, run_node)
 
 # vim: expandtab tabstop=4 shiftwidth=4

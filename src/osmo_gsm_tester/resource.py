@@ -26,10 +26,6 @@ from .core import log
 from .core import config
 from .core import util
 from .core import schema
-from .obj import bts_sysmo, bts_osmotrx, bts_osmovirtual, bts_octphy, bts_nanobts, bts_oc2g
-from .obj  import ms_ofono
-from .obj  import ms_osmo_mobile
-from .obj  import ms_srs, ms_amarisoft, enb_srs, enb_amarisoft, epc_srs, epc_amarisoft
 
 from .core.util import is_dict, is_list
 
@@ -46,38 +42,6 @@ R_ARFCN = 'arfcn'
 R_MODEM = 'modem'
 R_OSMOCON = 'osmocon_phone'
 R_ENB = 'enb'
-
-KNOWN_BTS_TYPES = {
-        'osmo-bts-sysmo': bts_sysmo.SysmoBts,
-        'osmo-bts-trx': bts_osmotrx.OsmoBtsTrx,
-        'osmo-bts-oc2g': bts_oc2g.OsmoBtsOC2G,
-        'osmo-bts-octphy': bts_octphy.OsmoBtsOctphy,
-        'osmo-bts-virtual': bts_osmovirtual.OsmoBtsVirtual,
-        'nanobts': bts_nanobts.NanoBts,
-    }
-
-KNOWN_ENB_TYPES = {
-        'srsenb': enb_srs.srsENB,
-        'amarisoftenb': enb_amarisoft.AmarisoftENB,
-}
-
-KNOWN_EPC_TYPES = {
-        'srsepc': epc_srs.srsEPC,
-        'amarisoftepc': epc_amarisoft.AmarisoftEPC,
-}
-
-KNOWN_MS_TYPES = {
-        # Map None to ofono for forward compability
-        None: ms_ofono.Modem,
-        'ofono': ms_ofono.Modem,
-        'osmo-mobile': ms_osmo_mobile.MSOsmoMobile,
-        'srsue': ms_srs.srsUE,
-        'amarisoftue': ms_amarisoft.AmarisoftUE,
-}
-
-
-def register_bts_type(name, clazz):
-    KNOWN_BTS_TYPES[name] = clazz
 
 class ResourcesPool(log.Origin):
     _remember_to_free = None

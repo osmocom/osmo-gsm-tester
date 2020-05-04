@@ -57,6 +57,25 @@ class EPC(log.Origin, metaclass=ABCMeta):
         'Nothing to do by default. Subclass can override if required.'
         pass
 
+    def get_instance_by_type(suite_run, run_node):
+        """Allocate a EPC child class based on type. Opts are passed to the newly created object."""
+        values = dict(epc=config.get_defaults('epc'))
+        config.overlay(values, dict(epc=suite_run.config().get('epc', {})))
+        epc_type = values['epc'].get('type', None)
+        if epc_type is None:
+            raise RuntimeError('EPC type is not defined!')
+
+        if epc_type == 'amarisoftepc':
+            from .epc_amarisoft import AmarisoftEPC
+            epc_class = AmarisoftEPC
+        elif epc_type == 'srsepc':
+            from .epc_srs import srsEPC
+            epc_class = srsEPC
+        else:
+            raise log.Error('EPC type not supported:', epc_type)
+
+        return  epc_class(suite_run, run_node)
+
 ###################
 # PUBLIC (test API included)
 ###################

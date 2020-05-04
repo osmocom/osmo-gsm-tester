@@ -38,11 +38,48 @@ def on_register_schemas():
 class MS(log.Origin, metaclass=ABCMeta):
     """Base for everything about mobile/modem and SIMs."""
 
+##############
+# PROTECTED
+##############
     def __init__(self, name, conf):
         super().__init__(log.C_TST, name)
         self._conf = conf
         self.msisdn = None
 
+########################
+# PUBLIC - INTERNAL API
+########################
+    @abstractmethod
+    def cleanup(self):
+        """Cleans up resources allocated."""
+        pass
+
+    def get_instance_by_type(suite_run, conf):
+        """Allocate a MS child class based on type. Opts are passed to the newly created object."""
+        ms_type = conf.get('type')
+        if ms_type is None:
+            # Map None to ofono for forward compability
+            ms_type = 'ofono'
+
+        if ms_type == 'ofono':
+            from .ms_ofono import Modem
+            ms_class = Modem
+        elif ms_type == 'osmo-mobile':
+            from .ms_osmo_mobile import MSOsmoMobile
+            ms_class = MSOsmoMobile
+        elif ms_type == 'srsue':
+            from .ms_srs import srsUE
+            ms_class = srsUE
+        elif ms_type == 'amarisoftue':
+            from .ms_amarisoft import AmarisoftUE
+            ms_class = AmarisoftUE
+        else:
+            raise log.Error('MS type not supported:', ms_type)
+        return ms_class(suite_run, conf)
+
+###################
+# PUBLIC (test API included)
+###################
     def imsi(self):
         return self._conf.get('imsi')
 
@@ -60,8 +97,3 @@ class MS(log.Origin, metaclass=ABCMeta):
 
     def msisdn(self):
         return self.msisdn
-
-    @abstractmethod
-    def cleanup(self):
-        """Cleans up resources allocated."""
-        pass

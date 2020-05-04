@@ -192,6 +192,22 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 
         return rf_dev_args
 
+    def get_instance_by_type(suite_run, conf):
+        """Allocate a ENB child class based on type. Opts are passed to the newly created object."""
+        enb_type = conf.get('type')
+        if enb_type is None:
+            raise RuntimeError('ENB type is not defined!')
+
+        if enb_type == 'amarisoftenb':
+            from .enb_amarisoft import AmarisoftENB
+            enb_class = AmarisoftENB
+        elif enb_type == 'srsenb':
+            from .enb_srs import srsENB
+            enb_class = srsENB
+        else:
+            raise log.Error('ENB type not supported:', enb_type)
+        return  enb_class(suite_run, conf)
+
 ###################
 # PUBLIC (test API included)
 ###################

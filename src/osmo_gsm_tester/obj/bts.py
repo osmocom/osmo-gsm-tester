@@ -162,6 +162,34 @@ class Bts(log.Origin, metaclass=ABCMeta):
         'Nothing to do by default. Subclass can override if required.'
         pass
 
+    def get_instance_by_type(suite_run, conf):
+        """Allocate a BTS child class based on type. Opts are passed to the newly created object."""
+        bts_type = conf.get('type')
+        if bts_type is None:
+            raise RuntimeError('BTS type is not defined!')
+
+        if bts_type == 'osmo-bts-sysmo':
+            from .bts_sysmo import SysmoBts
+            bts_class = SysmoBts
+        elif bts_type == 'osmo-bts-trx':
+            from .bts_osmotrx import OsmoBtsTrx
+            bts_class = OsmoBtsTrx
+        elif bts_type == 'osmo-bts-oc2g':
+            from .bts_oc2g import OsmoBtsOC2G
+            bts_class = OsmoBtsOC2G
+        elif bts_type == 'osmo-bts-octphy':
+            from .bts_octphy import OsmoBtsOctphy
+            bts_class = OsmoBtsOctphy
+        elif bts_type == 'osmo-bts-virtual':
+            from .bts_osmovirtual import OsmoBtsVirtual
+            bts_class = OsmoBtsVirtual
+        elif bts_type == 'nanobts':
+            from .bts_nanobts import NanoBts
+            bts_class = NanoBts
+        else:
+            raise log.Error('BTS type not supported:', bts_type)
+        return bts_class(suite_run, conf)
+
 ###################
 # PUBLIC (test API included)
 ###################

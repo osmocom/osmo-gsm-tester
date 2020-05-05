@@ -17,21 +17,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from ..core import log, util, process
 from ..core.event_loop import MainLoop
 from .ms import MS
 from . import sms
 
-from pydbus import SystemBus, Variant
-import os
-
-# Required for Gio.Cancellable.
-# See https://lazka.github.io/pgi-docs/Gio-2.0/classes/Cancellable.html#Gio.Cancellable
-from gi.module import get_introspection_module
-Gio = get_introspection_module('Gio')
-
-from gi.repository import GLib
+_import_external_modules_done = False
 bus = None
+Gio = None
+GLib = None
+Variant = None
+def _import_external_modules():
+    global _import_external_modules_done, bus, Gio, GLib, Variant
+    if _import_external_modules_done:
+        return
+    _import_external_modules_done = True
+
+    # Required for Gio.Cancellable.
+    # See https://lazka.github.io/pgi-docs/Gio-2.0/classes/Cancellable.html#Gio.Cancellable
+    from gi.module import get_introspection_module
+    Gio = get_introspection_module('Gio')
+    from gi.repository import GLib as glib_module
+    GLib = glib_module
+
+    from pydbus import SystemBus, Variant
+    bus = SystemBus()
+    from pydbus import Variant as variant_class
+    Variant = variant_class
 
 I_MODEM = 'org.ofono.Modem'
 I_NETREG = 'org.ofono.NetworkRegistration'
@@ -68,9 +82,6 @@ def dbus_connect(dbus_iface, handler):
     return DeferredDBus(dbus_iface, handler).subscription_id
 
 def systembus_get(path):
-    global bus
-    if not bus:
-        bus = SystemBus()
     return bus.get('org.ofono', path)
 
 def list_modems():
@@ -362,9 +373,11 @@ class Modem(MS):
     CTX_PROT_IPv46 = 'dual'
 
     def __init__(self, testenv, conf):
+        super().__init__('modem', conf)
+        _import_external_modules()
         self.syspath = conf.get('path')
         self.dbuspath = get_dbuspath_from_syspath(self.syspath)
-        super().__init__(self.dbuspath, conf)
+        self.set_name(self.dbuspath)
         self.dbg('creating from syspath %s' % self.syspath)
         self._ki = None
         self._imsi = None

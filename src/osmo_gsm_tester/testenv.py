@@ -29,13 +29,6 @@ from .core import process as process_module
 from .core import resource
 from .core.event_loop import MainLoop
 
-from .obj import nitb_osmo, hlr_osmo, mgcpgw_osmo, mgw_osmo, msc_osmo, bsc_osmo, stp_osmo, ggsn_osmo, sgsn_osmo, esme, osmocon, ms_driver, iperf3
-from .obj import run_node
-from .obj import epc
-from .obj import enb
-from .obj import bts
-from .obj import ms
-
 suite = None
 resources = None
 log = None
@@ -172,57 +165,68 @@ class TestEnv(log_module.Origin):
         return self.get_reserved_resource(resource.R_IP_ADDRESS, specifics)
 
     def nitb(self, ip_address=None):
+        from .obj.nitb_osmo import OsmoNitb
         if ip_address is None:
             ip_address = self.ip_address()
-        return nitb_osmo.OsmoNitb(self, ip_address)
+        return OsmoNitb(self, ip_address)
 
     def hlr(self, ip_address=None):
+        from .obj.hlr_osmo import OsmoHlr
         if ip_address is None:
             ip_address = self.ip_address()
-        return hlr_osmo.OsmoHlr(self, ip_address)
+        return OsmoHlr(self, ip_address)
 
     def ggsn(self, ip_address=None):
+        from .obj.ggsn_osmo import OsmoGgsn
         if ip_address is None:
             ip_address = self.ip_address()
-        return ggsn_osmo.OsmoGgsn(self, ip_address)
+        return OsmoGgsn(self, ip_address)
 
     def sgsn(self, hlr, ggsn, ip_address=None):
+        from .obj import sgsn_osmo
         if ip_address is None:
             ip_address = self.ip_address()
         return sgsn_osmo.OsmoSgsn(self, hlr, ggsn, ip_address)
 
     def mgcpgw(self, ip_address=None, bts_ip=None):
+        from .obj.mgcpgw_osmo import OsmoMgcpgw
         if ip_address is None:
             ip_address = self.ip_address()
-        return mgcpgw_osmo.OsmoMgcpgw(self, ip_address, bts_ip)
+        return OsmoMgcpgw(self, ip_address, bts_ip)
 
     def mgw(self, ip_address=None):
+        from .obj.mgw_osmo import OsmoMgw
         if ip_address is None:
             ip_address = self.ip_address()
-        return mgw_osmo.OsmoMgw(self, ip_address)
+        return OsmoMgw(self, ip_address)
 
     def msc(self, hlr, mgcpgw, stp, ip_address=None):
+        from .obj import msc_osmo
         if ip_address is None:
             ip_address = self.ip_address()
         return msc_osmo.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
 
     def bsc(self, msc, mgw, stp, ip_address=None):
+        from .obj.bsc_osmo import OsmoBsc
         if ip_address is None:
             ip_address = self.ip_address()
-        return bsc_osmo.OsmoBsc(self, msc, mgw, stp, ip_address)
+        return OsmoBsc(self, msc, mgw, stp, ip_address)
 
     def stp(self, ip_address=None):
+        from .obj.stp_osmo import OsmoStp
         if ip_address is None:
             ip_address = self.ip_address()
-        return stp_osmo.OsmoStp(self, ip_address)
+        return OsmoStp(self, ip_address)
 
     def ms_driver(self):
-        ms = ms_driver.MsDriver(self)
+        from .obj.ms_driver import MsDriver
+        ms = MsDriver(self)
         self.register_for_cleanup(ms)
         return ms
 
     def bts(self, specifics=None):
-        bts_obj = bts.Bts.get_instance_by_type(self, self.get_reserved_resource(resource.R_BTS, specifics=specifics))
+        from .obj.bts import Bts
+        bts_obj = Bts.get_instance_by_type(self, self.get_reserved_resource(resource.R_BTS, specifics=specifics))
         bts_obj.set_lac(self.lac())
         bts_obj.set_rac(self.rac())
         bts_obj.set_cellid(self.cellid())
@@ -231,8 +235,9 @@ class TestEnv(log_module.Origin):
         return bts_obj
 
     def modem(self, specifics=None):
+        from .obj.ms import MS
         conf = self.get_reserved_resource(resource.R_MODEM, specifics=specifics)
-        ms_obj = ms.MS.get_instance_by_type(self, conf)
+        ms_obj = MS.get_instance_by_type(self, conf)
         self.register_for_cleanup(ms_obj)
         return ms_obj
 
@@ -252,35 +257,41 @@ class TestEnv(log_module.Origin):
                 return l
 
     def esme(self):
-        esme_obj = esme.Esme(self.msisdn())
+        from .obj.esme import Esme
+        esme_obj = Esme(self.msisdn())
         self.register_for_cleanup(esme_obj)
         return esme_obj
 
     def run_node(self, specifics=None):
-        return run_node.RunNode.from_conf(self.get_reserved_resource(resource.R_RUN_NODE, specifics=specifics))
+        from .obj.run_node import RunNode
+        return RunNode.from_conf(self.get_reserved_resource(resource.R_RUN_NODE, specifics=specifics))
 
     def enb(self, specifics=None):
-        enb_obj = enb.eNodeB.get_instance_by_type(self, self.get_reserved_resource(resource.R_ENB, specifics=specifics))
+        from .obj.enb import eNodeB
+        enb_obj = eNodeB.get_instance_by_type(self, self.get_reserved_resource(resource.R_ENB, specifics=specifics))
         self.register_for_cleanup(enb_obj)
         return enb_obj
 
     def epc(self, run_node=None):
+        from .obj.epc import EPC
         if run_node is None:
             run_node = self.run_node()
-        epc_obj = epc.EPC.get_instance_by_type(self, run_node)
+        epc_obj = EPC.get_instance_by_type(self, run_node)
         self.register_for_cleanup(epc_obj)
         return epc_obj
 
     def osmocon(self, specifics=None):
+        from .obj.osmocon import Osmocon
         conf = self.get_reserved_resource(resource.R_OSMOCON, specifics=specifics)
-        osmocon_obj = osmocon.Osmocon(self, conf=conf)
+        osmocon_obj = Osmocon(self, conf=conf)
         self.register_for_cleanup(osmocon_obj)
         return osmocon_obj
 
     def iperf3srv(self, ip_address=None):
+        from .obj.iperf3 import IPerf3Server
         if ip_address is None:
             ip_address = self.ip_address()
-        iperf3srv_obj = iperf3.IPerf3Server(self, ip_address)
+        iperf3srv_obj = IPerf3Server(self, ip_address)
         return iperf3srv_obj
 
     def msisdn(self):

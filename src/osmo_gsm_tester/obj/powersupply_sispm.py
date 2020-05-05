@@ -17,9 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sispm
-from usb.core import USBError
-
 from ..core import log
 from ..core.event_loop import MainLoop
 from .powersupply import PowerSupply
@@ -77,6 +74,10 @@ class PowerSupplySispm(PowerSupply):
 ########################
     def __init__(self, conf):
         super().__init__(conf, 'sispm')
+
+        import sispm
+        from usb.core import USBError
+
         mydevid = conf.get('device')
         if mydevid is None:
             raise log.Error('No "device" attribute provided in supply conf!')

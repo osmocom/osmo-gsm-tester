@@ -1,4 +1,4 @@
-== {app-name} Installation
+== Installation
 
 === Trial Builder
 

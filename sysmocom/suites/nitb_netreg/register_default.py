@@ -2,9 +2,9 @@
 from osmo_gsm_tester.testenv import *
 
 print('use resources...')
-nitb = suite.nitb()
-bts = suite.bts()
-ms = suite.modem()
+nitb = tenv.nitb()
+bts = tenv.bts()
+ms = tenv.modem()
 
 print('start nitb and bts...')
 nitb.bts_add(bts)

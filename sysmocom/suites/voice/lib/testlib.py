@@ -2,15 +2,15 @@
 from osmo_gsm_tester.testenv import *
 
 def test_mo_mt_call(use_osmux=False, force_osmux=False):
-    hlr = suite.hlr()
-    bts = suite.bts()
-    mgw_msc = suite.mgw()
-    mgw_bsc = suite.mgw()
-    stp = suite.stp()
-    msc = suite.msc(hlr, mgw_msc, stp)
-    bsc = suite.bsc(msc, mgw_bsc, stp)
-    ms_mo = suite.modem()
-    ms_mt = suite.modem()
+    hlr = tenv.hlr()
+    bts = tenv.bts()
+    mgw_msc = tenv.mgw()
+    mgw_bsc = tenv.mgw()
+    stp = tenv.stp()
+    msc = tenv.msc(hlr, mgw_msc, stp)
+    bsc = tenv.bsc(msc, mgw_bsc, stp)
+    ms_mo = tenv.modem()
+    ms_mt = tenv.modem()
 
     hlr.start()
     stp.start()

@@ -6,7 +6,7 @@
 from osmo_gsm_tester.testenv import *
 
 import testlib
-suite.test_import_modules_register_for_cleanup(testlib)
+tenv.test_import_modules_register_for_cleanup(testlib)
 from testlib import setup_run_iperf3_test_parallel
 
 def ready_cb_place_voicecall(ms_li):

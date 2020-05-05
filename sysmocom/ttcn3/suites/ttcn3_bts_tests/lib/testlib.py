@@ -4,13 +4,13 @@ from mako.template import Template
 
 from osmo_gsm_tester.testenv import *
 
-def run_ttcn3(suite, test_obj, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute, ttcn3_test_extra_module_params=""):
+def run_ttcn3(tenv, test_obj, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute, ttcn3_test_extra_module_params=""):
     own_dir = testdir
     script_file = os.path.join(testdir, 'scripts', 'run_ttcn3_docker.sh')
     bts_tmpl_file = os.path.join(testdir, 'scripts', 'BTS_Tests.cfg.tmpl')
     script_run_dir = test_obj.get_run_dir().new_dir('ttcn3')
     bts_cfg_file = os.path.join(str(script_run_dir), 'BTS_Tests.cfg')
-    junit_ttcn3_dst_file = os.path.join(str(suite.trial.get_run_dir()), 'trial-') + test_obj.basename + '.xml'
+    junit_ttcn3_dst_file = os.path.join(str(tenv.suite().trial().get_run_dir()), 'trial-') + test_obj.basename + '.xml'
     if bts.bts_type() == 'osmo-bts-trx':
         pcu_available = True
         pcu_sk = bts.pcu_socket_path()

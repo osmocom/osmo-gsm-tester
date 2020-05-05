@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
-hlr = suite.hlr()
-bts = suite.bts()
+hlr = tenv.hlr()
+bts = tenv.bts()
 pcu = bts.pcu()
-mgw_msc = suite.mgw()
-mgw_bsc = suite.mgw()
-stp = suite.stp()
-ggsn = suite.ggsn()
-sgsn = suite.sgsn(hlr, ggsn)
-msc = suite.msc(hlr, mgw_msc, stp)
-bsc = suite.bsc(msc, mgw_bsc, stp)
+mgw_msc = tenv.mgw()
+mgw_bsc = tenv.mgw()
+stp = tenv.stp()
+ggsn = tenv.ggsn()
+sgsn = tenv.sgsn(hlr, ggsn)
+msc = tenv.msc(hlr, mgw_msc, stp)
+bsc = tenv.bsc(msc, mgw_bsc, stp)
 
-modems = suite.modems(int(prompt('How many modems?')))
+modems = tenv.modems(int(prompt('How many modems?')))
 
 bsc.bts_add(bts)
 sgsn.bts_add(bts)

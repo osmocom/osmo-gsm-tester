@@ -6,9 +6,9 @@
 
 from osmo_gsm_tester.testenv import *
 
-nitb = suite.nitb()
+nitb = tenv.nitb()
 smsc = nitb.smsc
-esme = suite.esme()
+esme = tenv.esme()
 
 # Here we deliberately omit calling smsc.esme_add() to avoid having it included
 # in the smsc config.

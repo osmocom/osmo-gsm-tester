@@ -2,14 +2,14 @@
 from osmo_gsm_tester.testenv import *
 
 def encryption_test_setup_run(enable_auth, algo):
-    hlr = suite.hlr()
-    bts = suite.bts()
-    mgw_msc = suite.mgw()
-    mgw_bsc = suite.mgw()
-    stp = suite.stp()
-    msc = suite.msc(hlr, mgw_msc, stp)
-    bsc = suite.bsc(msc, mgw_bsc, stp)
-    ms = suite.modem()
+    hlr = tenv.hlr()
+    bts = tenv.bts()
+    mgw_msc = tenv.mgw()
+    mgw_bsc = tenv.mgw()
+    stp = tenv.stp()
+    msc = tenv.msc(hlr, mgw_msc, stp)
+    bsc = tenv.bsc(msc, mgw_bsc, stp)
+    ms = tenv.modem()
 
     print('start network...')
     msc.set_authentication(enable_auth)

@@ -7,11 +7,11 @@ from osmo_gsm_tester.testenv import *
 from datetime import timedelta
 
 print('Claiming resources for the test')
-nitb = suite.nitb()
-bts = suite.bts()
-ms_driver = suite.ms_driver()
+nitb = tenv.nitb()
+bts = tenv.bts()
+ms_driver = tenv.ms_driver()
 ul = ms_driver.add_test('ul_test')
-modems = suite.all_resources(suite.modem)
+modems = tenv.all_resources(tenv.modem)
 
 print('Launching a simple network')
 nitb.bts_add(bts)

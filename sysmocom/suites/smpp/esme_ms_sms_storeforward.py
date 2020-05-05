@@ -12,17 +12,17 @@ from osmo_gsm_tester.testenv import *
 
 SMPP_ESME_RINVDSTADR = 0x0000000B
 
-hlr = suite.hlr()
-bts = suite.bts()
-mgw_msc = suite.mgw()
-mgw_bsc = suite.mgw()
-stp = suite.stp()
-msc = suite.msc(hlr, mgw_msc, stp)
-bsc = suite.bsc(msc, mgw_bsc, stp)
+hlr = tenv.hlr()
+bts = tenv.bts()
+mgw_msc = tenv.mgw()
+mgw_bsc = tenv.mgw()
+stp = tenv.stp()
+msc = tenv.msc(hlr, mgw_msc, stp)
+bsc = tenv.bsc(msc, mgw_bsc, stp)
 bsc.bts_add(bts)
 
-ms = suite.modem()
-esme = suite.esme()
+ms = tenv.modem()
+esme = tenv.esme()
 msc.smsc.esme_add(esme)
 
 hlr.start()

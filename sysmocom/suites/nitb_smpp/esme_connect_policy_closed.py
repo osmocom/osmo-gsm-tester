@@ -11,10 +11,10 @@ from osmo_gsm_tester.testenv import *
 SMPP_ESME_RINVPASWD = 0x0000000E
 SMPP_ESME_RINVSYSID = 0x0000000F
 
-nitb = suite.nitb()
+nitb = tenv.nitb()
 smsc = nitb.smsc
-esme = suite.esme()
-esme_no_pwd = suite.esme()
+esme = tenv.esme()
+esme_no_pwd = tenv.esme()
 esme_no_pwd.set_password('')
 
 smsc.set_smsc_policy(smsc.SMSC_POLICY_CLOSED)

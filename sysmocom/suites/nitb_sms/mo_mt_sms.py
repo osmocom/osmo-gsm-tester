@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
-nitb = suite.nitb()
-bts = suite.bts()
-ms_mo = suite.modem()
-ms_mt = suite.modem()
+nitb = tenv.nitb()
+bts = tenv.bts()
+ms_mo = tenv.modem()
+ms_mt = tenv.modem()
 
 print('start nitb and bts...')
 nitb.bts_add(bts)

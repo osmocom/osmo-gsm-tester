@@ -6,12 +6,12 @@
 
 from osmo_gsm_tester.testenv import *
 
-hlr = suite.hlr()
-mgw_msc = suite.mgw()
-stp = suite.stp()
-msc = suite.msc(hlr, mgw_msc, stp)
+hlr = tenv.hlr()
+mgw_msc = tenv.mgw()
+stp = tenv.stp()
+msc = tenv.msc(hlr, mgw_msc, stp)
 smsc = msc.smsc
-esme = suite.esme()
+esme = tenv.esme()
 
 # Here we deliberately omit calling smsc.esme_add() to avoid having it included
 # in the smsc config.

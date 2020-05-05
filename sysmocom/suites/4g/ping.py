@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
-epc = suite.epc()
-enb = suite.enb()
-ue = suite.modem()
+epc = tenv.epc()
+enb = tenv.enb()
+ue = tenv.modem()
 
 epc.subscriber_add(ue)
 epc.start()

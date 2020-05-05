@@ -12,10 +12,10 @@ from osmo_gsm_tester.testenv import *
 
 SMPP_ESME_RINVDSTADR = 0x0000000B
 
-nitb = suite.nitb()
-bts = suite.bts()
-ms = suite.modem()
-esme = suite.esme()
+nitb = tenv.nitb()
+bts = tenv.bts()
+ms = tenv.modem()
+esme = tenv.esme()
 
 print('start nitb and bts...')
 nitb.bts_add(bts)

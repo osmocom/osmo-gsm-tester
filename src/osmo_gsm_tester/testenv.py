@@ -37,7 +37,6 @@ from .obj import bts
 from .obj import ms
 
 suite = None
-test = None
 resources = None
 log = None
 dbg = None
@@ -49,6 +48,7 @@ poll = None
 prompt = None
 Sms = None
 process = None
+tenv = None
 
 class Timeout(Exception):
     pass
@@ -313,7 +313,7 @@ def setup(suite_run, _test):
     from .core.event_loop import MainLoop
     from .obj.sms import Sms as Sms_class
 
-    global suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process
+    global test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process, tenv
 
     test = _test
     resources = suite_run.reserved_resources # TODO: remove this global, only used in selftest
@@ -326,8 +326,8 @@ def setup(suite_run, _test):
     poll = MainLoop.poll
     Sms = Sms_class
     process = process_module
-    suite = TestEnv(suite_run, _test) # stored in "suite" for backward compatibility
-    prompt = suite.prompt
-    return suite
+    tenv = TestEnv(suite_run, _test)
+    prompt = tenv.prompt
+    return tenv
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -35,30 +35,30 @@ def run_iperf3_cli_parallel(iperf3clients, ms_li, ready_cb):
 
 
 def setup_run_iperf3_test_parallel(num_ms, ready_cb=None):
-    hlr = suite.hlr()
-    bts = suite.bts()
+    hlr = tenv.hlr()
+    bts = tenv.bts()
     pcu = bts.pcu()
-    mgw_msc = suite.mgw()
-    mgw_bsc = suite.mgw()
-    stp = suite.stp()
-    ggsn = suite.ggsn()
-    sgsn = suite.sgsn(hlr, ggsn)
-    msc = suite.msc(hlr, mgw_msc, stp)
-    bsc = suite.bsc(msc, mgw_bsc, stp)
+    mgw_msc = tenv.mgw()
+    mgw_bsc = tenv.mgw()
+    stp = tenv.stp()
+    ggsn = tenv.ggsn()
+    sgsn = tenv.sgsn(hlr, ggsn)
+    msc = tenv.msc(hlr, mgw_msc, stp)
+    bsc = tenv.bsc(msc, mgw_bsc, stp)
 
-    iperf3srv_addr = suite.ip_address()
+    iperf3srv_addr = tenv.ip_address()
     servers = []
     clients = []
     ms_li = []
     for i in range(num_ms):
-        iperf3srv = suite.iperf3srv(iperf3srv_addr)
+        iperf3srv = tenv.iperf3srv(iperf3srv_addr)
         iperf3srv.set_port(iperf3srv.DEFAULT_SRV_PORT + i)
         servers.append(iperf3srv)
 
         iperf3cli = iperf3srv.create_client()
         clients.append(iperf3cli)
 
-        ms = suite.modem()
+        ms = tenv.modem()
         ms_li.append(ms)
 
     bsc.bts_add(bts)

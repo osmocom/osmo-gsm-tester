@@ -3,20 +3,20 @@ import os
 
 from osmo_gsm_tester.testenv import *
 import testlib
-suite.test_import_modules_register_for_cleanup(testlib)
+tenv.test_import_modules_register_for_cleanup(testlib)
 from testlib import run_ttcn3
 
 ttcn3_test_execute="BTS_Tests.control"
 
-hlr_dummy = suite.hlr()
-mgw_dummy = suite.mgw()
-stp_dummy = suite.stp()
-msc_dummy = suite.msc(hlr_dummy, mgw_dummy, stp_dummy)
-ggsn_dummy = suite.ggsn()
-sgsn_dummy = suite.sgsn(hlr_dummy, ggsn_dummy)
-bsc = suite.bsc(msc_dummy, mgw_dummy, stp_dummy)
-bts = suite.bts()
-osmocon = suite.osmocon()
+hlr_dummy = tenv.hlr()
+mgw_dummy = tenv.mgw()
+stp_dummy = tenv.stp()
+msc_dummy = tenv.msc(hlr_dummy, mgw_dummy, stp_dummy)
+ggsn_dummy = tenv.ggsn()
+sgsn_dummy = tenv.sgsn(hlr_dummy, ggsn_dummy)
+bsc = tenv.bsc(msc_dummy, mgw_dummy, stp_dummy)
+bts = tenv.bts()
+osmocon = tenv.osmocon()
 
 bts.set_num_trx(1)
 bts.set_trx_phy_channel(0, 0, 'CCCH+SDCCH4')
@@ -34,7 +34,7 @@ stp_dummy.start()
 msc_dummy.start()
 mgw_dummy.start()
 
-nat_rsl_ip = suite.ip_address().get('addr')
+nat_rsl_ip = tenv.ip_address().get('addr')
 bsc.set_rsl_ip(nat_rsl_ip)
 bsc.bts_add(bts)
 sgsn_dummy.bts_add(bts)
@@ -46,4 +46,4 @@ print('Starting osmocon')
 osmocon.start()
 
 testdir = os.path.dirname(os.path.realpath(__file__))
-run_ttcn3(suite, test, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute)
+run_ttcn3(tenv. test, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute)

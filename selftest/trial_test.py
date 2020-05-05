@@ -4,7 +4,7 @@ import time
 import _prep
 import os
 from osmo_gsm_tester.core import util
-from osmo_gsm_tester.trial import Trial
+from osmo_gsm_tester.core.trial import Trial
 
 workdir = util.get_tempdir()
 

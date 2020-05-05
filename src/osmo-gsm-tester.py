@@ -71,9 +71,10 @@ import argparse
 from signal import *
 from osmo_gsm_tester import __version__
 from osmo_gsm_tester.core import log
+from osmo_gsm_tester.core import trial
+from osmo_gsm_tester.core import suite
 from osmo_gsm_tester.core.config import read_config_file, DEFAULT_SUITES_CONF
 from osmo_gsm_tester.core.schema import generate_schemas
-from osmo_gsm_tester import trial, suite
 
 def sig_handler_cleanup(signum, frame):
     print("killed by signal %d" % signum)

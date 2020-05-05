@@ -21,12 +21,12 @@ import os
 import sys
 import time
 import pprint
-from .core import config
-from .core import log
-from .core import util
-from .core import schema
-from .core import resource
-from .core import test
+from . import config
+from . import log
+from . import util
+from . import schema
+from . import resource
+from . import test
 
 class SuiteDefinition(log.Origin):
     '''A test suite reserves resources for a number of tests.

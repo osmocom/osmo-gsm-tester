@@ -324,46 +324,87 @@ Details:
     and 'trial-N-bin.tgz' archives are produced by the 'jenkins-run.sh' script,
     both for successful and failing runs.
 
-==== Install osmo-gsm-tester
+==== Install osmo-gsm-tester dependencies
 
 This assumes you have already created the jenkins user (see <<configure_jenkins_slave>>).
 
 Dependencies needed will depend on lots of factors, like your distribution, your
 specific setup, which hardware you plan to support, etc.
 
-On a Debian/Ubuntu based system, these commands install the packages needed to
-run the osmo-gsm-tester.py code, i.e. install these on your main unit:
+On a Debian/Ubuntu based system, these commands install the mandatory packages
+needed to run the osmo-gsm-tester.py code, i.e. install these on your main unit:
 
 ----
 apt-get install \
-        dbus \
-        tcpdump \
-        sqlite3 \
         python3 \
-        python3-setuptools \
         python3-yaml \
         python3-mako \
         python3-gi \
-        python3-numpy \
-        python3-wheel \
-        ofono \
-        patchelf \
-        sudo \
-        libcap2-bin \
-        python3-pip \
-        udhcpc \
-        iperf3 \
         locales
+----
+
+If one plans to use the 2G ESME (_esme.py_), following extra dependencies shall
+be installed:
+----
+apt-get install python3-setuptools python3-pip
+pip3 install "git+https://github.com/podshumok/python-smpplib.git@master#egg=smpplib"
+----
+
+If one plans to use the 2G OsmoHLR (_hlr_osmo.py_), following extra dependencies shall
+be installed:
+----
+apt-get install sqlite3
+----
+
+If one plans to use SISPM power supply hardware (_powersupply_sispm.py_),
+following extra dependencies shall be installed:
+----
+apt-get install python3-setuptools python3-pip
 pip3 install \
-        "git+https://github.com/podshumok/python-smpplib.git@master#egg=smpplib" \
-        pydbus \
         pyusb \
         pysispm
+----
+
+If one plans to use software-based RF emulation on Amarisoft ENB implemented
+through its CTRL interface (_rfemu_amarisoftctrl.py_), following extra
+dependencies shall be installed:
+----
+apt-get install python3-websocket
+----
+
+If one plans to use srsLTE UE metrics subsystems (_ms_srs.py_), following extra
+dependencies shall be installed:
+----
+apt-get install python3-numpy
+----
+
+If one plans to use ofono modems (_ms_ofono.py_), following extra dependencies
+shall be installed:
+----
+apt-get install \
+        dbus \
+        python3 \
+        ofono \
+        python3-pip \
+        udhcpc
+pip3 install \
+        pydbus
 ----
 
 IMPORTANT: ofono may need to be installed from source to contain the most
 recent fixes needed to operate your modems. This depends on the modem hardware
 used and the tests run. Please see <<hardware_modems>>.
+
+Finally, these programs are usually required by osmo-gsm-tester on the Slave Unit to run and manage processes:
+
+----
+apt-get install \
+        tcpdump \
+        patchelf \
+        sudo \
+        libcap2-bin \
+        iperf3
+----
 
 ==== User Permissions
 

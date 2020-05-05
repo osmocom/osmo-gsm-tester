@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from websocket import create_connection
 
 from ..core import log
 from .rfemu import RFemulation
@@ -40,6 +39,8 @@ class RFemulationAmarisoftCtrl(RFemulation):
         self.cell_id = conf.get('cell_id')
         if self.cell_id is None:
             raise log.Error('No "cell_id" attribute provided in supply conf!')
+
+        from websocket import create_connection
         self.ws = create_connection("ws://%s:%s" % (self.addr, self.port))
 
     def __del__(self):

@@ -33,20 +33,20 @@ class EPC(log.Origin, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, run_node, name):
+    def __init__(self, testenv, run_node, name):
         super().__init__(log.C_RUN, '%s' % name)
         self._addr = run_node.run_addr()
         self.set_name('%s_%s' % (name, self._addr))
-        self.suite_run = suite_run
+        self.testenv = testenv
         self._run_node = run_node
 
     def configure(self, config_specifics_li):
         values = dict(epc=config.get_defaults('epc'))
         for config_specifics in config_specifics_li:
             config.overlay(values, dict(epc=config.get_defaults(config_specifics)))
-        config.overlay(values, dict(epc=self.suite_run.config().get('epc', {})))
+        config.overlay(values, dict(epc=self.testenv.suite().config().get('epc', {})))
         for config_specifics in config_specifics_li:
-            config.overlay(values, dict(epc=self.suite_run.config().get(config_specifics, {})))
+            config.overlay(values, dict(epc=self.testenv.suite().config().get(config_specifics, {})))
         config.overlay(values, dict(epc={'run_addr': self.addr()}))
         return values
 
@@ -57,10 +57,10 @@ class EPC(log.Origin, metaclass=ABCMeta):
         'Nothing to do by default. Subclass can override if required.'
         pass
 
-    def get_instance_by_type(suite_run, run_node):
+    def get_instance_by_type(testenv, run_node):
         """Allocate a EPC child class based on type. Opts are passed to the newly created object."""
         values = dict(epc=config.get_defaults('epc'))
-        config.overlay(values, dict(epc=suite_run.config().get('epc', {})))
+        config.overlay(values, dict(epc=testenv.suite().config().get('epc', {})))
         epc_type = values['epc'].get('type', None)
         if epc_type is None:
             raise RuntimeError('EPC type is not defined!')
@@ -74,7 +74,7 @@ class EPC(log.Origin, metaclass=ABCMeta):
         else:
             raise log.Error('EPC type not supported:', epc_type)
 
-        return  epc_class(suite_run, run_node)
+        return  epc_class(testenv, run_node)
 
 ###################
 # PUBLIC (test API included)

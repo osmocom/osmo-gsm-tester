@@ -361,7 +361,7 @@ class Modem(MS):
     CTX_PROT_IPv6 = 'ipv6'
     CTX_PROT_IPv46 = 'dual'
 
-    def __init__(self, suite_run, conf):
+    def __init__(self, testenv, conf):
         self.syspath = conf.get('path')
         self.dbuspath = get_dbuspath_from_syspath(self.syspath)
         super().__init__(self.dbuspath, conf)
@@ -369,7 +369,7 @@ class Modem(MS):
         self._ki = None
         self._imsi = None
         self._apn_ipaddr = None
-        self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name().strip('/')))
+        self.run_dir = util.Dir(testenv.suite().get_run_dir().new_dir(self.name().strip('/')))
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.dbuspath)
         self.register_attempts = 0

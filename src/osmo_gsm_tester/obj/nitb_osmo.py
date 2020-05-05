@@ -26,22 +26,22 @@ from . import osmo_ctrl, pcap_recorder, smsc
 
 class OsmoNitb(log.Origin):
 
-    def __init__(self, suite_run, ip_address):
+    def __init__(self, testenv, ip_address):
         super().__init__(log.C_RUN, 'osmo-nitb_%s' % ip_address.get('addr'))
         self.run_dir = None
         self.config_file = None
         self.process = None
         self.encryption = None
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.ip_address = ip_address
         self.bts = []
         self.smsc = smsc.Smsc((ip_address.get('addr'), 2775))
 
     def start(self):
         self.log('Starting osmo-nitb')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-nitb')))
+        inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-nitb')))
         binary = inst.child('bin', 'osmo-nitb')
         if not os.path.isfile(binary):
             raise RuntimeError('Binary missing: %r' % binary)
@@ -49,7 +49,7 @@ class OsmoNitb(log.Origin):
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
+        pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
@@ -59,7 +59,7 @@ class OsmoNitb(log.Origin):
                                        (binary, '-c',
                                        os.path.abspath(self.config_file)),
                                        env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
@@ -67,7 +67,7 @@ class OsmoNitb(log.Origin):
         self.dbg(config_file=self.config_file)
 
         values = dict(nitb=config.get_defaults('nitb'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, dict(nitb=dict(ip_address=self.ip_address)))
 
         bts_list = []
@@ -120,7 +120,7 @@ class OsmoNitb(log.Origin):
 
     def subscriber_add(self, modem, msisdn=None, algo=None):
         if msisdn is None:
-            msisdn = self.suite_run.resources_pool.next_msisdn(modem)
+            msisdn = self.testenv.msisdn()
         modem.set_msisdn(msisdn)
 
         if not algo:

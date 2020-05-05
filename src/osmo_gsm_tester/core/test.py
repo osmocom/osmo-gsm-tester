@@ -58,7 +58,7 @@ class Test(log.Origin):
         testenv_obj = None
         try:
             self.log_target = log.FileLogTarget(self.get_run_dir().new_child('log')).set_all_levels(log.L_DBG).style_change(trace=True)
-            log.large_separator(self.suite_run.trial.name(), self.suite_run.name(), self.name(), sublevel=3)
+            log.large_separator(self.suite_run.trial().name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
             testenv_obj = testenv.setup(self.suite_run, self)

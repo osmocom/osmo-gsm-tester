@@ -30,8 +30,8 @@ class NanoBts(bts.Bts):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, 'nanobts_%s' % conf.get('label', 'nolabel'), 'nanobts')
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, 'nanobts_%s' % conf.get('label', 'nolabel'), 'nanobts')
         self.pwsup_list = []
         self._pcu = None
 
@@ -94,7 +94,7 @@ class NanoBts(bts.Bts):
     def start(self, keepalive=False):
         if self.conf.get('ipa_unit_id') is None:
             raise log.Error('No attribute ipa_unit_id provided in conf!')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self._configure()
 
         unitid = int(self.conf.get('ipa_unit_id'))
@@ -104,7 +104,7 @@ class NanoBts(bts.Bts):
             self.dbg('Powering cycling NanoBTS TRX')
             pwsup.power_cycle(1.0)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
+        pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    '%s and port not 22' % self.get_pcap_filter_all_trx_ip())
 
 
@@ -116,14 +116,14 @@ class NanoBts(bts.Bts):
             local_bind_ip = util.dst_ip_get_local_bind(bts_trx_ip)
 
             self.log('Finding nanobts %s, binding on %s...' % (bts_trx_ip, local_bind_ip))
-            ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'preconf')
+            ipfind = AbisIpFind(self.testenv, self.run_dir, local_bind_ip, 'preconf')
             ipfind.start()
             ipfind.wait_bts_ready(bts_trx_ip)
             running_unitid, running_trx = ipfind.get_unitid_by_ip(bts_trx_ip)
             self.log('Found nanobts %s with unit_id %d trx %d' % (bts_trx_ip, running_unitid, running_trx))
             ipfind.stop()
 
-            ipconfig = IpAccessConfig(self.suite_run, self.run_dir, bts_trx_ip)
+            ipconfig = IpAccessConfig(self.testenv, self.run_dir, bts_trx_ip)
             running_oml_ip = ipconfig.get_oml_ip()
 
             if running_unitid != unitid or running_trx != trx_i:
@@ -142,7 +142,7 @@ class NanoBts(bts.Bts):
                 MainLoop.sleep(self, 20)
 
                 self.dbg('Starting to connect id %d trx %d to' % (unitid, trx_i), self.bsc)
-                ipfind = AbisIpFind(self.suite_run, self.run_dir, local_bind_ip, 'postconf')
+                ipfind = AbisIpFind(self.testenv, self.run_dir, local_bind_ip, 'postconf')
                 ipfind.start()
                 ipfind.wait_bts_ready(bts_trx_ip)
                 self.log('nanoBTS id %d trx %d configured and running' % (unitid, trx_i))
@@ -171,12 +171,12 @@ class NanoBts(bts.Bts):
 
     def pcu(self):
         if not self._pcu:
-            self._pcu = pcu.PcuDummy(self.suite_run, self, self.conf)
+            self._pcu = pcu.PcuDummy(self.testenv, self, self.conf)
         return self._pcu
 
 
 class AbisIpFind(log.Origin):
-    suite_run = None
+    testenv = None
     parent_run_dir = None
     run_dir = None
     inst = None
@@ -187,16 +187,16 @@ class AbisIpFind(log.Origin):
     BIN_ABISIP_FIND = 'abisip-find'
     BTS_UNIT_ID_RE = re.compile("Unit_ID='(?P<unit_id>\d+)/\d+/(?P<trx_id>\d+)'")
 
-    def __init__(self, suite_run, parent_run_dir, bind_ip, name_suffix):
+    def __init__(self, testenv, parent_run_dir, bind_ip, name_suffix):
         super().__init__(log.C_RUN, AbisIpFind.BIN_ABISIP_FIND + '-' + name_suffix)
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.parent_run_dir = parent_run_dir
         self.bind_ip = bind_ip
         self.env = {}
 
     def start(self):
         self.run_dir = util.Dir(self.parent_run_dir.new_dir(self.name()))
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bsc')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bsc')))
 
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
@@ -209,11 +209,11 @@ class AbisIpFind(log.Origin):
         self.proc = process.Process(self.name(), self.run_dir,
                             (ipfind_path, '-i', '1', '-b', self.bind_ip),
                             env=env)
-        self.suite_run.remember_to_stop(self.proc)
+        self.testenv.remember_to_stop(self.proc)
         self.proc.launch()
 
     def stop(self):
-        self.suite_run.stop_process(self.proc)
+        self.testenv.stop_process(self.proc)
 
     def get_line_by_ip(self, ipaddr):
         """Get latest line (more up to date) from abisip-find based on ip address."""
@@ -246,7 +246,7 @@ class AbisIpFind(log.Origin):
         MainLoop.sleep(self, 2)
 
 class IpAccessConfig(log.Origin):
-    suite_run = None
+    testenv = None
     parent_run_dir = None
     run_dir = None
     inst = None
@@ -255,9 +255,9 @@ class IpAccessConfig(log.Origin):
 
     BIN_IPACCESS_CONFIG = 'ipaccess-config'
 
-    def __init__(self, suite_run, parent_run_dir, bts_ip):
+    def __init__(self, testenv, parent_run_dir, bts_ip):
         super().__init__(log.C_RUN, IpAccessConfig.BIN_IPACCESS_CONFIG)
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.parent_run_dir = parent_run_dir
         self.bts_ip = bts_ip
         self.env = {}
@@ -274,7 +274,7 @@ class IpAccessConfig(log.Origin):
 
     def run(self, name_suffix, *args):
         self.run_dir = util.Dir(self.parent_run_dir.new_dir(self.name()+'-'+name_suffix))
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bsc')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bsc')))
         lib = self.inst.child('lib')
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
         self.proc = self.create_process(IpAccessConfig.BIN_IPACCESS_CONFIG, *args)

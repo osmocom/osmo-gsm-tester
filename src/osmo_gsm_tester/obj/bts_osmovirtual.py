@@ -33,9 +33,9 @@ class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
 
     CONF_BTS = 'osmo-bts-virtual.cfg'
 
-    def __init__(self, suite_run, conf):
+    def __init__(self, testenv, conf):
         """Initializes the OsmoBtsVirtual."""
-        super().__init__(suite_run, conf, OsmoBtsVirtual.BIN_BTS, 'osmo_bts_virtual')
+        super().__init__(testenv, conf, OsmoBtsVirtual.BIN_BTS, 'osmo_bts_virtual')
         self.run_dir = None
         self.inst = None
         self.env = {}
@@ -50,7 +50,7 @@ class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc, keepalive)
+        self.testenv.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 
@@ -63,7 +63,7 @@ class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
         self.dbg(config_file=self.config_file)
 
         values = dict(osmo_bts_virtual=config.get_defaults('osmo_bts_virtual'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_bts_virtual': {
                             'oml_remote_ip': self.bsc.addr(),
@@ -95,13 +95,13 @@ class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
         """Handles starting/turning-up the osmo-bts-virtual process."""
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
-        self.suite_run.poll()
+        self.testenv.poll()
 
         self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bts')))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)
@@ -110,6 +110,6 @@ class OsmoBtsVirtual(bts_osmo.OsmoBtsMainUnit):
         self.proc_bts = self.launch_process(keepalive, OsmoBtsVirtual.BIN_BTS, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr())
-        self.suite_run.poll()
+        self.testenv.poll()
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -38,8 +38,8 @@ class OsmoBts(bts.Bts, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf, name, defaults_cfg_name):
-        super().__init__(suite_run, conf, name, defaults_cfg_name)
+    def __init__(self, testenv, conf, name, defaults_cfg_name):
+        super().__init__(testenv, conf, name, defaults_cfg_name)
         self._pcu = None
         self.proc_bts = None
         if len(self.pcu_socket_path().encode()) > 107:
@@ -86,9 +86,9 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
 # PROTECTED
 ##############
 
-    def __init__(self, suite_run, conf, name, defaults_cfg_name):
+    def __init__(self, testenv, conf, name, defaults_cfg_name):
         self.pcu_sk_tmp_dir = None
-        super().__init__(suite_run, conf, name, defaults_cfg_name)
+        super().__init__(testenv, conf, name, defaults_cfg_name)
 
 ########################
 # PUBLIC - INTERNAL API
@@ -107,7 +107,7 @@ class OsmoBtsMainUnit(OsmoBts, metaclass=ABCMeta):
             os.rmdir(self.pcu_sk_tmp_dir)
 
     def create_pcu(self):
-        return pcu_osmo.OsmoPcu(self.suite_run, self, self.conf)
+        return pcu_osmo.OsmoPcu(self.testenv, self, self.conf)
 
     def pcu_socket_path(self):
         if self.pcu_sk_tmp_dir is None:

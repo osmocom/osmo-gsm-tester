@@ -27,18 +27,18 @@ class OsmoPcu(pcu.Pcu):
     BIN_PCU = 'osmo-pcu'
     PCU_OSMO_CFG = 'osmo-pcu.cfg'
 
-    def __init__(self, suite_run, bts, conf):
-        super().__init__(suite_run, bts, conf, OsmoPcu.BIN_PCU)
+    def __init__(self, testenv, bts, conf):
+        super().__init__(testenv, bts, conf, OsmoPcu.BIN_PCU)
         self.run_dir = None
         self.inst = None
         self.conf = conf
         self.env = {}
 
     def start(self, keepalive=False):
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-pcu')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-pcu')))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)
@@ -47,7 +47,7 @@ class OsmoPcu(pcu.Pcu):
         self.launch_process(keepalive, OsmoPcu.BIN_PCU, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bts.bsc.addr())
-        self.suite_run.poll()
+        self.testenv.poll()
 
     def launch_process(self, keepalive, binary_name, *args):
         binary = os.path.abspath(self.inst.child('bin', binary_name))
@@ -57,7 +57,7 @@ class OsmoPcu(pcu.Pcu):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc, keepalive)
+        self.testenv.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 
@@ -66,7 +66,7 @@ class OsmoPcu(pcu.Pcu):
         self.dbg(config_file=self.config_file)
 
         values = dict(osmo_pcu=config.get_defaults('osmo_pcu'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_pcu': {
                             'bts_addr': self.bts.remote_addr(),

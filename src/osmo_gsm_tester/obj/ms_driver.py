@@ -30,9 +30,9 @@ import tempfile
 
 class MsDriver(log.Origin):
 
-    def __init__(self, suite_run):
+    def __init__(self, testenv):
         super().__init__(log.C_RUN, 'ms-driver')
-        self._suite_run = suite_run
+        self._testenv = testenv
 
         # TODO: take config out of the test scenario
         self._time_start = timedelta(seconds=60)
@@ -67,7 +67,7 @@ class MsDriver(log.Origin):
         """
 
         # Get the base directory for the virtphy/mobile application
-        inst = util.Dir(os.path.abspath(self._suite_run.trial.get_inst('osmocom-bb')))
+        inst = util.Dir(os.path.abspath(self._testenv.trial.get_inst('osmocom-bb')))
 
         # Assume these are dynamically linked and verify there is a lib dir.
         lib = inst.child('lib')
@@ -117,7 +117,7 @@ class MsDriver(log.Origin):
         self._starter = MobileTestStarter("mass", options, self._cdf,
                                           self._ev_server,
                                           util.Dir(self.event_server_sk_tmp_dir),
-                                          self._results, suite_run=self._suite_run)
+                                          self._results, testenv=self._testenv)
 
         for sub in self._subscribers:
             self._starter.subscriber_add(sub)

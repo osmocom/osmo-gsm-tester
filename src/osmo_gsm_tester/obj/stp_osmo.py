@@ -25,20 +25,20 @@ from . import pcap_recorder
 
 class OsmoStp(log.Origin):
 
-    def __init__(self, suite_run, ip_address):
+    def __init__(self, testenv, ip_address):
         super().__init__(log.C_RUN, 'osmo-stp_%s' % ip_address.get('addr'))
         self.run_dir = None
         self.config_file = None
         self.process = None
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.ip_address = ip_address
 
     def start(self):
         self.log('Starting osmo-stp')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-stp')))
+        inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-stp')))
 
         binary = inst.child('bin', 'osmo-stp')
         if not os.path.isfile(binary):
@@ -47,7 +47,7 @@ class OsmoStp(log.Origin):
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
+        pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
@@ -57,7 +57,7 @@ class OsmoStp(log.Origin):
                                        (binary, '-c',
                                         os.path.abspath(self.config_file)),
                                        env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
@@ -65,7 +65,7 @@ class OsmoStp(log.Origin):
         self.dbg(config_file=self.config_file)
 
         values = dict(stp=config.get_defaults('stp'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, dict(stp=dict(ip_address=self.ip_address)))
 
         self.dbg('STP CONFIG:\n' + pprint.pformat(values))

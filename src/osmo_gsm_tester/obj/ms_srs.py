@@ -77,7 +77,7 @@ class srsUE(MS):
     LOGFILE = 'srsue.log'
     METRICSFILE = 'srsue_metrics.csv'
 
-    def __init__(self, suite_run, conf):
+    def __init__(self, testenv, conf):
         self._addr = conf.get('addr', None)
         if self._addr is None:
             raise log.Error('addr not set')
@@ -97,7 +97,7 @@ class srsUE(MS):
         self.remote_metrics_file = None
         self.enable_pcap = False
         self.num_carriers = 1
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.remote_user = conf.get('remote_user', None)
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -132,12 +132,12 @@ class srsUE(MS):
         return "srsue1"
 
     def stop(self):
-        self.suite_run.stop_process(self.process)
+        self.testenv.stop_process(self.process)
 
     def connect(self, enb):
         self.log('Starting srsue')
         self.enb = enb
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
         if self.setup_runs_locally():
             self.start_locally()
@@ -170,7 +170,7 @@ class srsUE(MS):
 
         self.process = self.rem_host.RemoteProcess(srsUE.BINFILE, args)
         #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, remote_run_dir, args, remote_lib)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def start_locally(self):
@@ -194,11 +194,11 @@ class srsUE(MS):
         args += tuple(self._additional_args)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('srslte')))
         if not os.path.isdir(self.inst.child('lib')):
             raise log.Error('No lib/ in', self.inst)
         if not self.inst.isfile('bin', srsUE.BINFILE):
@@ -220,7 +220,7 @@ class srsUE(MS):
                 self.remote_metrics_file = remote_run_dir.child(srsUE.METRICSFILE)
 
         values = dict(ue=config.get_defaults('srsue'))
-        config.overlay(values, dict(ue=self.suite_run.config().get('modem', {})))
+        config.overlay(values, dict(ue=self.testenv.suite().config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
         config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
 

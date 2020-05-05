@@ -23,13 +23,13 @@ from ..core import log, process
 
 class PcapRecorder(log.Origin):
 
-    def __init__(self, suite_run, run_dir, iface=None, filters='', netns=None):
+    def __init__(self, testenv, run_dir, iface=None, filters='', netns=None):
         self.iface = iface
         if not self.iface:
             self.iface = "any"
         self.filters = filters
         super().__init__(log.C_RUN, 'pcap-recorder_%s' % self.iface, filters=self.filters)
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.run_dir = run_dir
         self.netns = netns
         self.start()
@@ -45,7 +45,7 @@ class PcapRecorder(log.Origin):
             self.process = process.NetNSProcess(self.name(), self.run_dir, self.netns, popen_args)
         else:
             self.process = process.Process(self.name(), self.run_dir, popen_args)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def running(self):

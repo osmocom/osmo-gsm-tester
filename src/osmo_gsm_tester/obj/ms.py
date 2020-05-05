@@ -54,7 +54,7 @@ class MS(log.Origin, metaclass=ABCMeta):
         """Cleans up resources allocated."""
         pass
 
-    def get_instance_by_type(suite_run, conf):
+    def get_instance_by_type(testenv, conf):
         """Allocate a MS child class based on type. Opts are passed to the newly created object."""
         ms_type = conf.get('type')
         if ms_type is None:
@@ -75,7 +75,7 @@ class MS(log.Origin, metaclass=ABCMeta):
             ms_class = AmarisoftUE
         else:
             raise log.Error('MS type not supported:', ms_type)
-        return ms_class(suite_run, conf)
+        return ms_class(testenv, conf)
 
 ###################
 # PUBLIC (test API included)

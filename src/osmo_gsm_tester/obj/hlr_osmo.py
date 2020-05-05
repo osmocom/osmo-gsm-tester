@@ -30,21 +30,21 @@ class OsmoHlr(log.Origin):
     process = None
     next_subscriber_id = 1
 
-    def __init__(self, suite_run, ip_address):
+    def __init__(self, testenv, ip_address):
         super().__init__(log.C_RUN, 'osmo-hlr_%s' % ip_address.get('addr'))
         self.run_dir = None
         self.config_file = None
         self.process = None
         self.next_subscriber_id = 1
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.ip_address = ip_address
 
     def start(self):
         self.log('Starting osmo-hlr')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-hlr')))
+        inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-hlr')))
 
         binary = inst.child('bin', 'osmo-hlr')
         if not os.path.isfile(binary):
@@ -60,7 +60,7 @@ class OsmoHlr(log.Origin):
             raise log.Error('hlr.sql missing:', sql_input)
         self.run_local('create_hlr_db', ('/bin/sh', '-c', 'sqlite3 %r < %r' % (self.db_file, sql_input)))
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
+        pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
@@ -71,7 +71,7 @@ class OsmoHlr(log.Origin):
                                         '-c', os.path.abspath(self.config_file),
                                         '--database', self.db_file),
                                        env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
@@ -79,7 +79,7 @@ class OsmoHlr(log.Origin):
         self.dbg(config_file=self.config_file)
 
         values = dict(hlr=config.get_defaults('hlr'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, dict(hlr=dict(ip_address=self.ip_address)))
 
         self.dbg('HLR CONFIG:\n' + pprint.pformat(values))
@@ -106,7 +106,7 @@ class OsmoHlr(log.Origin):
 
     def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:
-            msisdn = self.suite_run.resources_pool.next_msisdn(modem)
+            msisdn = self.testenv.msisdn()
         modem.set_msisdn(msisdn)
         subscriber_id = self.next_subscriber_id
         self.next_subscriber_id += 1

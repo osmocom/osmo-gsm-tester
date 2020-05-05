@@ -27,10 +27,10 @@ class Pcu(log.Origin, metaclass=ABCMeta):
 # PROTECTED
 ##############
 
-    def __init__(self, suite_run, bts, conf, name):
+    def __init__(self, testenv, bts, conf, name):
         """Base constructor. Must be called by subclass."""
         super().__init__(log.C_RUN, name)
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.bts = bts
         self.conf = conf
 
@@ -55,8 +55,8 @@ class Pcu(log.Origin, metaclass=ABCMeta):
 class PcuDummy(Pcu):
     """PCU for BTS without proper PCU control"""
 
-    def __init__(self, suite_run, bts, conf):
-        super().__init__(suite_run, bts, conf, 'PcuDummy')
+    def __init__(self, testenv, bts, conf):
+        super().__init__(testenv, bts, conf, 'PcuDummy')
 
     def start(self, keepalive=False):
         pass

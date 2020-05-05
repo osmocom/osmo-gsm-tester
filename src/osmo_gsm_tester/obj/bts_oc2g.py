@@ -31,8 +31,8 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
     BTS_OC2G_BIN = 'osmo-bts-oc2g'
     BTS_OC2G_CFG = 'osmo-bts-oc2g.cfg'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, OsmoBtsOC2G.BTS_OC2G_BIN, 'osmo_bts_oc2g')
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, OsmoBtsOC2G.BTS_OC2G_BIN, 'osmo_bts_oc2g')
         self.run_dir = None
         self.inst = None
         self.remote_inst = None
@@ -44,7 +44,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         return util.str2bool(self.conf.get('direct_pcu'))
 
     def create_pcu(self):
-        return pcu_oc2g.OsmoPcuOC2G(self.suite_run, self, self.conf)
+        return pcu_oc2g.OsmoPcuOC2G(self.testenv, self, self.conf)
 
     def configure(self):
         if self.bsc is None:
@@ -54,7 +54,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         self.dbg(config_file=self.config_file)
 
         values = { 'osmo_bts_oc2g': config.get_defaults('osmo_bts_oc2g') }
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_bts_oc2g': {
                             'oml_remote_ip': self.bsc.addr(),
@@ -100,10 +100,10 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         log.log('Starting OsmoBtsOC2G to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(OsmoBtsOC2G.BTS_OC2G_BIN)))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst(OsmoBtsOC2G.BTS_OC2G_BIN)))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise log.Error('No lib/ in', self.inst)
@@ -131,6 +131,6 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
             args += ('-M',)
 
         self.proc_bts = rem_host.RemoteProcess(OsmoBtsOC2G.BTS_OC2G_BIN, args)
-        self.suite_run.remember_to_stop(self.proc_bts, keepalive)
+        self.testenv.remember_to_stop(self.proc_bts, keepalive)
         self.proc_bts.launch()
 # vim: expandtab tabstop=4 shiftwidth=4

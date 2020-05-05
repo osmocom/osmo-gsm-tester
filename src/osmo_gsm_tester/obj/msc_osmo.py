@@ -32,7 +32,7 @@ def on_register_schemas():
 
 class OsmoMsc(log.Origin):
 
-    def __init__(self, suite_run, hlr, mgw, stp, ip_address):
+    def __init__(self, testenv, hlr, mgw, stp, ip_address):
         super().__init__(log.C_RUN, 'osmo-msc_%s' % ip_address.get('addr'))
         self.run_dir = None
         self.config_file = None
@@ -41,7 +41,7 @@ class OsmoMsc(log.Origin):
         self.encryption = None
         self.authentication = None
         self.use_osmux = "off"
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.ip_address = ip_address
         self.hlr = hlr
         self.mgw = mgw
@@ -50,9 +50,9 @@ class OsmoMsc(log.Origin):
 
     def start(self):
         self.log('Starting osmo-msc')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-msc')))
+        inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-msc')))
         binary = inst.child('bin', 'osmo-msc')
         if not os.path.isfile(binary):
             raise RuntimeError('Binary missing: %r' % binary)
@@ -60,7 +60,7 @@ class OsmoMsc(log.Origin):
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
+        pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
@@ -70,7 +70,7 @@ class OsmoMsc(log.Origin):
                                        (binary, '-c',
                                         os.path.abspath(self.config_file)),
                                        env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
@@ -78,7 +78,7 @@ class OsmoMsc(log.Origin):
         self.dbg(config_file=self.config_file)
 
         values = dict(msc=config.get_defaults('msc'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, dict(msc=dict(ip_address=self.ip_address)))
         config.overlay(values, self.mgw.conf_for_client())
         config.overlay(values, self.hlr.conf_for_client())

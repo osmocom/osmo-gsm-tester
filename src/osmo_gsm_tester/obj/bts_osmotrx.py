@@ -50,8 +50,8 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
     CONF_BTS_TRX = 'osmo-bts-trx.cfg'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, OsmoBtsTrx.BIN_BTS_TRX, 'osmo_bts_trx')
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, OsmoBtsTrx.BIN_BTS_TRX, 'osmo_bts_trx')
         self.run_dir = None
         self.inst = None
         self.trx = None
@@ -74,7 +74,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc, keepalive)
+        self.testenv.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 
@@ -86,7 +86,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
 
         values = dict(osmo_bts_trx=config.get_defaults('osmo_bts_trx'))
         config.overlay(values, dict(osmo_bts_trx=dict(osmo_trx=config.get_defaults('osmo_trx'))))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_bts_trx': {
                             'oml_remote_ip': self.bsc.addr(),
@@ -155,10 +155,10 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
     def start(self, keepalive=False):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
-        self.suite_run.poll()
+        self.testenv.poll()
 
         self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
         # Power cycle all TRX if needed (right now only TRX0 for SC5):
@@ -170,12 +170,12 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
             i = i + 1
 
         if self.launch_trx_enabled():
-            self.trx = OsmoTrx.get_instance_by_type(self.get_osmo_trx_type(), self.suite_run, self.conf_for_osmotrx())
+            self.trx = OsmoTrx.get_instance_by_type(self.get_osmo_trx_type(), self.testenv, self.conf_for_osmotrx())
             self.trx.start(keepalive)
             self.log('Waiting for %s to start up...' % self.trx.name())
             MainLoop.wait(self, self.trx.trx_ready)
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bts')))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % self.inst)
@@ -184,7 +184,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         self.proc_bts = self.launch_process(keepalive, OsmoBtsTrx.BIN_BTS_TRX, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr())
-        self.suite_run.poll()
+        self.testenv.poll()
 
 
 ################################################################################
@@ -195,23 +195,23 @@ class Trx(log.Origin, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf, name):
+    def __init__(self, testenv, conf, name):
         super().__init__(log.C_RUN, name)
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.conf = conf
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.listen_ip = conf.get('osmo_trx', {}).get('trx_ip')
         self.remote_user = conf.get('osmo_trx', {}).get('remote_user', None)
 
     @classmethod
-    def get_instance_by_type(cls, type, suite_run, conf):
+    def get_instance_by_type(cls, type, testenv, conf):
         KNOWN_OSMOTRX_TYPES = {
             'uhd': OsmoTrxUHD,
             'lms': OsmoTrxLMS,
             'sc5': TrxSC5
         }
         osmo_trx_class = KNOWN_OSMOTRX_TYPES.get(type)
-        return osmo_trx_class(suite_run, conf)
+        return osmo_trx_class(testenv, conf)
 
 ##############
 # PUBLIC (test API included)
@@ -233,8 +233,8 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, self.binary_name())
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, self.binary_name())
         self.env = {}
         self.log("OSMOTRX CONF: %r" % conf)
         self.bts_ip = conf.get('osmo_trx', {}).get('bts_ip')
@@ -274,7 +274,7 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc, keepalive)
+        self.testenv.remember_to_stop(proc, keepalive)
         proc.launch()
         return proc
 
@@ -292,7 +292,7 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
 
         have_inst = rem_host.inst_compatible_for_remote()
         if have_inst:
-            self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
+            self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-trx')))
 
         rem_host.recreate_remote_dir(remote_prefix_dir)
         if have_inst:
@@ -311,7 +311,7 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
             remote_binary = self.binary_name()
         args = (remote_binary, '-C', remote_config_file)
         self.proc_trx = rem_host.RemoteProcessFixIgnoreSIGHUP(self.binary_name(), remote_run_dir, args, remote_env=remote_env)
-        self.suite_run.remember_to_stop(self.proc_trx, keepalive)
+        self.testenv.remember_to_stop(self.proc_trx, keepalive)
         self.proc_trx.launch()
 
 ##############
@@ -323,7 +323,7 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
             self.start_remotely(keepalive)
             return
         # Run locally if ssh user is not set
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-trx')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-trx')))
         lib = self.inst.child('lib')
         self.env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
         self.proc_trx = self.launch_process_local(keepalive, self.binary_name(),
@@ -337,8 +337,8 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
 class OsmoTrxUHD(OsmoTrx):
     BIN_TRX = 'osmo-trx-uhd'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf)
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf)
 
     def binary_name(self):
         return OsmoTrxUHD.BIN_TRX
@@ -346,16 +346,16 @@ class OsmoTrxUHD(OsmoTrx):
 class OsmoTrxLMS(OsmoTrx):
     BIN_TRX = 'osmo-trx-lms'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf)
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf)
 
     def binary_name(self):
         return OsmoTrxLMS.BIN_TRX
 
 class TrxSC5(Trx):
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, "sc5-trx")
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, "sc5-trx")
         self.ready = False
 
     def start(self, keepalive=False):

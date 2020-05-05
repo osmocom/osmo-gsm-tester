@@ -38,8 +38,8 @@ class AmarisoftEPC(epc.EPC):
     LOGFILE = 'ltemme.log'
     IFUPFILE = 'mme-ifup'
 
-    def __init__(self, suite_run, run_node):
-        super().__init__(suite_run, run_node, 'amarisoftepc')
+    def __init__(self, testenv, run_node):
+        super().__init__(testenv, run_node, 'amarisoftepc')
         self.run_dir = None
         self.config_file = None
         self.log_file = None
@@ -58,7 +58,7 @@ class AmarisoftEPC(epc.EPC):
         if self._bin_prefix is None:
             self._bin_prefix = os.getenv('AMARISOFT_PATH_EPC', None)
             if self._bin_prefix == None:
-                self._bin_prefix  = self.suite_run.trial.get_inst('amarisoftepc')
+                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftepc')
         return self._bin_prefix
 
     def cleanup(self):
@@ -74,7 +74,7 @@ class AmarisoftEPC(epc.EPC):
 
     def start(self):
         self.log('Starting amarisoftepc')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
         if self._run_node.is_local():
             self.start_locally()
@@ -94,7 +94,7 @@ class AmarisoftEPC(epc.EPC):
 
         self.process = self.rem_host.RemoteProcess(AmarisoftEPC.BINFILE, args)
         #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(AmarisoftEPC.BINFILE, remote_run_dir, args)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def start_locally(self):
@@ -112,7 +112,7 @@ class AmarisoftEPC(epc.EPC):
         args = (binary, os.path.abspath(self.config_file))
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
@@ -168,7 +168,7 @@ class AmarisoftEPC(epc.EPC):
 
     def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:
-            msisdn = self.suite_run.resources_pool.next_msisdn(modem)
+            msisdn = self.testenv.msisdn()
         modem.set_msisdn(msisdn)
 
         if algo_str is None:

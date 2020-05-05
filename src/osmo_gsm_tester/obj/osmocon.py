@@ -35,7 +35,7 @@ class Osmocon(log.Origin):
 
     FIRMWARE_FILE="opt/osmocom-bb/target/firmware/board/compal_e88/layer1.compalram.bin"
 
-    def __init__(self, suite_run, conf):
+    def __init__(self, testenv, conf):
         serial_device = conf.get('serial_device')
         if serial_device is None:
             raise log.Error('osmocon_phone contains no attr "serial_device"')
@@ -43,7 +43,7 @@ class Osmocon(log.Origin):
         super().__init__(log.C_RUN, 'osmocon_%s' % os.path.basename(self.serial_device))
         self.run_dir = None
         self.process = None
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.conf = conf
         self.sk_tmp_dir = tempfile.mkdtemp('', 'ogtosmoconsk')
         if len(self.l2_socket_path().encode()) > 107:
@@ -62,9 +62,9 @@ class Osmocon(log.Origin):
         # TODO: make sure the pone is powered off before starting osmocon
 
         self.log('Starting osmocon')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
 
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmocom-bb')))
+        inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmocom-bb')))
 
         binary = inst.child('sbin', 'osmocon')
         if not os.path.isfile(binary):
@@ -86,7 +86,7 @@ class Osmocon(log.Origin):
                                        '-l', self.loader_socket_path(),
                                         firmware_path),
                                        env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
         self.log('Waiting for osmocon to be up and running')
         MainLoop.wait(self, os.path.exists, self.l2_socket_path())

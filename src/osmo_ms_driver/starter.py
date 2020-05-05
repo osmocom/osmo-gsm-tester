@@ -52,9 +52,9 @@ class OsmoVirtPhy(Launcher):
     def phy_filename(self):
         return self._phy_filename
 
-    def start(self, loop, suite_run=None):
-        if suite_run is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
-            self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name()))
+    def start(self, loop, testenv=None):
+        if testenv is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
+            self.run_dir = util.Dir(testenv.suite().get_run_dir().new_dir(self.name()))
         if len(self._phy_filename.encode()) > 107:
             raise log.Error('Path for unix socket is longer than max allowed len for unix socket path (107):', self._phy_filename)
 
@@ -62,8 +62,8 @@ class OsmoVirtPhy(Launcher):
         args = [self._binary, "--l1ctl-sock=" + self._phy_filename]
         self._vphy_proc = process.Process(self.name(), self.run_dir,
                                           args, env=self._env)
-        if suite_run is not None:
-            suite_run.remember_to_stop(self._vphy_proc)
+        if testenv is not None:
+            testenv.remember_to_stop(self._vphy_proc)
         self._vphy_proc.launch()
 
     def verify_ready(self):
@@ -134,9 +134,9 @@ class OsmoMobile(Launcher):
             w.write(mob_vty)
         return mob_cfg_file
 
-    def start(self, loop, suite_run=None):
-        if suite_run is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
-            self.run_dir = util.Dir(suite_run.get_test_run_dir().new_dir(self.name()))
+    def start(self, loop, testenv=None):
+        if testenv is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
+            self.run_dir = util.Dir(testenv.suite().get_run_dir().new_dir(self.name()))
         lua_filename = self.write_lua_cfg()
         mob_filename = self.write_mob_cfg(lua_filename, self._phy_filename)
 
@@ -145,8 +145,8 @@ class OsmoMobile(Launcher):
         args = [self._binary, "-c", mob_filename]
         self._omob_proc = process.Process(self.name(), self.run_dir,
                                           args, env=self._env)
-        if suite_run is not None:
-            suite_run.remember_to_stop(self._omob_proc)
+        if testenv is not None:
+            testenv.remember_to_stop(self._omob_proc)
         self._omob_proc.launch()
 
     def terminate(self):
@@ -168,11 +168,11 @@ class MobileTestStarter(log.Origin):
     TEMPLATE_CFG = "osmo-mobile.cfg"
 
     def __init__(self, name, options, cdf_function,
-                 event_server, tmp_dir, results, suite_run=None):
+                 event_server, tmp_dir, results, testenv=None):
         super().__init__(log.C_RUN, name)
         self._binary_options = options
         self._cdf = cdf_function
-        self._suite_run = suite_run
+        self._testenv = testenv
         self._tmp_dir = tmp_dir
         self._event_server = event_server
         self._results = results
@@ -225,7 +225,7 @@ class MobileTestStarter(log.Origin):
         """
         self.log("Pre-launching all virtphy's")
         for phy in self._phys:
-            phy.start(loop, self._suite_run)
+            phy.start(loop, self._testenv)
 
         self.log("Checking if sockets are in the filesystem")
         for phy in self._phys:
@@ -257,7 +257,7 @@ class MobileTestStarter(log.Origin):
         # start pending MS
         while len(self._started) < self._cdf.current_scaled_value() and len(self._unstarted) > 0:
             ms = self._unstarted.pop(0)
-            ms.start(loop, self._suite_run)
+            ms.start(loop, self._testenv)
             launch_time = time.clock_gettime(time.CLOCK_MONOTONIC)
             self._results[ms.name_number()].set_launch_time(launch_time)
             self._started.append(ms)

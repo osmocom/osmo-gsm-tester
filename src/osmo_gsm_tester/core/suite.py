@@ -72,12 +72,15 @@ class SuiteRun(log.Origin):
         self._resource_modifiers = None
         self._config = None
         self._run_dir = None
-        self.trial = trial
+        self._trial = trial
         self.definition = suite_definition
         self.scenarios = scenarios
         self.resources_pool = resource.ResourcesPool()
         self.status = SuiteRun.UNKNOWN
         self.load_tests()
+
+    def trial(self):
+        return self._trial
 
     def load_tests(self):
         self.tests = []
@@ -109,7 +112,7 @@ class SuiteRun(log.Origin):
 
     def get_run_dir(self):
         if self._run_dir is None:
-            self._run_dir = util.Dir(self.trial.get_run_dir().new_dir(self.name()))
+            self._run_dir = util.Dir(self._trial.get_run_dir().new_dir(self.name()))
         return self._run_dir
 
     def resource_requirements(self):
@@ -142,7 +145,7 @@ class SuiteRun(log.Origin):
     def run_tests(self, names=None):
         suite_libdir = os.path.join(self.definition.suite_dir, 'lib')
         try:
-            log.large_separator(self.trial.name(), self.name(), sublevel=2)
+            log.large_separator(self._trial.name(), self.name(), sublevel=2)
             self.mark_start()
             util.import_path_prepend(suite_libdir)
             if not self.reserved_resources:
@@ -171,7 +174,7 @@ class SuiteRun(log.Origin):
             else:
                 self.status = SuiteRun.FAIL
 
-            log.large_separator(self.trial.name(), self.name(), self.status, sublevel=2, space_above=False)
+            log.large_separator(self._trial.name(), self.name(), self.status, sublevel=2, space_above=False)
 
     def passed(self):
         return self.status == SuiteRun.PASS

@@ -66,7 +66,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf, name):
+    def __init__(self, testenv, conf, name):
         super().__init__(log.C_RUN, '%s' % name)
         self._conf = conf
         self._addr = conf.get('addr', None)
@@ -86,9 +86,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         values = dict(enb=config.get_defaults('enb'))
         for config_specifics in config_specifics_li:
             config.overlay(values, dict(enb=config.get_defaults(config_specifics)))
-        config.overlay(values, dict(enb=self.suite_run.config().get('enb', {})))
+        config.overlay(values, dict(enb=self.testenv.suite().config().get('enb', {})))
         for config_specifics in config_specifics_li:
-            config.overlay(values, dict(enb=self.suite_run.config().get(config_specifics, {})))
+            config.overlay(values, dict(enb=self.testenv.suite().config().get(config_specifics, {})))
         config.overlay(values, dict(enb=self._conf))
         self._id = int(values['enb'].get('id', None))
         assert self._id is not None
@@ -192,7 +192,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 
         return rf_dev_args
 
-    def get_instance_by_type(suite_run, conf):
+    def get_instance_by_type(testenv, conf):
         """Allocate a ENB child class based on type. Opts are passed to the newly created object."""
         enb_type = conf.get('type')
         if enb_type is None:
@@ -206,7 +206,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             enb_class = srsENB
         else:
             raise log.Error('ENB type not supported:', enb_type)
-        return  enb_class(suite_run, conf)
+        return  enb_class(testenv, conf)
 
 ###################
 # PUBLIC (test API included)

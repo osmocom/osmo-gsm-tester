@@ -78,7 +78,7 @@ class AmarisoftUE(MS):
     LOGFILE = 'lteue.log'
     IFUPFILE = 'ue-ifup'
 
-    def __init__(self, suite_run, conf):
+    def __init__(self, testenv, conf):
         self._addr = conf.get('addr', None)
         if self._addr is None:
             raise log.Error('addr not set')
@@ -98,7 +98,7 @@ class AmarisoftUE(MS):
         self.remote_config_rf_file =  None
         self.remote_log_file = None
         self.remote_ifup_file = None
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -107,7 +107,7 @@ class AmarisoftUE(MS):
         if self._bin_prefix is None:
             self._bin_prefix = os.getenv('AMARISOFT_PATH_UE', None)
             if self._bin_prefix == None:
-                self._bin_prefix  = self.suite_run.trial.get_inst('amarisoftue')
+                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftue')
         return self._bin_prefix
 
     def cleanup(self):
@@ -128,12 +128,12 @@ class AmarisoftUE(MS):
         return "amarisoftue1"
 
     def stop(self):
-        self.suite_run.stop_process(self.process)
+        self.testenv.stop_process(self.process)
 
     def connect(self, enb):
         self.log('Starting amarisoftue')
         self.enb = enb
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
         if self.setup_runs_locally():
             self.start_locally()
@@ -161,7 +161,7 @@ class AmarisoftUE(MS):
 
         args = (remote_binary, self.remote_config_file)
         self.process = self.rem_host.RemoteProcess(AmarisoftUE.BINFILE, args)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def start_locally(self):
@@ -182,7 +182,7 @@ class AmarisoftUE(MS):
         args = (binary, os.path.abspath(self.config_file))
         self.dbg(run_dir=self.run_dir, binary=binary, env=env)
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def gen_conf_file(self, path, filename, values):
@@ -232,8 +232,8 @@ class AmarisoftUE(MS):
 
         values = dict(ue=config.get_defaults('amarisoft'))
         config.overlay(values, dict(ue=config.get_defaults('amarisoftue')))
-        config.overlay(values, dict(ue=self.suite_run.config().get('amarisoft', {})))
-        config.overlay(values, dict(ue=self.suite_run.config().get('modem', {})))
+        config.overlay(values, dict(ue=self.testenv.suite().config().get('amarisoft', {})))
+        config.overlay(values, dict(ue=self.testenv.suite().config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
         config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
 

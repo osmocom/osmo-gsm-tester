@@ -46,8 +46,8 @@ class srsENB(enb.eNodeB):
     LOGFILE = 'srsenb.log'
     PCAPFILE = 'srsenb.pcap'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, srsENB.BINFILE)
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, srsENB.BINFILE)
         self.ue = None
         self.run_dir = None
         self.gen_conf = None
@@ -66,7 +66,7 @@ class srsENB(enb.eNodeB):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.enable_pcap = False
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.remote_user = conf.get('remote_user', None)
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -94,7 +94,7 @@ class srsENB(enb.eNodeB):
     def start(self, epc):
         self.log('Starting srsENB')
         self._epc = epc
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
         if self.remote_user:
             self.start_remotely()
@@ -112,7 +112,7 @@ class srsENB(enb.eNodeB):
         args += tuple(self._additional_args)
 
         self.process = self.rem_host.RemoteProcess(srsENB.BINFILE, args, remote_env=remote_env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def start_locally(self):
@@ -123,7 +123,7 @@ class srsENB(enb.eNodeB):
         args += tuple(self._additional_args)
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def gen_conf_file(self, path, filename, values):
@@ -135,7 +135,7 @@ class srsENB(enb.eNodeB):
             f.write(r)
 
     def configure(self):
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('srslte')))
         if not os.path.isdir(self.inst.child('lib')):
             raise log.Error('No lib/ in', self.inst)
         if not self.inst.isfile('bin', srsENB.BINFILE):

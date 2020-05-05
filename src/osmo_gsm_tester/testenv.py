@@ -36,7 +36,6 @@ from .obj import enb
 from .obj import bts
 from .obj import ms
 
-trial = None
 suite = None
 test = None
 resources = None
@@ -59,23 +58,16 @@ class TestEnv(log_module.Origin):
         super().__init__(log_module.C_TST, test.name())
         self.suite_run = suite_run
         self._test = test
-        self.trial = suite_run.trial # backward compat with objects
-        self.resources_pool = suite_run.resource_pool() # backward compat with objects
         self._processes = []
         self.test_import_modules_to_clean_up = []
         self.objects_to_clean_up = None
         MainLoop.register_poll_func(self.poll)
 
+    def test(self):
+        return self._test
+
     def suite(self):
         return self.suite_run
-
-    # backward compat with objects
-    def get_test_run_dir(self):
-        return self._test.get_run_dir()
-
-    # backward compat with objects
-    def config(self):
-        return self.suite_run.config()
 
     def remember_to_stop(self, process, respawn=False):
         '''Ask suite to monitor and manage lifecycle of the Process object. If a
@@ -321,9 +313,8 @@ def setup(suite_run, _test):
     from .core.event_loop import MainLoop
     from .obj.sms import Sms as Sms_class
 
-    global trial, suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process
+    global suite, test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process
 
-    trial = suite_run.trial
     test = _test
     resources = suite_run.reserved_resources # TODO: remove this global, only used in selftest
     log = test.log

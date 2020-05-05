@@ -28,8 +28,8 @@ class OsmoPcuSysmo(pcu.Pcu):
     PCU_SYSMO_BIN = 'osmo-pcu'
     PCU_SYSMO_CFG = 'osmo-pcu-sysmo.cfg'
 
-    def __init__(self, suite_run, sysmobts, conf):
-        super().__init__(suite_run, sysmobts, conf, self.PCU_SYSMO_BIN)
+    def __init__(self, testenv, sysmobts, conf):
+        super().__init__(testenv, sysmobts, conf, self.PCU_SYSMO_BIN)
         self.run_dir = None
         self.bsc = None
         self.inst = None
@@ -39,10 +39,10 @@ class OsmoPcuSysmo(pcu.Pcu):
         self.remote_user = 'root'
 
     def start(self, keepalive=False):
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-pcu-sysmo')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-pcu-sysmo')))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise log.Error('No lib/ in', self.inst)
@@ -87,7 +87,7 @@ class OsmoPcuSysmo(pcu.Pcu):
 
     def launch_remote(self, name, popen_args, remote_cwd=None, keepalive=False):
         proc = self._process_remote(name, popen_args, remote_cwd)
-        self.suite_run.remember_to_stop(proc, keepalive)
+        self.testenv.remember_to_stop(proc, keepalive)
         proc.launch()
 
     def run_local(self, name, popen_args):
@@ -104,7 +104,7 @@ class OsmoPcuSysmo(pcu.Pcu):
         self.dbg(config_file=self.config_file)
 
         values = { 'osmo_pcu_sysmo': config.get_defaults('osmo_pcu_sysmo') }
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_pcu_sysmo': {
                             'bts_addr': self.bts.remote_addr(),

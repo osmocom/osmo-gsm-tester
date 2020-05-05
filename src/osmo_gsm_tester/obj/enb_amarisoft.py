@@ -45,8 +45,8 @@ class AmarisoftENB(enb.eNodeB):
     CFGFILE_DRB = 'amarisoft_drb.cfg'
     LOGFILE = 'lteenb.log'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, 'amarisoftenb')
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, 'amarisoftenb')
         self.ue = None
         self.run_dir = None
         self.inst = None
@@ -68,7 +68,7 @@ class AmarisoftENB(enb.eNodeB):
         self.remote_config_drb_file = None
         self.remote_log_file = None
         self.enable_measurements = False
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -77,7 +77,7 @@ class AmarisoftENB(enb.eNodeB):
         if self._bin_prefix is None:
             self._bin_prefix = os.getenv('AMARISOFT_PATH_ENB', None)
             if self._bin_prefix == None:
-                self._bin_prefix  = self.suite_run.trial.get_inst('amarisoftenb')
+                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftenb')
         return self._bin_prefix
 
     def cleanup(self):
@@ -98,7 +98,7 @@ class AmarisoftENB(enb.eNodeB):
     def start(self, epc):
         self.log('Starting AmarisoftENB')
         self._epc = epc
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
         self._start()
 
@@ -119,7 +119,7 @@ class AmarisoftENB(enb.eNodeB):
             args = (remote_binary, self.remote_config_file)
             self.process = self.rem_host.RemoteProcess(AmarisoftENB.BINFILE, args, remote_env=remote_env)
 
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def gen_conf_file(self, path, filename, values):

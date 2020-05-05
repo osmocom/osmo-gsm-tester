@@ -25,21 +25,21 @@ from . import pcap_recorder
 
 class OsmoMgcpgw(log.Origin):
 
-    def __init__(self, suite_run, ip_address, bts_ip):
+    def __init__(self, testenv, ip_address, bts_ip):
         super().__init__(log.C_RUN, 'osmo-mgcpgw_%s' % ip_address.get('addr'))
         self.run_dir = None
         self.config_file = None
         self.process = None
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.ip_address = ip_address
         # hack: so far mgcpgw needs one specific BTS IP.
         self.bts_ip = bts_ip
 
     def start(self):
         self.log('Starting osmo-mgcpgw')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
-        inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-nitb')))
+        inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-nitb')))
         binary = inst.child('bin', 'osmo-bsc_mgcp')
         if not os.path.isfile(binary):
             raise RuntimeError('Binary missing: %r' % binary)
@@ -47,7 +47,7 @@ class OsmoMgcpgw(log.Origin):
         if not os.path.isdir(lib):
             raise RuntimeError('No lib/ in %r' % inst)
 
-        pcap_recorder.PcapRecorder(self.suite_run, self.run_dir.new_dir('pcap'), None,
+        pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.addr())
 
         env = { 'LD_LIBRARY_PATH': util.prepend_library_path(lib) }
@@ -57,7 +57,7 @@ class OsmoMgcpgw(log.Origin):
                                        (binary, '-c',
                                         os.path.abspath(self.config_file)),
                                        env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
@@ -65,7 +65,7 @@ class OsmoMgcpgw(log.Origin):
         self.dbg(config_file=self.config_file)
 
         values = dict(mgcpgw=config.get_defaults('mgcpgw'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, dict(mgcpgw=dict(ip_address=self.ip_address, bts_ip=self.bts_ip)))
 
         self.dbg('MGCPGW CONFIG:\n' + pprint.pformat(values))

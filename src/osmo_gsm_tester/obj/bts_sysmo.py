@@ -31,8 +31,8 @@ class SysmoBts(bts_osmo.OsmoBts):
     BTS_SYSMO_BIN = 'osmo-bts-sysmo'
     BTS_SYSMO_CFG = 'osmo-bts-sysmo.cfg'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, SysmoBts.BTS_SYSMO_BIN, 'osmo_bts_sysmo')
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, SysmoBts.BTS_SYSMO_BIN, 'osmo_bts_sysmo')
         self.run_dir = None
         self.inst = None
         self.remote_inst = None
@@ -44,7 +44,7 @@ class SysmoBts(bts_osmo.OsmoBts):
         return util.str2bool(self.conf.get('direct_pcu'))
 
     def create_pcu(self):
-        return pcu_sysmo.OsmoPcuSysmo(self.suite_run, self, self.conf)
+        return pcu_sysmo.OsmoPcuSysmo(self.testenv, self, self.conf)
 
     def configure(self):
         if self.bsc is None:
@@ -54,7 +54,7 @@ class SysmoBts(bts_osmo.OsmoBts):
         self.dbg(config_file=self.config_file)
 
         values = { 'osmo_bts_sysmo': config.get_defaults('osmo_bts_sysmo') }
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_bts_sysmo': {
                             'oml_remote_ip': self.bsc.addr(),
@@ -94,10 +94,10 @@ class SysmoBts(bts_osmo.OsmoBts):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         log.log('Starting sysmoBTS to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst(SysmoBts.BTS_SYSMO_BIN)))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst(SysmoBts.BTS_SYSMO_BIN)))
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
             raise log.Error('No lib/ in', self.inst)
@@ -127,7 +127,7 @@ class SysmoBts(bts_osmo.OsmoBts):
             args += ('-M',)
 
         self.proc_bts = rem_host.RemoteProcess(SysmoBts.BTS_SYSMO_BIN, args)
-        self.suite_run.remember_to_stop(self.proc_bts, keepalive)
+        self.testenv.remember_to_stop(self.proc_bts, keepalive)
         self.proc_bts.launch()
 
 # vim: expandtab tabstop=4 shiftwidth=4

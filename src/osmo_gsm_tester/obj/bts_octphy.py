@@ -31,8 +31,8 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
     BIN_BTS_OCTPHY = 'osmo-bts-octphy'
     CONF_BTS_OCTPHY = 'osmo-bts-octphy.cfg'
 
-    def __init__(self, suite_run, conf):
-        super().__init__(suite_run, conf, OsmoBtsOctphy.BIN_BTS_OCTPHY, 'osmo_bts_octphy')
+    def __init__(self, testenv, conf):
+        super().__init__(testenv, conf, OsmoBtsOctphy.BIN_BTS_OCTPHY, 'osmo_bts_octphy')
         self.run_dir = None
         self.inst = None
         self.env = {}
@@ -46,7 +46,7 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
         proc = process.Process(binary_name, run_dir,
                                (binary,) + args,
                                env=self.env)
-        self.suite_run.remember_to_stop(proc)
+        self.testenv.remember_to_stop(proc)
         proc.launch()
         return proc
 
@@ -85,7 +85,7 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
         self.dbg(config_file=self.config_file)
 
         values = dict(osmo_bts_octphy=config.get_defaults('osmo_bts_octphy'))
-        config.overlay(values, self.suite_run.config())
+        config.overlay(values, self.testenv.suite().config())
         config.overlay(values, {
                         'osmo_bts_octphy': {
                             'oml_remote_ip': self.bsc.addr(),
@@ -117,13 +117,13 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
     def start(self):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
-        self.suite_run.poll()
+        self.testenv.poll()
 
         self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
 
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('osmo-bts')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bts')))
         btsoct_path = self.inst.child('bin', OsmoBtsOctphy.BIN_BTS_OCTPHY)
         lib = self.inst.child('lib')
         if not os.path.isdir(lib):
@@ -139,6 +139,6 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
         self.proc_bts = self.launch_process(OsmoBtsOctphy.BIN_BTS_OCTPHY, '-r', '1',
                             '-c', os.path.abspath(self.config_file),
                             '-i', self.bsc.addr(), '-t', str(self.num_trx()))
-        self.suite_run.poll()
+        self.testenv.poll()
 
 # vim: expandtab tabstop=4 shiftwidth=4

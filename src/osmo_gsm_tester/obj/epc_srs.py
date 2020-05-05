@@ -39,8 +39,8 @@ class srsEPC(epc.EPC):
     PCAPFILE = 'srsepc.pcap'
     LOGFILE = 'srsepc.log'
 
-    def __init__(self, suite_run, run_node):
-        super().__init__(suite_run, run_node, 'srsepc')
+    def __init__(self, testenv, run_node):
+        super().__init__(testenv, run_node, 'srsepc')
         self.run_dir = None
         self.config_file = None
         self.db_file = None
@@ -74,7 +74,7 @@ class srsEPC(epc.EPC):
 
     def start(self):
         self.log('Starting srsepc')
-        self.run_dir = util.Dir(self.suite_run.get_test_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
         self.configure()
         if self._run_node.is_local():
             self.start_locally()
@@ -95,7 +95,7 @@ class srsEPC(epc.EPC):
         args = (remote_binary, self.remote_config_file)
 
         self.process = self.rem_host.RemoteProcess(srsEPC.BINFILE, args)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def start_locally(self):
@@ -114,11 +114,11 @@ class srsEPC(epc.EPC):
         args = (binary, os.path.abspath(self.config_file))
 
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
-        self.suite_run.remember_to_stop(self.process)
+        self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
     def configure(self):
-        self.inst = util.Dir(os.path.abspath(self.suite_run.trial.get_inst('srslte')))
+        self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('srslte')))
         if not os.path.isdir(self.inst.child('lib')):
             raise log.Error('No lib/ in', self.inst)
         if not self.inst.isfile('bin', srsEPC.BINFILE):
@@ -180,7 +180,7 @@ class srsEPC(epc.EPC):
 
     def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:
-            msisdn = self.suite_run.resources_pool.next_msisdn(modem)
+            msisdn = self.testenv.msisdn()
         modem.set_msisdn(msisdn)
 
         if algo_str is None:

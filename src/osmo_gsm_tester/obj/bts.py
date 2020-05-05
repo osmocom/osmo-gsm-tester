@@ -50,7 +50,7 @@ class Bts(log.Origin, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, suite_run, conf, name, defaults_cfg_name):
+    def __init__(self, testenv, conf, name, defaults_cfg_name):
         super().__init__(log.C_RUN, name)
         self.bsc = None
         self.sgsn = None
@@ -61,7 +61,7 @@ class Bts(log.Origin, metaclass=ABCMeta):
         self._num_trx = 1
         self._max_trx = None
         self.overlay_trx_list = []
-        self.suite_run = suite_run
+        self.testenv = testenv
         self.conf = conf
         self.defaults_cfg_name = defaults_cfg_name
         self._init_num_trx()
@@ -162,7 +162,7 @@ class Bts(log.Origin, metaclass=ABCMeta):
         'Nothing to do by default. Subclass can override if required.'
         pass
 
-    def get_instance_by_type(suite_run, conf):
+    def get_instance_by_type(testenv, conf):
         """Allocate a BTS child class based on type. Opts are passed to the newly created object."""
         bts_type = conf.get('type')
         if bts_type is None:
@@ -188,7 +188,7 @@ class Bts(log.Origin, metaclass=ABCMeta):
             bts_class = NanoBts
         else:
             raise log.Error('BTS type not supported:', bts_type)
-        return bts_class(suite_run, conf)
+        return bts_class(testenv, conf)
 
 ###################
 # PUBLIC (test API included)

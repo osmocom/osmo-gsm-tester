@@ -12,20 +12,22 @@ import pprint
 import subprocess
 
 feature_module_map = {
-    'powersupply_intellinet' : ['powersupply_intellinet'],
-    'powersupply_sispm' : ['powersupply_sispm'],
-    'rfemu_amarisoftctrl': ['rfemu_amarisoftctrl'],
-    'rfemu_minicircuits': ['rfemu_minicircuits'],
+    '2g': ['bsc_osmo', 'bts_nanobts', 'bts_oc2g', 'bts_octphy', 'bts_osmo', 'bts_osmotrx', 'bts_osmovirtual', 'bts_sysmo', 'bts', 'bts', 'esme', 'ggsn_osmo', 'hlr_osmo', 'mgcpgw_osmo', 'mgw_osmo', 'ms_ofono', 'ms_driver', 'msc_osmo', 'nitb_osmo', 'osmo_ctrl', 'osmocon', 'pcap_recorder', 'pcu_oc2g', 'pcu_osmo', 'pcu_sysmo', 'pcu', 'sgsn_osmo', 'sms', 'smsc', 'stp_osmo'],
+    '4g': [],
+    'srs': ['enb_srs', 'epc_srs', 'ms_srs'],
+    'powersupply': ['powersupply', 'powersupply_intellinet', 'powersupply_sispm'],
+    'rfemu': ['rfemu', 'rfemu_amarisoftctrl', 'rfemu_minicircuits'],
 }
 
 def skip_features_to_skip_modules(skip_features):
     skip_obj_modules = []
 
     for skip_feature in skip_features:
-        if skip_feature not in feature_module_map:
-            raise Exception('feature %s doesn\'t exist!' % skip_feature)
-        for skip_module in feature_module_map[skip_feature]:
-            skip_obj_modules.append(skip_module)
+        if skip_feature in feature_module_map:
+            for skip_module in feature_module_map[skip_feature]:
+                skip_obj_modules.append(skip_module)
+        else:
+            skip_obj_modules.append(skip_feature)
     return skip_obj_modules
 
 def import_runtime_dependencies():
@@ -98,7 +100,7 @@ def print_deb_packages(modules):
         print("\t" + mname.ljust(20) + " [" + err.rstrip() +"]")
 
 parser = argparse.ArgumentParser(epilog=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-s', '--skip-feature', dest='skip_features', choices=feature_module_map.keys(), action='append',
+parser.add_argument('-s', '--skip-feature', dest='skip_features', action='append',
                     help='''All osmo-gsm-tester features not used by the user running the script''')
 parser.add_argument('-p', '--distro-packages', dest='distro_packages', action='store_true',
         help='Print distro packages installing modules')

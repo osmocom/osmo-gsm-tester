@@ -17,12 +17,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import smpplib.gsm
-import smpplib.client
-import smpplib.command
-import smpplib.consts
-import smpplib.exceptions
-
 from ..core import log
 from ..core.event_loop import MainLoop
 
@@ -34,9 +28,6 @@ MAX_SYS_ID_LEN = 16
 MAX_PASSWD_LEN = 16
 
 class Esme(log.Origin):
-
-    MSGMODE_TRANSACTION = smpplib.consts.SMPP_MSGMODE_FORWARD
-    MSGMODE_STOREFORWARD = smpplib.consts.SMPP_MSGMODE_STOREFORWARD
 
     def __init__(self, msisdn):
         self.msisdn = msisdn
@@ -51,6 +42,13 @@ class Esme(log.Origin):
         self.listening = False
         self.references_pending_receipt = []
         self.next_user_message_reference = 1
+        import smpplib.gsm
+        import smpplib.client
+        import smpplib.command
+        import smpplib.consts
+        import smpplib.exceptions
+        self.MSGMODE_TRANSACTION = smpplib.consts.SMPP_MSGMODE_FORWARD
+        self.MSGMODE_STOREFORWARD = smpplib.consts.SMPP_MSGMODE_STOREFORWARD
 
     def __del__(self):
         self.cleanup()

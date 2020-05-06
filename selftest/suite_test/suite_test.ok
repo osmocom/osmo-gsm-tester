@@ -1,5 +1,5 @@
 - non-existing suite dir
-cnf -: DBG: Found config file paths.conf as [PATH]/selftest/suite_test/paths.conf in ./suite_test which is [PATH]/selftest/suite_test
+cnf -: DBG: Found config file paths.conf as [PATH]/selftest/suite_test/paths.conf in [PATH]/selftest/suite_test which is [PATH]/selftest/suite_test
 cnf -: DBG: [PATH]/selftest/suite_test/paths.conf: relative path ./test_work/state_dir is [PATH]/selftest/suite_test/test_work/state_dir
 cnf -: DBG: [PATH]/selftest/suite_test/paths.conf: relative path . is [PATH]/selftest/suite_test
 cnf -: DBG: Found path suites_dir as [PATH]/selftest/suite_test
@@ -25,7 +25,7 @@ resources:
   - times: '2'
 
 - run hello world test
-cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in [PATH]/selftest/suite_test which is [PATH]/selftest/suite_test
 cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir
 
 ---------------------------------------------------------------------
@@ -99,13 +99,14 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 5)
+PASS: test_suite (pass: 1, skip: 6)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_suite_params.py
 
 - a test with an error
 
@@ -122,13 +123,14 @@ tst test_error.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_error.py:[
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 5)
+FAIL: test_suite (fail: 1, skip: 6)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     FAIL: test_error.py (N.N sec) AssertionError: test_error.py:[LINENR]: assert False
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_suite_params.py
 
 - a test with a failure
 
@@ -145,13 +147,14 @@ tst test_fail.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail.py:[LI
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 5)
+FAIL: test_suite (fail: 1, skip: 6)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py (N.N sec)
     FAIL: test_fail.py (N.N sec) EpicFail: This failure is expected
     skip: test_fail_raise.py
+    skip: test_suite_params.py
 
 - a test with a raised failure
 
@@ -167,15 +170,16 @@ tst test_fail_raise.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail_
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 5)
+FAIL: test_suite (fail: 1, skip: 6)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py (N.N sec)
     skip: test_fail.py (N.N sec)
     FAIL: test_fail_raise.py (N.N sec) ExpectedFail: This failure is expected
+    skip: test_suite_params.py
 - test with half empty scenario
-cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in [PATH]/selftest/suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
 cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir  [config.py:[LINENR]]
 
 ---------------------------------------------------------------------
@@ -254,15 +258,16 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 5)
+PASS: test_suite (pass: 1, skip: 6)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_suite_params.py
 - test with scenario
-cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in [PATH]/selftest/suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
 cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir  [config.py:[LINENR]]
 
 ---------------------------------------------------------------------
@@ -341,15 +346,16 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 5)
+PASS: test_suite (pass: 1, skip: 6)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_suite_params.py
 - test with scenario and modifiers
-cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in ./suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in [PATH]/selftest/suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
 cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir  [config.py:[LINENR]]
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
@@ -474,12 +480,150 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 5)
+PASS: test_suite (pass: 1, skip: 6)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_suite_params.py
+- test with suite-specific config
+cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/suite_test/resources.conf in [PATH]/selftest/suite_test which is [PATH]/selftest/suite_test  [config.py:[LINENR]]
+cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/suite_test/test_work/state_dir  [config.py:[LINENR]]
+tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
+tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
+tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: c2feabd082c36a1cdeccb9a5237dfff7dbadb009
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+  [resource.py:[LINENR]]
+tst test_suite: Reserving 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+  [resource.py:[LINENR]]
+tst test_suite: Reserving 2 x modem (candidates: 16)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+  [resource.py:[LINENR]]
+resources(test_suite)={'bts': [{'_hash': 'a59640b8ba6a373552b24a6f9f65cadd2347bace',
+          '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+          'addr': '10.42.42.53',
+          'band': 'GSM-1800',
+          'ipa_unit_id': '7',
+          'label': 'sysmoCell 5000',
+          'osmo_trx': {'clock_reference': 'external',
+                       'launch_trx': 'False',
+                       'trx_ip': '10.42.42.112'},
+          'trx_list': [{'max_power_red': '3', 'nominal_power': '10'},
+                       {'max_power_red': '0', 'nominal_power': '12'}],
+          'type': 'osmo-bts-trx'},
+         {'_hash': 'c2feabd082c36a1cdeccb9a5237dfff7dbadb009',
+          '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+          'addr': '10.42.42.53',
+          'band': 'GSM-1800',
+          'ipa_unit_id': '7',
+          'label': 'sysmoCell 5000',
+          'osmo_trx': {'clock_reference': 'external',
+                       'launch_trx': 'False',
+                       'trx_ip': '10.42.42.112'},
+          'trx_list': [{'nominal_power': '10'},
+                       {'max_power_red': '1', 'nominal_power': '12'}],
+          'type': 'osmo-bts-trx'},
+         {'_hash': '07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9',
+          '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+          'addr': '10.42.42.114',
+          'band': 'GSM-1800',
+          'ipa_unit_id': '1',
+          'label': 'sysmoBTS 1002',
+          'type': 'sysmo'}],
+ 'ip_address': [{'_hash': 'cde1debf28f07f94f92c761b4b7c6bf35785ced4',
+                 '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+                 'addr': '10.42.42.1'}],
+ 'modem': [{'_hash': '19c69e45aa090fb511446bd00797690aa82ff52f',
+            '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+            'imsi': '901700000007801',
+            'ki': 'D620F48487B1B782DA55DF6717F08FF9',
+            'label': 'm7801',
+            'path': '/wavecom_0'},
+           {'_hash': 'e1a46516a1fb493b2617ab14fc1693a9a45ec254',
+            '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
+            'imsi': '901700000007802',
+            'ki': '47FDB2D55CE6A10A85ABDAD034A5B7B3',
+            'label': 'm7802',
+            'path': '/wavecom_1'}]}
+
+---------------------------------------------------------------------
+trial test_suite
+---------------------------------------------------------------------
+
+----------------------------------------------
+trial test_suite test_suite_params.py
+----------------------------------------------
+tst test_suite_params.py:[LINENR]: starting test  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={suite={test_suite={some_suite_global_param='heyho', test_suite_params={one_bool_parameter='true', second_list_parameter=['23', '45']}}}}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite_params.py:[LINENR]: SPECIFIC SUITE CONFIG: {'some_suite_global_param': 'heyho',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR]:  'test_suite_params': {'one_bool_parameter': 'true',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR]:                        'second_list_parameter': ['23', '45']}}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR]: SPECIFIC TEST CONFIG: {'one_bool_parameter': 'true', 'second_list_parameter': ['23', '45']}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR] Test passed (N.N sec)  [test_suite↪test_suite_params.py]  [test.py:[LINENR]]
+---------------------------------------------------------------------
+trial test_suite PASS
+---------------------------------------------------------------------
+PASS: test_suite (pass: 1, skip: 6)
+    skip: hello_world.py
+    skip: mo_mt_sms.py
+    skip: mo_sms.py
+    skip: test_error.py
+    skip: test_fail.py
+    skip: test_fail_raise.py
+    pass: test_suite_params.py (N.N sec)
 
 - graceful exit.

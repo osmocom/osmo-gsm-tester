@@ -325,6 +325,27 @@ def validate(config, schema):
 
     nest(None, config, schema)
 
+def config_to_schema_def(src, key_prefix):
+    'Converts a yaml parsed config into a schema dictionary used by validate()'
+    if util.is_dict(src):
+        out_dict = {}
+        for key, val in src.items():
+            list_token = ''
+            dict_token = ''
+            if util.is_list(val):
+                list_token = '[]'
+                assert len(val) == 1
+                val = val[0]
+            if util.is_dict(val):
+                dict_token = '.'
+            tmp_out = config_to_schema_def(val, "%s%s%s%s" %(key_prefix, key, list_token, dict_token))
+            out_dict = {**out_dict, **tmp_out}
+        return out_dict
+
+    # base case: string
+    return {key_prefix: str(src)}
+
+
 def generate_schemas():
     "Generate supported schemas dynamically from objects"
     obj_dir = '%s/../obj/' % os.path.dirname(os.path.abspath(__file__))
@@ -366,12 +387,13 @@ def register_config_schema(obj_class_str, obj_attr_dict):
     """Register schema attributes to configure all instances of an object class.
        For instance: register_resource_schema_attributes('bsc', {'net.codec_list[]': schema.CODEC})
     """
-    global _CONFIG_SCHEMA
+    global _CONFIG_SCHEMA, _ALL_SCHEMA
     tmpdict = {}
     for key, val in obj_attr_dict.items():
         new_key = '%s.%s' % (obj_class_str, key)
         tmpdict[new_key] = val
     combine(_CONFIG_SCHEMA, tmpdict)
+    _ALL_SCHEMA = None # reset _ALL_SCHEMA so it is re-generated next time it's requested.
 
 def get_resources_schema():
     return _RESOURCES_SCHEMA;

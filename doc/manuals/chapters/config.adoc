@@ -305,15 +305,25 @@ suites_dir/
 
 This file content is parsed using the <<schema_want,Want>> schema.
 
-It provides
-{app-name} with the base restrictions (later to be further filtered by
-<<scenario_conf,scenario>> files) to apply when allocating resources.
+On the <<schema_want,resources>> section, it provides {app-name} with the base restrictions
+(later to be further filtered by <<scenario_conf,scenario>> files) to apply when
+allocating resources.
 
 It can also override attributes for the allocated resources through the
 <<schema_want,modifiers>> section (to be further modified by
-<<scenario_conf,scenario>> files later on). Similary it can do the same for
+<<scenario_conf,scenario>> files later on). Similarly it can do the same for
 general configuration options (no per-resource) through the
 <<schema_want,config>> section.
+
+The _schema_ section allows defining a suite's own schema used to validate
+parameters passed to it later on through <<scenario_conf,scenario>> files (See
+<<scenario_suite_params>>), and which can be retrieved by tests using the
+_tenv.config_suite_specific()_ and _tenv.config_test_specific()_ APIs. The first
+one will provide the whole dictionary under schema, while the later will return
+the dictionary immediatelly inside the former and matching the test name being
+run. For instance, if _tenv.config_test_specific()_ is called from test
+_a_suite_test_foo.py_, the method will return the contents under dictionary with
+key _a_suite_test_foo_.
 
 .Sample 'suite.conf' file:
 ----
@@ -336,6 +346,12 @@ config:
     net:
       codec_list:
       - fr1
+
+schema:
+  some_suite_parameter: 'uint'
+  a_suite_test_foo:
+    one_test_parameter_for_test_foo: 'str'
+    another_test_parameter_for_test_foo: ['bool_str']
 
 defaults:
   timeout: 50s
@@ -430,6 +446,37 @@ This way {app-name} when parsing the scenarios and combining them with the suite
   for general values), and otherwise match only by name.
 . Generate the final
   scenario content from the template available in the matched '.conf' file.
+
+[[scenario_suite_params]]
+*_Scenario to set suite/test parameters_*:
+
+First, the suite needs to define its schema in its <<suite_conf,suite.conf>>
+file. Check <<suite_conf>> on how to do so.
+
+For instance, for a suite named 'mysuite' containing a test 'a_suite_test_foo.py', and containing this schema in its <<suite_conf,suite.conf>> file:
+----
+schema:
+  some_suite_parameter: 'uint'
+  a_suite_test_foo:
+    one_test_parameter_for_test_foo: 'str'
+    another_test_parameter_for_test_foo: ['bool_str']
+----
+
+One could define a parametrized scenario 'myparamscenario@.conf' like this:
+----
+config:
+  suite:
+    mysuite:
+      some_suite_parameter: ${param1}
+      a_suite_test_foo:
+        one_test_parameter_for_test_foo: ${param2}
+        another_test_parameter_for_test_foo: ['true', 'false', 'false', 'true']
+----
+
+And use it in {app-name} this way:
+----
+mysuite:myparamscenario@4,hello.conf
+----
 
 [[resources_conf]]
 ==== 'resources.conf'

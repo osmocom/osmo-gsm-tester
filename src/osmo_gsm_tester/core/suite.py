@@ -38,8 +38,11 @@ class SuiteDefinition(log.Origin):
     CONF_FILENAME = 'suite.conf'
 
     def __init__(self, suite_dir):
+        self._suite_name = os.path.basename(suite_dir)
+        super().__init__(log.C_CNF, self._suite_name)
         self.suite_dir = suite_dir
-        super().__init__(log.C_CNF, os.path.basename(self.suite_dir))
+        self.conf = None
+        self._schema = None
         self.read_conf()
 
     def read_conf(self):
@@ -47,8 +50,12 @@ class SuiteDefinition(log.Origin):
         if not os.path.isdir(self.suite_dir):
             raise RuntimeError('No such directory: %r' % self.suite_dir)
         self.conf = config.read(os.path.join(self.suite_dir,
-                                             SuiteDefinition.CONF_FILENAME),
-                                schema.get_all_schema())
+                                             SuiteDefinition.CONF_FILENAME))
+        # Drop schema part since it's dynamically defining content, makes no sense to validate it.
+        self._schema = self.conf.pop('schema', {})
+        sdef = schema.config_to_schema_def(self._schema, "%s." % self._suite_name)
+        schema.register_config_schema('suite', sdef)
+        schema.validate(self.conf, schema.get_all_schema())
         self.load_test_basenames()
 
     def load_test_basenames(self):
@@ -57,6 +64,7 @@ class SuiteDefinition(log.Origin):
             if not basename.endswith('.py'):
                 continue
             self.test_basenames.append(basename)
+
 
 class SuiteRun(log.Origin):
     UNKNOWN = 'UNKNOWN'
@@ -78,6 +86,10 @@ class SuiteRun(log.Origin):
         self.resources_pool = resource.ResourcesPool()
         self.status = SuiteRun.UNKNOWN
         self.load_tests()
+
+    def suite_name(self):
+        'Return name of suite without scenarios'
+        return self.definition.name()
 
     def trial(self):
         return self._trial
@@ -129,6 +141,9 @@ class SuiteRun(log.Origin):
         if self._config is None:
             self._config = self.combined('config', False)
         return self._config
+
+    def config_suite_specific(self):
+        return self.config().get('suite', {}).get(self.suite_name(), {})
 
     def resource_pool(self):
         return self.resources_pool

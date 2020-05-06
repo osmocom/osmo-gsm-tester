@@ -49,6 +49,11 @@ class Test(log.Origin):
         self.log_target = None
         self._report_stdout = None
 
+    def module_name(self):
+        'Return test name without trailing .py'
+        assert self.basename.endswith('.py')
+        return self.basename[:-3]
+
     def get_run_dir(self):
         if self._run_dir is None:
             self._run_dir = util.Dir(self.suite_run.get_run_dir().new_dir(self._name))

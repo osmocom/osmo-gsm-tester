@@ -1,0 +1,63 @@
+==== Testing dynamically generated schemas ====
+schema_case_01.conf:
+{'foobar.prefix.handover.duration': 'duration',
+ 'foobar.prefix.handover.threshold': 'uint'}
+validating tests[0]
+Validation: OK
+validating tests[1]
+--- foobar.prefix.handover.duration: ERR: ValueError: Invalid duration value: '22kkk'
+Validation: Error
+validating tests[2]
+Validation: OK
+validating tests[3]
+--- -: ERR: ValueError: config item not known: 'foobar.wrongprefix.handover.duration'
+Validation: Error
+validating tests[4]
+--- -: ERR: ValueError: config item not known: 'foobar.wrongprefix.handover'
+Validation: Error
+validating tests[5]
+Validation: OK
+validating tests[6]
+--- foobar.prefix.handover.threshold: ERR: ValueError: Positive value expected instead of -2
+Validation: Error
+validating tests[7]
+--- -: ERR: ValueError: config item not known: 'foobar.prefix.handover[].threshold'
+Validation: Error
+validating tests[8]
+--- -: ERR: ValueError: config item is a list, should be 'uint': 'foobar.prefix.handover.threshold'
+Validation: Error
+----------------------
+schema_case_02.conf:
+{'foobar.prefix.hey.ho.letsgo[]': 'wrongtype'}
+validating tests[0]
+--- -: ERR: ValueError: unknown type 'wrongtype' at 'foobar.prefix.hey.ho.letsgo[]'
+Validation: Error
+----------------------
+schema_case_03.conf:
+--- -: ERR: AssertionError: 
+config2schema: Error
+----------------------
+schema_case_04.conf:
+--- -: ERR: AssertionError: 
+config2schema: Error
+----------------------
+schema_case_05.conf:
+{'foobar.prefix.hey.ho.letsgo[]': 'str'}
+validating tests[0]
+Validation: OK
+validating tests[1]
+Validation: OK
+validating tests[2]
+Validation: OK
+validating tests[3]
+--- -: ERR: ValueError: config item not known: 'foobar.prefix.hey.ho.letsgo'
+Validation: Error
+validating tests[4]
+Validation: OK
+validating tests[5]
+--- -: ERR: ValueError: config item is dict but should be a leaf node of type 'str': 'foobar.prefix.hey.ho.letsgo[]'
+Validation: Error
+validating tests[6]
+--- -: ERR: ValueError: config item is a list, should be 'str': 'foobar.prefix.hey.ho.letsgo[]'
+Validation: Error
+----------------------

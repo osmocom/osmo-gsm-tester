@@ -141,6 +141,12 @@ class TestEnv(log_module.Origin):
         MainLoop.unregister_poll_func(self.poll)
         self.test_import_modules_cleanup()
 
+    def config_suite_specific(self):
+        return self.suite_run.config_suite_specific()
+
+    def config_test_specific(self):
+        return self.suite_run.config_suite_specific().get(self._test.module_name(), {})
+
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'
         if msg_details:

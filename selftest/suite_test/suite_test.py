@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import os
+import sys
 import _prep
 import shutil
 from osmo_gsm_tester.core import log, config, util, report
 from osmo_gsm_tester.core import suite
-from osmo_gsm_tester.core.schema import generate_schemas
+from osmo_gsm_tester.core.schema import generate_schemas, get_all_schema
 
-config.ENV_CONF = './suite_test'
+config.ENV_CONF = os.path.join(os.path.dirname(sys.argv[0]))
 
 example_trial_dir = os.path.join('test_trial_tmp')
 
@@ -88,6 +89,16 @@ s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
 s.reserve_resources()
 print(repr(s.reserved_resources))
 results = s.run_tests('hello_world.py')
+print(report.suite_to_text(s))
+
+print('- test with suite-specific config')
+trial = FakeTrial()
+scenario = config.Scenario('foo', 'bar')
+scenario['config'] = {'suite': {s.name(): { 'some_suite_global_param': 'heyho', 'test_suite_params': {'one_bool_parameter': 'true', 'second_list_parameter': ['23', '45']}}}}
+s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+s.reserve_resources()
+print(repr(s.reserved_resources))
+results = s.run_tests('test_suite_params.py')
 print(report.suite_to_text(s))
 
 print('\n- graceful exit.')

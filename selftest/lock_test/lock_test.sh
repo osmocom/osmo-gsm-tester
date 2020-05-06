@@ -1,5 +1,7 @@
 #!/bin/sh
 
+owndir="$(dirname -- "$0")"
+
 echo 'creating files'
 dir="$(mktemp -d)"
 n1="long name"
@@ -11,7 +13,7 @@ touch "$f2"
 sync
 
 echo 'launch a program that locks a given file, it will create $dir/lock_test'
-python3 ./lock_test_help.py "$dir" "$n1" &
+python3 $owndir/lock_test_help.py "$dir" "$n1" &
 
 echo 'wait until this lock_test lock file was created by program'
 while [ ! -f "$dir/lock_test" ]; do
@@ -23,7 +25,7 @@ echo 'expecting the lock file to reflect "long name"'
 echo "launched first, locked by: '$(cat "$dir/lock_test")'"
 
 echo 'launching second program, should find the lock intact and wait'
-python3 ./lock_test_help.py "$dir" "$n2" &
+python3 $owndir/lock_test_help.py "$dir" "$n2" &
 while [ ! -f "$f2.ready" ]; do
   sleep .1
 done

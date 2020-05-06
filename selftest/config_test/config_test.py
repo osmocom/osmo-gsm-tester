@@ -11,7 +11,7 @@ import copy
 from osmo_gsm_tester.core import config, log, schema
 
 example_config_file = 'test.cfg'
-example_config = os.path.join(_prep.script_dir, 'config_test', example_config_file)
+example_config = os.path.join(_prep.script_dir, example_config_file)
 cfg = config.read(example_config)
 
 pprint.pprint(cfg, width=81)

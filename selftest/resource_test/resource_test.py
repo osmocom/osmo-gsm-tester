@@ -2,6 +2,7 @@
 
 import tempfile
 import os
+import sys
 import pprint
 import shutil
 import atexit
@@ -12,7 +13,7 @@ from osmo_gsm_tester.core.schema import generate_schemas
 workdir = util.get_tempdir()
 
 # override config locations to make sure we use only the test conf
-config.ENV_CONF = './conf'
+config.ENV_CONF = os.path.join(os.path.dirname(sys.argv[0]), 'conf')
 
 log.get_process_id = lambda: '123-1490837279'
 

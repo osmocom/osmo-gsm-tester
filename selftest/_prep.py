@@ -1,7 +1,7 @@
 import sys, os
 
 script_dir = sys.path[0]
-top_dir = os.path.join(script_dir, '..')
+top_dir = os.path.join(script_dir, '..', '..')
 src_dir = os.path.join(top_dir, 'src')
 
 # to find the osmo_gsm_tester py module

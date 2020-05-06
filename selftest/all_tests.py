@@ -72,14 +72,20 @@ def verify_output(got, expect_file, update=False):
 script_dir = sys.path[0]
 
 tests = []
-for f in os.listdir(script_dir):
-    file_path = os.path.join(script_dir, f)
-    if not os.path.isfile(file_path):
+for d in os.listdir(script_dir):
+    dir_path = os.path.join(script_dir, d)
+    if not os.path.isdir(dir_path):
         continue
+    if not dir_path.endswith('_test'):
+        continue
+    for f in os.listdir(dir_path):
+        file_path = os.path.join(script_dir, d, f)
+        if not os.path.isfile(file_path):
+            continue
 
-    if not (file_path.endswith('_test.py') or file_path.endswith('_test.sh')):
-        continue
-    tests.append(file_path)
+        if not (file_path.endswith('_test.py') or file_path.endswith('_test.sh')):
+            continue
+        tests.append(file_path)
 
 ran = []
 errors = []

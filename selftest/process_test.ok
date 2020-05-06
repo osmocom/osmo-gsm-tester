@@ -13,21 +13,18 @@ foo stderr
 
 run foo(pid=[PID]): Terminating (SIGINT)
 run foo(pid=[PID]): DBG: Cleanup
-run foo(pid=[PID]): Terminated {rc=1}
-result: 1
+run foo(pid=[PID]): Terminated {rc=42}
+result: 42
 stdout:
 (launched: [DATETIME])
 foo stdout
 [[$0], 'arg1', 'arg2']
+SIGINT received
 Exiting (stdout)
 
 stderr:
 (launched: [DATETIME])
 foo stderr
-Traceback (most recent call last):
-  File [$0], line [LINE], in <module>
-    time.sleep(1)
-KeyboardInterrupt
 Exiting (stderr)
 
 done.

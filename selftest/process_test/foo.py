@@ -3,7 +3,13 @@
 import sys
 import atexit
 import time
+import signal
 
+def signal_handler(sig, frame):
+    print('SIGINT received')
+    sys.exit(42)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 sys.stdout.write('foo stdout\n')
 sys.stderr.write('foo stderr\n')

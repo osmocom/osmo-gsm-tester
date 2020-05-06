@@ -53,7 +53,7 @@ try:
     r.drop(r)
     assert False
 except RuntimeError as e:
-    print('ok, caused exception: %r' % e)
+    print('ok, caused exception RuntimeError: %s' % str(e))
 
 print('- test removing a Resources list from one with the same list in it')
 r = resource.Resources({ 'k': [ {'a': 1, 'b': 2}, {'a': 3, 'b': 4}, ],

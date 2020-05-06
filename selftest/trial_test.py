@@ -37,13 +37,13 @@ t = Trial(d.child('invalid_checksum'))
 try:
     t.verify()
 except RuntimeError as e:
-    print('ok, got %r' % e)
+    print('ok, got RuntimeError: %s' % str(e))
 
 print('- detect missing file')
 t = Trial(d.child('missing_file'))
 try:
     t.verify()
 except RuntimeError as e:
-    print('ok, got %r' % e)
+    print('ok, got RuntimeError: %s' % str(e))
 
 # vim: expandtab tabstop=4 shiftwidth=4

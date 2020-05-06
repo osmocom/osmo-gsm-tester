@@ -11,6 +11,6 @@ third
 None
 - test checksum verification
 - detect wrong checksum
-ok, got RuntimeError("Checksum mismatch for '[PATH]/trial_test/invalid_checksum/file2' vs. '[PATH]/trial_test/invalid_checksum/checksums.md5' line 2",)
+ok, got RuntimeError: Checksum mismatch for '[PATH]/trial_test/invalid_checksum/file2' vs. '[PATH]/trial_test/invalid_checksum/checksums.md5' line 2
 - detect missing file
-ok, got RuntimeError("File listed in checksums file but missing in trials dir: '[PATH]/trial_test/missing_file/file2' vs. '[PATH]/trial_test/missing_file/checksums.md5' line 2",)
+ok, got RuntimeError: File listed in checksums file but missing in trials dir: '[PATH]/trial_test/missing_file/file2' vs. '[PATH]/trial_test/missing_file/checksums.md5' line 2

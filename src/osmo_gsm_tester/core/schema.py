@@ -23,7 +23,7 @@ import os
 from . import log
 from . import util
 
-KEY_RE = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
+KEY_RE = re.compile('[a-zA-Z0-9][a-zA-Z0-9_]*')
 IPV4_RE = re.compile('([0-9]{1,3}.){3}[0-9]{1,3}')
 HWADDR_RE = re.compile('([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}')
 IMSI_RE = re.compile('[0-9]{6,15}')

@@ -67,7 +67,7 @@ class MsDriver(log.Origin):
         """
 
         # Get the base directory for the virtphy/mobile application
-        inst = util.Dir(os.path.abspath(self._testenv.trial.get_inst('osmocom-bb')))
+        inst = util.Dir(os.path.abspath(self._testenv.suite().trial().get_inst('osmocom-bb')))
 
         # Assume these are dynamically linked and verify there is a lib dir.
         lib = inst.child('lib')

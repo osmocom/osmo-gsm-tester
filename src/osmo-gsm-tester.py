@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-# osmo_gsm_tester: invoke a single test run
+# osmo-gsm-tester.py: main program file
 #
-# Copyright (C) 2016-2017 by sysmocom - s.f.m.c. GmbH
+# Copyright (C) 2016-2020 sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
 #
 # Author: Neels Hofmeyr <neels@hofmeyr.de>
+# Author: Pau Espin Pedrol <pespin@sysmocom.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as
@@ -19,7 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'''osmo_gsm_tester: invoke a single test run.
+'''osmo-gsm-tester.py: invoke a single test run
 
 Examples:
 
@@ -27,12 +28,12 @@ Examples:
 ./osmo-gsm-tester.py -c doc/examples/2g_osmocom/ ~/my_trial_package/ -s sms_tests:dyn_ts+eu_band+bts_sysmo
 ./osmo-gsm-tester.py -c sysmocom/ ~/my_trial_package/ -s sms_tests/mo_mt_sms:bts_trx
 
-(The names for test suite, scenario and series names used in these examples
-must be defined by the osmo-gsm-tester configuration.)
+(The names for test suites and scenarios used in these examples must be defined
+by the osmo-gsm-tester configuration.)
 
-A trial package contains binaries (usually built by a jenkins job) of GSM
-software, including the core network programs as well as binaries for the
-various BTS models.
+A trial package contains binaries (usually built by a jenkins job) of software
+to be run by Osmo-Gsm-Tester, like core network programs as well as binaries for
+the various BTS models on a 2G network.
 
 A test suite defines specific actions to be taken and verifies their outcome.
 Such a test suite may leave certain aspects of a setup undefined, e.g. it may
@@ -50,19 +51,17 @@ There may still be aspects that are neither required by a test suite nor
 strictly defined by a scenario, which will be resolved automatically, e.g. by
 choosing the first available item that matches the other constraints.
 
-A test run thus needs to define: a trial package containing built binaries, a
-combination of scenarios to run a suite in, and a test suite to launch in the
-given scenario with the given binaries.
+A test run thus needs to define:
+* A trial package containing built binaries
+* A set of test suites, each with its combinations of scenarios
+* A configuration directory specifying sets of resources, default configurations
+  and paths on where to find suites, scenarios, etc.
 
-The osmo-gsm-tester configuration may define one or more series as a number of
-suite:scenario combinations. So instead of a specific suite:scenario
-combination, the name of such a series can be passed.
-
-If neither a combination or series is specified, the default series will be run
-as defined in the osmo-gsm-tester configuration.
+If no combination of suites and scenarios is provided, the default list of
+suites will be run as defined in the osmo-gsm-tester configuration.
 
 The scenarios and suites run for a given trial will be recorded in a trial
-package's directory: Upon launch, a 'test_package/run.<date>' directory will be
+package's directory: Upon launch, a '$trial_dir/run.<date>' directory will be
 created, which will collect logs and reports.
 '''
 
@@ -102,14 +101,13 @@ def main():
     # is easiest to maintain.
     parser.add_argument('-V', '--version', action='store_true',
             help='Show version')
+    parser.add_argument('-c', '--conf-dir', dest='conf_dir',
+            help='''Specify configuration directory path (containing paths.conf)''')
     parser.add_argument('trial_package',
             help='Directory containing binaries to test')
     parser.add_argument('-s', '--suite-scenario', dest='suite_scenario', action='append',
             help='''A suite-scenarios combination
 like suite:scenario+scenario''')
-    parser.add_argument('-S', '--series', dest='series', action='append',
-            help='''A series of suite-scenarios combinations
-as defined in the osmo-gsm-tester configuration''')
     parser.add_argument('-t', '--test', dest='test', action='append',
             help='''Run only tests matching this name.
 Any test name that contains the given string is run.
@@ -123,8 +121,6 @@ optional.''')
             help='Enable stdout logging of tracebacks')
     parser.add_argument('-R', '--source', dest='source', action='store_true',
             help='Enable stdout logging of source file')
-    parser.add_argument('-c', '--conf-dir', dest='conf_dir',
-            help='''Specify configuration directory path (containing paths.conf)''')
     args = parser.parse_args()
 
     if args.version:
@@ -132,7 +128,6 @@ optional.''')
         exit(0)
 
     print('combinations:', repr(args.suite_scenario))
-    print('series:', repr(args.series))
     print('trial:', repr(args.trial_package))
     print('tests:', repr(args.test))
 
@@ -149,8 +144,6 @@ optional.''')
         config.override_conf = args.conf_dir
 
     combination_strs = list(args.suite_scenario or [])
-    # for series in args.series:
-    #     combination_strs.extend(config.get_series(series))
 
     if not combination_strs:
         combination_strs = config.read_config_file(config.DEFAULT_SUITES_CONF, if_missing_return=[])
@@ -162,7 +155,7 @@ optional.''')
 
 
     if not combination_strs:
-        raise RuntimeError('Need at least one suite:scenario or series to run')
+        raise RuntimeError('Need at least one suite:scenario to run')
 
     # Generate supported schemas dynamically from objects:
     generate_schemas()

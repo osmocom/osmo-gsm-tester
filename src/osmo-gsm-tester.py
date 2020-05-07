@@ -23,9 +23,9 @@
 
 Examples:
 
-./run_once.py ~/my_trial_package/ -s osmo_trx
-./run_once.py ~/my_trial_package/ -c sms_tests:dyn_ts+eu_band+bts_sysmo
-./run_once.py ~/my_trial_package/ -c sms_tests/mo_mt_sms:bts_trx
+./osmo-gsm-tester.py -c doc/examples/2g_osmocom/ ~/my_trial_package/ -s osmo_trx
+./osmo-gsm-tester.py -c doc/examples/2g_osmocom/ ~/my_trial_package/ -s sms_tests:dyn_ts+eu_band+bts_sysmo
+./osmo-gsm-tester.py -c sysmocom/ ~/my_trial_package/ -s sms_tests/mo_mt_sms:bts_trx
 
 (The names for test suite, scenario and series names used in these examples
 must be defined by the osmo-gsm-tester configuration.)
@@ -124,8 +124,7 @@ optional.''')
     parser.add_argument('-R', '--source', dest='source', action='store_true',
             help='Enable stdout logging of source file')
     parser.add_argument('-c', '--conf-dir', dest='conf_dir',
-            help='''Specify configuration dir (overrides
-OSMO_GSM_TESTER_CONF env and default locations)''')
+            help='''Specify configuration directory path (containing paths.conf)''')
     args = parser.parse_args()
 
     if args.version:

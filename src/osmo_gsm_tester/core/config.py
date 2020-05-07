@@ -58,9 +58,6 @@ from . import log, util, template
 from . import schema
 from .util import is_dict, is_list, Dir, get_tempdir
 
-ENV_PREFIX = 'OSMO_GSM_TESTER_'
-ENV_CONF = os.getenv(ENV_PREFIX + 'CONF')
-
 override_conf = None
 
 DEFAULT_CONFIG_LOCATIONS = [
@@ -91,7 +88,9 @@ PATHS = None
 def _get_config_file(basename, fail_if_missing=True):
     if override_conf:
         locations = [ override_conf ]
-    elif ENV_CONF:
+    elif os.getenv('OSMO_GSM_TESTER_CONF'):
+        ENV_CONF = os.getenv('OSMO_GSM_TESTER_CONF')
+        log.err('Using environment variable OSMO_GSM_TESTER_CONF=%s is deprecated. Rather use -c command line argument!' % ENV_CONF)
         locations = [ ENV_CONF ]
     else:
         locations = DEFAULT_CONFIG_LOCATIONS
@@ -122,13 +121,6 @@ def read_config_file(basename, validation_schema=None, if_missing_return=False):
 
 def get_configured_path(label, allow_unset=False):
     global PATHS
-
-    env_name = ENV_PREFIX + label.upper()
-    env_path = os.getenv(env_name)
-    if env_path:
-        real_env_path = os.path.realpath(env_path)
-        log.dbg('Found path', label, 'as', env_path, 'in', '$' + env_name, 'which is', real_env_path, _category=log.C_CNF)
-        return real_env_path
 
     if PATHS is None:
         paths_file, found_in = _get_config_file(PATHS_CONF)

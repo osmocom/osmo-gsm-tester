@@ -185,12 +185,13 @@ This schema is used by <<suite_conf,suite.conf>> and <<scenario_conf,scenario.co
 The osmo-gsm-tester looks for configuration files in various standard
 directories in this order:
 
+- '.' (Current Working Directory)
 - '$HOME/.config/osmo-gsm-tester/'
 - '/usr/local/etc/osmo-gsm-tester/'
 - '/etc/osmo-gsm-tester/'
 
-The config location can also be set by an environment variable
-'$OSMO_GSM_TESTER_CONF', which then overrides the above locations.
+The config location can also be set through '-c' command line argument, which
+then overrides the above locations.
 
 The osmo-gsm-tester expects to find the following configuration files in a
 configuration directory:

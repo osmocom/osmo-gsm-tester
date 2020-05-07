@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e -x
 base="$PWD"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) # this file's directory
+OSMO_GSM_TESTER_CONF=${OSMO_GSM_TESTER_CONF:-${SCRIPT_DIR}/../sysmocom}
 
 time_start="$(date '+%F %T')"
 
@@ -21,7 +23,7 @@ rm *.md5
 # jenkins build job.
 # On failure, first clean up below and then return the exit code.
 exit_code="1"
-if python3 -u "$(which osmo-gsm-tester.py)" "$trial_dir" $OSMO_GSM_TESTER_OPTS ; then
+if python3 -u "$(which osmo-gsm-tester.py)" -c "$OSMO_GSM_TESTER_CONF" "$trial_dir" $OSMO_GSM_TESTER_OPTS ; then
   exit_code="0"
 fi
 

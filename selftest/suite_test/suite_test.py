@@ -7,7 +7,7 @@ from osmo_gsm_tester.core import log, config, util, report
 from osmo_gsm_tester.core import suite
 from osmo_gsm_tester.core.schema import generate_schemas, get_all_schema
 
-config.ENV_CONF = os.path.join(os.path.dirname(sys.argv[0]))
+config.override_conf = os.path.join(os.path.dirname(sys.argv[0]))
 
 example_trial_dir = os.path.join('test_trial_tmp')
 

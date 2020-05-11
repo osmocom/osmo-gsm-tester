@@ -27,6 +27,25 @@ from ..core.event_loop import MainLoop
 MAX_SYS_ID_LEN = 16
 MAX_PASSWD_LEN = 16
 
+smpplib_gsm = None
+smpplib_client = None
+smpplib_command = None
+smpplib_consts = None
+smpplib_exceptions = None
+def _import_smpplib_modules():
+    global smpplib_gsm, smpplib_client, smpplib_command, smpplib_consts, smpplib_exceptions
+    if smpplib_exceptions is None:
+        import smpplib.gsm
+        import smpplib.client
+        import smpplib.command
+        import smpplib.consts
+        import smpplib.exceptions
+        smpplib_gsm = smpplib.gsm
+        smpplib_client = smpplib.client
+        smpplib_command = smpplib.command
+        smpplib_consts = smpplib.consts
+        smpplib_exceptions = smpplib.exceptions
+
 class Esme(log.Origin):
 
     def __init__(self, msisdn):
@@ -42,13 +61,9 @@ class Esme(log.Origin):
         self.listening = False
         self.references_pending_receipt = []
         self.next_user_message_reference = 1
-        import smpplib.gsm
-        import smpplib.client
-        import smpplib.command
-        import smpplib.consts
-        import smpplib.exceptions
-        self.MSGMODE_TRANSACTION = smpplib.consts.SMPP_MSGMODE_FORWARD
-        self.MSGMODE_STOREFORWARD = smpplib.consts.SMPP_MSGMODE_STOREFORWARD
+        _import_smpplib_modules()
+        self.MSGMODE_TRANSACTION = smpplib_consts.SMPP_MSGMODE_FORWARD
+        self.MSGMODE_STOREFORWARD = smpplib_consts.SMPP_MSGMODE_STOREFORWARD
 
     def __del__(self):
         self.cleanup()
@@ -56,7 +71,7 @@ class Esme(log.Origin):
     def cleanup(self):
         try:
             self.disconnect()
-        except smpplib.exceptions.ConnectionError:
+        except smpplib_exceptions.ConnectionError:
             pass
 
     def set_smsc(self, smsc):
@@ -95,7 +110,7 @@ class Esme(log.Origin):
         host, port = self.smsc.addr_port
         if self.client:
             self.disconnect()
-        self.client = smpplib.client.Client(host, port, timeout=None)
+        self.client = smpplib_client.Client(host, port, timeout=None)
         self.client.set_message_sent_handler(
             lambda pdu: self.dbg('Unhandled submit_sm_resp message:', pdu.sequence) )
         self.client.set_message_received_handler(self._message_received_handler)
@@ -117,9 +132,9 @@ class Esme(log.Origin):
 
     def _message_received_handler(self, pdu, *args):
         self.dbg('message received:', seq=pdu.sequence)
-        if isinstance(pdu, smpplib.command.AlertNotification):
+        if isinstance(pdu, smpplib_command.AlertNotification):
             self.dbg('message received:  AlertNotification:', ms_availability_status=pdu.ms_availability_status)
-        elif isinstance(pdu, smpplib.command.DeliverSM):
+        elif isinstance(pdu, smpplib_command.DeliverSM):
             umref = int(pdu.user_message_reference)
             self.dbg('message received: DeliverSM', references_pending_receipt=self.references_pending_receipt, user_message_reference=umref)
             self.references_pending_receipt.remove(umref)
@@ -131,25 +146,25 @@ class Esme(log.Origin):
         try:
             method(*args)
             #it should not succeed, raise an exception:
-            raise log.Error('SMPP Failure: %s should have failed with SMPP error %d (%s) but succeeded.' % (method, errcode, smpplib.consts.DESCRIPTIONS[errcode]))
-        except smpplib.exceptions.PDUError as e:
+            raise log.Error('SMPP Failure: %s should have failed with SMPP error %d (%s) but succeeded.' % (method, errcode, smpplib_consts.DESCRIPTIONS[errcode]))
+        except smpplib_exceptions.PDUError as e:
             if e.args[1] != errcode:
                 raise e
             self.dbg('Expected failure triggered: %d' % errcode)
 
     def sms_send(self, sms_obj, mode, receipt=False):
-        parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(str(sms_obj))
+        parts, encoding_flag, msg_type_flag = smpplib_gsm.make_parts(str(sms_obj))
         seqs = []
         self.log('Sending SMS "%s" to %s' % (str(sms_obj), sms_obj.dst_msisdn()))
         umref = self.next_user_message_reference
         self.next_user_message_reference = (self.next_user_message_reference + 1) % (1 << 8)
         for part in parts:
             pdu = self.client.send_message(
-                source_addr_ton=smpplib.consts.SMPP_TON_INTL,
-                source_addr_npi=smpplib.consts.SMPP_NPI_ISDN,
+                source_addr_ton=smpplib_consts.SMPP_TON_INTL,
+                source_addr_npi=smpplib_consts.SMPP_NPI_ISDN,
                 source_addr=sms_obj.src_msisdn(),
-                dest_addr_ton=smpplib.consts.SMPP_TON_INTL,
-                dest_addr_npi=smpplib.consts.SMPP_NPI_ISDN,
+                dest_addr_ton=smpplib_consts.SMPP_TON_INTL,
+                dest_addr_npi=smpplib_consts.SMPP_NPI_ISDN,
                 destination_addr=sms_obj.dst_msisdn(),
                 short_message=part,
                 data_coding=encoding_flag,

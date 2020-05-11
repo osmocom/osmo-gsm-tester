@@ -2,11 +2,16 @@
 from osmo_gsm_tester.testenv import *
 
 def print_result_node(result, node_str):
-    sent = result['end']['sum_sent']
-    recv = result['end']['sum_received']
-    print("Result %s:" % node_str)
-    print("\tSEND: %d KB, %d kbps, %d seconds (%s retrans)" % (sent['bytes']/1000, sent['bits_per_second']/1000, sent['seconds'], str(sent.get('retransmits', 'unknown'))))
-    print("\tRECV: %d KB, %d kbps, %d seconds" % (recv['bytes']/1000, recv['bits_per_second']/1000, recv['seconds']))
+    try:
+        sent = result['end']['sum_sent']
+        recv = result['end']['sum_received']
+        print("Result %s:" % node_str)
+        print("\tSEND: %d KB, %d kbps, %d seconds (%s retrans)" % (sent['bytes']/1000, sent['bits_per_second']/1000, sent['seconds'], str(sent.get('retransmits', 'unknown'))))
+        print("\tRECV: %d KB, %d kbps, %d seconds" % (recv['bytes']/1000, recv['bits_per_second']/1000, recv['seconds']))
+    except Exception as e:
+        print("Exception while using iperf3 %s results: %r" % (node_str, repr(result)))
+        raise e
+
 
 def print_results(cli_res, srv_res):
     print_result_node(cli_res, 'client')

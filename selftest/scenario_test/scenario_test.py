@@ -18,7 +18,7 @@ test_schema = {
     'foobar' : schema.BOOL_STR,
     }
 
-config.override_conf = os.path.join(os.path.dirname(sys.argv[0]))
+config.override_conf = os.path.join(os.path.dirname(sys.argv[0]), 'paths.conf')
 
 def print_scenario(sc):
     # we use copy() to be able to get the dictionary in super class of Scenario:

@@ -48,7 +48,7 @@ class ResourcesPool(log.Origin):
     _registered_exit_handler = False
 
     def __init__(self):
-        self.config_path = config.get_config_file(config.RESOURCES_CONF)
+        self.config_path = config.get_main_config_value(config.CFG_RESOURCES_CONF)
         self.state_dir = config.get_state_dir()
         super().__init__(log.C_CNF, conf=self.config_path, state=self.state_dir.path)
         self.read_conf()

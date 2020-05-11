@@ -13,7 +13,7 @@ from osmo_gsm_tester.core.schema import generate_schemas
 workdir = util.get_tempdir()
 
 # override config locations to make sure we use only the test conf
-config.override_conf = os.path.join(os.path.dirname(sys.argv[0]), 'conf')
+config.override_conf = os.path.join(os.path.dirname(sys.argv[0]), 'conf', 'paths.conf')
 
 log.get_process_id = lambda: '123-1490837279'
 

@@ -9,12 +9,14 @@ The requested resource requirements are not solvable [[0, 2], [2], [0, 2]]
 ok, caused exception RuntimeError: Refusing to drop a list of resources from itself. This is probably a bug where a list of Resources() should have been copied but is passed as-is. use Resources.clear() instead.
 - test removing a Resources list from one with the same list in it
 - test resources config and state dir:
-cnf -: DBG: Found config file paths.conf as [PATH]/selftest/resource_test/conf/paths.conf in [PATH]/selftest/resource_test/conf which is [PATH]/selftest/resource_test/conf
-cnf -: DBG: [PATH]/selftest/resource_test/conf/paths.conf: relative path ./test_work/state_dir is [PATH]/selftest/resource_test/conf/test_work/state_dir
-cnf -: DBG: [PATH]/selftest/resource_test/conf/paths.conf: relative path ./suite_test is [PATH]/selftest/resource_test/conf/suite_test
-cnf -: DBG: Found path state_dir as [PATH]/selftest/resource_test/conf/test_work/state_dir
-cnf ResourcesPool: DBG: Found config file resources.conf as [PATH]/selftest/resource_test/conf/resources.conf in [PATH]/selftest/resource_test/conf which is [PATH]/selftest/resource_test/conf
-cnf ResourcesPool: DBG: Found path state_dir as [PATH]/selftest/resource_test/conf/test_work/state_dir
+cnf -: DBG: Found main configuration file in  [PATH]/selftest/resource_test/conf/paths.conf which is [PATH]/selftest/resource_test/conf/paths.conf
+cnf -: DBG: MAIN CONFIG:
+{'default_suites_conf_path': '[PATH]/selftest/resource_test/conf/default-suites.conf',
+ 'defaults_conf_path': '[PATH]/selftest/resource_test/conf/defaults.conf',
+ 'resource_conf_path': '[PATH]/selftest/resource_test/conf/resources.conf',
+ 'scenarios_dir': '[PATH]/selftest/resource_test/conf/scenarios',
+ 'state_dir': '[PATH]/selftest/resource_test/conf/test_work/state_dir',
+ 'suites_dir': '[PATH]/selftest/resource_test/conf/suite_test'}
 *** all resources:
 {'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df063c',
             'arfcn': '512',

@@ -1,8 +1,9 @@
 # osmo_gsm_tester: read and manage config files and global config
 #
-# Copyright (C) 2016-2017 by sysmocom - s.f.m.c. GmbH
+# Copyright (C) 2016-2020 by sysmocom - s.f.m.c. GmbH
 #
 # Author: Neels Hofmeyr <neels@hofmeyr.de>
+# Author: Pau Espin Pedrol <pespin@sysmocom.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as
@@ -53,6 +54,7 @@
 import yaml
 import os
 import copy
+import pprint
 
 from . import log, util, template
 from . import schema
@@ -60,94 +62,122 @@ from .util import is_dict, is_list, Dir, get_tempdir
 
 override_conf = None
 
-DEFAULT_CONFIG_LOCATIONS = [
-    '.',
-    os.path.join(os.getenv('HOME'), '.config', 'osmo-gsm-tester'),
-    '/usr/local/etc/osmo-gsm-tester',
-    '/etc/osmo-gsm-tester'
-    ]
-
-PATHS_CONF = 'paths.conf'
-DEFAULT_SUITES_CONF = 'default-suites.conf'
-DEFAULTS_CONF = 'defaults.conf'
-RESOURCES_CONF = 'resources.conf'
-
-PATH_STATE_DIR = 'state_dir'
-PATH_SUITES_DIR = 'suites_dir'
-PATH_SCENARIOS_DIR = 'scenarios_dir'
-PATHS_SCHEMA = {
-        PATH_STATE_DIR: schema.STR,
-        PATH_SUITES_DIR: schema.STR,
-        PATH_SCENARIOS_DIR: schema.STR,
+CFG_STATE_DIR = 'state_dir'
+CFG_SUITES_DIR = 'suites_dir'
+CFG_SCENARIOS_DIR = 'scenarios_dir'
+CFG_DEFAULT_SUITES_CONF = 'default_suites_conf_path'
+CFG_DEFAULTS_CONF = 'defaults_conf_path'
+CFG_RESOURCES_CONF = 'resource_conf_path'
+MAIN_CONFIG_SCHEMA = {
+        CFG_STATE_DIR: schema.STR,
+        CFG_SUITES_DIR: schema.STR,
+        CFG_SCENARIOS_DIR: schema.STR,
+        CFG_DEFAULT_SUITES_CONF: schema.STR,
+        CFG_DEFAULTS_CONF: schema.STR,
+        CFG_RESOURCES_CONF: schema.STR,
     }
 
-PATHS_TEMPDIR_STR = '$TEMPDIR'
+DF_CFG_STATE_DIR = '/var/tmp/osmo-gsm-tester/state/'
+DF_CFG_SUITES_DIR = './suites'
+DF_CFG_SCENARIOS_DIR = './scenarios'
+DF_CFG_DEFAULT_SUITES_CONF = './default-suites.conf'
+DF_CFG_DEFAULTS_CONF = './defaults.conf'
+DF_CFG_RESOURCES_CONF = './resources.conf'
 
-PATHS = None
+DEFAULT_CONFIG_FILENAME = 'main.conf'
 
-def _get_config_file(basename, fail_if_missing=True):
+DEFAULT_CONFIG_LOCATIONS = [
+    '.',
+    os.path.join(os.getenv('HOME'), '.config', 'osmo-gsm-tester', DEFAULT_CONFIG_FILENAME),
+    os.path.join('/usr/local/etc/osmo-gsm-tester', DEFAULT_CONFIG_FILENAME),
+    os.path.join('/etc/osmo-gsm-tester', DEFAULT_CONFIG_FILENAME)
+    ]
+
+MAIN_CONFIG = None
+MAIN_CONFIG_PATH = None
+
+def _find_main_config_path():
     if override_conf:
         locations = [ override_conf ]
     elif os.getenv('OSMO_GSM_TESTER_CONF'):
         ENV_CONF = os.getenv('OSMO_GSM_TESTER_CONF')
-        log.err('Using environment variable OSMO_GSM_TESTER_CONF=%s is deprecated. Rather use -c command line argument!' % ENV_CONF)
-        locations = [ ENV_CONF ]
+        log.err('Using environment variable OSMO_GSM_TESTER_CONF=%s(/paths.conf) is deprecated. Rather use -c command line argument!' % ENV_CONF)
+        locations = [ ENV_CONF + 'paths.conf' ] # directory is expected in OSMO_GSM_TESTER_CONF, bakcward compatibility
     else:
         locations = DEFAULT_CONFIG_LOCATIONS
 
     for l in locations:
         real_l = os.path.realpath(l)
-        p = os.path.realpath(os.path.join(real_l, basename))
-        if os.path.isfile(p):
-            log.dbg('Found config file', basename, 'as', p, 'in', l, 'which is', real_l, _category=log.C_CNF)
-            return (p, real_l)
-    if not fail_if_missing:
-        return None, None
-    raise RuntimeError('configuration file not found: %r in %r' % (basename,
-        [os.path.abspath(p) for p in locations]))
+        if os.path.isfile(real_l):
+            log.dbg('Found main configuration file in ', l, 'which is', real_l, _category=log.C_CNF)
+            return real_l
+    raise RuntimeError('Main configuration file not found in %r' % ([l for l in locations]))
 
-def get_config_file(basename, fail_if_missing=True):
-    path, found_in = _get_config_file(basename, fail_if_missing)
+def _get_main_config_path():
+    global MAIN_CONFIG_PATH
+    if MAIN_CONFIG_PATH is None:
+        MAIN_CONFIG_PATH = _find_main_config_path()
+    return MAIN_CONFIG_PATH
+
+def main_config_path_to_abspath(path):
+    'Relative files in main config are relative towards the config file, not towards $CWD'
+    if not path.startswith(os.pathsep):
+        return os.path.realpath(os.path.join(os.path.dirname(_get_main_config_path()), path))
     return path
 
-def read_config_file(basename, validation_schema=None, if_missing_return=False):
+def _get_main_config():
+    global MAIN_CONFIG
+    if MAIN_CONFIG is None:
+        cfg = read(_get_main_config_path(), MAIN_CONFIG_SCHEMA)
+        MAIN_CONFIG = {
+            CFG_STATE_DIR: DF_CFG_STATE_DIR,
+            CFG_SUITES_DIR: DF_CFG_SUITES_DIR,
+            CFG_SCENARIOS_DIR: DF_CFG_SCENARIOS_DIR,
+            CFG_DEFAULT_SUITES_CONF: DF_CFG_DEFAULT_SUITES_CONF,
+            CFG_DEFAULTS_CONF: DF_CFG_DEFAULTS_CONF,
+            CFG_RESOURCES_CONF: DF_CFG_RESOURCES_CONF,
+            }
+        overlay(MAIN_CONFIG, cfg)
+        for key, path in sorted(MAIN_CONFIG.items()):
+             MAIN_CONFIG[key] = main_config_path_to_abspath(path)
+        log.dbg('MAIN CONFIG:\n' + pprint.pformat(MAIN_CONFIG), _category=log.C_CNF)
+    return MAIN_CONFIG
+
+def get_main_config_value(cfg_name, fail_if_missing=True):
+    cfg = _get_main_config()
+    f = cfg.get(cfg_name, None)
+    if f is None and fail_if_missing:
+        raise RuntimeError('Missing configuration %s' % (cfg_name))
+    return f
+
+def read_config_file(cfg_name, validation_schema=None, if_missing_return=False):
+    '''Read content of config file cfg_name (referring to key in main config).
+    If "if_missing_return" is different than False, then instead of failing it will return whatever it is stored in that arg
+    '''
     fail_if_missing = True
     if if_missing_return is not False:
         fail_if_missing = False
-    path = get_config_file(basename, fail_if_missing=fail_if_missing)
+    path = get_main_config_value(cfg_name, fail_if_missing=fail_if_missing)
     if path is None:
         return if_missing_return
     return read(path, validation_schema=validation_schema, if_missing_return=if_missing_return)
 
-def get_configured_path(label, allow_unset=False):
-    global PATHS
-
-    if PATHS is None:
-        paths_file, found_in = _get_config_file(PATHS_CONF)
-        PATHS = read(paths_file, PATHS_SCHEMA)
-        # sorted for deterministic regression test results
-        for key, path in sorted(PATHS.items()):
-            if not path.startswith(os.pathsep):
-                PATHS[key] = os.path.realpath(os.path.join(found_in, path))
-                log.dbg(paths_file + ': relative path', path, 'is', PATHS[key], _category=log.C_CNF)
-    p = PATHS.get(label)
-    if p is None and not allow_unset:
-        raise RuntimeError('missing configuration in %s: %r' % (PATHS_CONF, label))
-
-    log.dbg('Found path', label, 'as', p, _category=log.C_CNF)
-    if p.startswith(PATHS_TEMPDIR_STR):
-        p = os.path.join(get_tempdir(), p[len(PATHS_TEMPDIR_STR):])
-        log.dbg('Path', label, 'contained', PATHS_TEMPDIR_STR, 'and becomes', p, _category=log.C_CNF)
-    return p
-
 def get_state_dir():
-    return Dir(get_configured_path(PATH_STATE_DIR))
+    return Dir(get_main_config_value(CFG_STATE_DIR))
 
 def get_suites_dir():
-    return Dir(get_configured_path(PATH_SUITES_DIR))
+    return Dir(get_main_config_value(CFG_SUITES_DIR))
 
 def get_scenarios_dir():
-    return Dir(get_configured_path(PATH_SCENARIOS_DIR))
+    return Dir(get_main_config_value(CFG_SCENARIOS_DIR))
+
+DEFAULTS_CONF = None
+def get_defaults(for_kind):
+    global DEFAULTS_CONF
+    if DEFAULTS_CONF is None:
+        DEFAULTS_CONF = read_config_file(CFG_DEFAULTS_CONF, if_missing_return={})
+    defaults = DEFAULTS_CONF.get(for_kind, {})
+    return copy.deepcopy(defaults)
 
 def read(path, validation_schema=None, if_missing_return=False):
     log.ctx(path)
@@ -190,10 +220,6 @@ def _standardize_item(item):
 def _standardize(config):
     config = yaml.safe_load(_tostr(_standardize_item(config)))
     return config
-
-def get_defaults(for_kind):
-    defaults = read_config_file(DEFAULTS_CONF, if_missing_return={})
-    return defaults.get(for_kind, {})
 
 def overlay(dest, src):
     if is_dict(dest):

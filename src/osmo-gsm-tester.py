@@ -24,9 +24,9 @@
 
 Examples:
 
-./osmo-gsm-tester.py -c doc/examples/2g_osmocom/ ~/my_trial_package/ -s osmo_trx
-./osmo-gsm-tester.py -c doc/examples/2g_osmocom/ ~/my_trial_package/ -s sms_tests:dyn_ts+eu_band+bts_sysmo
-./osmo-gsm-tester.py -c sysmocom/ ~/my_trial_package/ -s sms_tests/mo_mt_sms:bts_trx
+./osmo-gsm-tester.py -c doc/examples/2g_osmocom/main.conf ~/my_trial_package/ -s osmo_trx
+./osmo-gsm-tester.py -c doc/examples/2g_osmocom/main.conf ~/my_trial_package/ -s sms_tests:dyn_ts+eu_band+bts_sysmo
+./osmo-gsm-tester.py -c sysmocom/main.conf ~/my_trial_package/ -s sms_tests/mo_mt_sms:bts_trx
 
 (The names for test suites and scenarios used in these examples must be defined
 by the osmo-gsm-tester configuration.)
@@ -54,8 +54,9 @@ choosing the first available item that matches the other constraints.
 A test run thus needs to define:
 * A trial package containing built binaries
 * A set of test suites, each with its combinations of scenarios
-* A configuration directory specifying sets of resources, default configurations
-  and paths on where to find suites, scenarios, etc.
+* A main configuration file specifying paths to other files containing sets of
+  resources, default configurations and paths on where to find suites,
+  scenarios, etc.
 
 If no combination of suites and scenarios is provided, the default list of
 suites will be run as defined in the osmo-gsm-tester configuration.
@@ -101,8 +102,8 @@ def main():
     # is easiest to maintain.
     parser.add_argument('-V', '--version', action='store_true',
             help='Show version')
-    parser.add_argument('-c', '--conf-dir', dest='conf_dir',
-            help='''Specify configuration directory path (containing paths.conf)''')
+    parser.add_argument('-c', '--conf-path', dest='conf_path',
+            help='''Specify main configuration file path''')
     parser.add_argument('trial_package',
             help='Directory containing binaries to test')
     parser.add_argument('-s', '--suite-scenario', dest='suite_scenario', action='append',
@@ -140,18 +141,18 @@ optional.''')
         log.style_change(trace=True)
     if args.source:
         log.style_change(src=True)
-    if args.conf_dir:
-        config.override_conf = args.conf_dir
+    if args.conf_path:
+        config.override_conf = args.conf_path
 
     combination_strs = list(args.suite_scenario or [])
 
     if not combination_strs:
-        combination_strs = config.read_config_file(config.DEFAULT_SUITES_CONF, if_missing_return=[])
+        combination_strs = config.read_config_file(config.CFG_DEFAULT_SUITES_CONF, if_missing_return=[])
 
         if combination_strs:
             print('Running default suites:\n  ' + ('\n  '.join(combination_strs)))
         else:
-            print('No default suites configured (%r)' % config.DEFAULT_SUITES_CONF)
+            print('Failed to load default suites (%r)' % config.get_main_config_value(config.DEFAULT_SUITES_CONF, fail_if_missing=False))
 
 
     if not combination_strs:

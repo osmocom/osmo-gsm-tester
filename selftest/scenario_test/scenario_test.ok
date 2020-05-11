@@ -1,32 +1,28 @@
-cnf -: DBG: Found config file paths.conf as [PATH]/selftest/scenario_test/paths.conf in [PATH]/selftest/scenario_test which is [PATH]/selftest/scenario_test
-cnf -: DBG: [PATH]/selftest/scenario_test/paths.conf: relative path . is [PATH]/selftest/scenario_test
-cnf -: DBG: [PATH]/selftest/scenario_test/paths.conf: relative path ./test_work/state_dir is [PATH]/selftest/scenario_test/test_work/state_dir
-cnf -: DBG: [PATH]/selftest/scenario_test/paths.conf: relative path . is [PATH]/selftest/scenario_test
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
+cnf -: DBG: Found main configuration file in  [PATH]/selftest/scenario_test/paths.conf which is [PATH]/selftest/scenario_test/paths.conf
+cnf -: DBG: MAIN CONFIG:
+{'default_suites_conf_path': '[PATH]/selftest/scenario_test/default-suites.conf',
+ 'defaults_conf_path': '[PATH]/selftest/scenario_test/defaults.conf',
+ 'resource_conf_path': '[PATH]/selftest/scenario_test/resources.conf',
+ 'scenarios_dir': '[PATH]/selftest/scenario_test',
+ 'state_dir': '[PATH]/selftest/scenario_test/test_work/state_dir',
+ 'suites_dir': '[PATH]/selftest/scenario_test'}
 scenario_case_01.conf
 {'anotherlist': ['4', '0'],
  'foobar': 'True',
  'somelist': [{'somelistitem': 'firststring'},
               {'somelistitem': 'secondstring'},
               {'somelistitem': 'thirdstring'}]}
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 scenario_case_01.conf
 {'anotherlist': ['4', '0'],
  'foobar': 'True',
  'somelist': [{'somelistitem': 'firststring'},
               {'somelistitem': 'secondstring'},
               {'somelistitem': 'thirdstring'}]}
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 OK: expected RuntimeError: No such scenario file: '[PATH]/selftest/scenario_test/scenario_case_01@.conf' (nor scenario_case_01@.conf)
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 OK: expected ValueError
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 OK: expected ValueError
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 OK: expected RuntimeError: No such scenario file: '[PATH]/selftest/scenario_test/scenario_case_03.conf'
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 OK: expected RuntimeError: No such scenario file: '[PATH]/selftest/scenario_test/scenario_case_03.conf'
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 tst scenario_case_03@heyho,1,yes.conf: DBG: {param_dict={param1='heyho', param2='1', param3='yes'}}
 scenario_case_03@heyho,1,yes.conf
 {'anotherlist': ['1', '0'],
@@ -34,7 +30,6 @@ scenario_case_03@heyho,1,yes.conf
  'somelist': [{'somelistitem': 'firststring'},
               {'somelistitem': 'heyho'},
               {'somelistitem': 'thirdstring'}]}
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 tst scenario_case_03@heyho,1,yes.conf: DBG: {param_dict={param1='heyho', param2='1', param3='yes'}}
 scenario_case_03@heyho,1,yes.conf
 {'anotherlist': ['1', '0'],
@@ -42,17 +37,13 @@ scenario_case_03@heyho,1,yes.conf
  'somelist': [{'somelistitem': 'firststring'},
               {'somelistitem': 'heyho'},
               {'somelistitem': 'thirdstring'}]}
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 tst scenario_case_03@heyho,1.conf: DBG: {param_dict={param1='heyho', param2='1'}}
 OK: expected NameError: Undefined
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 tst scenario_case_03@heyho,1.conf: DBG: {param_dict={param1='heyho', param2='1'}}
 OK: expected NameError: Undefined
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 tst scenario_case_03@specific.conf: DBG: {param_dict={param1='specific'}}
 scenario_case_03@specific.conf
 {'somelist': [{'somelistitem': 'specific'}]}
-cnf -: DBG: Found path scenarios_dir as [PATH]/selftest/scenario_test
 tst scenario_case_03@specific.conf: DBG: {param_dict={param1='specific'}}
 scenario_case_03@specific.conf
 {'somelist': [{'somelistitem': 'specific'}]}

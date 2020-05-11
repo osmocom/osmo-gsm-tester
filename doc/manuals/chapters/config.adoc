@@ -4,14 +4,20 @@
 
 All configuration attributes in {app-name} are stored and provided as YAML
 files, which are handled internally mostly as sets of dictionaries, lists and
-scalars. Each of these configurations have a known format, which is called
-'schema'. Each provided configuration is validated against its 'schema' at parse
-time. Hence, 'schemas' can be seen as a namespace containing a structured tree
-of configuration attributes. Each attribute has a schema type assigned which
-constrains the type of value it can hold.
+scalars. Each of these configurations have a known format (set of keys and
+values), which is called 'schema'. Each provided configuration is validated
+against its 'schema' at parse time. Hence, 'schemas' can be seen as a namespace
+containing a structured tree of configuration attributes. Each attribute has a
+schema type assigned which constrains the type of value it can hold.
 
 There are several well-known schemas used across {app-name}, and they are
 described in following sub-sections.
+
+[[schema_main_cfg]]
+==== Schema 'main config'
+
+This schema defines all the attributes available in {app-name} the main
+configuration file <<main_conf,main.conf>>, and it is used to validate it.
 
 [[schema_resources]]
 ==== Schema 'resources'
@@ -19,7 +25,8 @@ described in following sub-sections.
 This schema defines all the attributes which can be assigned to
 a _resource_, and it is used to validate the <<resources_conf,resources.conf>>
 file. Hence, the <<resources_conf,resources.conf>> contains a list of elements
-for each resource type.
+for each resource type. This schema is also used and extended by the
+<<schema_want,'want' schema>>.
 
 It is important to understand that the content in this schema refers to a list of
 resources for each resource class. Since a list is ordered by definition, it
@@ -34,9 +41,10 @@ On the other hand, it's also important to note that lists for simple or scalar
 types are currently being treated as unordered sets, which mean combination of
 filters or modifiers apply differently. In the future, it may be possible to
 have both behaviors for scalar/simple types by using also the YAML 'set' type in
-{app-handle}.
+{app-name}.
 
-//TODO: update this list and use a table for each resource type
+//TODO: update this list and use a table for each resource type in its own object section
+////
 These kinds of resources and their attributes are known:
 
 'ip_address'::
@@ -127,6 +135,7 @@ These kinds of resources and their attributes are known:
 	- 'gprs'
 	- 'voice'
 	- 'ussd'
+////
 
 [[schema_want]]
 ==== Schema 'want'
@@ -152,78 +161,109 @@ resources:
     type: osmo-bts-sysmo
 ----
 
-[[schema_conf]]
-==== Schema 'conf'
+[[schema_config]]
+==== Schema 'config'
 
-This schema is used by <<suite_conf,suite.conf>> and <<scenario_conf,scenario.conf>> files. It contains 3 main element sections:::
-[[schema_conf_sec_resources]]
-- Section 'resources': Contains a set of elements validated with <<schema_resources,resources>>
+This schema defines all the attributes which can be used by object classes or
+tests during test execution. The main difference between this schema and the
+<<schema_resources,resources>> schema is that the former contains configuration
+to be applied globally for all objects being used, while the later applies
+attributes to a specific object in the list of allocated resources. This schema
+hence allows setting attributes for objects which are not allocated as resources
+and hence not directly accessible through scenarios, like a BSC or an iperf3
+client.
+
+This schema is built dynamically at runtime from content registered by:
+- object classes registering their own attributes
+- test suite registering their own attributes through <<suite_conf,suite.conf>>
+  and tests being able to later retrieve them through 'testenv' API.
+
+[[schema_all]]
+==== Schema 'all'
+
+This schema is basically an aggregated namespace for <<schema_want,want>> schema
+and <<schema_config,config>> schema, and is the one used by
+<<suite_conf,suite.conf>> and <<scenario_conf,scenario.conf>> files. It contains
+these main element sections:::
+
+[[schema_all_sec_resources]]
+- Section 'resources': Contains a set of elements validated with <<schema_want,want>>
   schema. In  <<suite_conf,suite.conf>> it is used to construct the list of
   requested resources. In  <<scenario_conf,scenario.conf>>, it is used to inject
   attributes to the initial <<suite_conf,suite.conf>> _resources_ section and
   hence further restrain it.
-[[schema_conf_sec_modifiers]]
+[[schema_all_sec_modifiers]]
 - Section 'modifiers': Both in <<suite_conf,suite.conf>> and
   <<scenario_conf,scenario.conf>>, values presented in here are injected into
-  the content of the <<schema_conf_sec_resources,resources section>> after
+  the content of the <<schema_all_sec_resources,resources section>> after
   _resource_ allocation, hereby overwriting attributes passed to the object
   class instance managing the specific _resource_ (matches by resource type and
   list position). Since it is combined with the content of
-  <<schema_conf_sec_resources,resources section>>, it is clear that the
-  <<schema_resources,resources schema>> is used to validate this content.
-[[schema_conf_sec_config]]
-- Section 'config': Contains configuration attributes for {app-name} classes which are
-  not _resources_, and hence cannot be configured with <<schema_modifiers,modifiers>>.
-  They can overwrite values provided in the <<defaults_conf,defaults.conf>> file.
+  <<schema_all_sec_resources,resources section>>, it is clear that the
+  <<schema_want,want schema>> is used to validate this content.
+[[schema_all_sec_config]]
+- Section 'config': Contains configuration attributes for {app-name} object
+  classes which are not _resources_, and hence cannot be configured with
+  <<schema_all_sec_modifiers,modifiers>>. They can overwrite values provided in the
+  <<defaults_conf,defaults.conf>> file. Content in this section follows the
+  <<schema_config,config>> schema.
 
 //TODO: defaults.timeout should be change in code to be config.test_timeout or similar
 //TODO: 'config' should be split into its own schema and validate defaults.conf
 
-[[config_paths]]
-=== Config Paths
+[[config]]
+=== Configuration files and directories
 
-The osmo-gsm-tester looks for configuration files in various standard
-directories in this order:
+Find in below sub-sections all user-defined files and directories used by
+{app-name} to run tests on a given setup.
 
-- '.' (Current Working Directory)
-- '$HOME/.config/osmo-gsm-tester/'
-- '/usr/local/etc/osmo-gsm-tester/'
-- '/etc/osmo-gsm-tester/'
+[[config_main]]
+==== 'main.conf'
 
-The config location can also be set through '-c' command line argument, which
+The main configuration file is basically a placeholder for {app-name} to find
+paths to all other files and directories used to operate and run tests.
+
+{app-name} looks for the main configuration file in various standard paths in
+this order:
+
+- './main.conf' (Current Working Directory)
+- '$HOME/.config/osmo-gsm-tester/main.conf'
+- '/usr/local/etc/osmo-gsm-tester/main.conf'
+- '/etc/osmo-gsm-tester/main.conf'
+
+The config file location can also be set through '-c' command line argument, which
 then overrides the above locations.
 
-The osmo-gsm-tester expects to find the following configuration files in a
-configuration directory:
+{app-name} expects to find the following configuration settings in 'main.conf':
 
-- <<paths_conf,paths.conf>>
-- <<resource_conf,resources.conf>>
-- <<default_suites_conf,default-suites.conf>> (optional)
-- <<defaults_conf,defaults.conf>> (optional)
+- 'state_dir': Path to <<state_dir,state_dir>> directory
+- 'suites_dir': Path to <<suites_dir,suites_dir>> directory
+- 'scenarios_dir': Path to <<scenarios_dir,scenarios_dir>> directory (optional)
+- 'default_suites_conf_path': Path to <<default_suites_conf,default-suites.conf>> file (optional)
+- 'defaults_conf_path': Path to <<defaults_conf,defaults.conf>> file (optional)
+- 'resource_conf_path': Path to <<resource_conf,resources.conf>> file (optional)
 
-These are described in detail in the following sections.
+These are described in detail in the following sections. If no value is provided
+for a given setting, sane default paths are used: For 'state_dir',
+'/var/tmp/osmo-gsm-tester/state/' is used. All other files and directories are
+expected, by default, to be in the same directory as <<config_main,main.conf>>
 
-[[paths_conf]]
-==== 'paths.conf'
+IMPORTANT: Relative paths provided in 'main.conf' are parsed as being relative
+to the directory of that 'main.conf' file itself, and not relative to the CWD
+of the {app-name} process parsing it.
 
-The 'paths.conf' file defines where to store the global state (of reserved
-resources) and where to find suite and scenario definitions.
-
-Any relative paths found in a 'paths.conf' file are interpreted as relative to
-the directory of that 'paths.conf' file.
-
-There's not yet any well-known schema to validate this file contents since it
-has only 3 attributes.
-
-.Sample paths.conf file:
+.Sample main.conf file:
 ----
 state_dir: '/var/tmp/osmo-gsm-tester/state'
 suites_dir: '/usr/local/src/osmo-gsm-tester/suites'
 scenarios_dir: './scenarios'
+default_suites_conf_path: './default-suites.conf'
+defaults_conf_path: './defaults.conf'
+resource_conf_path: './resources.conf'
 ----
 
 [[state_dir]]
-===== 'state_dir'
+==== 'state_dir'
 
 It contains global or system-wide state for osmo-gsm-tester. In a typical state
 dir you can find the following files:
@@ -256,7 +296,7 @@ same physical device is described differently in several
 resource allocation may not work as expected.
 
 [[suites_dir]]
-===== 'suites_dir'
+==== 'suites_dir'
 
 Suites contain a set of tests which are designed to be run together to test a
 set of features given a specific set of resources. As a result, resources are
@@ -359,7 +399,7 @@ defaults:
 ----
 
 [[scenarios_dir]]
-===== 'scenarios_dir'
+==== 'scenarios_dir'
 
 This dir contains scenario configuration files.
 
@@ -503,7 +543,7 @@ that is repeated numerous times. No special notation for these cases is
 available (yet).
 
 [[default_suites_conf]]
-==== 'default-suites.conf' (optional)
+==== 'default-suites.conf'
 
 The 'default-suites.conf' file contains a YAML list of 'suite:scenario+scenario+...'
 combination strings as defined by the 'osmo-gsm-tester.py -s' commandline
@@ -512,10 +552,10 @@ option. If invoking the 'osmo-gsm-tester.py' without any suite definitions, the
 combinations is run in sequence.
 
 A suite name must match the name of a directory in the
-<<suites_dir,suites_dir/>> as defined by <<paths_conf,paths.conf>>.
+<<suites_dir,suites_dir/>> as defined by <<main_conf,main.conf>>.
 
 A scenario name must match the name of a configuration file in the
-<<scenarios_dir,scnearios_dir/>> as defined by <<paths_conf,paths.conf>>
+<<scenarios_dir,scnearios_dir/>> as defined by <<main_conf,main.conf>>
 (optionally without the '.conf' suffix).
 
 .Sample 'default-suites.conf' file:
@@ -530,7 +570,7 @@ A scenario name must match the name of a configuration file in the
 - voice:trx+dyn_ts
 ----
 
-==== 'defaults.conf' (optional)
+==== 'defaults.conf'
 
 In {app-name} object instances requested by the test and created by the suite
 relate to a specific allocated resource. That's not always the case, and even if
@@ -613,16 +653,17 @@ ups share mostly all configuration, main difference being the
 All {app-name} related configuration for that environment is publicly available
 in 'osmo-gsm-tester.git' itself:
 
-- <<paths_conf,paths.conf>>: Available Available under 'example/', with its paths
-  already configured to take required bits from inside the git repository.
-- <<suite_dir,suites_dir>>: Available under 'example/suites/'
-- <<scenarios_dir,scenarios_dir>>: Available under 'example/scenarios/'
-- <<resource_conf,resources.conf>>: Available under 'example/' as
+- <<main_conf,main.conf>>: Available Available under 'sysmocom/', with its paths
+  already configured to take required bits from inside the git repository directory.
+- <<suite_dir,suites_dir>>: Available under 'sysmocom/suites/'
+- <<scenarios_dir,scenarios_dir>>: Available under 'sysmocom/scenarios/'
+- <<resource_conf,resources.conf>>: Available under 'sysmocom/' as
   'resources.conf.prod' for Production setup and as 'resources.conf.rnd' for the
   RnD setup. One must use a symbolic link to have it available as
   'resources.conf'.
 
-//TODO: resources.conf file path should be modifiable through paths.conf!
+There are also small sample setups under the 'doc/examples/' directory to
+showcase how to set up different types of networks.
 
 ==== Typical Invocations
 
@@ -633,24 +674,33 @@ such a set of binaries, see <<trials>>.
 Examples for launching test trials:
 
 - Run the default suites (see <<default_suites_conf,default_suites.conf>>) on a
-  given set of binaries:
+  given set of binaries from 'path/to/my-trial' with <<main_conf,main.conf>>
+  available under a standard path:
 
 ----
 osmo-gsm-tester.py path/to/my-trial
 ----
 
-- Run an explicit choice of 'suite:scenario' combinations:
+- Same as above, but run an explicit choice of 'suite:scenario' combinations:
 
 ----
 osmo-gsm-tester.py path/to/my-trial -s sms:sysmo -s sms:trx -s sms:nanobts
 ----
 
-- Run one 'suite:scenario1+scenario2' combination, setting log level to 'debug'
-  and enabling logging of full python tracebacks, and also only run just the
-  'mo_mt_sms.py' test from the suite, e.g. to investigate a test failure:
+- Same as above, but run one 'suite:scenario1+scenario2' combination, setting
+  log level to 'debug' and enabling logging of full python tracebacks, and also
+  only run just the 'mo_mt_sms.py' test from the suite, e.g. to investigate a
+  test failure:
 
 ----
 osmo-gsm-tester.py path/to/my-trial -s sms:sysmo+foobar -l dbg -T -t mo_mt
+----
+
+- Same as above, but tell {app-name} to read the 'main.conf' in specific
+  directory 'path/to/my/main.conf':
+
+----
+osmo-gsm-tester.py -c path/to/my/main.conf path/to/my-trial -s sms:sysmo+foobar -l dbg -T -t mo_mt
 ----
 
 A test script may also be run step-by-step in a python debugger, see

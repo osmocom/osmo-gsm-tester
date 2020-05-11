@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e -x
 base="$PWD"
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) # this file's directory
+OSMO_GSM_TESTER_CONF=${OSMO_GSM_TESTER_CONF:-${SCRIPT_DIR}/main.conf}
 
 time_start="$(date '+%F %T')"
 

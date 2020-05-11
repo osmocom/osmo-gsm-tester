@@ -133,7 +133,7 @@ class AmarisoftUE(MS):
     def connect(self, enb):
         self.log('Starting amarisoftue')
         self.enb = enb
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
         if self.setup_runs_locally():
             self.start_locally()

@@ -94,7 +94,7 @@ class srsENB(enb.eNodeB):
     def start(self, epc):
         self.log('Starting srsENB')
         self._epc = epc
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
         if self.remote_user:
             self.start_remotely()

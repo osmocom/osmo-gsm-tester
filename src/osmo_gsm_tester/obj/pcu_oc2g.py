@@ -39,7 +39,7 @@ class OsmoPcuOC2G(pcu.Pcu):
         self.remote_user = 'root'
 
     def start(self, keepalive=False):
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
 
         self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-pcu-oc2g')))

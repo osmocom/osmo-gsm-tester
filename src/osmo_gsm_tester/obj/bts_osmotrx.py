@@ -158,7 +158,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
         self.testenv.poll()
 
         self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
 
         # Power cycle all TRX if needed (right now only TRX0 for SC5):
@@ -199,7 +199,7 @@ class Trx(log.Origin, metaclass=ABCMeta):
         super().__init__(log.C_RUN, name)
         self.testenv = testenv
         self.conf = conf
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.listen_ip = conf.get('osmo_trx', {}).get('trx_ip')
         self.remote_user = conf.get('osmo_trx', {}).get('remote_user', None)
 

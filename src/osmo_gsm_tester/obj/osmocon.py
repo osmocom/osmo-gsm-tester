@@ -62,7 +62,7 @@ class Osmocon(log.Origin):
         # TODO: make sure the pone is powered off before starting osmocon
 
         self.log('Starting osmocon')
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
 
         inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmocom-bb')))
 

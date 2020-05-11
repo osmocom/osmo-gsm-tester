@@ -51,7 +51,7 @@ class OsmoBsc(log.Origin):
 
     def start(self):
         self.log('Starting osmo-bsc')
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
 
         inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bsc')))

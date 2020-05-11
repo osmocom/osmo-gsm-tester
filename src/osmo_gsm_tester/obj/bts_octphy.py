@@ -120,7 +120,7 @@ class OsmoBtsOctphy(bts_osmo.OsmoBtsMainUnit):
         self.testenv.poll()
 
         self.log('Starting to connect to', self.bsc)
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
 
         self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bts')))

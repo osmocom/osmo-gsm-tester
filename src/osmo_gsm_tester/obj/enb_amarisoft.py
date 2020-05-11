@@ -98,7 +98,7 @@ class AmarisoftENB(enb.eNodeB):
     def start(self, epc):
         self.log('Starting AmarisoftENB')
         self._epc = epc
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
         self._start()
 

@@ -100,7 +100,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
         if self.bsc is None:
             raise RuntimeError('BTS needs to be added to a BSC or NITB before it can be started')
         log.log('Starting OsmoBtsOC2G to connect to', self.bsc)
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
 
         self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst(OsmoBtsOC2G.BTS_OC2G_BIN)))

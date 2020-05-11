@@ -74,7 +74,7 @@ class srsEPC(epc.EPC):
 
     def start(self):
         self.log('Starting srsepc')
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
         if self._run_node.is_local():
             self.start_locally()

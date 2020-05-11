@@ -94,7 +94,7 @@ class NanoBts(bts.Bts):
     def start(self, keepalive=False):
         if self.conf.get('ipa_unit_id') is None:
             raise log.Error('No attribute ipa_unit_id provided in conf!')
-        self.run_dir = util.Dir(self.testenv.suite().get_run_dir().new_dir(self.name()))
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self._configure()
 
         unitid = int(self.conf.get('ipa_unit_id'))

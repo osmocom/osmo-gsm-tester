@@ -382,7 +382,7 @@ class Modem(MS):
         self._ki = None
         self._imsi = None
         self._apn_ipaddr = None
-        self.run_dir = util.Dir(testenv.suite().get_run_dir().new_dir(self.name().strip('/')))
+        self.run_dir = util.Dir(testenv.test().get_run_dir().new_dir(self.name().strip('/')))
         self.sms_received_list = []
         self.dbus = ModemDbusInteraction(self.dbuspath)
         self.register_attempts = 0

@@ -26,6 +26,7 @@ from . import log
 from . import util
 from . import schema
 from . import resource
+from . import scenario
 from . import test
 
 class SuiteDefinition(log.Origin):
@@ -111,12 +112,12 @@ class SuiteRun(log.Origin):
         if replicate_times:
             combination = config.replicate_times(combination)
         log.dbg(definition_conf=combination)
-        for scenario in self.scenarios:
-            log.ctx(combining_scenarios=conf_name, scenario=scenario.name())
-            c = scenario.get(conf_name, {})
+        for sc in self.scenarios:
+            log.ctx(combining_scenarios=conf_name, scenario=sc.name())
+            c = sc.get(conf_name, {})
             if replicate_times:
                 c = config.replicate_times(c)
-            log.dbg(scenario=scenario.name(), conf=c)
+            log.dbg(scenario=sc.name(), conf=c)
             if c is None:
                 continue
             schema.combine(combination, c)
@@ -258,7 +259,7 @@ def parse_suite_scenario_str(suite_scenario_str):
 def load_suite_scenario_str(suite_scenario_str):
     suite_name, scenario_names = parse_suite_scenario_str(suite_scenario_str)
     suite = load(suite_name)
-    scenarios = [config.get_scenario(scenario_name, schema.get_all_schema()) for scenario_name in scenario_names]
+    scenarios = [scenario.get_scenario(scenario_name, schema.get_all_schema()) for scenario_name in scenario_names]
     return (suite_scenario_str, suite, scenarios)
 
 # vim: expandtab tabstop=4 shiftwidth=4

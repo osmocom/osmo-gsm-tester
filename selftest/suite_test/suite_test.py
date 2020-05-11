@@ -3,7 +3,11 @@ import os
 import sys
 import _prep
 import shutil
-from osmo_gsm_tester.core import log, config, util, report
+from osmo_gsm_tester.core import log
+from osmo_gsm_tester.core import config
+from osmo_gsm_tester.core import util
+from osmo_gsm_tester.core import report
+from osmo_gsm_tester.core import scenario
 from osmo_gsm_tester.core import suite
 from osmo_gsm_tester.core.schema import generate_schemas, get_all_schema
 
@@ -66,26 +70,26 @@ print(output)
 
 print('- test with half empty scenario')
 trial = FakeTrial()
-scenario = config.Scenario('foo', 'bar')
-scenario['resources'] = { 'bts': [{'type': 'osmo-bts-trx'}] }
-s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+sc = scenario.Scenario('foo', 'bar')
+sc['resources'] = { 'bts': [{'type': 'osmo-bts-trx'}] }
+s = suite.SuiteRun(trial, 'test_suite', s_def, [sc])
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
 
 print('- test with scenario')
 trial = FakeTrial()
-scenario = config.Scenario('foo', 'bar')
-scenario['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
-s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+sc = scenario.Scenario('foo', 'bar')
+sc['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
+s = suite.SuiteRun(trial, 'test_suite', s_def, [sc])
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
 
 print('- test with scenario and modifiers')
 trial = FakeTrial()
-scenario = config.Scenario('foo', 'bar')
-scenario['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
-scenario['modifiers'] = { 'bts': [{ 'times': '2', 'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'type': 'sysmo'}] }
-s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+sc = scenario.Scenario('foo', 'bar')
+sc['resources'] = { 'bts': [{ 'times': '2', 'type': 'osmo-bts-trx', 'trx_list': [{'nominal_power': '10'}, {'nominal_power': '12'}]}, {'type': 'sysmo'}] }
+sc['modifiers'] = { 'bts': [{ 'times': '2', 'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'type': 'sysmo'}] }
+s = suite.SuiteRun(trial, 'test_suite', s_def, [sc])
 s.reserve_resources()
 print(repr(s.reserved_resources))
 results = s.run_tests('hello_world.py')
@@ -93,9 +97,9 @@ print(report.suite_to_text(s))
 
 print('- test with suite-specific config')
 trial = FakeTrial()
-scenario = config.Scenario('foo', 'bar')
-scenario['config'] = {'suite': {s.name(): { 'some_suite_global_param': 'heyho', 'test_suite_params': {'one_bool_parameter': 'true', 'second_list_parameter': ['23', '45']}}}}
-s = suite.SuiteRun(trial, 'test_suite', s_def, [scenario])
+sc = scenario.Scenario('foo', 'bar')
+sc['config'] = {'suite': {s.name(): { 'some_suite_global_param': 'heyho', 'test_suite_params': {'one_bool_parameter': 'true', 'second_list_parameter': ['23', '45']}}}}
+s = suite.SuiteRun(trial, 'test_suite', s_def, [sc])
 s.reserve_resources()
 print(repr(s.reserved_resources))
 results = s.run_tests('test_suite_params.py')

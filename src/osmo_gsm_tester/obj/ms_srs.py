@@ -353,6 +353,8 @@ class srsUE(MS):
         metrics = srsUEMetrics(self.metrics_file)
         return metrics.verify(value, operation, metric, criterion)
 
+numpy = None
+
 class srsUEMetrics(log.Origin):
 
     VALID_OPERATIONS = ['avg', 'sum']
@@ -365,7 +367,10 @@ class srsUEMetrics(log.Origin):
         super().__init__(log.C_RUN, 'srsue_metrics')
         self.raw_data = None
         self.metrics_file = metrics_file
-        import numpy
+        global numpy
+        if numpy is None:
+            import numpy as numpy_module
+            numpy = numpy_module
         # read CSV, guessing data type with first row being the legend
         try:
             self.raw_data = numpy.genfromtxt(self.metrics_file, names=True, delimiter=';', dtype=None)

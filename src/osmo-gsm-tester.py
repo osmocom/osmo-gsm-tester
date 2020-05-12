@@ -24,9 +24,9 @@
 
 Examples:
 
-./osmo-gsm-tester.py -c doc/examples/2g_osmocom/main.conf ~/my_trial_package/ -s osmo_trx
-./osmo-gsm-tester.py -c doc/examples/2g_osmocom/main.conf ~/my_trial_package/ -s sms_tests:dyn_ts+eu_band+bts_sysmo
-./osmo-gsm-tester.py -c sysmocom/main.conf ~/my_trial_package/ -s sms_tests/mo_mt_sms:bts_trx
+./osmo-gsm-tester.py -c doc/examples/2g_osmocom/main.conf ~/my_trial_dir/ -s osmo_trx
+./osmo-gsm-tester.py -c doc/examples/2g_osmocom/main.conf ~/my_trial_dir/ -s sms_tests:dyn_ts+eu_band+bts_sysmo
+./osmo-gsm-tester.py -c sysmocom/main.conf ~/my_trial_dir/ -s sms_tests/mo_mt_sms:bts_trx
 
 (The names for test suites and scenarios used in these examples must be defined
 by the osmo-gsm-tester configuration.)
@@ -104,7 +104,7 @@ def main():
             help='Show version')
     parser.add_argument('-c', '--conf-path', dest='conf_path',
             help='''Specify main configuration file path''')
-    parser.add_argument('trial_package',
+    parser.add_argument('trial_dir', nargs='?', default=None,
             help='Directory containing binaries to test')
     parser.add_argument('-s', '--suite-scenario', dest='suite_scenario', action='append',
             help='''A suite-scenarios combination
@@ -129,7 +129,7 @@ optional.''')
         exit(0)
 
     print('combinations:', repr(args.suite_scenario))
-    print('trial:', repr(args.trial_package))
+    print('trial:', repr(args.trial_dir))
     print('tests:', repr(args.test))
 
     # create a default log to stdout
@@ -143,6 +143,11 @@ optional.''')
         log.style_change(src=True)
     if args.conf_path:
         config.override_conf = args.conf_path
+
+    if args.trial_dir is not None:
+        trial_dir = args.trial_dir
+    else:
+        trial_dir = config.get_main_config_value(config.CFG_TRIAL_DIR)
 
     combination_strs = list(args.suite_scenario or [])
 
@@ -187,7 +192,7 @@ optional.''')
         test_names = sorted(set(test_names))
         print(repr(test_names))
 
-    with trial.Trial(args.trial_package) as current_trial:
+    with trial.Trial(trial_dir) as current_trial:
         current_trial.verify()
         for suite_scenario_str, suite_def, scenarios in suite_scenarios:
             current_trial.add_suite_run(suite_scenario_str, suite_def, scenarios)

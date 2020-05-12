@@ -27,6 +27,7 @@ then overrides the above locations.
 
 - 'state_dir': Path to <<state_dir,state_dir>> directory
 - 'suites_dir': Path to <<suites_dir,suites_dir>> directory
+- 'trial_dir': Path to <<trials,trial>> directory to test against (overridden by cmdline argument)
 - 'scenarios_dir': Path to <<scenarios_dir,scenarios_dir>> directory (optional)
 - 'default_suites_conf_path': Path to <<default_suites_conf,default-suites.conf>> file (optional)
 - 'defaults_conf_path': Path to <<defaults_conf,defaults.conf>> file (optional)
@@ -46,6 +47,7 @@ of the {app-name} process parsing it.
 state_dir: '/var/tmp/osmo-gsm-tester/state'
 suites_dir: '/usr/local/src/osmo-gsm-tester/suites'
 scenarios_dir: './scenarios'
+trial_dir: './trial'
 default_suites_conf_path: './default-suites.conf'
 defaults_conf_path: './defaults.conf'
 resource_conf_path: './resources.conf'

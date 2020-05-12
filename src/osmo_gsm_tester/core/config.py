@@ -65,6 +65,7 @@ override_conf = None
 CFG_STATE_DIR = 'state_dir'
 CFG_SUITES_DIR = 'suites_dir'
 CFG_SCENARIOS_DIR = 'scenarios_dir'
+CFG_TRIAL_DIR = 'trial_dir'
 CFG_DEFAULT_SUITES_CONF = 'default_suites_conf_path'
 CFG_DEFAULTS_CONF = 'defaults_conf_path'
 CFG_RESOURCES_CONF = 'resource_conf_path'
@@ -72,6 +73,7 @@ MAIN_CONFIG_SCHEMA = {
         CFG_STATE_DIR: schema.STR,
         CFG_SUITES_DIR: schema.STR,
         CFG_SCENARIOS_DIR: schema.STR,
+        CFG_TRIAL_DIR: schema.STR,
         CFG_DEFAULT_SUITES_CONF: schema.STR,
         CFG_DEFAULTS_CONF: schema.STR,
         CFG_RESOURCES_CONF: schema.STR,
@@ -80,6 +82,7 @@ MAIN_CONFIG_SCHEMA = {
 DF_CFG_STATE_DIR = '/var/tmp/osmo-gsm-tester/state/'
 DF_CFG_SUITES_DIR = './suites'
 DF_CFG_SCENARIOS_DIR = './scenarios'
+DF_CFG_TRIAL_DIR = './trial'
 DF_CFG_DEFAULT_SUITES_CONF = './default-suites.conf'
 DF_CFG_DEFAULTS_CONF = './defaults.conf'
 DF_CFG_RESOURCES_CONF = './resources.conf'
@@ -133,6 +136,7 @@ def _get_main_config():
             CFG_STATE_DIR: DF_CFG_STATE_DIR,
             CFG_SUITES_DIR: DF_CFG_SUITES_DIR,
             CFG_SCENARIOS_DIR: DF_CFG_SCENARIOS_DIR,
+            CFG_TRIAL_DIR: DF_CFG_TRIAL_DIR,
             CFG_DEFAULT_SUITES_CONF: DF_CFG_DEFAULT_SUITES_CONF,
             CFG_DEFAULTS_CONF: DF_CFG_DEFAULTS_CONF,
             CFG_RESOURCES_CONF: DF_CFG_RESOURCES_CONF,

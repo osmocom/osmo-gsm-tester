@@ -16,7 +16,8 @@ cnf -: DBG: MAIN CONFIG:
  'resource_conf_path': '[PATH]/selftest/resource_test/conf/resources.conf',
  'scenarios_dir': '[PATH]/selftest/resource_test/conf/scenarios',
  'state_dir': '[PATH]/selftest/resource_test/conf/test_work/state_dir',
- 'suites_dir': '[PATH]/selftest/resource_test/conf/suite_test'}
+ 'suites_dir': '[PATH]/selftest/resource_test/conf/suite_test',
+ 'trial_dir': '[PATH]/selftest/resource_test/conf/trial'}
 *** all resources:
 {'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df063c',
             'arfcn': '512',

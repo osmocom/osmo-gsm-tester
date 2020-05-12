@@ -5,7 +5,8 @@ cnf -: DBG: MAIN CONFIG:
  'resource_conf_path': '[PATH]/selftest/scenario_test/resources.conf',
  'scenarios_dir': '[PATH]/selftest/scenario_test',
  'state_dir': '[PATH]/selftest/scenario_test/test_work/state_dir',
- 'suites_dir': '[PATH]/selftest/scenario_test'}
+ 'suites_dir': '[PATH]/selftest/scenario_test',
+ 'trial_dir': '[PATH]/selftest/scenario_test/trial'}
 scenario_case_01.conf
 {'anotherlist': ['4', '0'],
  'foobar': 'True',

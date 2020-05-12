@@ -6,7 +6,8 @@ cnf -: DBG: MAIN CONFIG:
  'resource_conf_path': '[PATH]/selftest/suite_test/resources.conf',
  'scenarios_dir': '[PATH]/selftest/suite_test/scenarios',
  'state_dir': '[PATH]/selftest/suite_test/test_work/state_dir',
- 'suites_dir': '[PATH]/selftest/suite_test'}
+ 'suites_dir': '[PATH]/selftest/suite_test',
+ 'trial_dir': '[PATH]/selftest/suite_test/trial'}
 --- -: ERR: RuntimeError: Suite not found: 'does_not_exist' in [PATH]/selftest/suite_test
 - no suite.conf
 cnf empty_dir: DBG: reading suite.conf

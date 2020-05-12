@@ -3,7 +3,7 @@ all: deps version check manual
 .PHONY: version check
 
 deps:
-	./check_dependencies.py
+	./contrib/check_dependencies.py
 
 version:
 	./update_version.sh

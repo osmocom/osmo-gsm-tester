@@ -36,7 +36,7 @@ def import_runtime_dependencies():
     pass
 
 def import_all_py_in_dir(rel_path, skip_modules=[]):
-    selfdir = os.path.dirname(os.path.abspath(__file__))
+    selfdir = os.getcwd()
     dir = os.path.join(selfdir, rel_path)
     print('importing files in directory %s' % dir)
     for entry in os.listdir(dir):
@@ -112,8 +112,12 @@ skip_obj_modules = skip_features_to_skip_modules(list(args.skip_features or []))
 
 print('Skip checking modules: %r' % skip_obj_modules)
 
+rootdir = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+print('Changing workdir dir to %s' % rootdir)
+os.chdir(rootdir)
+sys.path.insert(0, rootdir)
 # We need to add it for cross-references between osmo_ms_driver and osmo_gsm_tester to work:
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src/'))
+sys.path.insert(0, os.path.join(rootdir, 'src/'))
 import_all_py_in_dir('src/osmo_ms_driver')
 import_all_py_in_dir('src/osmo_gsm_tester/core')
 import_all_py_in_dir('src/osmo_gsm_tester/obj', skip_obj_modules)

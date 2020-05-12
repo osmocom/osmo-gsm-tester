@@ -6,7 +6,7 @@ deps:
 	./contrib/check_dependencies.py
 
 version:
-	./update_version.sh
+	./contrib/update_version.sh
 
 manual:
 	$(MAKE) -C doc/manuals

@@ -1,216 +1,5 @@
 == Configuration
 
-=== Schemas
-
-All configuration attributes in {app-name} are stored and provided as YAML
-files, which are handled internally mostly as sets of dictionaries, lists and
-scalars. Each of these configurations have a known format (set of keys and
-values), which is called 'schema'. Each provided configuration is validated
-against its 'schema' at parse time. Hence, 'schemas' can be seen as a namespace
-containing a structured tree of configuration attributes. Each attribute has a
-schema type assigned which constrains the type of value it can hold.
-
-There are several well-known schemas used across {app-name}, and they are
-described in following sub-sections.
-
-[[schema_main_cfg]]
-==== Schema 'main config'
-
-This schema defines all the attributes available in {app-name} the main
-configuration file <<main_conf,main.conf>>, and it is used to validate it.
-
-[[schema_resources]]
-==== Schema 'resources'
-
-This schema defines all the attributes which can be assigned to
-a _resource_, and it is used to validate the <<resources_conf,resources.conf>>
-file. Hence, the <<resources_conf,resources.conf>> contains a list of elements
-for each resource type. This schema is also used and extended by the
-<<schema_want,'want' schema>>.
-
-It is important to understand that the content in this schema refers to a list of
-resources for each resource class. Since a list is ordered by definition, it
-clearly identifies specific resources by order. This is important when applying
-filters or modifiers, since they are applied per-resource in the list. One can
-for instance apply attribute A to first resource of class C, while not applying
-it or applying another attribute B to second resources of the same class. As a
-result, complex forms can be used to filter and modify a list of resources
-required by a testsuite.
-
-On the other hand, it's also important to note that lists for simple or scalar
-types are currently being treated as unordered sets, which mean combination of
-filters or modifiers apply differently. In the future, it may be possible to
-have both behaviors for scalar/simple types by using also the YAML 'set' type in
-{app-name}.
-
-//TODO: update this list and use a table for each resource type in its own object section
-////
-These kinds of resources and their attributes are known:
-
-'ip_address'::
-	List of IP addresses to run osmo-nitb instances on. The main unit
-	typically has a limited number of such IP addresses configured, which
-	the connected BTS models can see on their network.
-  'addr':::
-	IPv4 address of the local interface.
-
-'bts'::
-	List of available BTS hardware.
-  'label':::
-	human readable label for your own reference
-  'type':::
-	which way to launch this BTS, one of
-	- 'osmo-bts-sysmo'
-	- 'osmo-bts-trx'
-	- 'osmo-bts-octphy'
-	- 'ipa-nanobts'
-  'ipa_unit_id':::
-	ip.access unit id to be used by the BTS, written into BTS and BSC config.
-  'addr':::
-	Remote IP address of the BTS for BTS like sysmoBTS, and local IP address
-	to bind to for locally run BTS such as osmo-bts-trx.
-  'band':::
-	GSM band that this BTS shoud use (*TODO*: allow multiple bands). One of:
-	- 'GSM-1800'
-	- 'GSM-1900'
-	- (*TODO*: more bands)
-  'trx_list':::
-	Specific TRX configurations for this BTS. There should be as many of
-	these as the BTS has TRXes. (*TODO*: a way to define >1 TRX without
-	special configuration for them.)
-    'hw_addr'::::
-	Hardware (MAC) address of the TRX in the form of '11:22:33:44:55:66',
-	only used for osmo-bts-octphy.  (*TODO*: and nanobts??)
-    'net_device'::::
-	Local network device to reach the TRX's 'hw_addr' at, only used for
-	osmo-bts-octphy. Example: 'eth0'.
-    'nominal_power'::::
-	Nominal power to be used by the TRX.
-    'max_power_red'::::
-	Max power reduction to apply to the nominal power of the TRX.
-'arfcn'::
-	List of ARFCNs to use for running BTSes, which defines the actual RF
-	frequency bands used.
-  'arfcn':::
-	ARFCN number, see e.g.
-	https://en.wikipedia.org/wiki/Absolute_radio-frequency_channel_number
-	(note that the resource type 'arfcn' contains an item trait also named
-	'arfcn').
-  'band':::
-	GSM band name to use this ARFCN for, same as for 'bts:band' above.
-
-'modem'::
-	List of modems reachable via ofono and information on the inserted SIM
-	card. (Note: the MSISDN is allocated dynamically in test scripts).
-  'label':::
-	Human readable label for your own reference, which also appears in logs.
-  'path':::
-	Ofono's path for this modem, like '/modemkind_99'.
-  'imsi':::
-	IMSI of the inserted SIM card, like '"123456789012345"'.
-  'ki':::
-	16 byte authentication/encryption KI of the inserted SIM card, in
-	hexadecimal notation (32 characters) like +
-	'"00112233445566778899aabbccddeeff"'.
-  'auth_algo':::
-	Authentication algorithm to be used with the SIM card. One of:
-	- 'none'
-	- 'xor'
-	- 'comp128v1'
-  'ciphers':::
-	List of ciphers that this modem supports, used to match
-	requirements in suites or scenarios. Any combination of:
-	- 'a5_0'
-	- 'a5_1'
-	- 'a5_2'
-	- 'a5_3'
-	- 'a5_4'
-	- 'a5_5'
-	- 'a5_6'
-	- 'a5_7'
-  'features':::
-	List of features that this modem supports, used to match requirements in
-	suites or scenarios. Any combination of:
-	- 'sms'
-	- 'gprs'
-	- 'voice'
-	- 'ussd'
-////
-
-[[schema_want]]
-==== Schema 'want'
-
-This schema is basically the same as the <<schema_resources,resources>> one, but
-with an extra 'times' attribute for each resource item. All 'times' attributes
-are expanded before matching. For example, if a 'suite.conf' requests two BTS,
-one may enforce that both BTS should be of type 'osmo-bts-sysmo' in these ways:
-
-----
-resources:
-  bts:
-  - type: osmo-bts-sysmo
-  - type: osmo-bts-sysmo
-----
-
-or alternatively,
-
-----
-resources:
-  bts:
-  - times: 2
-    type: osmo-bts-sysmo
-----
-
-[[schema_config]]
-==== Schema 'config'
-
-This schema defines all the attributes which can be used by object classes or
-tests during test execution. The main difference between this schema and the
-<<schema_resources,resources>> schema is that the former contains configuration
-to be applied globally for all objects being used, while the later applies
-attributes to a specific object in the list of allocated resources. This schema
-hence allows setting attributes for objects which are not allocated as resources
-and hence not directly accessible through scenarios, like a BSC or an iperf3
-client.
-
-This schema is built dynamically at runtime from content registered by:
-- object classes registering their own attributes
-- test suite registering their own attributes through <<suite_conf,suite.conf>>
-  and tests being able to later retrieve them through 'testenv' API.
-
-[[schema_all]]
-==== Schema 'all'
-
-This schema is basically an aggregated namespace for <<schema_want,want>> schema
-and <<schema_config,config>> schema, and is the one used by
-<<suite_conf,suite.conf>> and <<scenario_conf,scenario.conf>> files. It contains
-these main element sections:::
-
-[[schema_all_sec_resources]]
-- Section 'resources': Contains a set of elements validated with <<schema_want,want>>
-  schema. In  <<suite_conf,suite.conf>> it is used to construct the list of
-  requested resources. In  <<scenario_conf,scenario.conf>>, it is used to inject
-  attributes to the initial <<suite_conf,suite.conf>> _resources_ section and
-  hence further restrain it.
-[[schema_all_sec_modifiers]]
-- Section 'modifiers': Both in <<suite_conf,suite.conf>> and
-  <<scenario_conf,scenario.conf>>, values presented in here are injected into
-  the content of the <<schema_all_sec_resources,resources section>> after
-  _resource_ allocation, hereby overwriting attributes passed to the object
-  class instance managing the specific _resource_ (matches by resource type and
-  list position). Since it is combined with the content of
-  <<schema_all_sec_resources,resources section>>, it is clear that the
-  <<schema_want,want schema>> is used to validate this content.
-[[schema_all_sec_config]]
-- Section 'config': Contains configuration attributes for {app-name} object
-  classes which are not _resources_, and hence cannot be configured with
-  <<schema_all_sec_modifiers,modifiers>>. They can overwrite values provided in the
-  <<defaults_conf,defaults.conf>> file. Content in this section follows the
-  <<schema_config,config>> schema.
-
-//TODO: defaults.timeout should be change in code to be config.test_timeout or similar
-//TODO: 'config' should be split into its own schema and validate defaults.conf
-
 [[config]]
 === Configuration files and directories
 
@@ -641,6 +430,217 @@ bsc_bts:
     - phys_chan_config: TCH/F_TCH/H_PDCH
     - phys_chan_config: TCH/F_TCH/H_PDCH
 ----
+
+=== Schemas
+
+All configuration attributes in {app-name} are stored and provided as YAML
+files, which are handled internally mostly as sets of dictionaries, lists and
+scalars. Each of these configurations have a known format (set of keys and
+values), which is called 'schema'. Each provided configuration is validated
+against its 'schema' at parse time. Hence, 'schemas' can be seen as a namespace
+containing a structured tree of configuration attributes. Each attribute has a
+schema type assigned which constrains the type of value it can hold.
+
+There are several well-known schemas used across {app-name}, and they are
+described in following sub-sections.
+
+[[schema_main_cfg]]
+==== Schema 'main config'
+
+This schema defines all the attributes available in {app-name} the main
+configuration file <<main_conf,main.conf>>, and it is used to validate it.
+
+[[schema_resources]]
+==== Schema 'resources'
+
+This schema defines all the attributes which can be assigned to
+a _resource_, and it is used to validate the <<resources_conf,resources.conf>>
+file. Hence, the <<resources_conf,resources.conf>> contains a list of elements
+for each resource type. This schema is also used and extended by the
+<<schema_want,'want' schema>>.
+
+It is important to understand that the content in this schema refers to a list of
+resources for each resource class. Since a list is ordered by definition, it
+clearly identifies specific resources by order. This is important when applying
+filters or modifiers, since they are applied per-resource in the list. One can
+for instance apply attribute A to first resource of class C, while not applying
+it or applying another attribute B to second resources of the same class. As a
+result, complex forms can be used to filter and modify a list of resources
+required by a testsuite.
+
+On the other hand, it's also important to note that lists for simple or scalar
+types are currently being treated as unordered sets, which mean combination of
+filters or modifiers apply differently. In the future, it may be possible to
+have both behaviors for scalar/simple types by using also the YAML 'set' type in
+{app-name}.
+
+//TODO: update this list and use a table for each resource type in its own object section
+////
+These kinds of resources and their attributes are known:
+
+'ip_address'::
+	List of IP addresses to run osmo-nitb instances on. The main unit
+	typically has a limited number of such IP addresses configured, which
+	the connected BTS models can see on their network.
+  'addr':::
+	IPv4 address of the local interface.
+
+'bts'::
+	List of available BTS hardware.
+  'label':::
+	human readable label for your own reference
+  'type':::
+	which way to launch this BTS, one of
+	- 'osmo-bts-sysmo'
+	- 'osmo-bts-trx'
+	- 'osmo-bts-octphy'
+	- 'ipa-nanobts'
+  'ipa_unit_id':::
+	ip.access unit id to be used by the BTS, written into BTS and BSC config.
+  'addr':::
+	Remote IP address of the BTS for BTS like sysmoBTS, and local IP address
+	to bind to for locally run BTS such as osmo-bts-trx.
+  'band':::
+	GSM band that this BTS shoud use (*TODO*: allow multiple bands). One of:
+	- 'GSM-1800'
+	- 'GSM-1900'
+	- (*TODO*: more bands)
+  'trx_list':::
+	Specific TRX configurations for this BTS. There should be as many of
+	these as the BTS has TRXes. (*TODO*: a way to define >1 TRX without
+	special configuration for them.)
+    'hw_addr'::::
+	Hardware (MAC) address of the TRX in the form of '11:22:33:44:55:66',
+	only used for osmo-bts-octphy.  (*TODO*: and nanobts??)
+    'net_device'::::
+	Local network device to reach the TRX's 'hw_addr' at, only used for
+	osmo-bts-octphy. Example: 'eth0'.
+    'nominal_power'::::
+	Nominal power to be used by the TRX.
+    'max_power_red'::::
+	Max power reduction to apply to the nominal power of the TRX.
+'arfcn'::
+	List of ARFCNs to use for running BTSes, which defines the actual RF
+	frequency bands used.
+  'arfcn':::
+	ARFCN number, see e.g.
+	https://en.wikipedia.org/wiki/Absolute_radio-frequency_channel_number
+	(note that the resource type 'arfcn' contains an item trait also named
+	'arfcn').
+  'band':::
+	GSM band name to use this ARFCN for, same as for 'bts:band' above.
+
+'modem'::
+	List of modems reachable via ofono and information on the inserted SIM
+	card. (Note: the MSISDN is allocated dynamically in test scripts).
+  'label':::
+	Human readable label for your own reference, which also appears in logs.
+  'path':::
+	Ofono's path for this modem, like '/modemkind_99'.
+  'imsi':::
+	IMSI of the inserted SIM card, like '"123456789012345"'.
+  'ki':::
+	16 byte authentication/encryption KI of the inserted SIM card, in
+	hexadecimal notation (32 characters) like +
+	'"00112233445566778899aabbccddeeff"'.
+  'auth_algo':::
+	Authentication algorithm to be used with the SIM card. One of:
+	- 'none'
+	- 'xor'
+	- 'comp128v1'
+  'ciphers':::
+	List of ciphers that this modem supports, used to match
+	requirements in suites or scenarios. Any combination of:
+	- 'a5_0'
+	- 'a5_1'
+	- 'a5_2'
+	- 'a5_3'
+	- 'a5_4'
+	- 'a5_5'
+	- 'a5_6'
+	- 'a5_7'
+  'features':::
+	List of features that this modem supports, used to match requirements in
+	suites or scenarios. Any combination of:
+	- 'sms'
+	- 'gprs'
+	- 'voice'
+	- 'ussd'
+////
+
+[[schema_want]]
+==== Schema 'want'
+
+This schema is basically the same as the <<schema_resources,resources>> one, but
+with an extra 'times' attribute for each resource item. All 'times' attributes
+are expanded before matching. For example, if a 'suite.conf' requests two BTS,
+one may enforce that both BTS should be of type 'osmo-bts-sysmo' in these ways:
+
+----
+resources:
+  bts:
+  - type: osmo-bts-sysmo
+  - type: osmo-bts-sysmo
+----
+
+or alternatively,
+
+----
+resources:
+  bts:
+  - times: 2
+    type: osmo-bts-sysmo
+----
+
+[[schema_config]]
+==== Schema 'config'
+
+This schema defines all the attributes which can be used by object classes or
+tests during test execution. The main difference between this schema and the
+<<schema_resources,resources>> schema is that the former contains configuration
+to be applied globally for all objects being used, while the later applies
+attributes to a specific object in the list of allocated resources. This schema
+hence allows setting attributes for objects which are not allocated as resources
+and hence not directly accessible through scenarios, like a BSC or an iperf3
+client.
+
+This schema is built dynamically at runtime from content registered by:
+- object classes registering their own attributes
+- test suite registering their own attributes through <<suite_conf,suite.conf>>
+  and tests being able to later retrieve them through 'testenv' API.
+
+[[schema_all]]
+==== Schema 'all'
+
+This schema is basically an aggregated namespace for <<schema_want,want>> schema
+and <<schema_config,config>> schema, and is the one used by
+<<suite_conf,suite.conf>> and <<scenario_conf,scenario.conf>> files. It contains
+these main element sections:::
+
+[[schema_all_sec_resources]]
+- Section 'resources': Contains a set of elements validated with <<schema_want,want>>
+  schema. In  <<suite_conf,suite.conf>> it is used to construct the list of
+  requested resources. In  <<scenario_conf,scenario.conf>>, it is used to inject
+  attributes to the initial <<suite_conf,suite.conf>> _resources_ section and
+  hence further restrain it.
+[[schema_all_sec_modifiers]]
+- Section 'modifiers': Both in <<suite_conf,suite.conf>> and
+  <<scenario_conf,scenario.conf>>, values presented in here are injected into
+  the content of the <<schema_all_sec_resources,resources section>> after
+  _resource_ allocation, hereby overwriting attributes passed to the object
+  class instance managing the specific _resource_ (matches by resource type and
+  list position). Since it is combined with the content of
+  <<schema_all_sec_resources,resources section>>, it is clear that the
+  <<schema_want,want schema>> is used to validate this content.
+[[schema_all_sec_config]]
+- Section 'config': Contains configuration attributes for {app-name} object
+  classes which are not _resources_, and hence cannot be configured with
+  <<schema_all_sec_modifiers,modifiers>>. They can overwrite values provided in the
+  <<defaults_conf,defaults.conf>> file. Content in this section follows the
+  <<schema_config,config>> schema.
+
+//TODO: defaults.timeout should be change in code to be config.test_timeout or similar
+//TODO: 'config' should be split into its own schema and validate defaults.conf
 
 === Example Setup
 

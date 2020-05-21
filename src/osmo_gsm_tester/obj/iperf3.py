@@ -25,8 +25,13 @@ from ..core import schema
 from . import pcap_recorder, run_node
 
 def on_register_schemas():
+    schema_types = {
+        'iperf3_protocol': IPerf3Client.validate_protocol,
+    }
+    schema.register_schema_types(schema_types)
     config_schema = {
         'time': schema.DURATION,
+        'protocol': 'iperf3_protocol',
         }
     schema.register_config_schema('iperf3cli', config_schema)
 
@@ -45,6 +50,25 @@ def iperf3_result_to_json(log_obj, data):
         log_obj.log('failed parsing iperf3 output: "%s"' % data)
         raise e
 
+def print_result_node_udp(result, node_str):
+    try:
+        sum = result['end']['sum']
+        print("Result %s:" % node_str)
+        print("\tSUM: %d KB, %d kbps, %d seconds %d/%d lost" % (sum['bytes']/1000, sum['bits_per_second']/1000, sum['seconds'], sum['lost_packets'], sum['packets']))
+    except Exception as e:
+        print("Exception while using iperf3 %s results: %r" % (node_str, repr(result)))
+        raise e
+
+def print_result_node_tcp(result, node_str):
+    try:
+        sent = result['end']['sum_sent']
+        recv = result['end']['sum_received']
+        print("Result %s:" % node_str)
+        print("\tSEND: %d KB, %d kbps, %d seconds (%s retrans)" % (sent['bytes']/1000, sent['bits_per_second']/1000, sent['seconds'], str(sent.get('retransmits', 'unknown'))))
+        print("\tRECV: %d KB, %d kbps, %d seconds" % (recv['bytes']/1000, recv['bits_per_second']/1000, recv['seconds']))
+    except Exception as e:
+        print("Exception while using iperf3 %s results: %r" % (node_str, repr(result)))
+        raise e
 
 class IPerf3Server(log.Origin):
 
@@ -140,6 +164,12 @@ class IPerf3Server(log.Origin):
         else:
             return iperf3_result_to_json(self, self.process.get_stdout())
 
+    def print_results(self, client_was_udp):
+        if client_was_udp:
+            print_result_node_udp(self.get_results(), 'server')
+        else:
+            print_result_node_tcp(self.get_results(), 'server')
+
     def addr(self):
         return self.ip_address.get('addr')
 
@@ -160,6 +190,13 @@ class IPerf3Client(log.Origin):
     REMOTE_DIR = '/tmp'
     LOGFILE = 'iperf3_cli.json'
 
+    PROTO_TCP = "tcp"
+    PROTO_UDP = "udp"
+
+    @classmethod
+    def validate_protocol(cls, val):
+        return val in (cls.PROTO_TCP, cls.PROTO_UDP)
+
     def __init__(self, testenv, iperf3srv):
         super().__init__(log.C_RUN, 'iperf3-cli_%s' % iperf3srv.addr())
         self.run_dir = None
@@ -167,6 +204,7 @@ class IPerf3Client(log.Origin):
         self._run_node = None
         self.server = iperf3srv
         self.testenv = testenv
+        self._proto = None
         self.log_file = None
         self.rem_host = None
         self.remote_log_file = None
@@ -177,10 +215,10 @@ class IPerf3Client(log.Origin):
         locally = not self._run_node or self._run_node.is_local()
         return locally
 
-    def prepare_test_proc(self, downlink=False, netns=None, time_sec=None):
+    def prepare_test_proc(self, downlink=False, netns=None, time_sec=None, proto=None):
+        values = config.get_defaults('iperf3cli')
+        config.overlay(values, self.testenv.suite().config().get('iperf3cli', {}))
         if time_sec is None:
-            values = config.get_defaults('iperf3cli')
-            config.overlay(values, self.testenv.suite().config().get('iperf3cli', {}))
             time_sec_str = values.get('time', time_sec)
 
             # Convert duration to seconds
@@ -190,19 +228,22 @@ class IPerf3Client(log.Origin):
                 time_sec = int(time_sec_str[:-1]) * 60
             else:
                 time_sec = int(time_sec_str)
-
         assert(time_sec)
 
-        self.log('Preparing iperf3-client connecting to %s:%d (time=%ds)' % (self.server.addr(), self.server.port(), time_sec))
+        if proto is None:
+            proto = values.get('protocol', IPerf3Client.PROTO_TCP)
+        self._proto = proto
+
+        self.log('Preparing iperf3-client connecting to %s:%d (proto=%s,time=%ds)' % (self.server.addr(), self.server.port(), self._proto, time_sec))
         self.log_copied = False
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
         if self.runs_locally():
-            return self.prepare_test_proc_locally(downlink, netns, time_sec)
+            return self.prepare_test_proc_locally(downlink, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
         else:
-            return self.prepare_test_proc_remotely(downlink, netns, time_sec)
+            return self.prepare_test_proc_remotely(downlink, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
 
-    def prepare_test_proc_remotely(self, downlink, netns, time_sec):
+    def prepare_test_proc_remotely(self, downlink, netns, time_sec, use_udp):
         self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
 
         remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
@@ -218,6 +259,8 @@ class IPerf3Client(log.Origin):
             popen_args += ('--logfile', self.remote_log_file,)
         if downlink:
             popen_args += ('-R',)
+        if use_udp:
+            popen_args += ('-u', '-b', '0')
 
         if netns:
             self.process = self.rem_host.RemoteNetNSProcess(self.name(), netns, popen_args, env={})
@@ -225,7 +268,7 @@ class IPerf3Client(log.Origin):
             self.process = self.rem_host.RemoteProcess(self.name(), popen_args, env={})
         return self.process
 
-    def prepare_test_proc_locally(self, downlink, netns, time_sec):
+    def prepare_test_proc_locally(self, downlink, netns, time_sec, use_udp):
         pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.server.addr(), netns)
 
@@ -236,6 +279,8 @@ class IPerf3Client(log.Origin):
             popen_args += ('--logfile', os.path.abspath(self.log_file),)
         if downlink:
             popen_args += ('-R',)
+        if use_udp:
+            popen_args += ('-u', '-b', '0')
 
         if netns:
             self.process = process.NetNSProcess(self.name(), self.run_dir, netns, popen_args, env={})
@@ -258,8 +303,17 @@ class IPerf3Client(log.Origin):
         else:
             return iperf3_result_to_json(self, self.process.get_stdout())
 
+    def print_results(self):
+        if self.proto() == self.PROTO_UDP:
+            print_result_node_udp(self.get_results(), 'client')
+        else:
+            print_result_node_tcp(self.get_results(), 'client')
+
     def set_run_node(self, run_node):
         self._run_node = run_node
+
+    def proto(self):
+        return self._proto
 
     def __str__(self):
         # FIXME: somehow differentiate between several clients connected to same server?

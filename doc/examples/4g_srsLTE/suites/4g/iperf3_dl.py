@@ -1,17 +1,6 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
-def print_result_node(result, node_str):
-    sent = result['end']['sum_sent']
-    recv = result['end']['sum_received']
-    print("Result %s:" % node_str)
-    print("\tSEND: %d KB, %d kbps, %d seconds (%s retrans)" % (sent['bytes']/1000, sent['bits_per_second']/1000, sent['seconds'], str(sent.get('retransmits', 'unknown'))))
-    print("\tRECV: %d KB, %d kbps, %d seconds" % (recv['bytes']/1000, recv['bits_per_second']/1000, recv['seconds']))
-
-def print_results(cli_res, srv_res):
-    print_result_node(cli_res, 'client')
-    print_result_node(srv_res, 'server')
-
 epc = tenv.epc()
 enb = tenv.enb()
 ue = tenv.modem()
@@ -41,7 +30,9 @@ print('UE is attached')
 print("Running iperf3 client to %s through %s" % (str(iperf3cli), ue.netns()))
 proc.launch_sync()
 iperf3srv.stop()
-print_results(iperf3cli.get_results(), iperf3srv.get_results())
+
+iperf3cli.print_results()
+iperf3srv.print_results(iperf3cli.proto() == iperf3cli.PROTO_UDP)
 
 max_rate = enb.ue_max_rate(downlink=True)
 res_str = ue.verify_metric(max_rate * 0.8, operation='avg', metric='dl_brate', criterion='gt')

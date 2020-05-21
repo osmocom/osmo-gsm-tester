@@ -1,21 +1,9 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
 
-def print_result_node(result, node_str):
-    try:
-        sent = result['end']['sum_sent']
-        recv = result['end']['sum_received']
-        print("Result %s:" % node_str)
-        print("\tSEND: %d KB, %d kbps, %d seconds (%s retrans)" % (sent['bytes']/1000, sent['bits_per_second']/1000, sent['seconds'], str(sent.get('retransmits', 'unknown'))))
-        print("\tRECV: %d KB, %d kbps, %d seconds" % (recv['bytes']/1000, recv['bits_per_second']/1000, recv['seconds']))
-    except Exception as e:
-        print("Exception while using iperf3 %s results: %r" % (node_str, repr(result)))
-        raise e
-
-
-def print_results(cli_res, srv_res):
-    print_result_node(cli_res, 'client')
-    print_result_node(srv_res, 'server')
+def print_results(cli, srv):
+        cli.print_results()
+        srv.print_results(cli.proto() == cli.PROTO_UDP)
 
 def run_iperf3_cli_parallel(iperf3clients, ms_li, ready_cb):
     assert len(iperf3clients) == len(ms_li)
@@ -114,7 +102,7 @@ def setup_run_iperf3_test_parallel(num_ms, ready_cb=None):
     for i in range(num_ms):
         servers[i].stop()
         print("Results for %s through %r" % (str(servers[i]), repr(ms_li[i].tmp_ctx_id)))
-        print_results(clients[i].get_results(), servers[i].get_results())
+        print_results(clients[i], servers[i])
 
     for ms in ms_li:
         ms.deactivate_context(ms.tmp_ctx_id)

@@ -157,7 +157,7 @@ class srsUE(MS):
         self.rem_host.set_remote_env({'PATCHELF_BIN': '/opt/bin/patchelf-v0.10' })
         self.rem_host.change_elf_rpath(remote_binary, remote_lib)
 
-        # srsue requires CAP_SYS_ADMIN to cjump to net network namespace: netns(CLONE_NEWNET):
+        # srsue requires CAP_SYS_ADMIN to jump to net network namespace: netns(CLONE_NEWNET):
         # srsue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
         self.log('Applying CAP_SYS_ADMIN+CAP_NET_ADMIN capability to srsue')
         self.rem_host.setcap_netsys_admin(remote_binary)
@@ -182,7 +182,7 @@ class srsUE(MS):
         self.log('Setting RPATH for srsue')
         util.change_elf_rpath(binary, util.prepend_library_path(lib), self.run_dir.new_dir('patchelf'))
 
-        # srsue requires CAP_SYS_ADMIN to cjump to net network namespace: netns(CLONE_NEWNET):
+        # srsue requires CAP_SYS_ADMIN to jump to net network namespace: netns(CLONE_NEWNET):
         # srsue requires CAP_NET_ADMIN to create tunnel devices: ioctl(TUNSETIFF):
         self.log('Applying CAP_SYS_ADMIN+CAP_NET_ADMIN capability to srsue')
         util.setcap_netsys_admin(binary, self.run_dir.new_dir('setcap_netsys_admin'))

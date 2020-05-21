@@ -96,6 +96,7 @@ class srsUE(MS):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.remote_metrics_file = None
+        self.stop_sleep_time = 6 # We require at most 5s to stop
         self.enable_pcap = False
         self.num_carriers = 1
         self.testenv = testenv
@@ -109,12 +110,10 @@ class srsUE(MS):
             return
         if self.setup_runs_locally():
             return
-        # When using zmq, srsUE is known to hang for a few seconds before
-        # exiting (3 seconds after alarm() watchdog kicks in). We hence need to
-        # wait to make sure the remote process terminated and the file was
-        # flushed, since cleanup() triggered means only the local ssh client was killed.
-        if self._conf and self._conf.get('rf_dev_type', '') == 'zmq':
-            MainLoop.sleep(self, 3)
+
+        # Make sure we give the UE time to tear down
+        self.sleep_after_stop()
+
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
@@ -132,8 +131,15 @@ class srsUE(MS):
     def netns(self):
         return "srsue1"
 
+    def sleep_after_stop(self):
+        # Only sleep once
+        if self.stop_sleep_time > 0:
+            MainLoop.sleep(self, self.stop_sleep_time)
+            self.stop_sleep_time = 0
+
     def stop(self):
         self.testenv.stop_process(self.process)
+        self.sleep_after_stop()
 
     def connect(self, enb):
         self.log('Starting srsue')
@@ -341,15 +347,14 @@ class srsUE(MS):
         # file is not properly flushed until the process has stopped.
         if self.running():
             self.stop()
-            # metrics file is not flushed immediatelly by the OS during process
-            # tear down, we need to wait some extra time:
-            MainLoop.sleep(self, 2)
-            if not self.setup_runs_locally():
-                try:
-                    self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
-                except Exception as e:
-                    self.err('Failed copying back metrics file from remote host')
-                    raise e
+
+        if not self.setup_runs_locally():
+            try:
+                self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
+            except Exception as e:
+                self.err('Failed copying back metrics file from remote host')
+                raise e
+
         metrics = srsUEMetrics(self.metrics_file)
         return metrics.verify(value, operation, metric, criterion, window)
 

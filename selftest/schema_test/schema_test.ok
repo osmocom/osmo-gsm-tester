@@ -61,3 +61,20 @@ validating tests[6]
 --- -: ERR: ValueError: config item is a list, should be 'str': 'foobar.prefix.hey.ho.letsgo[]'
 Validation: Error
 ----------------------
+schema_case_06.conf:
+{'foobar.prefix.handover.anothervar': 'another_type',
+ 'foobar.prefix.handover.myvar': 'test_type',
+ 'foobar.prefix.handover.threshold': 'uint'}
+validating tests[0]
+Validation: OK
+validating tests[1]
+Validation: OK
+validating tests[2]
+Validation: OK
+validating tests[3]
+--- foobar.prefix.handover.myvar: ERR: ValueError: Invalid value 'invalid_val' for schema type 'test_type' (validator: test_validator)
+Validation: Error
+validating tests[4]
+--- foobar.prefix.handover.anothervar: ERR: ValueError: Invalid value 'another_invalid_val' for schema type 'another_type' (validator: <lambda>)
+Validation: Error
+----------------------

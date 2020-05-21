@@ -25,6 +25,13 @@ def get_case_list(dir):
             li.append(f)
     return sorted(li)
 
+def test_validator(val):
+    return val in ('valid_value1', 'valid_value2')
+
+schema.register_schema_types({'test_type': test_validator,
+                              'another_type': lambda val: val == 'unique_val_ok'})
+
+
 print('==== Testing dynamically generated schemas ====')
 for f in get_case_list(_prep.script_dir):
     print('%s:' % f)

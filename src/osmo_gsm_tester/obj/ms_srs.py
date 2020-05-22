@@ -337,7 +337,7 @@ class srsUE(MS):
             return self._get_counter_handover_success()
         raise log.Error('counter %s not implemented!' % counter_name)
 
-    def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt'):
+    def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt', window=1):
         # file is not properly flushed until the process has stopped.
         if self.running():
             self.stop()
@@ -351,13 +351,13 @@ class srsUE(MS):
                     self.err('Failed copying back metrics file from remote host')
                     raise e
         metrics = srsUEMetrics(self.metrics_file)
-        return metrics.verify(value, operation, metric, criterion)
+        return metrics.verify(value, operation, metric, criterion, window)
 
 numpy = None
 
 class srsUEMetrics(log.Origin):
 
-    VALID_OPERATIONS = ['avg', 'sum']
+    VALID_OPERATIONS = ['avg', 'sum', 'max_rolling_avg']
     VALID_CRITERION = ['eq','gt','lt']
     CRITERION_TO_SYM = { 'eq' : '==', 'gt' : '>', 'lt' : '<' }
     CRYTERION_TO_SYM_OPPOSITE = { 'eq' : '!=', 'gt' : '<=', 'lt' : '>=' }
@@ -378,7 +378,7 @@ class srsUEMetrics(log.Origin):
             self.err("Error parsing metrics CSV file %s" % self.metrics_file)
             raise error
 
-    def verify(self, value, operation='avg', metric='dl_brate', criterion='gt'):
+    def verify(self, value, operation='avg', metric='dl_brate', criterion='gt', window=1):
         if operation not in self.VALID_OPERATIONS:
             raise log.Error('Unknown operation %s not in %r' % (operation, self.VALID_OPERATIONS))
         if criterion not in self.VALID_CRITERION:
@@ -394,6 +394,10 @@ class srsUEMetrics(log.Origin):
             result = numpy.average(sel_data)
         elif operation == 'sum':
             result = numpy.sum(sel_data)
+        elif operation == 'max_rolling_avg':
+            # calculate rolling average over window and take maximum value
+            result = numpy.amax(numpy.convolve(sel_data, numpy.ones((window,))/window, mode='valid'))
+
         self.dbg(result=result, value=value)
 
         success = False

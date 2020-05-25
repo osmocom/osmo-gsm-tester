@@ -10,7 +10,7 @@ def run_iperf3_cli_parallel(iperf3clients, ms_li, ready_cb):
     procs = []
     for i in range(len(iperf3clients)):
         print("Running iperf3 client to %s through %r" % (str(iperf3clients[i]), repr(ms_li[i].tmp_ctx_id)))
-        procs.append(iperf3clients[i].prepare_test_proc(False, ms_li[i].netns()))
+        procs.append(iperf3clients[i].prepare_test_proc(iperf3clients[i].DIR_UL, ms_li[i].netns()))
     try:
         for proc in procs:
             proc.launch()

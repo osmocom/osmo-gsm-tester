@@ -193,6 +193,10 @@ class IPerf3Client(log.Origin):
     PROTO_TCP = "tcp"
     PROTO_UDP = "udp"
 
+    DIR_UL = "ul"
+    DIR_DL = "dl"
+    DIR_BI = "bi"
+
     @classmethod
     def validate_protocol(cls, val):
         return val in (cls.PROTO_TCP, cls.PROTO_UDP)
@@ -215,9 +219,13 @@ class IPerf3Client(log.Origin):
         locally = not self._run_node or self._run_node.is_local()
         return locally
 
-    def prepare_test_proc(self, downlink=False, netns=None, time_sec=None, proto=None):
+    def prepare_test_proc(self, dir=None, netns=None, time_sec=None, proto=None):
         values = config.get_defaults('iperf3cli')
         config.overlay(values, self.testenv.suite().config().get('iperf3cli', {}))
+
+        if dir is None:
+            dir = self.DIR_UL
+
         if time_sec is None:
             time_sec_str = values.get('time', time_sec)
 
@@ -239,11 +247,11 @@ class IPerf3Client(log.Origin):
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
         if self.runs_locally():
-            return self.prepare_test_proc_locally(downlink, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
+            return self.prepare_test_proc_locally(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
         else:
-            return self.prepare_test_proc_remotely(downlink, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
+            return self.prepare_test_proc_remotely(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
 
-    def prepare_test_proc_remotely(self, downlink, netns, time_sec, use_udp):
+    def prepare_test_proc_remotely(self, dir, netns, time_sec, use_udp):
         self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
 
         remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
@@ -257,8 +265,10 @@ class IPerf3Client(log.Origin):
                       '-t', str(time_sec))
         if self.logfile_supported:
             popen_args += ('--logfile', self.remote_log_file,)
-        if downlink:
+        if dir == IPerf3Client.DIR_DL:
             popen_args += ('-R',)
+        elif dir == IPerf3Client.DIR_BI:
+            popen_args += ('--bidir',)
         if use_udp:
             popen_args += ('-u', '-b', '0')
 
@@ -268,7 +278,7 @@ class IPerf3Client(log.Origin):
             self.process = self.rem_host.RemoteProcess(self.name(), popen_args, env={})
         return self.process
 
-    def prepare_test_proc_locally(self, downlink, netns, time_sec, use_udp):
+    def prepare_test_proc_locally(self, dir, netns, time_sec, use_udp):
         pcap_recorder.PcapRecorder(self.testenv, self.run_dir.new_dir('pcap'), None,
                                    'host %s and port not 22' % self.server.addr(), netns)
 
@@ -277,8 +287,10 @@ class IPerf3Client(log.Origin):
                       '-t', str(time_sec))
         if self.logfile_supported:
             popen_args += ('--logfile', os.path.abspath(self.log_file),)
-        if downlink:
+        if dir == IPerf3Client.DIR_DL:
             popen_args += ('-R',)
+        elif dir == IPerf3Client.DIR_BI:
+            popen_args += ('--bidir',)
         if use_udp:
             popen_args += ('-u', '-b', '0')
 

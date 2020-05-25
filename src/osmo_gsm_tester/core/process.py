@@ -277,7 +277,7 @@ class Process(log.Origin):
             self.log('Terminated', rc=self.result)
         else:
             self.err('Terminated: ERROR', rc=self.result)
-            #self.log_stdout_tail()
+            self.log_stdout_tail()
             self.log_stderr_tail()
 
     def log_stdout_tail(self):

@@ -378,17 +378,26 @@ class srsUEMetrics(log.Origin):
             self.err("Error parsing metrics CSV file %s" % self.metrics_file)
             raise error
 
-    def verify(self, value, operation='avg', metric='dl_brate', criterion='gt', window=1):
+    def verify(self, value, operation='avg', metric_str='dl_brate', criterion='gt', window=1):
         if operation not in self.VALID_OPERATIONS:
             raise log.Error('Unknown operation %s not in %r' % (operation, self.VALID_OPERATIONS))
         if criterion not in self.VALID_CRITERION:
             raise log.Error('Unknown operation %s not in %r' % (operation, self.VALID_CRITERION))
         # check if given metric exists in data
-        try:
-            sel_data = self.raw_data[metric]
-        except ValueError as err:
-            print('metric %s not available' % metric)
-            raise err
+        sel_data = numpy.array([])
+        metrics_list = metric_str.split('+') # allow addition operator for columns
+        for metric in metrics_list:
+            try:
+                vec = numpy.array(self.raw_data[metric])
+            except ValueError as err:
+                print('metric %s not available' % metric)
+                raise err
+            if sel_data.size == 0:
+                # Initialize with dimension of first metric vector
+                sel_data = vec
+            else:
+                # Sum them up assuming same array dimension
+                sel_data += vec
 
         if operation == 'avg':
             result = numpy.average(sel_data)
@@ -407,7 +416,7 @@ class srsUEMetrics(log.Origin):
             success = True
 
         # Convert bitrate in Mbit/s:
-        if metric.find('brate') > 0:
+        if metric_str.find('brate') > 0:
             result /= 1e6
             value /= 1e6
             mbit_str = ' Mbit/s'

@@ -20,8 +20,10 @@ print('ENB is connected to EPC')
 
 ue.connect(enb)
 
+max_rate = enb.ue_max_rate(downlink=False)
+
 iperf3srv.start()
-proc = iperf3cli.prepare_test_proc(iperf3cli.DIR_UL, ue.netns())
+proc = iperf3cli.prepare_test_proc(iperf3cli.DIR_UL, ue.netns(), bitrate=max_rate)
 
 print('waiting for UE to attach...')
 wait(ue.is_connected, None)
@@ -34,7 +36,6 @@ iperf3srv.stop()
 iperf3cli.print_results()
 iperf3srv.print_results(iperf3cli.proto() == iperf3cli.PROTO_UDP)
 
-max_rate = enb.ue_max_rate(downlink=False)
 res_str = ue.verify_metric(max_rate * 0.8, operation='avg', metric='ul_brate', criterion='gt')
 print(res_str)
 test.set_report_stdout(res_str)

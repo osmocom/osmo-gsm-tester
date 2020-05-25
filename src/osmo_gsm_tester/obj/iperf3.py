@@ -219,7 +219,7 @@ class IPerf3Client(log.Origin):
         locally = not self._run_node or self._run_node.is_local()
         return locally
 
-    def prepare_test_proc(self, dir=None, netns=None, time_sec=None, proto=None):
+    def prepare_test_proc(self, dir=None, netns=None, time_sec=None, proto=None, bitrate=0):
         values = config.get_defaults('iperf3cli')
         config.overlay(values, self.testenv.suite().config().get('iperf3cli', {}))
 
@@ -247,11 +247,11 @@ class IPerf3Client(log.Origin):
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
         if self.runs_locally():
-            return self.prepare_test_proc_locally(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
+            return self.prepare_test_proc_locally(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP, bitrate)
         else:
-            return self.prepare_test_proc_remotely(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP)
+            return self.prepare_test_proc_remotely(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP, bitrate)
 
-    def prepare_test_proc_remotely(self, dir, netns, time_sec, use_udp):
+    def prepare_test_proc_remotely(self, dir, netns, time_sec, use_udp, bitrate):
         self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
 
         remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
@@ -270,7 +270,7 @@ class IPerf3Client(log.Origin):
         elif dir == IPerf3Client.DIR_BI:
             popen_args += ('--bidir',)
         if use_udp:
-            popen_args += ('-u', '-b', '0')
+            popen_args += ('-u', '-b', str(bitrate))
 
         if netns:
             self.process = self.rem_host.RemoteNetNSProcess(self.name(), netns, popen_args, env={})

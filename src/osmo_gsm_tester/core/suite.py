@@ -232,12 +232,16 @@ def load(suite_name):
     if suite is not None:
         return suite
 
-    suites_dir = config.get_suites_dir()
-    suite_dir = suites_dir.child(suite_name)
-    if not suites_dir.exists(suite_name):
-        raise RuntimeError('Suite not found: %r in %r' % (suite_name, suites_dir))
-    if not suites_dir.isdir(suite_name):
-        raise RuntimeError('Suite name found, but not a directory: %r' % (suite_dir))
+    suites_dirs = config.get_suites_dirs()
+    suite_dir = None
+    found = False
+    for d in suites_dirs:
+        suite_dir = d.child(suite_name)
+        if d.exists(suite_name) and d.isdir(suite_name):
+            found = True
+            break
+    if not found:
+        raise RuntimeError('Suite not found: %r in %r' % (suite_name, suites_dirs))
 
     suite_def = SuiteDefinition(suite_dir)
     loaded_suite_definitions[suite_name] = suite_def

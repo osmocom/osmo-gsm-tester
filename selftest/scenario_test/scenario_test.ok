@@ -3,9 +3,9 @@ cnf -: DBG: MAIN CONFIG:
 {'default_suites_conf_path': '[PATH]/selftest/scenario_test/default-suites.conf',
  'defaults_conf_path': '[PATH]/selftest/scenario_test/defaults.conf',
  'resource_conf_path': '[PATH]/selftest/scenario_test/resources.conf',
- 'scenarios_dir': '[PATH]/selftest/scenario_test',
+ 'scenarios_dir': ['[PATH]/selftest/scenario_test'],
  'state_dir': '[PATH]/selftest/scenario_test/test_work/state_dir',
- 'suites_dir': '[PATH]/selftest/scenario_test',
+ 'suites_dir': ['[PATH]/selftest/scenario_test'],
  'trial_dir': '[PATH]/selftest/scenario_test/trial'}
 scenario_case_01.conf
 {'anotherlist': ['4', '0'],
@@ -19,11 +19,11 @@ scenario_case_01.conf
  'somelist': [{'somelistitem': 'firststring'},
               {'somelistitem': 'secondstring'},
               {'somelistitem': 'thirdstring'}]}
-OK: expected RuntimeError: No such scenario file: '[PATH]/selftest/scenario_test/scenario_case_01@.conf' (nor scenario_case_01@.conf)
+OK: expected RuntimeError: No such scenario file 'scenario_case_01@.conf' (nor scenario_case_01@.conf) in [[PATH]/selftest/scenario_test]
 OK: expected ValueError
 OK: expected ValueError
-OK: expected RuntimeError: No such scenario file: '[PATH]/selftest/scenario_test/scenario_case_03.conf'
-OK: expected RuntimeError: No such scenario file: '[PATH]/selftest/scenario_test/scenario_case_03.conf'
+OK: expected RuntimeError: No such scenario file scenario_case_03.conf in [[PATH]/selftest/scenario_test]
+OK: expected RuntimeError: No such scenario file scenario_case_03.conf in [[PATH]/selftest/scenario_test]
 tst scenario_case_03@heyho,1,yes.conf: DBG: {param_dict={param1='heyho', param2='1', param3='yes'}}
 scenario_case_03@heyho,1,yes.conf
 {'anotherlist': ['1', '0'],

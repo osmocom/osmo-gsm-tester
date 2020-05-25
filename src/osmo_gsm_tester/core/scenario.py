@@ -88,25 +88,41 @@ class Scenario(log.Origin, dict):
         self.update(conf)
 
 def get_scenario(name, validation_schema=None):
-    scenarios_dir = config.get_scenarios_dir()
+    found = False
+    path = None
+    param_list = []
     if not name.endswith('.conf'):
         name = name + '.conf'
     is_parametrized_file = '@' in name
-    param_list = []
-    path = scenarios_dir.child(name)
     if not is_parametrized_file:
-        if not os.path.isfile(path):
-            raise RuntimeError('No such scenario file: %r' % path)
+        scenarios_dirs = config.get_scenarios_dirs()
+        for d in scenarios_dirs:
+            path = d.child(name)
+            if  os.path.isfile(path):
+                found = True
+                break
+        if not found:
+            raise RuntimeError('No such scenario file %s in %r' % (name, scenarios_dirs))
         sc = Scenario(name, path)
     else: # parametrized scenario:
         # Allow first matching complete matching names (eg: scenario@param1,param2.conf),
         # this allows setting specific content in different files for specific values.
-        if not os.path.isfile(path):
+        scenarios_dirs = config.get_scenarios_dirs()
+        for d in scenarios_dirs:
+            path = d.child(name)
+            if os.path.isfile(path):
+                found = True
+                break
+        if not found:
             # get "scenario@.conf" from "scenario@param1,param2.conf":
-            prefix_name = name[:name.index("@")+1] + '.conf'
-            path = scenarios_dir.child(prefix_name)
-            if not os.path.isfile(path):
-                raise RuntimeError('No such scenario file: %r (nor %s)' % (path, name))
+            for d in scenarios_dirs:
+                prefix_name = name[:name.index("@")+1] + '.conf'
+                path = d.child(prefix_name)
+                if os.path.isfile(path):
+                    found = True
+                    break
+        if not found:
+            raise RuntimeError('No such scenario file %r (nor %s) in %r' % (name, prefix_name, scenarios_dirs))
         # At this point, we have existing file path. Let's now scrap the parameter(s):
         # get param1,param2 str from scenario@param1,param2.conf
         param_list_str = name.split('@', 1)[1][:-len('.conf')]

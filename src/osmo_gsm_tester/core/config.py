@@ -71,8 +71,8 @@ CFG_DEFAULTS_CONF = 'defaults_conf_path'
 CFG_RESOURCES_CONF = 'resource_conf_path'
 MAIN_CONFIG_SCHEMA = {
         CFG_STATE_DIR: schema.STR,
-        CFG_SUITES_DIR: schema.STR,
-        CFG_SCENARIOS_DIR: schema.STR,
+        CFG_SUITES_DIR + '[]': schema.STR,
+        CFG_SCENARIOS_DIR + '[]': schema.STR,
         CFG_TRIAL_DIR: schema.STR,
         CFG_DEFAULT_SUITES_CONF: schema.STR,
         CFG_DEFAULTS_CONF: schema.STR,
@@ -80,8 +80,8 @@ MAIN_CONFIG_SCHEMA = {
     }
 
 DF_CFG_STATE_DIR = '/var/tmp/osmo-gsm-tester/state/'
-DF_CFG_SUITES_DIR = './suites'
-DF_CFG_SCENARIOS_DIR = './scenarios'
+DF_CFG_SUITES_DIR = ['./suites']
+DF_CFG_SCENARIOS_DIR = ['./scenarios']
 DF_CFG_TRIAL_DIR = './trial'
 DF_CFG_DEFAULT_SUITES_CONF = './default-suites.conf'
 DF_CFG_DEFAULTS_CONF = './defaults.conf'
@@ -122,11 +122,16 @@ def _get_main_config_path():
         MAIN_CONFIG_PATH = _find_main_config_path()
     return MAIN_CONFIG_PATH
 
-def main_config_path_to_abspath(path):
+def main_config_path_to_abspath(val):
     'Relative files in main config are relative towards the config file, not towards $CWD'
-    if not path.startswith(os.pathsep):
-        return os.path.realpath(os.path.join(os.path.dirname(_get_main_config_path()), path))
-    return path
+    # If val is a list of paths, recurse to translate its paths.
+    if isinstance(val, list):
+        for i in range(len(val)):
+            val[i] = main_config_path_to_abspath(val[i])
+        return val
+    if not val.startswith(os.pathsep):
+        return os.path.realpath(os.path.join(os.path.dirname(_get_main_config_path()), val))
+    return val
 
 def _get_main_config():
     global MAIN_CONFIG
@@ -169,11 +174,11 @@ def read_config_file(cfg_name, validation_schema=None, if_missing_return=False):
 def get_state_dir():
     return Dir(get_main_config_value(CFG_STATE_DIR))
 
-def get_suites_dir():
-    return Dir(get_main_config_value(CFG_SUITES_DIR))
+def get_suites_dirs():
+    return [Dir(d) for d in get_main_config_value(CFG_SUITES_DIR)]
 
-def get_scenarios_dir():
-    return Dir(get_main_config_value(CFG_SCENARIOS_DIR))
+def get_scenarios_dirs():
+    return [Dir(d) for d in get_main_config_value(CFG_SCENARIOS_DIR)]
 
 DEFAULTS_CONF = None
 def get_defaults(for_kind):

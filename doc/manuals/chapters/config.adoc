@@ -26,12 +26,18 @@ then overrides the above locations.
 {app-name} expects to find the following configuration settings in 'main.conf':
 
 - 'state_dir': Path to <<state_dir,state_dir>> directory
-- 'suites_dir': Path to <<suites_dir,suites_dir>> directory
 - 'trial_dir': Path to <<trials,trial>> directory to test against (overridden by cmdline argument)
-- 'scenarios_dir': Path to <<scenarios_dir,scenarios_dir>> directory (optional)
+- 'suites_dir': List of paths to <<suites_dir,suites_dir>> directories.
+- 'scenarios_dir': List of paths to <<scenarios_dir,scenarios_dir>> directories (optional)
 - 'default_suites_conf_path': Path to <<default_suites_conf,default-suites.conf>> file (optional)
 - 'defaults_conf_path': Path to <<defaults_conf,defaults.conf>> file (optional)
 - 'resource_conf_path': Path to <<resource_conf,resources.conf>> file (optional)
+
+Configuration settings holding a list of paths, such as 'suites_dir' or
+'scenarios_dir', are used to look up for paths in regular list of order, meaning
+first paths in list take preference over last ones. As a result, if a suite
+named 'A' is found in several paths, the one on the first path in the list will
+be used.
 
 These are described in detail in the following sections. If no value is provided
 for a given setting, sane default paths are used: For 'state_dir',
@@ -45,8 +51,8 @@ of the {app-name} process parsing it.
 .Sample main.conf file:
 ----
 state_dir: '/var/tmp/osmo-gsm-tester/state'
-suites_dir: '/usr/local/src/osmo-gsm-tester/suites'
-scenarios_dir: './scenarios'
+suites_dir: [ '/usr/local/src/osmo-gsm-tester/suites' ]
+scenarios_dir: [ './scenarios' ]
 trial_dir: './trial'
 default_suites_conf_path: './default-suites.conf'
 defaults_conf_path: './defaults.conf'

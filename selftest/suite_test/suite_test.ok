@@ -4,14 +4,15 @@ cnf -: DBG: MAIN CONFIG:
 {'default_suites_conf_path': '[PATH]/selftest/suite_test/default-suites.conf',
  'defaults_conf_path': '[PATH]/selftest/suite_test/defaults.conf',
  'resource_conf_path': '[PATH]/selftest/suite_test/resources.conf',
- 'scenarios_dir': '[PATH]/selftest/suite_test/scenarios',
+ 'scenarios_dir': ['[PATH]/selftest/suite_test/scenarios'],
  'state_dir': '[PATH]/selftest/suite_test/test_work/state_dir',
- 'suites_dir': '[PATH]/selftest/suite_test',
+ 'suites_dir': ['[PATH]/selftest/suite_test/suitedirA',
+                '[PATH]/selftest/suite_test/suitedirB'],
  'trial_dir': '[PATH]/selftest/suite_test/trial'}
---- -: ERR: RuntimeError: Suite not found: 'does_not_exist' in [PATH]/selftest/suite_test
+--- -: ERR: RuntimeError: Suite not found: 'does_not_exist' in [[PATH]/selftest/suite_test/suitedirA, [PATH]/selftest/suite_test/suitedirB]
 - no suite.conf
 cnf empty_dir: DBG: reading suite.conf
-cnf [PATH]/selftest/suite_test/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/empty_dir/suite.conf'  [empty_dir↪[PATH]/selftest/suite_test/empty_dir/suite.conf]
+cnf [PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf'  [empty_dir↪[PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf]
 - valid suite dir
 cnf test_suite: DBG: reading suite.conf
 defaults:

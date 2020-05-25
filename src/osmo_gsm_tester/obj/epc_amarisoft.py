@@ -59,7 +59,7 @@ class AmarisoftEPC(epc.EPC):
         if self._bin_prefix is None:
             self._bin_prefix = os.getenv('AMARISOFT_PATH_EPC', None)
             if self._bin_prefix == None:
-                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftepc')
+                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftepc', self._run_node.run_label())
         return self._bin_prefix
 
     def cleanup(self):

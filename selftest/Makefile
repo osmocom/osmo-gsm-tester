@@ -12,6 +12,7 @@ set_pythonpath:
 clean:
 	@find . -name "*__pycache__" -type d -print0 | xargs -0 rm -rvf
 	@find . -name "*test_work" -type d -print0 | xargs -0 rm -rvf
+	@rm -rfv ./trial_test/run_label/inst
 	@rm -fv ./set_pythonpath
 
 # vim: noexpandtab tabstop=8 shiftwidth=8

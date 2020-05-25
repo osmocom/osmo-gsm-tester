@@ -57,7 +57,7 @@ class Trial(log.Origin):
         super().__init__(log.C_TST, os.path.basename(self.path))
         self.dir = util.Dir(self.path)
         self.inst_dir = util.Dir(self.dir.child('inst'))
-        self.bin_tars = []
+        self.bin_tars = {}
         self.suites = []
         self.status = Trial.UNKNOWN
         self._run_dir = None
@@ -125,10 +125,10 @@ class Trial(log.Origin):
                 line_nr += 1
                 if not line:
                     continue
-                md5, filename = line.split('  ')
-                file_path = self.dir.child(filename)
+                md5, relpath = line.split('  ')
+                file_path = self.dir.child(relpath)
 
-                if not self.dir.isfile(filename):
+                if not self.dir.isfile(relpath):
                     raise RuntimeError('File listed in checksums file but missing in trials dir:'
                                        ' %r vs. %r line %d' % (file_path, checksums, line_nr))
 
@@ -136,28 +136,34 @@ class Trial(log.Origin):
                     raise RuntimeError('Checksum mismatch for %r vs. %r line %d'
                                        % (file_path, checksums, line_nr))
 
-                if filename.endswith('.tgz'):
-                    self.bin_tars.append(filename)
+                if relpath.endswith('.tgz') or relpath.endswith('.tar.gz'):
+                    (label, name) = os.path.split(relpath)
+                    #print('label: %s, name: %s' % (label, name))
+                    li = self.bin_tars.get(label, [])
+                    li.append(name)
+                    self.bin_tars[label] = li
 
-    def has_bin_tar(self, bin_name):
+    def has_bin_tar(self, bin_name, run_label):
         bin_tar_start = '%s.' % bin_name
-        matches = [t for t in self.bin_tars if t.startswith(bin_tar_start)]
-        self.dbg(bin_name=bin_name, matches=matches)
+        matches = [t for t in self.bin_tars[run_label] if t.startswith(bin_tar_start)]
+        self.dbg('has bin_tar', run_label=run_label, bin_name=bin_name, matches=matches)
         if not matches:
             return None
         if len(matches) > 1:
-            raise RuntimeError('More than one match for bin name %r: %r' % (bin_name, matches))
+            raise RuntimeError('More than one match for bin name %r on run_label \'%s\': %r' % (bin_name, run_label, matches))
         bin_tar = matches[0]
-        bin_tar_path = self.dir.child(bin_tar)
+        bin_tar_path = self.dir.child(os.path.join(run_label, bin_tar))
         if not os.path.isfile(bin_tar_path):
             raise RuntimeError('Not a file or missing: %r' % bin_tar_path)
         return bin_tar_path
 
-    def get_inst(self, bin_name):
-        bin_tar = self.has_bin_tar(bin_name)
+    def get_inst(self, bin_name, run_label=None):
+        if run_label is None:
+            run_label = ''
+        bin_tar = self.has_bin_tar(bin_name, run_label)
         if not bin_tar:
             raise RuntimeError('No such binary available: %r' % bin_name)
-        inst_dir = self.inst_dir.child(bin_name)
+        inst_dir = self.inst_dir.child(os.path.join(run_label, bin_name))
 
         if os.path.isdir(inst_dir):
             # already unpacked

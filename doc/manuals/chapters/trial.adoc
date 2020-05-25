@@ -48,12 +48,21 @@ The script in 'contrib/jenkins-run.sh' takes care of related tasks such as
 
 {app-name} tests create objects to manage the allocated resources during test
 lifetime. These objects, in turn, usually run and manage processes started from
-the trail's sysroot binaries. {app-name} provide APIs for those object classes
+the trial's sysroot binaries. {app-name} provide APIs for those object classes
 to discover, unpack and run those binaries. An object class simply needs to
 request the name of the sysroot it wants to use (for instance 'osmo-bsc'), and
 {app-name} will take care of preparing everything and providing the sysroot path
 to it. It's a duty of the resource class to copy over the sysroot to the
 destination if the intention is to run the binary remotely on another host.
+
+Moreover, {app-name} supports working with several different versions of a given
+sysroot by means of storing them in different subdirectories, which are later
+referenced by an object's class 'run_label' attribute named after that
+subdirectory. This way, for instance, a sysroot can be provided containing
+binaries linked against libraries present on a CentOS distribution, and other
+sysroots with the same name can also be provided which are linked against
+different versions of CentOS, or a different distro like Debian, or even a
+different arch like ARM.
 
 When seeking a sysroot of a given name '<inst-name>' in the 'inst/' directory,
 {app-name} will look for 'tgz' files starting with the pattern '<inst-name>.'
@@ -63,3 +72,6 @@ commit hash. Hence, these example files are considered valid and will be
 selected by {app-name} for 'osmo-bsc': 'osmo-bsc.tgz', 'osmo-bsc.build-23.tgz',
 'osmo-bsc.5f3e0dd2.tgz', 'osmo-bsc.armv7.build-2.tgz'. If either none or more
 than one valid file is found matching the pattern, an exception will be thrown.
+If a 'run_label=foobar' is provided, {app-name} will look up for the 'tgz' in
+exactly the same way, but this time in 'inst/foobar/' directory instead of
+'inst/'.

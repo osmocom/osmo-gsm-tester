@@ -14,3 +14,12 @@ None
 ok, got RuntimeError: Checksum mismatch for '[PATH]/trial_test/invalid_checksum/file2' vs. '[PATH]/trial_test/invalid_checksum/checksums.md5' line 2
 - detect missing file
 ok, got RuntimeError: File listed in checksums file but missing in trials dir: '[PATH]/trial_test/missing_file/file2' vs. '[PATH]/trial_test/missing_file/checksums.md5' line 2
+- Verify trials based on run_label
+tst run_label: DBG: has bin_tar {bin_name='sample', matches=['sample.tar.gz'], run_label='foobar'}
+inst: [PATH]/trial_test/run_label/inst/foobar/sample
+content file2: subhello
+
+tst run_label: DBG: has bin_tar {bin_name='sample', matches=['sample.tar.gz'], run_label=''}
+inst: [PATH]/trial_test/run_label/inst/sample
+content file1: hello
+

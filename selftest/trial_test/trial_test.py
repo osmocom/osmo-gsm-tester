@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-import time
 import _prep
+
+import time
 import os
+
 from osmo_gsm_tester.core import util
 from osmo_gsm_tester.core.trial import Trial
 
@@ -45,5 +47,18 @@ try:
     t.verify()
 except RuntimeError as e:
     print('ok, got RuntimeError: %s' % str(e))
+
+print('- Verify trials based on run_label')
+d = util.Dir('trial_test')
+t = Trial(d.child('run_label'))
+t.verify()
+inst = util.Dir(t.get_inst('sample', 'foobar'))
+print('inst: ' + str(inst))
+with open(inst.child('file2'), 'r') as f:
+    print('content file2: %s' % f.read())
+inst = util.Dir( t.get_inst('sample'))
+print('inst: ' + str(inst))
+with open(inst.child('file1'), 'r') as f:
+    print('content file1: %s' % f.read())
 
 # vim: expandtab tabstop=4 shiftwidth=4

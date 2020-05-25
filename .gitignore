@@ -4,12 +4,15 @@ pid
 .version
 _version.py
 tags
-set_pythonpath
-test_work
 state
 *.pyc
 sysmocom/resources.conf
 sysmocom/ttcn3/resources.conf
+
+# selftest:
+set_pythonpath
+test_work
+selftest/trial_test/run_label/inst/
 
 # manuals
 doc/manuals/*.html

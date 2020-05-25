@@ -59,6 +59,7 @@ class srsENB(enb.eNodeB):
         self.pcap_file = None
         self.process = None
         self.rem_host = None
+        self.remote_run_dir = None
         self.remote_config_file =  None
         self.remote_config_sib_file = None
         self.remote_config_rr_file = None
@@ -111,7 +112,7 @@ class srsENB(enb.eNodeB):
         args = (remote_binary, self.remote_config_file)
         args += tuple(self._additional_args)
 
-        self.process = self.rem_host.RemoteProcess(srsENB.BINFILE, args, remote_env=remote_env)
+        self.process = self.rem_host.RemoteProcessSafeExit(srsENB.BINFILE, self.remote_run_dir, args, remote_env=remote_env, wait_time_sec=7)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
@@ -152,14 +153,14 @@ class srsENB(enb.eNodeB):
             self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
             remote_prefix_dir = util.Dir(srsENB.REMOTE_DIR)
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-            remote_run_dir = util.Dir(remote_prefix_dir.child(srsENB.BINFILE))
+            self.remote_run_dir = util.Dir(remote_prefix_dir.child(srsENB.BINFILE))
 
-            self.remote_config_file = remote_run_dir.child(srsENB.CFGFILE)
-            self.remote_config_sib_file = remote_run_dir.child(srsENB.CFGFILE_SIB)
-            self.remote_config_rr_file = remote_run_dir.child(srsENB.CFGFILE_RR)
-            self.remote_config_drb_file = remote_run_dir.child(srsENB.CFGFILE_DRB)
-            self.remote_log_file = remote_run_dir.child(srsENB.LOGFILE)
-            self.remote_pcap_file = remote_run_dir.child(srsENB.PCAPFILE)
+            self.remote_config_file = self.remote_run_dir.child(srsENB.CFGFILE)
+            self.remote_config_sib_file = self.remote_run_dir.child(srsENB.CFGFILE_SIB)
+            self.remote_config_rr_file = self.remote_run_dir.child(srsENB.CFGFILE_RR)
+            self.remote_config_drb_file = self.remote_run_dir.child(srsENB.CFGFILE_DRB)
+            self.remote_log_file = self.remote_run_dir.child(srsENB.LOGFILE)
+            self.remote_pcap_file = self.remote_run_dir.child(srsENB.PCAPFILE)
 
         values = super().configure(['srsenb'])
 
@@ -211,7 +212,7 @@ class srsENB(enb.eNodeB):
         if not self.setup_runs_locally():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-            self.rem_host.recreate_remote_dir(remote_run_dir)
+            self.rem_host.recreate_remote_dir(self.remote_run_dir)
             self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
             self.rem_host.scp('scp-cfg-sib-to-remote', self.config_sib_file, self.remote_config_sib_file)
             self.rem_host.scp('scp-cfg-rr-to-remote', self.config_rr_file, self.remote_config_rr_file)

@@ -55,7 +55,7 @@ class RemoteHost(log.Origin):
         run_dir = self.run_dir.new_dir(name)
         return process.RemoteProcess(name, run_dir, self.user(), self.host(), self.cwd(), popen_args, remote_env=remote_env, **popen_kwargs)
 
-    def generate_wrapper_script(self):
+    def generate_wrapper_script(self, wait_time_sec):
         wrapper_script = self.run_dir.new_file(RemoteHost.WRAPPER_SCRIPT)
         with open(wrapper_script, 'w') as f:
             r = """#!/bin/bash
@@ -66,8 +66,8 @@ class RemoteHost(log.Origin):
                 if ! kill -0 $mypid; then
                     return
                 fi
-                echo "sleeping some time waiting for child to die..." >>$LOGFILE
-                sleep 5
+                echo "sleeping %d seconds waiting for child to die..." >>$LOGFILE
+                sleep %d
                 if ! kill -0 $mypid; then
                     return
                 fi
@@ -102,20 +102,18 @@ class RemoteHost(log.Origin):
             prep_sighandler
             $@ &
             wait_sighandler
-            """
+            """ % (wait_time_sec, wait_time_sec)
             f.write(r)
         st = os.stat(wrapper_script)
         os.chmod(wrapper_script, st.st_mode | stat.S_IEXEC)
         return wrapper_script
 
-    def RemoteProcessFixIgnoreSIGHUP(self, name, remote_dir, popen_args, remote_env={}, **popen_kwargs):
-        # Run remotely through ssh. We need to run binary under a wrapper
-        # script since osmo-trx ignores SIGHUP and will keep running after
-        # we close local ssh session. The wrapper script catches SIGHUP and
-        # sends SIGINT to it.
+    def RemoteProcessSafeExit(self, name, remote_dir, popen_args, remote_env={}, wait_time_sec=5, **popen_kwargs):
+        """Run binary under a wrapper which will make sure process is killed -9
+        a few seconds after SIGHUP from SSH is received."""
         self.create_remote_dir(remote_dir)
 
-        wrapper_script = self.generate_wrapper_script()
+        wrapper_script = self.generate_wrapper_script(wait_time_sec)
         remote_wrapper_script = remote_dir.child(RemoteHost.WRAPPER_SCRIPT)
         self.scp('scp-wrapper-to-remote', wrapper_script, remote_wrapper_script)
 

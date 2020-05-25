@@ -91,6 +91,7 @@ class srsUE(MS):
         self.process = None
         self.rem_host = None
         self.remote_inst = None
+        self.remote_run_dir = None
         self.remote_config_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
@@ -168,8 +169,7 @@ class srsUE(MS):
         args = (remote_binary, self.remote_config_file, '--gw.netns=' + self.netns())
         args += tuple(self._additional_args)
 
-        self.process = self.rem_host.RemoteProcess(srsUE.BINFILE, args)
-        #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(srsUE.BINFILE, remote_run_dir, args, remote_lib)
+        self.process = self.rem_host.RemoteProcessSafeExit(srsUE.BINFILE, self.remote_run_dir, args)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
@@ -213,11 +213,11 @@ class srsUE(MS):
                 self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
                 remote_prefix_dir = util.Dir(srsUE.REMOTE_DIR)
                 self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-                remote_run_dir = util.Dir(remote_prefix_dir.child(srsUE.BINFILE))
-                self.remote_config_file = remote_run_dir.child(srsUE.CFGFILE)
-                self.remote_log_file = remote_run_dir.child(srsUE.LOGFILE)
-                self.remote_pcap_file = remote_run_dir.child(srsUE.PCAPFILE)
-                self.remote_metrics_file = remote_run_dir.child(srsUE.METRICSFILE)
+                self.remote_run_dir = util.Dir(remote_prefix_dir.child(srsUE.BINFILE))
+                self.remote_config_file = self.remote_run_dir.child(srsUE.CFGFILE)
+                self.remote_log_file = self.remote_run_dir.child(srsUE.LOGFILE)
+                self.remote_pcap_file = self.remote_run_dir.child(srsUE.PCAPFILE)
+                self.remote_metrics_file = self.remote_run_dir.child(srsUE.METRICSFILE)
 
         values = dict(ue=config.get_defaults('srsue'))
         config.overlay(values, dict(ue=self.testenv.suite().config().get('modem', {})))
@@ -297,7 +297,7 @@ class srsUE(MS):
         if not self.setup_runs_locally():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-            self.rem_host.recreate_remote_dir(remote_run_dir)
+            self.rem_host.recreate_remote_dir(self.remote_run_dir)
             self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
 
     def is_connected(self, mcc_mnc=None):

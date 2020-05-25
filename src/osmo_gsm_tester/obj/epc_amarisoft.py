@@ -46,6 +46,7 @@ class AmarisoftEPC(epc.EPC):
         self.ifup_file = None
         self.process = None
         self.rem_host = None
+        self.remote_run_dir = None
         self.remote_inst = None
         self.remote_config_file = None
         self.remote_log_file = None
@@ -92,8 +93,7 @@ class AmarisoftEPC(epc.EPC):
 
         args = (remote_binary, self.remote_config_file)
 
-        self.process = self.rem_host.RemoteProcess(AmarisoftEPC.BINFILE, args)
-        #self.process = self.rem_host.RemoteProcessFixIgnoreSIGHUP(AmarisoftEPC.BINFILE, remote_run_dir, args)
+        self.process = self.rem_host.RemoteProcessSafeExit(AmarisoftEPC.BINFILE, self.remote_run_dir, args)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
@@ -137,11 +137,11 @@ class AmarisoftEPC(epc.EPC):
             self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(AmarisoftEPC.REMOTE_DIR)
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-            remote_run_dir = util.Dir(remote_prefix_dir.child(AmarisoftEPC.BINFILE))
+            self.remote_run_dir = util.Dir(remote_prefix_dir.child(AmarisoftEPC.BINFILE))
 
-            self.remote_config_file = remote_run_dir.child(AmarisoftEPC.CFGFILE)
-            self.remote_log_file = remote_run_dir.child(AmarisoftEPC.LOGFILE)
-            self.remote_ifup_file = remote_run_dir.child(AmarisoftEPC.IFUPFILE)
+            self.remote_config_file = self.remote_run_dir.child(AmarisoftEPC.CFGFILE)
+            self.remote_log_file = self.remote_run_dir.child(AmarisoftEPC.LOGFILE)
+            self.remote_ifup_file = self.remote_run_dir.child(AmarisoftEPC.IFUPFILE)
 
         values = super().configure(['amarisoft', 'amarisoftepc'])
 
@@ -162,7 +162,7 @@ class AmarisoftEPC(epc.EPC):
         if not self._run_node.is_local():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
-            self.rem_host.recreate_remote_dir(remote_run_dir)
+            self.rem_host.recreate_remote_dir(self.remote_run_dir)
             self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
             self.rem_host.scp('scp-ifup-to-remote', self.ifup_file, self.remote_ifup_file)
 

@@ -310,7 +310,11 @@ class OsmoTrx(Trx, metaclass=ABCMeta):
             remote_env = {}
             remote_binary = self.binary_name()
         args = (remote_binary, '-C', remote_config_file)
-        self.proc_trx = rem_host.RemoteProcessFixIgnoreSIGHUP(self.binary_name(), remote_run_dir, args, remote_env=remote_env)
+        # Run remotely through ssh. We need to run binary under a wrapper
+        # script since osmo-trx ignores SIGHUP and will keep running after
+        # we close local ssh session. The wrapper script catches SIGHUP and
+        # sends SIGINT to it.
+        self.proc_trx = rem_host.RemoteProcessSafeExit(self.binary_name(), remote_run_dir, args, remote_env=remote_env)
         self.testenv.remember_to_stop(self.proc_trx, keepalive)
         self.proc_trx.launch()
 

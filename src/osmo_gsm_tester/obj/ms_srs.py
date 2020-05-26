@@ -398,6 +398,15 @@ class srsUEMetrics(log.Origin):
                 # Sum them up assuming same array dimension
                 sel_data += vec
 
+        # Sum up all component carriers for rate metrics
+        if metric_str.find('brate'):
+            # Determine number of component carriers
+            num_cc = numpy.amax(numpy.array(self.raw_data['cc'])) + 1 # account for zero index
+            tmp_values = sel_data
+            sel_data = numpy.array(tmp_values[::num_cc]) # first carrier, every num_cc'th item in list
+            for cc in range(1, num_cc):
+                sel_data += numpy.array(tmp_values[cc::num_cc]) # all other carriers, start at cc index
+
         if operation == 'avg':
             result = numpy.average(sel_data)
         elif operation == 'sum':

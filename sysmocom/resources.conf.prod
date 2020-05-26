@@ -159,15 +159,21 @@ enb:
   type: srsenb
   rf_dev_type: zmq
   rf_dev_args: auto
-  remote_user: jenkins
-  addr: 10.42.42.117
+  run_node:
+    run_type: ssh
+    run_addr: 10.42.42.117
+    ssh_user: jenkins
+    ssh_addr: 10.42.42.117
 
 - label: srsENB-B200
   type: srsenb
   rf_dev_type: uhd
   rf_dev_args: "type=b200,serial=306BD11"
-  remote_user: jenkins
-  addr: 10.42.42.117
+  run_node:
+    run_type: ssh
+    run_addr: 10.42.42.117
+    ssh_user: jenkins
+    ssh_addr: 10.42.42.117
 
 arfcn:
   - arfcn: 512

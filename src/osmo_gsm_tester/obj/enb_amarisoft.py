@@ -69,7 +69,6 @@ class AmarisoftENB(enb.eNodeB):
         self.remote_log_file = None
         self.enable_measurements = False
         self.testenv = testenv
-        self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
 
@@ -83,17 +82,13 @@ class AmarisoftENB(enb.eNodeB):
     def cleanup(self):
         if self.process is None:
             return
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             return
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
             self.log(repr(e))
-
-
-    def setup_runs_locally(self):
-        return self.remote_user is None
 
     def start(self, epc):
         self.log('Starting AmarisoftENB')
@@ -107,7 +102,7 @@ class AmarisoftENB(enb.eNodeB):
         self.process.stdin_write('t\n')
 
     def _start(self):
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             env = { 'LD_LIBRARY_PATH': util.prepend_library_path(self.inst) }
             binary = self.inst.child('.', AmarisoftENB.BINFILE)
             self.dbg(run_dir=self.run_dir, binary=binary, env=env)
@@ -141,8 +136,8 @@ class AmarisoftENB(enb.eNodeB):
         self.config_drb_file = self.run_dir.child(AmarisoftENB.CFGFILE_DRB)
         self.log_file = self.run_dir.child(AmarisoftENB.LOGFILE)
 
-        if not self.setup_runs_locally():
-            self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
+        if not self._run_node.is_local():
+            self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(AmarisoftENB.REMOTE_DIR)
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
             remote_run_dir = util.Dir(remote_prefix_dir.child(AmarisoftENB.BINFILE))
@@ -186,7 +181,7 @@ class AmarisoftENB(enb.eNodeB):
 
                 config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
-        logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
+        logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
         config.overlay(values, dict(enb=dict(log_filename=logfile)))
 
         # rf driver is shared between amarisoft enb and ue, so it has a
@@ -205,7 +200,7 @@ class AmarisoftENB(enb.eNodeB):
         self.gen_conf_file(self.config_rf_file, AmarisoftENB.CFGFILE_RF, values)
         self.gen_conf_file(self.config_drb_file, AmarisoftENB.CFGFILE_DRB, values)
 
-        if not self.setup_runs_locally():
+        if not self._run_node.is_local():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
             self.rem_host.recreate_remote_dir(remote_run_dir)

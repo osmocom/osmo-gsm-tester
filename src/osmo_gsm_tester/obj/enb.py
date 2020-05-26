@@ -20,13 +20,12 @@
 from abc import ABCMeta, abstractmethod
 from ..core import log, config
 from ..core import schema
+from . import run_node
 
 def on_register_schemas():
     resource_schema = {
         'label': schema.STR,
         'type': schema.STR,
-        'remote_user': schema.STR,
-        'addr': schema.IPV4,
         'gtp_bind_addr': schema.IPV4,
         'id': schema.UINT,
         'num_prb': schema.UINT,
@@ -60,6 +59,8 @@ def on_register_schemas():
         'cell_list[].dl_rfemu.addr': schema.IPV4,
         'cell_list[].dl_rfemu.ports[]': schema.UINT,
         }
+    for key, val in run_node.RunNode.schema().items():
+        resource_schema['run_node.%s' % key] = val
     schema.register_resource_schema('enb', resource_schema)
 
 class eNodeB(log.Origin, metaclass=ABCMeta):
@@ -70,13 +71,11 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def __init__(self, testenv, conf, name):
         super().__init__(log.C_RUN, '%s' % name)
         self._conf = conf
-        self._addr = conf.get('addr', None)
-        if self._addr is None:
-            raise log.Error('addr not set')
+        self._run_node = run_node.RunNode.from_conf(conf.get('run_node', {}))
         self._gtp_bind_addr = conf.get('gtp_bind_addr', None)
         if self._gtp_bind_addr is None:
-            self._gtp_bind_addr = self._addr
-        self.set_name('%s_%s' % (name, self._addr))
+            self._gtp_bind_addr = self._run_node.run_addr()
+        self.set_name('%s_%s' % (name, self._run_node.run_addr()))
         self._txmode = 0
         self._id = None
         self._num_prb = 0
@@ -99,6 +98,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         assert self._txmode
         config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
         assert self._epc is not None
+        config.overlay(values, dict(enb={ 'addr': self.addr() }))
         config.overlay(values, dict(enb={ 'mme_addr': self._epc.addr() }))
         config.overlay(values, dict(enb={ 'gtp_bind_addr': self._gtp_bind_addr }))
         self._num_cells = int(values['enb'].get('num_cells', None))
@@ -235,7 +235,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         pass
 
     def addr(self):
-        return self._addr
+        return self._run_node.run_addr()
 
     def ue_max_rate(self, downlink=True):
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64

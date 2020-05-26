@@ -21,13 +21,7 @@ from ..core import log
 from ..core import schema
 
 def on_register_schemas():
-    resource_schema = {
-        'run_type': schema.STR,
-        'run_addr': schema.IPV4,
-        'ssh_user': schema.STR,
-        'ssh_addr': schema.IPV4,
-        'run_label': schema.STR,
-        }
+    resource_schema = RunNode.schema()
     schema.register_resource_schema('run_node', resource_schema)
 
 
@@ -62,6 +56,17 @@ class RunNode(log.Origin):
         return cls(conf.get('run_type', None), conf.get('run_addr', None),
                    conf.get('ssh_user', None), conf.get('ssh_addr', None),
                    conf.get('run_label', None))
+
+    @classmethod
+    def schema(cls):
+        resource_schema = {
+            'run_type': schema.STR,
+            'run_addr': schema.IPV4,
+            'ssh_user': schema.STR,
+            'ssh_addr': schema.IPV4,
+            'run_label': schema.STR,
+            }
+        return resource_schema
 
     def is_local(self):
         return self._type == RunNode.T_LOCAL

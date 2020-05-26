@@ -68,7 +68,6 @@ class srsENB(enb.eNodeB):
         self.remote_pcap_file = None
         self.enable_pcap = False
         self.testenv = testenv
-        self.remote_user = conf.get('remote_user', None)
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -76,7 +75,7 @@ class srsENB(enb.eNodeB):
     def cleanup(self):
         if self.process is None:
             return
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             return
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
@@ -89,18 +88,15 @@ class srsENB(enb.eNodeB):
             except Exception as e:
                 self.log(repr(e))
 
-    def setup_runs_locally(self):
-        return self.remote_user is None
-
     def start(self, epc):
         self.log('Starting srsENB')
         self._epc = epc
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
-        if self.remote_user:
-            self.start_remotely()
-        else:
+        if self._run_node.is_local():
             self.start_locally()
+        else:
+            self.start_remotely()
 
         # send t+Enter to enable console trace
         self.dbg('Enabling console trace')
@@ -149,8 +145,8 @@ class srsENB(enb.eNodeB):
         self.log_file = self.run_dir.child(srsENB.LOGFILE)
         self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
 
-        if not self.setup_runs_locally():
-            self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
+        if not self._run_node.is_local():
+            self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(srsENB.REMOTE_DIR)
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
             self.remote_run_dir = util.Dir(remote_prefix_dir.child(srsENB.BINFILE))
@@ -164,11 +160,11 @@ class srsENB(enb.eNodeB):
 
         values = super().configure(['srsenb'])
 
-        sibfile = self.config_sib_file if self.setup_runs_locally() else self.remote_config_sib_file
-        rrfile = self.config_rr_file if self.setup_runs_locally() else self.remote_config_rr_file
-        drbfile = self.config_drb_file if self.setup_runs_locally() else self.remote_config_drb_file
-        logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
-        pcapfile = self.pcap_file if self.setup_runs_locally() else self.remote_pcap_file
+        sibfile = self.config_sib_file if self._run_node.is_local() else self.remote_config_sib_file
+        rrfile = self.config_rr_file if self._run_node.is_local() else self.remote_config_rr_file
+        drbfile = self.config_drb_file if self._run_node.is_local() else self.remote_config_drb_file
+        logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
+        pcapfile = self.pcap_file if self._run_node.is_local() else self.remote_pcap_file
         config.overlay(values, dict(enb=dict(sib_filename=sibfile,
                                              rr_filename=rrfile,
                                              drb_filename=drbfile,
@@ -209,7 +205,7 @@ class srsENB(enb.eNodeB):
         self.gen_conf_file(self.config_rr_file, srsENB.CFGFILE_RR, values)
         self.gen_conf_file(self.config_drb_file, srsENB.CFGFILE_DRB, values)
 
-        if not self.setup_runs_locally():
+        if not self._run_node.is_local():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
             self.rem_host.recreate_remote_dir(self.remote_run_dir)

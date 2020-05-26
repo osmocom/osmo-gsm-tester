@@ -238,7 +238,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         return self._addr
 
     def ue_max_rate(self, downlink=True):
-        # The max rate for a single UE per PRB configuration in TM1
+        # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64
         max_phy_rate_tm1_dl = { 6 : 3.5e6,
                                15 : 11e6,
                                25 : 18e6,
@@ -255,12 +255,11 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             max_rate = max_phy_rate_tm1_dl[self.num_prb()]
         else:
             max_rate = max_phy_rate_tm1_ul[self.num_prb()]
+
         #TODO: calculate for non-standard prb numbers.
-        if self._txmode > 2:
+        if downlink and self._txmode > 2:
             max_rate *= 2
-        # We use 3 control symbols for 6, 15 and 25 PRBs which results in lower max rate
-        if self.num_prb() < 50:
-          max_rate *= 0.9
+
         return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

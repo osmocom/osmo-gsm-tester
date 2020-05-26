@@ -27,6 +27,10 @@ from .run_node import RunNode
 from .ms import MS
 
 def on_register_schemas():
+    resource_schema = {}
+    for key, val in RunNode.schema().items():
+        resource_schema['run_node.%s' % key] = val
+    schema.register_resource_schema('modem', resource_schema)
     config_schema = {
         'license_server_addr': schema.IPV4,
         }
@@ -79,10 +83,8 @@ class AmarisoftUE(MS):
     IFUPFILE = 'ue-ifup'
 
     def __init__(self, testenv, conf):
-        self._addr = conf.get('addr', None)
-        if self._addr is None:
-            raise log.Error('addr not set')
-        super().__init__('amarisoftue_%s' % self._addr, conf)
+        self._run_node = RunNode.from_conf(conf.get('run_node', {}))
+        super().__init__('amarisoftue_%s' % self.addr(), conf)
         self.enb = None
         self.run_dir = None
         self.inst = None
@@ -99,7 +101,6 @@ class AmarisoftUE(MS):
         self.remote_log_file = None
         self.remote_ifup_file = None
         self.testenv = testenv
-        self.remote_user = conf.get('remote_user', None)
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
 
@@ -113,16 +114,13 @@ class AmarisoftUE(MS):
     def cleanup(self):
         if self.process is None:
             return
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             return
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
             self.log(repr(e))
-
-    def setup_runs_locally(self):
-        return self.remote_user is None
 
     def netns(self):
         return "amarisoftue1"
@@ -135,7 +133,7 @@ class AmarisoftUE(MS):
         self.enb = enb
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             self.start_locally()
         else:
             self.start_remotely()
@@ -219,8 +217,8 @@ class AmarisoftUE(MS):
             ''' % (self.netns(), self.netns())
             f.write(r)
 
-        if not self.setup_runs_locally():
-            self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
+        if not self._run_node.is_local():
+            self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(AmarisoftUE.REMOTE_DIR)
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
             remote_run_dir = util.Dir(remote_prefix_dir.child(AmarisoftUE.BINFILE))
@@ -235,10 +233,11 @@ class AmarisoftUE(MS):
         config.overlay(values, dict(ue=self.testenv.suite().config().get('amarisoft', {})))
         config.overlay(values, dict(ue=self.testenv.suite().config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
-        config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
+        config.overlay(values, dict(ue=dict(addr = self.addr(),
+                                            num_antennas = self.enb.num_ports())))
 
-        logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
-        ifupfile = self.ifup_file if self.setup_runs_locally() else self.remote_ifup_file
+        logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
+        ifupfile = self.ifup_file if self._run_node.is_local() else self.remote_ifup_file
         config.overlay(values, dict(ue=dict(log_filename=logfile,
                                             ifup_filename=ifupfile)))
 
@@ -289,7 +288,7 @@ class AmarisoftUE(MS):
         self.gen_conf_file(self.config_file, AmarisoftUE.CFGFILE, values)
         self.gen_conf_file(self.config_rf_file, AmarisoftUE.CFGFILE_RF, values)
 
-        if not self.setup_runs_locally():
+        if not self._run_node.is_local():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
             self.rem_host.recreate_remote_dir(remote_run_dir)
@@ -309,13 +308,13 @@ class AmarisoftUE(MS):
         return not self.process.terminated()
 
     def addr(self):
-        return self._addr
+        return self._run_node.run_addr()
 
     def run_node(self):
-        return RunNode(RunNode.T_REM_SSH, self._addr, self.remote_user, self._addr)
+        return self._run_node
 
     def run_netns_wait(self, name, popen_args):
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             proc = process.NetNSProcess(name, self.run_dir.new_dir(name), self.netns(), popen_args, env={})
         else:
             proc = self.rem_host.RemoteNetNSProcess(name, self.netns(), popen_args, env={})

@@ -31,8 +31,6 @@ def rf_type_valid(rf_type_str):
 
 def on_register_schemas():
     resource_schema = {
-        'remote_user': schema.STR,
-        'addr': schema.IPV4,
         'rf_dev_type': schema.STR,
         'rf_dev_args': schema.STR,
         'num_carriers': schema.UINT,
@@ -42,6 +40,8 @@ def on_register_schemas():
         'tx_gain': schema.UINT,
         'rx_gain': schema.UINT,
         }
+    for key, val in RunNode.schema().items():
+        resource_schema['run_node.%s' % key] = val
     schema.register_resource_schema('modem', resource_schema)
 
     config_schema = {
@@ -78,10 +78,8 @@ class srsUE(MS):
     METRICSFILE = 'srsue_metrics.csv'
 
     def __init__(self, testenv, conf):
-        self._addr = conf.get('addr', None)
-        if self._addr is None:
-            raise log.Error('addr not set')
-        super().__init__('srsue_%s' % self._addr, conf)
+        self._run_node = RunNode.from_conf(conf.get('run_node', {}))
+        super().__init__('srsue_%s' % self.addr(), conf)
         self.enb = None
         self.run_dir = None
         self.config_file = None
@@ -100,7 +98,6 @@ class srsUE(MS):
         self.enable_pcap = False
         self.num_carriers = 1
         self.testenv = testenv
-        self.remote_user = conf.get('remote_user', None)
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -108,7 +105,7 @@ class srsUE(MS):
     def cleanup(self):
         if self.process is None:
             return
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             return
 
         # Make sure we give the UE time to tear down
@@ -124,9 +121,6 @@ class srsUE(MS):
                 self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
             except Exception as e:
                 self.log(repr(e))
-
-    def setup_runs_locally(self):
-        return self.remote_user is None
 
     def netns(self):
         return "srsue1"
@@ -146,7 +140,7 @@ class srsUE(MS):
         self.enb = enb
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             self.start_locally()
         else:
             self.start_remotely()
@@ -215,8 +209,8 @@ class srsUE(MS):
         self.pcap_file = self.run_dir.child(srsUE.PCAPFILE)
         self.metrics_file = self.run_dir.child(srsUE.METRICSFILE)
 
-        if not self.setup_runs_locally():
-                self.rem_host = remote.RemoteHost(self.run_dir, self.remote_user, self._addr)
+        if not self._run_node.is_local():
+                self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
                 remote_prefix_dir = util.Dir(srsUE.REMOTE_DIR)
                 self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
                 self.remote_run_dir = util.Dir(remote_prefix_dir.child(srsUE.BINFILE))
@@ -230,9 +224,9 @@ class srsUE(MS):
         config.overlay(values, dict(ue=self._conf))
         config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
 
-        metricsfile = self.metrics_file if self.setup_runs_locally() else self.remote_metrics_file
-        logfile = self.log_file if self.setup_runs_locally() else self.remote_log_file
-        pcapfile = self.pcap_file if self.setup_runs_locally() else self.remote_pcap_file
+        metricsfile = self.metrics_file if self._run_node.is_local() else self.remote_metrics_file
+        logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
+        pcapfile = self.pcap_file if self._run_node.is_local() else self.remote_pcap_file
         config.overlay(values, dict(ue=dict(metrics_filename=metricsfile,
                                              log_filename=logfile,
                                              pcap_filename=pcapfile)))
@@ -300,7 +294,7 @@ class srsUE(MS):
             self.dbg(r)
             f.write(r)
 
-        if not self.setup_runs_locally():
+        if not self._run_node.is_local():
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
             self.rem_host.recreate_remote_dir(self.remote_run_dir)
@@ -316,13 +310,13 @@ class srsUE(MS):
         return not self.process.terminated()
 
     def addr(self):
-        return self._addr
+        return self._run_node.run_addr()
 
     def run_node(self):
-        return RunNode(RunNode.T_REM_SSH, self._addr, self.remote_user, self._addr)
+        return self._run_node
 
     def run_netns_wait(self, name, popen_args):
-        if self.setup_runs_locally():
+        if self._run_node.is_local():
             proc = process.NetNSProcess(name, self.run_dir.new_dir(name), self.netns(), popen_args, env={})
         else:
             proc = self.rem_host.RemoteNetNSProcess(name, self.netns(), popen_args, env={})
@@ -348,7 +342,7 @@ class srsUE(MS):
         if self.running():
             self.stop()
 
-        if not self.setup_runs_locally():
+        if not self._run_node.is_local():
             try:
                 self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
             except Exception as e:

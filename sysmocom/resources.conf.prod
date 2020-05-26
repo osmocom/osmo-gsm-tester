@@ -258,23 +258,29 @@ modem:
   type: srsue
   rf_dev_type: zmq
   rf_dev_args: auto
-  remote_user: jenkins
-  addr: 10.42.42.116
   imsi: '001010123456789'
   ki: '00112233445566778899aabbccddeeff'
   auth_algo: 'xor'
   features: ['4g']
+  run_node:
+    run_type: ssh
+    run_addr: 10.42.42.116
+    ssh_user: jenkins
+    ssh_addr: 10.42.42.116
 
 - label: srsUE-soapy-lms_1
   type: srsue
   rf_dev_type: soapy
   rf_dev_args: driver=lime,serial=00090706024F0A22,rxant=LNAW,txant=BAND1
-  remote_user: jenkins
-  addr: 10.42.42.116
   imsi: '001010123456789'
   ki: '00112233445566778899aabbccddeeff'
   auth_algo: 'xor'
   features: ['4g']
+  run_node:
+    run_type: ssh
+    run_addr: 10.42.42.116
+    ssh_user: jenkins
+    ssh_addr: 10.42.42.116
 
 osmocon_phone:
   - serial_device: '/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00897B41-if00-port0'

@@ -172,23 +172,6 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
                     + ',rx_port2=tcp://' + self.ue.addr() + ':2005' \
                     + ',rx_port3=tcp://' + self.ue.addr() + ':2007'
 
-        if self._num_cells == 1:
-            # Single carrier
-            if self.num_ports() == 1:
-                # SISO
-                rf_dev_args += ',tx_freq0=2630e6,rx_freq0=2510e6'
-            elif self.num_ports() == 2:
-                # MIMO
-                rf_dev_args += ',tx_freq0=2630e6,tx_freq1=2630e6,rx_freq0=2510e6,rx_freq1=2510e6'
-        elif self._num_cells == 2:
-            # 2x class
-            if self.num_ports() == 1:
-                # SISO
-                rf_dev_args += ',tx_freq0=2630e6,tx_freq1=2650e6,rx_freq0=2510e6,rx_freq1=2530e6'
-            elif self.num_ports() == 2:
-                # MIMO
-                rf_dev_args += ',tx_freq0=2630e6,tx_freq1=2630e6,tx_freq2=2650e6,tx_freq3=2650e6,rx_freq0=2510e6,rx_freq1=2510e6,rx_freq2=2530e6,rx_freq3=2530e6'
-
         rf_dev_args += ',id=enb,base_srate=' + str(base_srate)
 
         return rf_dev_args

@@ -76,7 +76,7 @@ class AmarisoftENB(enb.eNodeB):
         if self._bin_prefix is None:
             self._bin_prefix = os.getenv('AMARISOFT_PATH_ENB', None)
             if self._bin_prefix == None:
-                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftenb')
+                self._bin_prefix  = self.testenv.suite().trial().get_inst('amarisoftenb', self._run_node.run_label())
         return self._bin_prefix
 
     def cleanup(self):

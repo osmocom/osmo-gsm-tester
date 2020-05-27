@@ -76,6 +76,15 @@ class EPC(log.Origin, metaclass=ABCMeta):
 
         return  epc_class(testenv, run_node)
 
+    def run_wait(self, name, popen_args):
+        ''' Execute process on EPC node, useful for MT traffic '''
+        if self._run_node.is_local():
+            proc = process.Process(name, self.run_dir, popen_args)
+        else:
+            proc = self.rem_host.RemoteProcess(name, popen_args)
+        proc.launch_sync()
+        return proc
+
 ###################
 # PUBLIC (test API included)
 ###################

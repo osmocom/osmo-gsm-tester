@@ -100,7 +100,7 @@ class RemoteHost(log.Origin):
                 echo "process ${term_child_pid} finished" >>$LOGFILE
             }
             prep_sighandler
-            $@ &
+            $@ <&0 &
             wait_sighandler
             """ % (wait_time_sec, wait_time_sec)
             f.write(r)

@@ -46,7 +46,7 @@ iperf3srv.start()
 proc = iperf3cli.prepare_test_proc(iperf3cli.DIR_UL, ue.netns(), duration + 30)
 
 print('waiting for UE to attach...')
-wait(ue.is_connected, None)
+wait(ue.is_rrc_connected)
 print('UE is attached')
 
 rfemu_cell1 = enb.get_rfemu(0)

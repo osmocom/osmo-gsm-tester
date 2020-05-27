@@ -487,6 +487,9 @@ class Modem(MS):
             return self._apn_ipaddr
         return 'dynamic'
 
+    def get_assigned_addr(self, ipv6=False):
+        raise log.Error('API not implemented!')
+
     def features(self):
         return self._conf.get('features', [])
 
@@ -501,7 +504,7 @@ class Modem(MS):
     def _on_netreg_property_changed(self, name, value):
         self.dbg('%r.PropertyChanged() -> %s=%s' % (I_NETREG, name, value))
 
-    def is_connected(self, mcc_mnc=None):
+    def is_registered(self, mcc_mnc=None):
         netreg = self.dbus.interface(I_NETREG)
         prop = netreg.GetProperties()
         status = prop.get('Status')
@@ -515,6 +518,10 @@ class Modem(MS):
         if (mcc, mnc) == mcc_mnc:
             return True
         return False
+
+    def is_connected(self, mcc_mnc=None):
+        '''Convenience helper to keep old test API'''
+        return self.is_registered(mcc_mnc)
 
     def schedule_scan_register(self, mcc_mnc):
         if self.register_attempts > NETREG_MAX_REGISTER_ATTEMPTS:

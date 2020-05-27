@@ -296,13 +296,19 @@ class AmarisoftUE(MS):
             self.rem_host.scp('scp-cfg-rf-to-remote', self.config_rf_file, self.remote_config_rf_file)
             self.rem_host.scp('scp-ifup-to-remote', self.ifup_file, self.remote_ifup_file)
 
-    def is_connected(self, mcc_mnc=None):
+    def is_registered(self, mcc_mnc=None):
         # lteue doesn't call the ifup script until after it becomes attached, so
         # simply look for our ifup script output at the end of it:
         return 'netns %s configured' % (self.netns()) in (self.process.get_stdout() or '')
 
+    def is_rrc_connected(self):
+        return self.is_registered()
+
     def is_attached(self):
-        return self.is_connected()
+        return self.is_registered()
+
+    def get_assigned_addr(self, ipv6=False):
+        raise log.Error('API not implemented!')
 
     def running(self):
         return not self.process.terminated()

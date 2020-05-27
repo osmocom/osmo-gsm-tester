@@ -19,6 +19,7 @@
 
 import os
 import pprint
+import re
 
 from ..core import log, util, config, template, process, remote
 from ..core import schema
@@ -300,11 +301,26 @@ class srsUE(MS):
             self.rem_host.recreate_remote_dir(self.remote_run_dir)
             self.rem_host.scp('scp-cfg-to-remote', self.config_file, self.remote_config_file)
 
-    def is_connected(self, mcc_mnc=None):
+    def is_rrc_connected(self):
+        ''' Check whether UE is RRC connected using console message '''
+        pos_connected = (self.process.get_stdout() or '').rfind('RRC Connected')
+        pos_released = (self.process.get_stdout() or '').rfind('RRC IDLE')
+        return pos_connected > pos_released
+
+    def is_registered(self, mcc_mnc=None):
+        ''' Checks if UE is EMM registered '''
         return 'Network attach successful.' in (self.process.get_stdout() or '')
 
-    def is_attached(self):
-        return self.is_connected()
+    def get_assigned_addr(self, ipv6=False):
+        if ipv6:
+            raise log.Error('IPv6 not implemented!')
+        else:
+            stdout_lines = (self.process.get_stdout() or '').splitlines()
+            for line in reversed(stdout_lines):
+                if line.find('Network attach successful. IP: ') != -1:
+                    ipv4_addr = re.findall( r'[0-9]+(?:\.[0-9]+){3}', line)
+                    return ipv4_addr[0]
+            return None
 
     def running(self):
         return not self.process.terminated()

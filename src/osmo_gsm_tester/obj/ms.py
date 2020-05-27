@@ -77,6 +77,20 @@ class MS(log.Origin, metaclass=ABCMeta):
             raise log.Error('MS type not supported:', ms_type)
         return ms_class(testenv, conf)
 
+    @abstractmethod
+    def is_registered(self, mcc_mnc=None):
+        '''Check whether MS is considered registered with the target network. In
+        2G networks, and MS is registered if it had a successful Location Update
+        in CS. In 4G networks, an UE is considered registered with the core
+        network if it has obtained and IP address. If MCC/MNC are given it tries
+        to manually register against that specific network.'''
+        pass
+
+    @abstractmethod
+    def get_assigned_addr(self, ipv6=False):
+        ''' Returns last assigned IP address '''
+        pass
+
 ###################
 # PUBLIC (test API included)
 ###################

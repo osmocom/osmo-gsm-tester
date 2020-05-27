@@ -323,18 +323,30 @@ class srsUE(MS):
         proc.launch_sync()
         return proc
 
-    def _get_counter_handover_success(self):
-        # Match against sample line: "HO success"
+    def _get_counter_stdout(self, keyword):
+        # Match stdout against keyword
         n = 0
         stdout_lines = (self.process.get_stdout() or '').splitlines()
         for l in stdout_lines:
-            if l == 'HO successful':
+            if keyword in l:
                 n += 1
         return n
 
     def get_counter(self, counter_name):
         if counter_name == 'handover_success':
-            return self._get_counter_handover_success()
+            return self._get_counter_stdout('HO successful')
+        if counter_name == 'prach_sent':
+            return self._get_counter_stdout('Random Access Transmission')
+        if counter_name == 'paging_received':
+            return self._get_counter_stdout('S-TMSI match in paging message')
+        if counter_name == 'reestablishment_attempts':
+            return self._get_counter_stdout('RRC Connection Reestablishment')
+        if counter_name == 'reestablishment_ok':
+            return self._get_counter_stdout('Reestablishment OK')
+        if counter_name == 'rrc_connected_transitions':
+            return self._get_counter_stdout('RRC Connected')
+        if counter_name == 'rrc_idle_transitions':
+            return self._get_counter_stdout('RRC IDLE')
         raise log.Error('counter %s not implemented!' % counter_name)
 
     def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt', window=1):

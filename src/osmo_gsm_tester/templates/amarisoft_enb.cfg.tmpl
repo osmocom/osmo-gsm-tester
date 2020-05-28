@@ -152,11 +152,13 @@
     sr_period: 20,
 
     /* CQI report config */
-    cqi_period: 40, /* period (ms). Must be >= 32 for HD-FDD */
+    cqi_period: 160, /* period (ms). Must be >= 32 for HD-FDD */
 
     /* RI reporting is done with a period of m_ri * cqi_period.
        m_ri = 0 (default) disables RI reporting. */
-//    m_ri: 8,
+    % if int(enb.get('transmission_mode')) > 1:
+      m_ri: 8,
+    % endif
 
     pucch_dedicated: {
         /* ack/nack feedback mode when carrier aggregation is

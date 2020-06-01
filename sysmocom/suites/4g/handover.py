@@ -70,7 +70,7 @@ except Exception as e:
             print("Exception while terminating process %r" % repr(process))
     raise e
 
-rest_str = 'Got %d successful handovers (>= %d) during %d seconds' % (num_handovers, threshold, duration)
+res_str = 'Got %d successful handovers (>= %d) during %d seconds' % (num_handovers, threshold, duration)
 print(res_str)
 test.set_report_stdout(res_str)
 proc.terminate()

@@ -52,19 +52,13 @@ def on_register_schemas():
 
 #reference: srsLTE.git srslte_symbol_sz()
 def num_prb2symbol_sz(num_prb):
-    if num_prb <= 6:
+    if num_prb == 6:
         return 128
-    if num_prb <= 15:
-        return 256
-    if num_prb <= 25:
-        return 384
-    if num_prb <= 50:
+    if num_prb == 50:
         return 768
-    if num_prb <= 75:
+    if num_prb == 75:
         return 1024
-    if num_prb <= 110:
-        return 1536
-    raise log.Error('invalid num_prb %r', num_prb)
+    return 1536
 
 def num_prb2base_srate(num_prb):
     return num_prb2symbol_sz(num_prb) * 15 * 1000

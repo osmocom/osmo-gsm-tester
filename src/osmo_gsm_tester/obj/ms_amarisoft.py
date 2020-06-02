@@ -45,8 +45,6 @@ def num_prb2symbol_sz(num_prb):
         return 128
     if num_prb <= 15:
         return 256
-    if num_prb <= 25:
-        return 384
     if num_prb <= 50:
         return 768
     if num_prb <= 75:

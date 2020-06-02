@@ -252,8 +252,13 @@ class srsENB(enb.eNodeB):
             max_rate = max_phy_rate_tm1_ul[self.num_prb()]
 
         # MIMO only supported for Downlink
-        if downlink and self._txmode > 2:
-            max_rate *= 2
+        if downlink:
+            if self._txmode > 2:
+                max_rate *= 2
+
+            # For 6 PRBs the max throughput is significantly lower
+            if self._txmode >= 2 and self.num_prb() == 6:
+                max_rate *= 0.85
 
         return max_rate
 

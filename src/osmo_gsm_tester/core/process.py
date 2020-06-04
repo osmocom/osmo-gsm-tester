@@ -196,7 +196,6 @@ class Process(log.Origin):
             self.terminate()
             raise e
         if raise_nonsuccess and self.result != 0:
-            log.ctx(self)
             raise log.Error('Exited in error %d' % self.result)
         return self.result
 

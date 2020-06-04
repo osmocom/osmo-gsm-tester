@@ -318,8 +318,12 @@ def ctx_obj(origin_or_str):
     f = sys._getframe(2)
     if origin_or_str is None:
         f.f_locals.pop(LOG_CTX_VAR, None)
-    else:
-        f.f_locals[LOG_CTX_VAR] = origin_or_str
+        return
+    if isinstance(origin_or_str, Origin) and origin_or_str is f.f_locals.get('self'):
+        # Avoid adding log ctx in stack frame where Origin it is already "self",
+        # it is not needed and will make find_on_stack() to malfunction
+        raise Error('Don\'t use log.ctx(self), it\'s not needed!')
+    f.f_locals[LOG_CTX_VAR] = origin_or_str
 
 class OriginLoopError(Error):
     pass

@@ -619,5 +619,109 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     pass: test_suite_params.py (N.N sec)
+- test with template overlay
+cnf suiteC: DBG: reading suite.conf  [suite.py:[LINENR]]
+
+---------------------------------------------------------------------
+trial suiteC
+---------------------------------------------------------------------
+tst suiteC: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
+tst suiteC: DBG: {combining='resources'}  [suite.py:[LINENR]]
+tst {combining_scenarios='resources'}: DBG: {definition_conf={ip_address=[{'addr': '10.42.42.2'}]}}  [suiteC↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
+tst suiteC: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
+tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
+tst suiteC: Reserving 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
+  addr: 10.42.42.2
+  [resource.py:[LINENR]]
+
+----------------------------------------------
+trial suiteC test_template_overlay.py
+----------------------------------------------
+tst test_template_overlay.py:[LINENR]: - Testing: expect to fail on invalid templates overlay dir  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]: sucess: setting non-existing templates dir raised RuntimeError  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]:   [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+--- ReservedResources: DBG: requesting use of ip_address {specifics={}}  [resource.py:[LINENR]]
+tst suiteC: Using 1 x ip_address (candidates: 1)  [resource.py:[LINENR]]
+tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
+  _reserved_by: suiteC-[ID_NUM]-[ID_NUM]
+  addr: 10.42.42.2
+  [resource.py:[LINENR]]
+--- ReservedResources: DBG: {available=1}  [resource.py:[LINENR]]
+--- ReservedResources: DBG: {using={_hash='fd103b22c7cf2480d609150e06f4bbd92ac78d8c', _reserved_by='suiteC-[ID_NUM]-[ID_NUM]', addr='10.42.42.2'}}  [resource.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]: - Testing: original template  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: {config_file='test_trial_tmp/test_run_6/suiteC/test_template_overlay.py/osmo-stp_10.42.42.2/osmo-stp.cfg'}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+tst suiteC: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: STP CONFIG:
+{'stp': {'ip_address': {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
+                        '_reserved_by': 'suiteC-[ID_NUM]-[ID_NUM]',
+                        '_used': True,
+                        'addr': '10.42.42.2'}}}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+cnf Templates: DBG: rendering osmo-stp.cfg.tmpl  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪Templates]  [template.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: ! Configuration rendered by osmo-gsm-tester
+log stderr
+ logging filter all 1
+ logging color 1
+ logging print category 1
+ logging print extended-timestamp 1
+ logging level set-all debug
+line vty
+ no login
+ bind 10.42.42.2
+!ctrl
+! bind 10.42.42.2
+cs7 instance 0
+ xua rkm routing-key-allocation dynamic-permitted
+ listen m3ua 2905
+  accept-asp-connections dynamic-permitted
+  local-ip 10.42.42.2
+  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]: - Testing:overlay template  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]: - After creating the new template, still old template is used  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: {config_file='test_trial_tmp/test_run_6/suiteC/test_template_overlay.py/osmo-stp_10.42.42_2.2/osmo-stp.cfg'}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: STP CONFIG:
+{'stp': {'ip_address': {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
+                        '_reserved_by': 'suiteC-[ID_NUM]-[ID_NUM]',
+                        '_used': True,
+                        'addr': '10.42.42.2'}}}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+cnf Templates: DBG: rendering osmo-stp.cfg.tmpl  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪Templates]  [template.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: ! Configuration rendered by osmo-gsm-tester
+log stderr
+ logging filter all 1
+ logging color 1
+ logging print category 1
+ logging print extended-timestamp 1
+ logging level set-all debug
+line vty
+ no login
+ bind 10.42.42.2
+!ctrl
+! bind 10.42.42.2
+cs7 instance 0
+ xua rkm routing-key-allocation dynamic-permitted
+ listen m3ua 2905
+  accept-asp-connections dynamic-permitted
+  local-ip 10.42.42.2
+  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]: - New template is used after re-generating cache with set_overlay_template_dir:  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: {config_file='test_trial_tmp/test_run_6/suiteC/test_template_overlay.py/osmo-stp_10.42.42_3.2/osmo-stp.cfg'}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: STP CONFIG:
+{'stp': {'ip_address': {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
+                        '_reserved_by': 'suiteC-[ID_NUM]-[ID_NUM]',
+                        '_used': True,
+                        'addr': '10.42.42.2'}}}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+cnf Templates: DBG: rendering osmo-stp.cfg.tmpl  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪Templates]  [template.py:[LINENR]]
+run osmo-stp_10.42.42.2: DBG: ! Overlay Config file genreated by test
+line vty
+ no login
+ bind 10.42.42.2
+          [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
+tst test_template_overlay.py:[LINENR] Test passed (N.N sec)  [suiteC↪test_template_overlay.py]  [test.py:[LINENR]]
+---------------------------------------------------------------------
+trial suiteC PASS
+---------------------------------------------------------------------
+PASS: suiteC (pass: 1)
+    pass: test_template_overlay.py (N.N sec)
 
 - graceful exit.

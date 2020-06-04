@@ -31,6 +31,8 @@ def default_templates_dir():
     return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
 
 def set_templates_dir(*templates_dirs):
+    '''Set a lit of directories to look for templates. It must be called
+       everytime a template file is updated.'''
     global _lookup
     global _logger
     if not templates_dirs:

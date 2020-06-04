@@ -35,7 +35,6 @@ class OsmoStp(log.Origin):
 
     def start(self):
         self.log('Starting osmo-stp')
-        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
 
         inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-stp')))
@@ -61,6 +60,7 @@ class OsmoStp(log.Origin):
         self.process.launch()
 
     def configure(self):
+        self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.config_file = self.run_dir.new_file('osmo-stp.cfg')
         self.dbg(config_file=self.config_file)
 

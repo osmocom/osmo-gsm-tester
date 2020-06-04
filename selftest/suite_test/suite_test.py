@@ -105,6 +105,13 @@ print(repr(s.reserved_resources))
 results = s.run_tests('test_suite_params.py')
 print(report.suite_to_text(s))
 
+print('- test with template overlay')
+trial = FakeTrial()
+s_def = suite.load('suiteC')
+s = suite.SuiteRun(trial, 'suiteC', s_def)
+results = s.run_tests('test_template_overlay.py')
+print(report.suite_to_text(s))
+
 print('\n- graceful exit.')
 #deleting generated tmp trial dir:
 shutil.rmtree(example_trial_dir, ignore_errors=True)

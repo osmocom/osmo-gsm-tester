@@ -24,6 +24,7 @@
 import sys
 
 from .core import process
+from .core import template
 from .core import log as log_module
 from .core import process as process_module
 from .core import resource
@@ -139,12 +140,21 @@ class TestEnv(log_module.Origin):
         self.suite_run.reserved_resources.put_all()
         MainLoop.unregister_poll_func(self.poll)
         self.test_import_modules_cleanup()
+        self.set_overlay_template_dir(None)
 
     def config_suite_specific(self):
         return self.suite_run.config_suite_specific()
 
     def config_test_specific(self):
         return self.suite_run.config_suite_specific().get(self._test.module_name(), {})
+
+    def set_overlay_template_dir(self, template_dir=None):
+        '''Overlay a directory on top of default one when looking for
+           directories. It must be called everytime a template file is updated.'''
+        if template_dir is None:
+            template.set_templates_dir(template.default_templates_dir())
+        else:
+            template.set_templates_dir(template_dir, template.default_templates_dir())
 
     def prompt(self, *msgs, **msg_details):
         'ask for user interaction. Do not use in tests that should run automatically!'

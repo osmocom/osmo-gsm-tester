@@ -1,0 +1,6 @@
+# For 'test_template_overlay.py', it's fine having this directory completely
+# empy. However, we need a file in this directory so it can be stored in git.
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore

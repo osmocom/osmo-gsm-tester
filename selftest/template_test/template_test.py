@@ -92,4 +92,13 @@ except RuntimeError:
     print('sucess: setting non-existing templates dir raised RuntimeError\n')
     pass
 
+mytemplatedir = os.path.join(os.path.dirname(__file__), 'mytemplatedir')
+template.set_templates_dir(mytemplatedir, template.default_templates_dir())
+print('- Testing: template directory overlay (still can find default one?)')
+print(template.render('osmo-nitb.cfg', vals))
+print('- Testing: template directory overlay (present in both dirs)')
+print(template.render('osmo-bsc.cfg', dict(foo=dict(bar=dict(works='yes')))))
+print('- Testing: template directory overlay (present only on overlay dir)')
+print(template.render('mytemplate.cfg', dict(one=dict(two=dict(works='yes')))))
+
 # vim: expandtab tabstop=4 shiftwidth=4

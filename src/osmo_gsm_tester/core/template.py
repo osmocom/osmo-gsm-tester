@@ -27,12 +27,14 @@ from .util import dict2obj
 _lookup = None
 _logger = log.Origin(log.C_CNF, 'no templates dir set')
 
+def default_templates_dir():
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
+
 def set_templates_dir(*templates_dirs):
     global _lookup
     global _logger
     if not templates_dirs:
-        # default templates dir is relative to this source file
-        templates_dirs = [os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')]
+            raise RuntimeError('templates dir list is empty!')
     for d in templates_dirs:
         if not os.path.isdir(d):
             raise RuntimeError('templates dir is not a dir: %r'
@@ -45,7 +47,7 @@ def render(name, values):
        ".tmpl" is added to the name to look it up in the templates dir.'''
     global _lookup
     if _lookup is None:
-        set_templates_dir()
+        set_templates_dir(default_templates_dir())
     tmpl_name = name + '.tmpl'
     log.ctx(tmpl_name)
     template = _lookup.get_template(tmpl_name)

@@ -30,7 +30,6 @@ from .core import resource
 from .core.event_loop import MainLoop
 
 suite = None
-resources = None
 log = None
 dbg = None
 err = None
@@ -330,10 +329,9 @@ def setup(suite_run, _test):
     from .core.event_loop import MainLoop
     from .obj.sms import Sms as Sms_class
 
-    global test, resources, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process, tenv
+    global test, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process, tenv
 
     test = _test
-    resources = suite_run.reserved_resources # TODO: remove this global, only used in selftest
     log = test.log
     dbg = test.dbg
     err = test.err

@@ -1,14 +1,14 @@
-ip_address = resources.ip_address()
-nitb = resources.nitb()
-bts = resources.bts()
-ms_mo = resources.modem()
-ms_mt = resources.modem()
+ip_address = tenv.ip_address()
+nitb = tenv.nitb()
+bts = tenv.bts()
+ms_mo = tenv.modem()
+ms_mt = tenv.modem()
 
 nitb.start(ip_address)
 bts.start(nitb)
 
-nitb.add_subscriber(ms_mo, resources.msisdn())
-nitb.add_subscriber(ms_mt, resources.msisdn())
+nitb.add_subscriber(ms_mo, tenv.msisdn())
+nitb.add_subscriber(ms_mt, tenv.msisdn())
 
 ms_mo.start()
 ms_mt.start()

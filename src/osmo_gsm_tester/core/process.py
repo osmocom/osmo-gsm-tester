@@ -196,7 +196,7 @@ class Process(log.Origin):
             self.terminate()
             raise e
         if raise_nonsuccess and self.result != 0:
-            raise log.Error('Exited in error %d' % self.result)
+            raise self.RunError('launch_sync()')
         return self.result
 
     def respawn(self):
@@ -357,6 +357,11 @@ class Process(log.Origin):
             self.process_obj.stdin.write(cmd.encode("utf-8"))
             self.process_obj.stdin.flush()
 
+    def RunError(self, msg_prefix):
+        'Get a log.Error filled in with Result information. Use when program is terminated and result !=0'
+        msg = '%s: local process exited with status %d' % (msg_prefix, self.result)
+        return log.Error(msg)
+
 class RemoteProcess(Process):
 
     def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, remote_env={}, **popen_kwargs):
@@ -381,6 +386,17 @@ class RemoteProcess(Process):
                                          ' '.join(['%s=%r'%(k,v) for k,v in self.remote_env.items()]),
                                          ' '.join(self.popen_args))]
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs, remote_env=self.remote_env)
+
+    def RunError(self, msg_prefix):
+        'Overwrite Process method with ssh extra information'
+        # man ssh states it returns 255 if an ssh error occurred:
+        msg = msg_prefix + ': '
+        if self.result == 255:
+            tail = ' (' + (self.get_stderr_tail(tail=1, prefix='') or '').rstrip() + ')'
+            msg += 'local ssh process exited with status %d%s' % (self.result, tail if 'ssh' in tail else '')
+        else:
+            msg += 'remote process exited with status %d' % (self.result)
+        return log.Error(msg)
 
 class NetNSProcess(Process):
     NETNS_EXEC_BIN = 'osmo-gsm-tester_netns_exec.sh'

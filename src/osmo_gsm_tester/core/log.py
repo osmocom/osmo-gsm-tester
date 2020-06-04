@@ -88,8 +88,17 @@ DATEFMT = '%H:%M:%S.%f'
 get_process_id = lambda: '%d-%d' % (os.getpid(), time.time())
 
 class Error(Exception):
-    def __init__(self, *messages, **named_items):
-        super().__init__(compose_message(messages, named_items))
+    def __init__(self, *messages, origin=None, **named_items):
+        msg = ''
+        if origin is None:
+            origin = Origin.find_on_stack(f=sys._getframe(1))
+        if origin:
+            msg += origin.name() + ': '
+        msg += compose_message(messages, named_items)
+        if origin and origin._parent is not None:
+            deeper_origins = origin.ancestry_str()
+            msg += ' [%s]' % deeper_origins
+        super().__init__(msg)
 
 class LogTarget:
     all_targets = []

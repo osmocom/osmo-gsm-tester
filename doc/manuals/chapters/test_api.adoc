@@ -1,4 +1,107 @@
 == Test API
 
-*TODO* (in the meantime, look at src/osmo_gsm_tester/test.py, as well as
-suite.py, which calls the test's setup() function to get an idea)
+All tests run by {app-name} are python script files. On top of usual python
+standard features, {app-name} provides a set of public APIs and tools that
+these tests can use in order to interact with the core of {app-name}, like
+creating object classes, run processes synchronously or asynchronously, wait for
+events, retrieve specific configuration, etc. This section aims at documenting
+the most relevant tools available for tests.
+
+First of all, it is important to avoid blocking out of the core's main event loop in
+the test, since doing that will prevent {app-name} core functionalities to work
+properly, such as control of asynchronous processes.
+
+To get access to those functionalities, a test must import a test environment
+previously prepared by {app-name} before the test was started:
+[source,python]
+----
+#!/usr/bin/env python3
+from osmo_gsm_tester.testenv import *
+----
+
+After the test environment is imported, aome usual functionalities are available
+directly under the global scope. Specially noticeable is the existence of object
+_tenv_, which provides access to most of the functionalities.
+
+The test can simply ask {app-name} to sleep some time, while giving control back
+to {app-name} core's mainloop:
+[source,python]
+----
+sleep(3) # sleep for 3 seconds
+----
+
+One can also wait for events in the background, for instance launch a child
+process locally in the same host and wait for its termination:
+[source,python]
+----
+proc = process.Process('process_description_name', working_dir_to_store_logs, 'sleep 4') <1>
+tenv.remember_to_stop(proc) <2>
+proc.launch() <3>
+proc.wait() <4>
+----
+<1> Create process object. This line doesn't yet runs it.
+<2> Make sure the core will kill the process if this test fails
+<3> Start process asynchronously
+<4> wait until process is done. One could waiting generically here too: _wait(proc.terminated)_
+
+If running asynchronously is not needed, one can run synchronously in an easy
+way:
+[source,python]
+----
+proc = process.Process('process_description_name', working_dir_to_store_logs, 'sleep 4')
+proc.launch_sync()
+----
+
+One can also log output using either the regular _print_ function from python,
+or using {app-name} specific functions available:
+[source,python]
+----
+log('this is a regular log message')
+dbg('this is a dbg message, only printed on outputs where dbg is enabled')
+err('outputs log message for non-expected events')
+print('this is the same as log()')
+----
+
+The test also gains access to suite and/or test specific configuration through
+different APIs:
+[source,python]
+----
+test_config = tenv.config_test_specific()
+threshold = int(test_config.get('threshold', 2))
+suite_config = tenv.config_suite_specific()
+foobar = suite_config['foobar']
+----
+
+A test requiring a really specific config file for an object class it is going
+to run can provide its own template files by overlaying an own directory
+containing them on top of the usual default directory where object class
+templates are (_osmo-gsm-tester.git/src/osmo_gsm_tester/obj/templates/_):
+[source,python]
+----
+tenv.set_overlay_template_dir(os.path.join(os.path.dirname(__file__), 'mytemplatedir'))
+----
+
+Several tests in a suite can also share code by using some APIs provided by
+{app-names}. The shared python code must be placed in files under the 'lib/'
+subdirectory in the suite directory where the test belongs to.
+[source,python]
+----
+# File containing function foobar() available under ${suite_dir}/lib/testlib.py:
+import testlib
+tenv.test_import_modules_register_for_cleanup(testlib)
+from testlib import foobar
+----
+
+For a complete set of features and how to use them, one can have a look at real
+examples present in {app-name} git repository under the _sysmocom/_ directory.
+Besides those, have a look too a _testenv.py_ file, which implements the 'tenv'
+object available to tests.
+
+=== Test verdict
+
+In general, a test reaching the end of the file and returning control to
+{app-name} core will be flagged as a successful test (PASS).
+
+If an exception is thrown from within the test file and propagated to
+{app-name}, the test will be considered as failed and {app-name} will store all
+failure related information from the caught exception.

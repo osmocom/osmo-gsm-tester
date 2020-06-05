@@ -70,6 +70,7 @@ def trial_to_junit(trial):
     testsuites.set('errors', str(num_errors))
     testsuites.set('failures', str(num_failures))
     testsuites.set('time', str(math.ceil(time)))
+    testsuites.set('name', trial.name())
     return testsuites
 
 def suite_to_junit(suite):

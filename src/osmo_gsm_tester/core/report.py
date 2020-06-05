@@ -46,6 +46,14 @@ def escape_xml_invalid_characters(str):
     replacement_char = '\uFFFD' # Unicode replacement character
     return invalid_xml_char_ranges_regex.sub(replacement_char, escape(str))
 
+def hash_info_to_junit(testsuite, hash_info):
+    properties = et.SubElement(testsuite, 'properties')
+    for key, val in hash_info.items():
+        prop = et.SubElement(properties, 'property')
+        prop.set('name', 'ref:' + key)
+        prop.set('value', val)
+
+
 def trial_to_junit_write(trial, junit_path):
     elements = et.ElementTree(element=trial_to_junit(trial))
     elements.write(junit_path)
@@ -57,8 +65,10 @@ def trial_to_junit(trial):
     num_errors = 0
     time = 0
     id = 0
+    hash_info = trial.get_all_inst_hash_info()
     for suite in trial.suites:
         testsuite = suite_to_junit(suite)
+        hash_info_to_junit(testsuite, hash_info)
         testsuite.set('id', str(id))
         id += 1
         testsuites.append(testsuite)

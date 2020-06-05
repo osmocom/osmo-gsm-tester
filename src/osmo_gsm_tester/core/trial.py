@@ -21,6 +21,7 @@ import os
 import time
 import shutil
 import tarfile
+import pathlib
 
 from . import log
 from . import util
@@ -211,6 +212,22 @@ class Trial(log.Origin):
             junit_path = self.get_run_dir().new_file(self.name()+'.xml')
             self.log('Storing JUnit report in', junit_path)
             report.trial_to_junit_write(self, junit_path)
+
+    def get_all_inst_hash_info(self):
+        d = {}
+        pathlist = pathlib.Path(str(self.inst_dir)).glob('**/*git_hashes.txt')
+        for path in pathlist:
+            # because path is object not string
+            abs_path_str = str(path) # because path is object not string
+            dir, file = os.path.split(abs_path_str)
+            reldir = os.path.relpath(dir, str(self.inst_dir)).rstrip(os.sep)
+            with open(abs_path_str, 'r') as f:
+                for line in [l.strip() for l in f.readlines()]:
+                    if not line:
+                        continue
+                    hash, proj = tuple(line.split(' ', 1))
+                d[os.path.join(reldir,proj)] = hash
+        return d
 
     def log_report(self):
         log.large_separator(self.name(), self.status)

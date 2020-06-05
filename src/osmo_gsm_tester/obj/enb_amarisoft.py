@@ -253,8 +253,12 @@ class AmarisoftENB(enb.eNodeB):
             max_rate = max_phy_rate_tm1_ul[self.num_prb()]
 
         # MIMO only supported for Downlink
-        if downlink and self._txmode > 2:
-            max_rate *= 2
+        if downlink:
+            if self._txmode > 2:
+                max_rate *= 2
+            # Lower max MCS for TM2 and above results in lower max rate
+            if self._txmode >= 2 and self.num_prb() <= 25:
+                max_rate *= 0.85
 
         return max_rate
 

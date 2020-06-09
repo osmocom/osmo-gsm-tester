@@ -46,4 +46,4 @@ print('Starting osmocon')
 osmocon.start()
 
 testdir = os.path.dirname(os.path.realpath(__file__))
-run_ttcn3(tenv. test, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute)
+run_ttcn3(tenv, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute)

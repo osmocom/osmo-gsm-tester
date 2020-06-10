@@ -88,6 +88,6 @@ network_remove
 
 echo "Copying TTCN3 junit file to $JUNIT_TTCN3_DST_FILE"
 cp $VOL_BASE_DIR/bts-tester/junit-xml-*.log $JUNIT_TTCN3_DST_FILE
-sed -i "s#classname='BTS_Tests'#classname='$(basename $JUNIT_TTCN3_DST_FILE)'#g" $JUNIT_TTCN3_DST_FILE
+sed -i "s#classname='BTS_Tests'#classname='$(basename $JUNIT_TTCN3_DST_FILE '.xml')'#g" $JUNIT_TTCN3_DST_FILE
 
 exit $child_exit_code

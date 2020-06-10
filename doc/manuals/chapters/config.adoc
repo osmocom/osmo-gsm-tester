@@ -326,15 +326,15 @@ should be used.
 
 A 'resources.conf' is validated by the <<schema_resources,resources schema>>.
 That means it is structured as a list of items for each resource type, where
-each item has one or more attributes -- for an example, see
-<<resources_conf_example>>.
+each item has one or more attributes -- looking for an example, see {app-name}
+subdirectory _doc/examples_.
 
 Side note: at first sight it might make sense to the reader to rather structure
 e.g. the 'ip_address' or 'arfcn' configuration as +
 '"arfcn: GSM-1800: [512, 514, ...]"', +
-but the more verbose format is chosen to stay consistent with the general
-structure of resource configurations, which the resource allocation algorithm
-uses to resolve required resources according to their traits. These
+but the more verbose format is chosen in general to stay consistent with the
+general structure of resource configurations, which the resource allocation
+algorithm uses to resolve required resources according to their traits. These
 configurations look cumbersome because they exhibit only one trait / a trait
 that is repeated numerous times. No special notation for these cases is
 available (yet).

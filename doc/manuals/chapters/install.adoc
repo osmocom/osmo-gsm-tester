@@ -309,7 +309,7 @@ Details:
     wide install, in which case you could omit the explicit PATH to
     "$PWD/osmo-gsm-tester/src".
 *** This assumes that there are configuration files for osmo-gsm-tester placed
-    on the system (see <<config_paths>>).
+    on the system (see <<config_main>>).
 *** If you'd like to check the behavior of test failures, you can uncomment the
     line below "# debug" to produce a build failure on every run. Note that
     this test typically produces a quite empty run result, since it launches no
@@ -687,4 +687,4 @@ sed -i 's#\./suites#/usr/local/src/osmo-gsm-tester/suites#' osmo-gsm-tester/path
 ----
 
 NOTE: The configuration will be looked up in various places, see
-<<config_paths>>.
+<<config_main>>.

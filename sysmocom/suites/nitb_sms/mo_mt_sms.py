@@ -22,8 +22,8 @@ ms_mo.log_info()
 ms_mt.log_info()
 
 print('waiting for modems to attach...')
-wait(ms_mo.is_connected, nitb.mcc_mnc())
-wait(ms_mt.is_connected, nitb.mcc_mnc())
+wait(ms_mo.is_registered, nitb.mcc_mnc())
+wait(ms_mt.is_registered, nitb.mcc_mnc())
 wait(nitb.subscriber_attached, ms_mo, ms_mt)
 
 sms = ms_mo.sms_send(ms_mt)

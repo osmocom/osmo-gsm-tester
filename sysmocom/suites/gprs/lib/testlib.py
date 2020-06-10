@@ -85,7 +85,7 @@ def setup_run_iperf3_test_parallel(num_ms, ready_cb=None):
 
     print('waiting for modems to attach...')
     for ms in ms_li:
-        wait(ms.is_connected, msc.mcc_mnc())
+        wait(ms.is_registered, msc.mcc_mnc())
     wait(msc.subscriber_attached, *ms_li)
 
     print('waiting for modems to attach to data services...')

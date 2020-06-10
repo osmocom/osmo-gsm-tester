@@ -18,5 +18,5 @@ ms.connect(nitb.mcc_mnc())
 
 print(ms.info())
 
-wait(ms.is_connected, nitb.mcc_mnc())
+wait(ms.is_registered, nitb.mcc_mnc())
 wait(nitb.subscriber_attached, ms)

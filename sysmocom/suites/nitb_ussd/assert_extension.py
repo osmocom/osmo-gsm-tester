@@ -19,7 +19,7 @@ ms.connect(nitb.mcc_mnc())
 ms.log_info()
 
 print('waiting for modems to attach...')
-wait(ms.is_connected, nitb.mcc_mnc())
+wait(ms.is_registered, nitb.mcc_mnc())
 wait(nitb.subscriber_attached, ms)
 
 # ofono (qmi) currently changes state to 'registered' jut after sending

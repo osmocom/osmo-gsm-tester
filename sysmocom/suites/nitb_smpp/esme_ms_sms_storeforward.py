@@ -38,7 +38,7 @@ umref = esme.sms_send_wait_resp(msg, esme.MSGMODE_STOREFORWARD, receipt=True)
 
 print('MS registers and will receive the SMS...')
 ms.connect(nitb.mcc_mnc())
-wait(ms.is_connected, nitb.mcc_mnc())
+wait(ms.is_registered, nitb.mcc_mnc())
 wait(nitb.subscriber_attached, ms)
 wait(ms.sms_was_received, msg)
 print('Waiting to receive and consume sms receipt with reference', umref)

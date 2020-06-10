@@ -519,10 +519,6 @@ class Modem(MS):
             return True
         return False
 
-    def is_connected(self, mcc_mnc=None):
-        '''Convenience helper to keep old test API'''
-        return self.is_registered(mcc_mnc)
-
     def schedule_scan_register(self, mcc_mnc):
         if self.register_attempts > NETREG_MAX_REGISTER_ATTEMPTS:
             raise log.Error('Failed to find Network Operator', mcc_mnc=mcc_mnc, attempts=self.register_attempts)
@@ -547,7 +543,7 @@ class Modem(MS):
         # So far the easiest seems to check if we are now registered and
         # otherwise schedule a scan again.
         self.err('Scan() failed, retrying if needed:', e)
-        if not self.is_connected(mcc_mnc):
+        if not self.is_registered(mcc_mnc):
             self.schedule_scan_register(mcc_mnc)
         else:
             self.log('Already registered with network', mcc_mnc)
@@ -632,7 +628,7 @@ class Modem(MS):
         self.cancel_pending_dbus_methods()
         self.power_cycle()
         self.register_attempts = 0
-        if self.is_connected(mcc_mnc):
+        if self.is_registered(mcc_mnc):
             self.log('Already registered with', mcc_mnc if mcc_mnc else 'default network')
         else:
             self.log('Connect to', mcc_mnc if mcc_mnc else 'default network')

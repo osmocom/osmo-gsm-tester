@@ -26,7 +26,7 @@ iperf3srv.start()
 proc = iperf3cli.prepare_test_proc(iperf3cli.DIR_DL, ue.netns(), bitrate=max_rate)
 
 print('waiting for UE to attach...')
-wait(ue.is_connected, None)
+wait(ue.is_registered, None)
 print('UE is attached')
 
 print("Running iperf3 client to %s through %s" % (str(iperf3cli), ue.netns()))

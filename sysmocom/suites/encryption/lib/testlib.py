@@ -39,7 +39,7 @@ def encryption_test_setup_run(enable_auth, algo):
         sleep(40) # TODO: read pcap or CTRL interface and look for Rejected? (gsm_a.dtap.msg_mm_type == 0x04)
         print('Asserting modem did not register')
         # FIXME: this can fail because ofono qmi signals registered before being accepted by network. See OS#2458
-        # assert not ms.is_connected(msc.mcc_mnc())
+        # assert not ms.is_registered(msc.mcc_mnc())
         assert not msc.subscriber_attached(ms)
 
         hlr.subscriber_delete(ms)
@@ -50,5 +50,5 @@ def encryption_test_setup_run(enable_auth, algo):
     else:
         print('Attempt connection with wrong KI, should work as it is not used...')
     ms.connect(msc.mcc_mnc())
-    wait(ms.is_connected, msc.mcc_mnc())
+    wait(ms.is_registered, msc.mcc_mnc())
     wait(msc.subscriber_attached, ms)

@@ -31,7 +31,7 @@ while True:
   elif 'wait-registered'.startswith(cmd):
     try:
       for m in modems:
-         wait(m.is_connected, nitb.mcc_mnc())
+         wait(m.is_registered, nitb.mcc_mnc())
       wait(nitb.subscriber_attached, *modems)
     except Timeout:
       print('Timeout while waiting for registration.')

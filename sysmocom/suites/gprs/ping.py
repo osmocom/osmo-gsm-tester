@@ -40,7 +40,7 @@ ms.attach()
 ms.log_info()
 
 print('waiting for modems to attach...')
-wait(ms.is_connected, msc.mcc_mnc())
+wait(ms.is_registered, msc.mcc_mnc())
 wait(msc.subscriber_attached, ms)
 
 print('waiting for modems to attach to data services...')

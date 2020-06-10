@@ -76,8 +76,8 @@ ms_mo.log_info()
 ms_mt.log_info()
 
 print('waiting for modems to attach...')
-wait(ms_mo.is_connected, msc.mcc_mnc())
-wait(ms_mt.is_connected, msc.mcc_mnc())
+wait(ms_mo.is_registered, msc.mcc_mnc())
+wait(ms_mt.is_registered, msc.mcc_mnc())
 wait(msc.subscriber_attached, ms_mo)
 wait(msc.subscriber_attached, ms_mt)
 

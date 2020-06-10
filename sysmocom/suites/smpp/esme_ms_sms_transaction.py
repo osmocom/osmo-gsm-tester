@@ -38,7 +38,7 @@ ms.connect(msc.mcc_mnc())
 
 ms.log_info()
 print('waiting for modem to attach...')
-wait(ms.is_connected, msc.mcc_mnc())
+wait(ms.is_registered, msc.mcc_mnc())
 wait(msc.subscriber_attached, ms)
 
 print('sending first sms...')

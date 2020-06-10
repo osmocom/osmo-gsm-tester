@@ -16,7 +16,7 @@ print('ENB is connected to EPC')
 
 ue.connect(enb)
 print('waiting for UE to attach...')
-wait(ue.is_connected, None)
+wait(ue.is_registered, None)
 print('UE is attached')
 
 proc = ue.run_netns_wait('ping', ('ping', '-c', '10', epc.tun_addr()))

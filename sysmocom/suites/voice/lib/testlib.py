@@ -45,8 +45,8 @@ def test_mo_mt_call(use_osmux=False, force_osmux=False):
     ms_mt.log_info()
 
     print('waiting for modems to attach...')
-    wait(ms_mo.is_connected, msc.mcc_mnc())
-    wait(ms_mt.is_connected, msc.mcc_mnc())
+    wait(ms_mo.is_registered, msc.mcc_mnc())
+    wait(ms_mt.is_registered, msc.mcc_mnc())
     wait(msc.subscriber_attached, ms_mo, ms_mt)
 
     assert len(ms_mo.call_id_list()) == 0 and len(ms_mt.call_id_list()) == 0

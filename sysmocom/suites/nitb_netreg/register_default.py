@@ -18,5 +18,5 @@ ms.connect()
 
 print(ms.info())
 
-wait(ms.is_connected)
+wait(ms.is_registered)
 wait(nitb.subscriber_attached, ms)

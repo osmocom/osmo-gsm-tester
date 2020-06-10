@@ -47,7 +47,7 @@ class PowerSupply(log.Origin, metaclass=ABCMeta):
     def power_cycle(self, sleep=0):
         """Turns off the device, waits N.N seconds, then turn on the device."""
         self.power_set(False)
-        MainLoop.sleep(self, sleep)
+        MainLoop.sleep(sleep)
         self.power_set(True)
 
 def get_instance_by_type(pwsupply_type, pwsupply_opt):

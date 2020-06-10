@@ -345,13 +345,13 @@ def setup(suite_run, _test):
     log = test.log
     dbg = test.dbg
     err = test.err
-    wait = lambda *args, **kwargs: MainLoop.wait(suite_run, *args, **kwargs)
-    wait_no_raise = lambda *args, **kwargs: MainLoop.wait_no_raise(suite_run, *args, **kwargs)
-    sleep = lambda *args, **kwargs: MainLoop.sleep(suite_run, *args, **kwargs)
+    tenv = TestEnv(suite_run, _test)
+    wait = MainLoop.wait
+    wait_no_raise = MainLoop.wait_no_raise
+    sleep = MainLoop.sleep
     poll = MainLoop.poll
     Sms = Sms_class
     process = process_module
-    tenv = TestEnv(suite_run, _test)
     prompt = tenv.prompt
     return tenv
 

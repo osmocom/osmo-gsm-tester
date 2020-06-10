@@ -85,9 +85,8 @@ class EventLoop:
         self.gctx.iteration(may_block)
         self.deferred_handling.handle_queue()
 
-    def wait_no_raise(self, log_obj, condition, condition_args, condition_kwargs, timeout, timestep):
+    def wait_no_raise(self, condition, condition_args, condition_kwargs, timeout, timestep):
         if not timeout or timeout < 0:
-            self = log_obj
             raise log.Error('wait() *must* time out at some point.', timeout=timeout)
         if timestep < 0.1:
             timestep = 0.1
@@ -105,14 +104,13 @@ class EventLoop:
                 success = wait_req.condition_ack
                 return success
 
-    def wait(self, log_obj, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
-        if not self.wait_no_raise(log_obj, condition, condition_args, condition_kwargs, timeout, timestep):
-            log.ctx(log_obj)
+    def wait(self, condition, *condition_args, timeout=300, timestep=1, **condition_kwargs):
+        if not self.wait_no_raise(condition, condition_args, condition_kwargs, timeout, timestep):
             raise log.Error('Wait timeout', condition=condition, timeout=timeout, timestep=timestep)
 
-    def sleep(self, log_obj, seconds):
+    def sleep(self, seconds):
         assert seconds > 0.
-        self.wait_no_raise(log_obj, lambda: False, [], {}, timeout=seconds, timestep=seconds)
+        self.wait_no_raise(lambda: False, [], {}, timeout=seconds, timestep=seconds)
 
 
 MainLoop = EventLoop()

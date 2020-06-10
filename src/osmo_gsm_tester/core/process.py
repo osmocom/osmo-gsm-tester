@@ -347,7 +347,7 @@ class Process(log.Origin):
         return self.result is not None
 
     def wait(self, timeout=300):
-        MainLoop.wait(self, self.terminated, timeout=timeout)
+        MainLoop.wait(self.terminated, timeout=timeout)
 
     def stdin_write(self, cmd):
         '''

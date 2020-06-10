@@ -48,7 +48,7 @@ class PowerSupplySispm(PowerSupply):
             except USBError as e:
                     if e.errno == 16 or e.errno==110:
                         self.log('skip usb error, retry', repr(e))
-                        MainLoop.sleep(self, 0.1)
+                        MainLoop.sleep(0.1)
                         continue
                     raise e
 

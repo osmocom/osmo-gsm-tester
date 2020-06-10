@@ -317,7 +317,7 @@ class ModemDbusInteraction(log.Origin):
         self.log('Setting', name, val)
         self.interface(iface).SetProperty(name, Variant('b', val))
 
-        MainLoop.wait(self, self.property_is, name, bool_val)
+        MainLoop.wait(self.property_is, name, bool_val)
 
     def set_powered(self, powered=True):
         self.set_bool('Powered', powered)
@@ -461,10 +461,10 @@ class Modem(MS):
                 if not self.is_powered():
                         self.set_powered()
                 # wait for SimManager iface to appear after we power on
-                MainLoop.wait(self, self.dbus.has_interface, I_SIMMGR, timeout=10)
+                MainLoop.wait(self.dbus.has_interface, I_SIMMGR, timeout=10)
                 simmgr = self.dbus.interface(I_SIMMGR)
                 # If properties are requested quickly, it may happen that Sim property is still not there.
-                MainLoop.wait(self, lambda: simmgr.GetProperties().get('SubscriberIdentity', None) is not None, timeout=10)
+                MainLoop.wait(lambda: simmgr.GetProperties().get('SubscriberIdentity', None) is not None, timeout=10)
                 props = simmgr.GetProperties()
                 self.dbg('got SIM properties', props)
                 self._imsi = props.get('SubscriberIdentity', None)
@@ -606,7 +606,7 @@ class Modem(MS):
         self.set_powered(False)
         req_ifaces = self._required_ifaces()
         for iface in req_ifaces:
-            MainLoop.wait(self, lambda: not self.dbus.has_interface(iface), timeout=10)
+            MainLoop.wait(lambda: not self.dbus.has_interface(iface), timeout=10)
 
     def power_cycle(self):
         'Power the modem and put it online, power cycle it if it was already on'
@@ -618,7 +618,7 @@ class Modem(MS):
             self.dbg('Powering on')
         self.set_powered()
         self.set_online()
-        MainLoop.wait(self, self.dbus.has_interface, *req_ifaces, timeout=10)
+        MainLoop.wait(self.dbus.has_interface, *req_ifaces, timeout=10)
 
     def connect(self, mcc_mnc=None):
         'Connect to MCC+MNC'
@@ -671,7 +671,7 @@ class Modem(MS):
 
         # Activate can only be called after we are attached
         ctx.SetProperty('Active', Variant('b', True))
-        MainLoop.wait(self, lambda: ctx.GetProperties()['Active'] == True)
+        MainLoop.wait(lambda: ctx.GetProperties()['Active'] == True)
         self.log('context activated', path=ctx_path, apn=apn, user=user, properties=ctx.GetProperties())
         return ctx_path
 
@@ -679,7 +679,7 @@ class Modem(MS):
         self.dbg('deactivate_context', path=ctx_id)
         ctx = systembus_get(ctx_id)
         ctx.SetProperty('Active', Variant('b', False))
-        MainLoop.wait(self, lambda: ctx.GetProperties()['Active'] == False)
+        MainLoop.wait(lambda: ctx.GetProperties()['Active'] == False)
         self.dbg('deactivate_context active=false, removing', path=ctx_id)
         connmgr = self.dbus.interface(I_CONNMGR)
         connmgr.RemoveContext(ctx_id)
@@ -770,7 +770,7 @@ class Modem(MS):
         else:
             caller_msisdn = str(caller_msisdn_or_modem)
         self.dbg('Waiting for incoming call from:', caller_msisdn)
-        MainLoop.wait(self, lambda: self._find_call_msisdn_state(caller_msisdn, 'incoming') is not None, timeout=timeout)
+        MainLoop.wait(lambda: self._find_call_msisdn_state(caller_msisdn, 'incoming') is not None, timeout=timeout)
         return self._find_call_msisdn_state(caller_msisdn, 'incoming')
 
     def call_answer(self, call_id):

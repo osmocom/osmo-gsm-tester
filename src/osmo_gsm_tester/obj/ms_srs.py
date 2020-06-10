@@ -123,7 +123,7 @@ class srsUE(MS):
     def sleep_after_stop(self):
         # Only sleep once
         if self.stop_sleep_time > 0:
-            MainLoop.sleep(self, self.stop_sleep_time)
+            MainLoop.sleep(self.stop_sleep_time)
             self.stop_sleep_time = 0
 
     def stop(self):

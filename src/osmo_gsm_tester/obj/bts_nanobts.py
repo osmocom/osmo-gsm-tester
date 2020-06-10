@@ -139,7 +139,7 @@ class NanoBts(bts.Bts):
                 # Let some time for BTS to restart. It takes much more than 20 secs, and
                 # this way we make sure we don't catch responses in abisip-find prior to
                 # BTS restarting.
-                MainLoop.sleep(self, 20)
+                MainLoop.sleep(20)
 
                 self.dbg('Starting to connect id %d trx %d to' % (unitid, trx_i), self.bsc)
                 ipfind = AbisIpFind(self.testenv, self.run_dir, local_bind_ip, 'postconf')
@@ -150,7 +150,7 @@ class NanoBts(bts.Bts):
             else:
                 self.dbg('nanoBTS id %d trx %d no need to change OML IP (%s) and restart' % (unitid, trx_i, running_oml_ip))
 
-        MainLoop.wait(self, self.bsc.bts_is_connected, self, timeout=600)
+        MainLoop.wait(self.bsc.bts_is_connected, self, timeout=600)
         self.log('nanoBTS connected to BSC')
 
         #According to roh, it can be configured to use a static IP in a permanent way:
@@ -239,11 +239,11 @@ class AbisIpFind(log.Origin):
         return self.get_line_by_ip(ipaddr) is not None
 
     def wait_bts_ready(self, ipaddr):
-        MainLoop.wait(self, self.bts_ready, ipaddr)
+        MainLoop.wait(self.bts_ready, ipaddr)
         # There's a period of time after boot in which nanobts answers to
         # abisip-find but tcp RSTs ipacces-config conns. Let's wait in here a
         # bit more time to avoid failing after stating the BTS is ready.
-        MainLoop.sleep(self, 2)
+        MainLoop.sleep(2)
 
 class IpAccessConfig(log.Origin):
     testenv = None

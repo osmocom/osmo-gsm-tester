@@ -173,7 +173,7 @@ class OsmoBtsTrx(bts_osmo.OsmoBtsMainUnit):
             self.trx = OsmoTrx.get_instance_by_type(self.get_osmo_trx_type(), self.testenv, self.conf_for_osmotrx())
             self.trx.start(keepalive)
             self.log('Waiting for %s to start up...' % self.trx.name())
-            MainLoop.wait(self, self.trx.trx_ready)
+            MainLoop.wait(self.trx.trx_ready)
 
         self.inst = util.Dir(os.path.abspath(self.testenv.suite().trial().get_inst('osmo-bts')))
         lib = self.inst.child('lib')
@@ -374,7 +374,7 @@ class TrxSC5(Trx):
                 break
             keep_trying = keep_trying - 1
             self.log('Configuring SC5 TRX failed, retrying %d more times' % keep_trying)
-            MainLoop.sleep(self, 5)
+            MainLoop.sleep(5)
         if keep_trying == 0:
             raise log.Error('Failed configuring SC5!')
         self.ready = True

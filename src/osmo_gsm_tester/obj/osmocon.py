@@ -89,7 +89,7 @@ class Osmocon(log.Origin):
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
         self.log('Waiting for osmocon to be up and running')
-        MainLoop.wait(self, os.path.exists, self.l2_socket_path())
+        MainLoop.wait(os.path.exists, self.l2_socket_path())
 
     def running(self):
         return not self.process.terminated()

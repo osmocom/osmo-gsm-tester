@@ -190,7 +190,7 @@ class Esme(log.Origin):
             umref, self.pdus_pending = self.sms_send(sms_obj, mode, receipt)
             self.dbg('pdus_pending:', self.pdus_pending)
             self.client.set_message_sent_handler(self._process_pdus_pending)
-            MainLoop.wait(self, lambda: len(self.pdus_pending) == 0, timeout=10)
+            MainLoop.wait(lambda: len(self.pdus_pending) == 0, timeout=10)
             return umref
         finally:
             self.client.set_message_sent_handler(old_func)

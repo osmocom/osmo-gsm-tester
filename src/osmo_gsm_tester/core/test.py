@@ -46,7 +46,7 @@ class Test(log.Origin):
         self.duration = 0
         self.fail_type = None
         self.fail_message = None
-        self.log_target = None
+        self.log_targets = []
         self._report_stdout = None
 
     def module_name(self):
@@ -62,7 +62,8 @@ class Test(log.Origin):
     def run(self):
         testenv_obj = None
         try:
-            self.log_target = log.FileLogTarget(self.get_run_dir().new_child('log')).set_all_levels(log.L_DBG).style_change(trace=True)
+            self.log_targets = [log.FileLogTarget(self.get_run_dir().new_child(log.FILE_LOG)).set_all_levels(log.L_DBG).style_change(trace=True),
+                                log.FileLogTarget(self.get_run_dir().new_child(log.FILE_LOG_BRIEF)).style_change(src=False, all_origins_on_levels=(log.L_ERR, log.L_TRACEBACK))]
             log.large_separator(self.suite_run.trial().name(), self.suite_run.name(), self.name(), sublevel=3)
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
@@ -95,8 +96,8 @@ class Test(log.Origin):
         finally:
             if testenv_obj:
                 testenv_obj.stop()
-            if self.log_target:
-                self.log_target.remove()
+            for log_tgt in self.log_targets:
+                log_tgt.remove()
 
     def name(self):
         l = log.get_line_for_src(self.path)
@@ -137,9 +138,9 @@ class Test(log.Origin):
         # If test overwrote the text, provide it:
         if self._report_stdout is not None:
             return self._report_stdout
-        # Otherwise vy default provide the entire test log:
-        if self.log_target is not None and self.log_target.log_file_path() is not None:
-            with open(self.log_target.log_file_path(), 'r') as myfile:
+        # Otherwise vy default provide the entire test brief log:
+        if len(self.log_targets) == 2 and self.log_targets[1].log_file_path() is not None:
+            with open(self.log_targets[1].log_file_path(), 'r') as myfile:
                 return myfile.read()
         else:
             return 'test log file not available'

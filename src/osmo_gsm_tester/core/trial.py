@@ -32,8 +32,6 @@ FILE_MARK_TAKEN = 'taken'
 FILE_CHECKSUMS = 'checksums.md5'
 TIMESTAMP_FMT = '%Y-%m-%d_%H-%M-%S'
 FILE_LAST_RUN = 'last_run'
-FILE_LOG = 'log'
-FILE_LOG_BRIEF = 'log_brief'
 
 class Trial(log.Origin):
     UNKNOWN = 'UNKNOWN'
@@ -71,12 +69,12 @@ class Trial(log.Origin):
         '''add a log target to log to the run dir, write taken marker, log a
         starting separator.'''
         run_dir = self.get_run_dir()
-        detailed_log = run_dir.new_child(FILE_LOG)
+        detailed_log = run_dir.new_child(log.FILE_LOG)
         self.log_targets = [
             log.FileLogTarget(detailed_log)
               .set_all_levels(log.L_DBG)
               .style_change(trace=True),
-            log.FileLogTarget(run_dir.new_child(FILE_LOG_BRIEF))
+            log.FileLogTarget(run_dir.new_child(log.FILE_LOG_BRIEF))
               .style_change(src=False, all_origins_on_levels=(log.L_ERR, log.L_TRACEBACK))
             ]
         log.large_separator(self.name(), sublevel=1)

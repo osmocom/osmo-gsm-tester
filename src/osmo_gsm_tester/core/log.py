@@ -46,6 +46,9 @@ C_CNF = 'cnf'
 C_BUS = 'bus'
 C_DEFAULT = '---'
 
+FILE_LOG = 'log'
+FILE_LOG_BRIEF = 'log_brief'
+
 LOG_CTX_VAR = '_log_ctx_'
 
 def dbg(*messages, _origin=None, _category=None, _src=None, **named_items):

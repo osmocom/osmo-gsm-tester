@@ -154,6 +154,7 @@ class TestEnv(log_module.Origin):
         if template_dir is None:
             template.set_templates_dir(template.default_templates_dir())
         else:
+            self.dbg('template dir overlay set: %s' % template_dir)
             template.set_templates_dir(template_dir, template.default_templates_dir())
 
     def prompt(self, *msgs, **msg_details):

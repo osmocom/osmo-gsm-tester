@@ -639,8 +639,10 @@ tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
 trial suiteC test_template_overlay.py
 ----------------------------------------------
 tst test_template_overlay.py:[LINENR]: - Testing: expect to fail on invalid templates overlay dir  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR] DBG: template dir overlay set: [PATH]/selftest/suite_test/suitedirB/suiteC/nonexistent-templatedir  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py]  [testenv.py:[LINENR]]
 tst test_template_overlay.py:[LINENR]: sucess: setting non-existing templates dir raised RuntimeError  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
 tst test_template_overlay.py:[LINENR]:   [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR] DBG: template dir overlay set: [PATH]/selftest/suite_test/suitedirB/suiteC/mytemplatedir  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py]  [testenv.py:[LINENR]]
 --- ReservedResources: DBG: requesting use of ip_address {specifics={}}  [resource.py:[LINENR]]
 tst suiteC: Using 1 x ip_address (candidates: 1)  [resource.py:[LINENR]]
 tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
@@ -705,6 +707,7 @@ cs7 instance 0
   local-ip 10.42.42.2
   [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
 tst test_template_overlay.py:[LINENR]: - New template is used after re-generating cache with set_overlay_template_dir:  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR] DBG: template dir overlay set: [PATH]/selftest/suite_test/suitedirB/suiteC/mytemplatedir  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py]  [testenv.py:[LINENR]]
 run osmo-stp_10.42.42.2: DBG: {config_file='test_trial_tmp/test_run_6/suiteC/test_template_overlay.py/osmo-stp_10.42.42_3.2/osmo-stp.cfg'}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
 run osmo-stp_10.42.42.2: DBG: STP CONFIG:
 {'stp': {'ip_address': {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',

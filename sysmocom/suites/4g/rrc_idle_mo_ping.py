@@ -16,7 +16,7 @@ print('ENB is connected to EPC')
 
 ue.connect(enb)
 print('waiting for UE to attach...')
-wait(ue.is_rrc_connected)
+wait(ue.is_registered)
 print('UE is RRC connected')
 
 print('waiting until RRC connection gets released...')

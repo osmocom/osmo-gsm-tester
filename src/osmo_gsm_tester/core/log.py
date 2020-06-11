@@ -386,7 +386,12 @@ class Origin:
             f = f.f_back
 
         if (origin is not None) and (log_ctx_obj is not None):
-            log_ctx_obj.highest_ancestor()._set_parent(origin)
+            log_ctx_highest_ancestor = log_ctx_obj.highest_ancestor()
+            # If Both end up in same ancestor it means they are connected to the
+            # same tree, so no need to connect them, we'll use log_ctx_obj
+            # specific path in that case.
+            if log_ctx_highest_ancestor != origin.highest_ancestor():
+                log_ctx_highest_ancestor._set_parent(origin)
             p = log_ctx_obj
             while p:
                 p._set_log_category(origin._log_category)

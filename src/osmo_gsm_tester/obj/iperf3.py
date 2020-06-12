@@ -250,7 +250,7 @@ class IPerf3Client(log.Origin):
             proc = self.prepare_test_proc_locally(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP, bitrate)
         else:
             proc = self.prepare_test_proc_remotely(dir, netns, time_sec, proto == IPerf3Client.PROTO_UDP, bitrate)
-        proc.set_default_wait_timeout(time_sec + 10) # leave 10 extra sec for remote run, ctrl conn establishment, etc.
+        proc.set_default_wait_timeout(time_sec + 30) # leave 30 extra sec for remote run, ctrl conn establishment, etc.
         return proc
 
     def prepare_test_proc_remotely(self, dir, netns, time_sec, use_udp, bitrate):

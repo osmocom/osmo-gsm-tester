@@ -430,7 +430,7 @@ def get_all_schema():
     global _ALL_SCHEMA
     if _ALL_SCHEMA is None:
         want_schema = get_want_schema()
-        _ALL_SCHEMA = util.dict_add({ 'defaults.timeout': STR },
+        _ALL_SCHEMA = util.dict_add(
                         dict([('config.%s' % key, val) for key, val in _CONFIG_SCHEMA.items()]),
                         dict([('resources.%s' % key, val) for key, val in want_schema.items()]),
                         dict([('modifiers.%s' % key, val) for key, val in want_schema.items()]))

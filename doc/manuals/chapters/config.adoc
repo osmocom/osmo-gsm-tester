@@ -190,9 +190,6 @@ schema:
   a_suite_test_foo:
     one_test_parameter_for_test_foo: 'str'
     another_test_parameter_for_test_foo: ['bool_str']
-
-defaults:
-  timeout: 50s
 ----
 
 [[scenarios_dir]]
@@ -646,9 +643,6 @@ these main element sections:::
   <<schema_all_sec_modifiers,modifiers>>. They can overwrite values provided in the
   <<defaults_conf,defaults.conf>> file. Content in this section follows the
   <<schema_config,config>> schema.
-
-//TODO: defaults.timeout should be change in code to be config.test_timeout or similar
-//TODO: 'config' should be split into its own schema and validate defaults.conf
 
 === Example Setup
 

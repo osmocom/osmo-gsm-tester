@@ -15,8 +15,6 @@ cnf empty_dir: DBG: reading suite.conf
 cnf [PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf'  [empty_dir↪[PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf]
 - valid suite dir
 cnf test_suite: DBG: reading suite.conf
-defaults:
-  timeout: 60s
 resources:
   bts:
   - label: sysmoCell 5000

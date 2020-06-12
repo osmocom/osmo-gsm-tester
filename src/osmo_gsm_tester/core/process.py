@@ -125,11 +125,14 @@ class ParallelTerminationStrategy(TerminationStrategy):
 
 class Process(log.Origin):
 
+    DEFAULT_WAIT_TIMEOUT = 300 # seconds
+
     def __init__(self, name, run_dir, popen_args, **popen_kwargs):
         super().__init__(log.C_RUN, name)
         self.process_obj = None
         self.result = None
         self.killed = None
+        self.default_wait_timeout = Process.DEFAULT_WAIT_TIMEOUT
         self.name_str = name
         self.run_dir = run_dir
         self.popen_args = popen_args
@@ -142,6 +145,10 @@ class Process(log.Origin):
         env = self.popen_kwargs.get('env') or {}
         env[key] = value
         self.popen_kwargs['env'] = env
+
+    def set_default_wait_timeout(self, timeout):
+        assert timeout
+        self.default_wait_timeout = timeout
 
     def make_output_log(self, name):
         '''
@@ -346,7 +353,9 @@ class Process(log.Origin):
             self.poll()
         return self.result is not None
 
-    def wait(self, timeout=300):
+    def wait(self, timeout=None):
+        if timeout is None:
+            timeout = self.default_wait_timeout
         MainLoop.wait(self.terminated, timeout=timeout)
 
     def stdin_write(self, cmd):

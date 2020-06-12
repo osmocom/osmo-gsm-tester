@@ -223,7 +223,7 @@ class AmarisoftENB(enb.eNodeB):
         if cell_list is None or len(cell_list) < cell + 1:
             raise log.Error('cell_list attribute or subitem not found!')
         rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
-        if rfemu_cfg is None: # craft amarisfot by default:
+        if rfemu_cfg is None: # craft amarisoft by default:
             rfemu_cfg = {'type': 'amarisoftctl',
                          'addr': self.addr(),
                          'ports': [9001]

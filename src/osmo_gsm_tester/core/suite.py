@@ -98,7 +98,8 @@ class SuiteRun(log.Origin):
     def load_tests(self):
         self.tests = []
         for test_basename in self.definition.test_basenames:
-            self.tests.append(test.Test(self, test_basename))
+            test_specific_config = self.config_suite_specific().get(test_basename.rstrip('.py'), {})
+            self.tests.append(test.Test(self, test_basename, test_specific_config))
 
     def mark_start(self):
         self.start_timestamp = time.time()

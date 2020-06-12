@@ -146,7 +146,7 @@ class TestEnv(log_module.Origin):
         return self.suite_run.config_suite_specific()
 
     def config_test_specific(self):
-        return self.suite_run.config_suite_specific().get(self._test.module_name(), {})
+        return self._test.config_test_specific()
 
     def set_overlay_template_dir(self, template_dir=None):
         '''Overlay a directory on top of default one when looking for

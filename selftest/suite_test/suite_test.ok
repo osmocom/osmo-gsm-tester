@@ -27,6 +27,8 @@ resources:
   - times: '2'
 
 - run hello world test
+tst test_suite: DBG: {combining='config'}
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]
 
 ---------------------------------------------------------------------
 trial test_suite
@@ -179,6 +181,9 @@ FAIL: test_suite (fail: 1, skip: 6)
     FAIL: test_fail_raise.py (N.N sec) ExpectedFail: This failure is expected
     skip: test_suite_params.py
 - test with half empty scenario
+tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 
 ---------------------------------------------------------------------
 trial test_suite
@@ -265,6 +270,9 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail_raise.py
     skip: test_suite_params.py
 - test with scenario
+tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 
 ---------------------------------------------------------------------
 trial test_suite
@@ -351,6 +359,9 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail_raise.py
     skip: test_suite_params.py
 - test with scenario and modifiers
+tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
@@ -483,6 +494,9 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail_raise.py
     skip: test_suite_params.py
 - test with suite-specific config
+tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={suite={test_suite={some_suite_global_param='heyho', test_suite_params={one_bool_parameter='true', second_list_parameter=['23', '45']}}}}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
@@ -598,9 +612,6 @@ trial test_suite
 trial test_suite test_suite_params.py
 ----------------------------------------------
 tst test_suite_params.py:[LINENR]: starting test  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
-tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
-tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={suite={test_suite={some_suite_global_param='heyho', test_suite_params={one_bool_parameter='true', second_list_parameter=['23', '45']}}}}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite_params.py:[LINENR]: SPECIFIC SUITE CONFIG: {'some_suite_global_param': 'heyho',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR]:  'test_suite_params': {'one_bool_parameter': 'true',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR]:                        'second_list_parameter': ['23', '45']}}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
@@ -619,6 +630,8 @@ PASS: test_suite (pass: 1, skip: 6)
     pass: test_suite_params.py (N.N sec)
 - test with template overlay
 cnf suiteC: DBG: reading suite.conf  [suite.py:[LINENR]]
+tst suiteC: DBG: {combining='config'}  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
 
 ---------------------------------------------------------------------
 trial suiteC
@@ -651,8 +664,6 @@ tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
 --- ReservedResources: DBG: {using={_hash='fd103b22c7cf2480d609150e06f4bbd92ac78d8c', _reserved_by='suiteC-[ID_NUM]-[ID_NUM]', addr='10.42.42.2'}}  [resource.py:[LINENR]]
 tst test_template_overlay.py:[LINENR]: - Testing: original template  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
 run osmo-stp_10.42.42.2: DBG: {config_file='test_trial_tmp/test_run_6/suiteC/test_template_overlay.py/osmo-stp_10.42.42.2/osmo-stp.cfg'}  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py↪osmo-stp_10.42.42.2]  [stp_osmo.py:[LINENR]]
-tst suiteC: DBG: {combining='config'}  [suite.py:[LINENR]]
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
 run osmo-stp_10.42.42.2: DBG: STP CONFIG:
 {'stp': {'ip_address': {'_hash': 'fd103b22c7cf2480d609150e06f4bbd92ac78d8c',
                         '_reserved_by': 'suiteC-[ID_NUM]-[ID_NUM]',

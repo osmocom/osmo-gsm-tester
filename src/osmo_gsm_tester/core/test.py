@@ -35,11 +35,12 @@ class Test(log.Origin):
     PASS = 'pass'
     FAIL = 'FAIL'
 
-    def __init__(self, suite_run, test_basename):
+    def __init__(self, suite_run, test_basename, test_specific_config):
         self.basename = test_basename
         super().__init__(log.C_TST, self.basename)
         self._run_dir = None
         self.suite_run = suite_run
+        self._config_test_specific = test_specific_config
         self.path = os.path.join(self.suite_run.definition.suite_dir, self.basename)
         self.status = Test.UNKNOWN
         self.start_timestamp = 0
@@ -133,6 +134,9 @@ class Test(log.Origin):
     def set_skip(self):
         self.status = Test.SKIP
         self.duration = 0
+
+    def config_test_specific(self):
+        return self._config_test_specific
 
     def set_report_stdout(self, text):
         'Overwrite stdout text stored in report from inside a test'

@@ -64,4 +64,8 @@ class RFemulationMinicircuitsHTTP(RFemulation):
         self.dbg('Received response: "%s"' % data_str)
         if data_str != '1':
             raise log.Error('Mini-circuits attenuation device returned failure! %s' & data_str)
+
+    def get_max_attenuation(self):
+        return 95 # Maximum value of the Mini-Circuits RC4DAT-6G-95
+
 # vim: expandtab tabstop=4 shiftwidth=4

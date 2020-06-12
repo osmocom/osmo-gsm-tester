@@ -39,6 +39,11 @@ class RFemulation(log.Origin, metaclass=ABCMeta):
         """Set attenuation in dB on the configured channel"""
         pass
 
+    @abstractmethod
+    def get_max_attenuation(self):
+        """Get maximum channel attenuation"""
+        pass
+
 def get_instance_by_type(rfemu_type, rfemu_opt):
     """Allocate a RFemulation child class based on type. Opts are passed to the newly created object."""
     if rfemu_type == 'amarisoftctl':

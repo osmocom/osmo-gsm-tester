@@ -59,5 +59,7 @@ class RFemulationAmarisoftCtrl(RFemulation):
         result = self.ws.recv()
         self.dbg('Received CTRL msg: "%s"' % result)
 
+    def get_max_attenuation(self):
+        return 200 # maximum cell_gain value in Amarisoft
 
 # vim: expandtab tabstop=4 shiftwidth=4

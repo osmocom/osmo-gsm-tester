@@ -15,6 +15,11 @@ cnf empty_dir: DBG: reading suite.conf
 cnf [PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf: ERR: FileNotFoundError: [Errno 2] No such file or directory: '[PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf'  [empty_dir↪[PATH]/selftest/suite_test/suitedirA/empty_dir/suite.conf]
 - valid suite dir
 cnf test_suite: DBG: reading suite.conf
+config:
+  suite:
+    test_suite:
+      test_timeout:
+        timeout: '1'
 resources:
   bts:
   - label: sysmoCell 5000
@@ -28,7 +33,7 @@ resources:
 
 - run hello world test
 tst test_suite: DBG: {combining='config'}
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]
+tst {combining_scenarios='config'}: DBG: {definition_conf={suite={test_suite={test_timeout={timeout='1'}}}}}  [test_suite↪{combining_scenarios='config'}]
 
 ---------------------------------------------------------------------
 trial test_suite
@@ -101,7 +106,7 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 6)
+PASS: test_suite (pass: 1, skip: 7)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -109,6 +114,7 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     skip: test_suite_params.py
+    skip: test_timeout.py
 
 - a test with an error
 
@@ -125,7 +131,7 @@ tst test_error.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_error.py:[
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 6)
+FAIL: test_suite (fail: 1, skip: 7)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -133,6 +139,7 @@ FAIL: test_suite (fail: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     skip: test_suite_params.py
+    skip: test_timeout.py
 
 - a test with a failure
 
@@ -149,7 +156,7 @@ tst test_fail.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail.py:[LI
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 6)
+FAIL: test_suite (fail: 1, skip: 7)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -157,6 +164,7 @@ FAIL: test_suite (fail: 1, skip: 6)
     FAIL: test_fail.py (N.N sec) EpicFail: This failure is expected
     skip: test_fail_raise.py
     skip: test_suite_params.py
+    skip: test_timeout.py
 
 - a test with a raised failure
 
@@ -172,7 +180,7 @@ tst test_fail_raise.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail_
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 6)
+FAIL: test_suite (fail: 1, skip: 7)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -180,9 +188,10 @@ FAIL: test_suite (fail: 1, skip: 6)
     skip: test_fail.py (N.N sec)
     FAIL: test_fail_raise.py (N.N sec) ExpectedFail: This failure is expected
     skip: test_suite_params.py
+    skip: test_timeout.py
 - test with half empty scenario
 tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={suite={test_suite={test_timeout={timeout='1'}}}}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 
 ---------------------------------------------------------------------
@@ -261,7 +270,7 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 6)
+PASS: test_suite (pass: 1, skip: 7)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -269,9 +278,10 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     skip: test_suite_params.py
+    skip: test_timeout.py
 - test with scenario
 tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={suite={test_suite={test_timeout={timeout='1'}}}}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 
 ---------------------------------------------------------------------
@@ -350,7 +360,7 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 6)
+PASS: test_suite (pass: 1, skip: 7)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -358,9 +368,10 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     skip: test_suite_params.py
+    skip: test_timeout.py
 - test with scenario and modifiers
 tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={suite={test_suite={test_timeout={timeout='1'}}}}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
@@ -485,7 +496,7 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 6)
+PASS: test_suite (pass: 1, skip: 7)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -493,9 +504,10 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     skip: test_suite_params.py
+    skip: test_timeout.py
 - test with suite-specific config
 tst test_suite: DBG: {combining='config'}  [suite.py:[LINENR]]
-tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
+tst {combining_scenarios='config'}: DBG: {definition_conf={suite={test_suite={test_timeout={timeout='1'}}}}}  [test_suite↪{combining_scenarios='config'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='config', scenario='foo'}: DBG: {conf={suite={test_suite={some_suite_global_param='heyho', test_suite_params={one_bool_parameter='true', second_list_parameter=['23', '45']}}}}, scenario='foo'}  [test_suite↪{combining_scenarios='config', scenario='foo'}]  [suite.py:[LINENR]]
 tst test_suite: reserving resources in [PATH]/selftest/suite_test/test_work/state_dir ...  [suite.py:[LINENR]]
 tst test_suite: DBG: {combining='resources'}  [suite.py:[LINENR]]
@@ -614,13 +626,21 @@ trial test_suite test_suite_params.py
 tst test_suite_params.py:[LINENR]: starting test  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR]: SPECIFIC SUITE CONFIG: {'some_suite_global_param': 'heyho',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR]:  'test_suite_params': {'one_bool_parameter': 'true',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
-tst test_suite_params.py:[LINENR]:                        'second_list_parameter': ['23', '45']}}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR]:                        'second_list_parameter': ['23', '45']},  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR]:  'test_timeout': {'timeout': '1'}}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR]: SPECIFIC TEST CONFIG: {'one_bool_parameter': 'true', 'second_list_parameter': ['23', '45']}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR] Test passed (N.N sec)  [test_suite↪test_suite_params.py]  [test.py:[LINENR]]
+
+----------------------------------------------
+trial test_suite test_timeout.py
+----------------------------------------------
+tst test_timeout.py:[LINENR]: starting test and waiting to receive Timeout after 1 seconds  [test_suite↪test_timeout.py:[LINENR]]  [test_timeout.py:[LINENR]]
+tst test_timeout.py:[LINENR]: ERR: Error: test_timeout.py:[LINENR] Test Timeout triggered: 1 seconds elapsed [test_suite↪test_timeout.py:[LINENR]↪test_timeout.py]  [test_suite↪test_timeout.py:[LINENR]]  [testenv.py:[LINENR]: raise log_module.Error('Test Timeout triggered: %d seconds elapsed' % self._test.elapsed_time())]
+tst test_timeout.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_timeout.py:[LINENR]]  [test.py:[LINENR]]
 ---------------------------------------------------------------------
-trial test_suite PASS
+trial test_suite FAIL
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 6)
+FAIL: test_suite (fail: 1, pass: 1, skip: 6)
     skip: hello_world.py
     skip: mo_mt_sms.py
     skip: mo_sms.py
@@ -628,6 +648,7 @@ PASS: test_suite (pass: 1, skip: 6)
     skip: test_fail.py
     skip: test_fail_raise.py
     pass: test_suite_params.py (N.N sec)
+    FAIL: test_timeout.py (N.N sec) Error: test_timeout.py:[LINENR] Test Timeout triggered: 1 seconds elapsed [test_suite↪test_timeout.py:[LINENR]↪test_timeout.py]
 - test with template overlay
 cnf suiteC: DBG: reading suite.conf  [suite.py:[LINENR]]
 tst suiteC: DBG: {combining='config'}  [suite.py:[LINENR]]

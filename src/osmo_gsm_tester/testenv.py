@@ -55,6 +55,8 @@ class TestEnv(log_module.Origin):
         self.test_import_modules_to_clean_up = []
         self.objects_to_clean_up = None
         MainLoop.register_poll_func(self.poll)
+        if self._test.timeout is not None: # aimed at firing once
+            MainLoop.register_poll_func(self.timeout_expired, timestep=self._test.timeout)
 
     def test(self):
         return self._test
@@ -120,6 +122,11 @@ class TestEnv(log_module.Origin):
             except Exception:
                 log_module.log_exn()
 
+    def timeout_expired(self):
+        # Avoid timeout being called several times:
+        MainLoop.unregister_poll_func(self.timeout_expired)
+        raise log_module.Error('Test Timeout triggered: %d seconds elapsed' % self._test.elapsed_time())
+
     def poll(self):
         for proc, respawn in self._processes:
             if proc.terminated():
@@ -139,6 +146,7 @@ class TestEnv(log_module.Origin):
         self.objects_cleanup()
         self.suite_run.reserved_resources.put_all()
         MainLoop.unregister_poll_func(self.poll)
+        MainLoop.unregister_poll_func(self.timeout_expired)
         self.test_import_modules_cleanup()
         self.set_overlay_template_dir(None)
 

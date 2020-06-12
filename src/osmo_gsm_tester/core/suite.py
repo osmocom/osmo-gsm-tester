@@ -44,6 +44,8 @@ class SuiteDefinition(log.Origin):
         self.suite_dir = suite_dir
         self.conf = None
         self._schema = None
+        self.test_basenames = []
+        self.load_test_basenames()
         self.read_conf()
 
     def read_conf(self):
@@ -54,13 +56,16 @@ class SuiteDefinition(log.Origin):
                                              SuiteDefinition.CONF_FILENAME))
         # Drop schema part since it's dynamically defining content, makes no sense to validate it.
         self._schema = self.conf.pop('schema', {})
+        # Add per-test 'timeout' attribute:
+        d = {t.rstrip('.py'):{'timeout': schema.DURATION} for t in self.test_basenames}
+        schema.combine(self._schema, d)
+        # Convert config file format to proper schema format and register it:
         sdef = schema.config_to_schema_def(self._schema, "%s." % self._suite_name)
         schema.register_config_schema('suite', sdef)
+        # Finally validate the file:
         schema.validate(self.conf, schema.get_all_schema())
-        self.load_test_basenames()
 
     def load_test_basenames(self):
-        self.test_basenames = []
         for basename in sorted(os.listdir(self.suite_dir)):
             if not basename.endswith('.py'):
                 continue

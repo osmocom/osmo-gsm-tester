@@ -102,7 +102,7 @@ sc['config'] = {'suite': {s.name(): { 'some_suite_global_param': 'heyho', 'test_
 s = suite.SuiteRun(trial, 'test_suite', s_def, [sc])
 s.reserve_resources()
 print(repr(s.reserved_resources))
-results = s.run_tests('test_suite_params.py')
+results = s.run_tests(['test_suite_params.py', 'test_timeout.py'])
 print(report.suite_to_text(s))
 
 print('- test with template overlay')

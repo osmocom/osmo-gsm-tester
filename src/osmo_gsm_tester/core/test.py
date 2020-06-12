@@ -35,12 +35,12 @@ class Test(log.Origin):
     PASS = 'pass'
     FAIL = 'FAIL'
 
-    def __init__(self, suite_run, test_basename, test_specific_config):
+    def __init__(self, suite_run, test_basename, config_test_specific):
         self.basename = test_basename
         super().__init__(log.C_TST, self.basename)
         self._run_dir = None
         self.suite_run = suite_run
-        self._config_test_specific = test_specific_config
+        self._config_test_specific = config_test_specific
         self.path = os.path.join(self.suite_run.definition.suite_dir, self.basename)
         self.status = Test.UNKNOWN
         self.start_timestamp = 0
@@ -49,6 +49,7 @@ class Test(log.Origin):
         self.fail_message = None
         self.log_targets = []
         self._report_stdout = None
+        self.timeout = int(config_test_specific['timeout']) if 'timeout' in config_test_specific else None
 
     def module_name(self):
         'Return test name without trailing .py'

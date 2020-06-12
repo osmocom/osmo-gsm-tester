@@ -105,9 +105,13 @@ class Test(log.Origin):
             return '%s:%s' % (self._name, l)
         return super().name()
 
+    def elapsed_time(self):
+        'time elapsed since test was started'
+        return time.time() - self.start_timestamp
+
     def set_fail(self, fail_type, fail_message, tb_str=None, src=4):
         self.status = Test.FAIL
-        self.duration = time.time() - self.start_timestamp
+        self.duration = self.elapsed_time()
         self.fail_type = fail_type
         self.fail_message = fail_message
 
@@ -123,7 +127,7 @@ class Test(log.Origin):
 
     def set_pass(self):
         self.status = Test.PASS
-        self.duration = time.time() - self.start_timestamp
+        self.duration = self.elapsed_time()
         self.log('Test passed (%.1f sec)' % self.duration)
 
     def set_skip(self):

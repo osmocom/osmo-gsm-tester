@@ -76,13 +76,14 @@ class EPC(log.Origin, metaclass=ABCMeta):
 
         return  epc_class(testenv, run_node)
 
-    def run_wait(self, name, popen_args):
-        ''' Execute process on EPC node, useful for MT traffic '''
+    def prepare_process(self, name, popen_args):
+        ''' Prepare and return a process to run on EPC node.
+            Caller calls either launch() or launch_sync()
+            for non-blocking or blocking operation respectively '''
         if self._run_node.is_local():
             proc = process.Process(name, self.run_dir, popen_args)
         else:
             proc = self.rem_host.RemoteProcess(name, popen_args)
-        proc.launch_sync()
         return proc
 
 ###################

@@ -27,7 +27,8 @@ print('UE is RRC idle')
 sleep(5)
 
 # Generate MO traffic, send single ping
-proc = epc.run_wait('ping', ('ping', '-c', '1', ue.get_assigned_addr()))
+proc = epc.prepare_process('ping', ('ping', '-c', '1', ue.get_assigned_addr()))
+proc.launch_sync()
 output = proc.get_stdout()
 
 # Check paging received

@@ -7,7 +7,7 @@
     qci: 1, /* UM - real time (RTP for VOIP) */
     pdcp_config: {
       discardTimer: 100, /* in ms, 0 means infinity */
-      pdcp_SN_Size: 7,
+      pdcp_SN_Size: 12,
       /* ROHC header compression */
       /*
       headerCompression: {
@@ -30,9 +30,9 @@
     logical_channel_config: {
       /* Note: SRB1 has priority 1, SRB2 has priority 3.
          We start from 4 for priority 0.5 and increase the value */
-      priority: 7,
-      prioritisedBitRate: 0, /* in kb/s, -1 means infinity */
-      bucketSizeDuration: 100, /* in ms */
+      priority: 4,
+      prioritisedBitRate: 256, /* in kb/s, -1 means infinity */
+      bucketSizeDuration: 1000, /* in ms */
       logicalChannelGroup: 1,
       logicalChannelSR_Mask: false,
       logicalChannelSR_Prohibit: false,
@@ -54,9 +54,9 @@
       },
     },
     logical_channel_config: {
-      priority: 9,
-      prioritisedBitRate: 0, /* in kb/s, -1 means infinity */
-      bucketSizeDuration: 100, /* in ms */
+      priority: 5,
+      prioritisedBitRate: 128, /* in kb/s, -1 means infinity */
+      bucketSizeDuration: 1000, /* in ms */
       logicalChannelGroup: 1,
       logicalChannelSR_Mask: false,
       logicalChannelSR_Prohibit: false,
@@ -300,7 +300,7 @@
     },
     logical_channel_config: {
       priority: 15,
-      prioritisedBitRate: 8, /* in kb/s, -1 means infinity */
+      prioritisedBitRate: -1, /* in kb/s, -1 means infinity */
       bucketSizeDuration: 100, /* in ms */
       logicalChannelGroup: 3,
       logicalChannelSR_Mask: false,

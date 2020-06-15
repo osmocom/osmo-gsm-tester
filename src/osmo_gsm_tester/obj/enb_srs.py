@@ -176,7 +176,9 @@ class srsENB(enb.eNodeB):
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
 
-        self._additional_args = values['enb'].get('additional_args', '').split()
+        self._additional_args = []
+        for add_args in values['enb'].get('additional_args', []):
+            self._additional_args += add_args.split()
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':

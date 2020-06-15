@@ -35,7 +35,7 @@ def on_register_schemas():
         'rf_dev_type': schema.STR,
         'rf_dev_args': schema.STR,
         'num_carriers': schema.UINT,
-        'additional_args': schema.STR,
+        'additional_args[]': schema.STR,
         'airplane_t_on_ms': schema.INT,
         'airplane_t_off_ms': schema.INT,
         'tx_gain': schema.UINT,
@@ -231,6 +231,9 @@ class srsUE(MS):
         config.overlay(values, dict(ue={'enable_pcap': self.enable_pcap}))
 
         self._additional_args = values['ue'].get('additional_args', '').split()
+        for add_args in values['ue'].get('additional_args', []):
+            self._additional_args += add_args.split()
+
 
         self.num_carriers = int(values['ue'].get('num_carriers', 1))
 

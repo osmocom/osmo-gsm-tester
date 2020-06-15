@@ -34,7 +34,7 @@ def on_register_schemas():
         'rx_gain': schema.UINT,
         'rf_dev_type': schema.STR,
         'rf_dev_args': schema.STR,
-        'additional_args': schema.STR,
+        'additional_args[]': schema.STR,
         'enable_measurements': schema.BOOL_STR,
         'a1_report_type': schema.STR,
         'a1_report_value': schema.INT,

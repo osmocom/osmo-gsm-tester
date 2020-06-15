@@ -230,10 +230,9 @@ class srsUE(MS):
         self.enable_pcap = util.str2bool(values['ue'].get('enable_pcap', 'false'))
         config.overlay(values, dict(ue={'enable_pcap': self.enable_pcap}))
 
-        self._additional_args = values['ue'].get('additional_args', '').split()
+        self._additional_args = []
         for add_args in values['ue'].get('additional_args', []):
             self._additional_args += add_args.split()
-
 
         self.num_carriers = int(values['ue'].get('num_carriers', 1))
 

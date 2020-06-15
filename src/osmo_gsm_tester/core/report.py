@@ -53,6 +53,46 @@ def hash_info_to_junit(testsuite, hash_info):
         prop.set('name', 'ref:' + key)
         prop.set('value', val)
 
+def dict_to_junit(parent, d):
+    for key, val in d.items():
+        if isinstance(val, dict):
+            node = et.SubElement(parent, 'kpi_node')
+            node.set('name', key)
+            dict_to_junit(node, val)
+            continue
+        if isinstance(val, (tuple, list)):
+            node = et.SubElement(parent, 'kpi_node')
+            node.set('name', key)
+            list_to_junit(node, val)
+            continue
+        # scalar:
+        node = et.SubElement(parent, 'property')
+        node.set('name', key)
+        node.set('value', str(val))
+
+def list_to_junit(parent, li):
+    for i in range(len(li)):
+        if isinstance(li[i], dict):
+            node = et.SubElement(parent, 'kpi_node')
+            node.set('name', str(i))
+            dict_to_junit(node, li[i])
+            continue
+        if isinstance(val, (tuple, list)):
+            node = et.SubElement(parent, 'kpi_node')
+            node.set('name', str(i))
+            list_to_junit(node, li[i])
+            continue
+        # scalar:
+        node = et.SubElement(parent, 'property')
+        node.set('name', str(i))
+        node.set('value', str(li[i]))
+
+def kpis_to_junit(parent, kpis):
+    if not kpis:
+        return
+    assert isinstance(kpis, dict)
+    knode = et.SubElement(parent, 'kpis')
+    dict_to_junit(knode, kpis)
 
 def trial_to_junit_write(trial, junit_path):
     elements = et.ElementTree(element=trial_to_junit(trial))
@@ -118,6 +158,7 @@ def test_to_junit(t):
     elif t.status != test.Test.PASS:
         error = et.SubElement(testcase, 'error')
         error.text = 'could not run'
+    kpis_to_junit(testcase, t.kpis())
     sout = et.SubElement(testcase, 'system-out')
     sout.text = escape_xml_invalid_characters(t.report_stdout())
     return testcase

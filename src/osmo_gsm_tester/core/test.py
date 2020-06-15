@@ -49,6 +49,7 @@ class Test(log.Origin):
         self.fail_message = None
         self.log_targets = []
         self._report_stdout = None
+        self._kpis = None
         self.timeout = int(config_test_specific['timeout']) if 'timeout' in config_test_specific else None
 
     def module_name(self):
@@ -138,6 +139,14 @@ class Test(log.Origin):
 
     def config_test_specific(self):
         return self._config_test_specific
+
+    def set_kpis(self, kpis):
+        if not isinstance(kpis, dict):
+            raise log.Error('Expected dictionary in toplevel kpis')
+        self._kpis = kpis
+
+    def kpis(self):
+        return self._kpis
 
     def set_report_stdout(self, text):
         'Overwrite stdout text stored in report from inside a test'

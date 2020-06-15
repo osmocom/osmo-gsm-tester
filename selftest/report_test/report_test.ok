@@ -15,3 +15,5 @@ tst suiteC: DBG: {combining='config'}
 tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='config'}]
 tst suiteD: DBG: {combining='config'}
 tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteD↪{combining_scenarios='config'}]
+tst suiteE: DBG: {combining='config'}
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteE↪{combining_scenarios='config'}]

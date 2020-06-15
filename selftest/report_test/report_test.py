@@ -39,11 +39,13 @@ class FakeSuiteDefinition(log.Origin):
             self.suite_dir = util.Dir(example_trial_dir).new_child('suitedef' + name)
 
 
-def fake_run_test(test_obj, status, duration, sysout=None):
+def fake_run_test(test_obj, status, duration, sysout=None, kpis=None):
     test_obj.status = status
     test_obj.duration = duration
     if sysout is not None:
         test_obj.set_report_stdout(sysout)
+    if kpis is not None:
+        test_obj.set_kpis(kpis)
     if status == test.Test.FAIL:
         test_obj.fail_type = 'fake_fail_type'
         test_obj.fail_message = 'fake_fail_message'
@@ -92,6 +94,14 @@ fake_run_test(s.tests[0], test.Test.FAIL, 12)
 fake_run_test(s.tests[1], test.Test.PASS, 10)
 fake_run_suite(s, 20)
 
+# Test adding KPIs
+s_def = FakeSuiteDefinition('suiteE', 2)
+s = suite.SuiteRun(trial, s_def.name(), s_def)
+trial.suites.append(s)
+fake_run_test(s.tests[0], test.Test.FAIL, 12, kpis={'ueA': {'kpiA': 30, 'kpiB': 'foobar', 'yet-another-level': {'foo': 'bar'}}, 'enbD': {'foobar-boolean': True }, 'somekpi': 'someval'})
+fake_run_test(s.tests[1], test.Test.PASS, 10, kpis={'abcd': 'abcdval'})
+fake_run_suite(s, 20)
+
 element = report.trial_to_junit(trial)
 
 def indent(elem, level=0):
@@ -126,6 +136,9 @@ if hasattr(et, 'canonicalize'):
     with open(exp_path, 'r') as f:
         exp = f.read().rstrip()
     udiff(exp, got, exp_path)
+    # Uncomment to update exp_path:
+    #with open(exp_path, 'w') as f:
+    #    f.write(got)
 
 #deleting generated tmp trial dir:
 shutil.rmtree(example_trial_dir, ignore_errors=True)

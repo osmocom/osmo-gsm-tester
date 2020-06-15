@@ -1,0 +1,17 @@
+cnf ResourcesPool: DBG: Found main configuration file in  [PATH]/selftest/report_test/main.conf which is [PATH]/selftest/report_test/main.conf
+cnf ResourcesPool: DBG: MAIN CONFIG:
+{'default_suites_conf_path': '[PATH]/selftest/report_test/default-suites.conf',
+ 'defaults_conf_path': '[PATH]/selftest/report_test/defaults.conf',
+ 'resource_conf_path': '[PATH]/selftest/report_test/resources.conf',
+ 'scenarios_dir': ['[PATH]/selftest/report_test/scenarios'],
+ 'state_dir': '/var/tmp/osmo-gsm-tester/state',
+ 'suites_dir': ['[PATH]/selftest/report_test/suites'],
+ 'trial_dir': '[PATH]/selftest/report_test/trial'}
+tst suiteA: DBG: {combining='config'}
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteA↪{combining_scenarios='config'}]
+tst suiteB: DBG: {combining='config'}
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteB↪{combining_scenarios='config'}]
+tst suiteC: DBG: {combining='config'}
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='config'}]
+tst suiteD: DBG: {combining='config'}
+tst {combining_scenarios='config'}: DBG: {definition_conf={}}  [suiteD↪{combining_scenarios='config'}]

@@ -1,0 +1,62 @@
+<testsuites errors="2" failures="1" name="trial" tests="10" time="102">
+  <testsuite disabled="0" errors="0" failures="0" hostname="localhost" id="0" name="suiteA" skipped="0" tests="2">
+    <testcase classname="suiteA" name="suiteA-0" time="30">
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <testcase classname="suiteA" name="suiteA-1" time="10">
+      <system-out>yay this is a test-applied stdout</system-out>
+    </testcase>
+    <properties>
+      <property name="ref:foobar/potato" value="1234"></property>
+      <property name="ref:orange" value="abcd"></property>
+    </properties>
+  </testsuite>
+  <testsuite disabled="0" errors="2" failures="0" hostname="localhost" id="1" name="suiteB" skipped="0" tests="3">
+    <testcase classname="suiteB" name="suiteB-0" time="10">
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <testcase classname="suiteB" name="suiteB-1" time="0">
+      <error>could not run</error>
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <testcase classname="suiteB" name="suiteB-2" time="0">
+      <error>could not run</error>
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <properties>
+      <property name="ref:foobar/potato" value="1234"></property>
+      <property name="ref:orange" value="abcd"></property>
+    </properties>
+  </testsuite>
+  <testsuite disabled="2" errors="0" failures="0" hostname="localhost" id="2" name="suiteC" skipped="2" tests="3">
+    <testcase classname="suiteC" name="suiteC-0" time="0">
+      <skipped></skipped>
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <testcase classname="suiteC" name="suiteC-1" time="10">
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <testcase classname="suiteC" name="suiteC-2" time="0">
+      <skipped></skipped>
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <properties>
+      <property name="ref:foobar/potato" value="1234"></property>
+      <property name="ref:orange" value="abcd"></property>
+    </properties>
+  </testsuite>
+  <testsuite disabled="0" errors="0" failures="1" hostname="localhost" id="3" name="suiteD" skipped="0" tests="2">
+    <testcase classname="suiteD" name="suiteD-0" time="12">
+      <failure type="fake_fail_type">fake_fail_message</failure>
+      <system-err>system stderr fake content</system-err>
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <testcase classname="suiteD" name="suiteD-1" time="10">
+      <system-out>test log file not available</system-out>
+    </testcase>
+    <properties>
+      <property name="ref:foobar/potato" value="1234"></property>
+      <property name="ref:orange" value="abcd"></property>
+    </properties>
+  </testsuite>
+</testsuites>

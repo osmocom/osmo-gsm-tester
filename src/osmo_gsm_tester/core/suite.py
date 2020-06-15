@@ -189,17 +189,20 @@ class SuiteRun(log.Origin):
             util.import_path_remove(suite_libdir)
             self.duration = time.time() - self.start_timestamp
 
-            passed, skipped, failed, errors = self.count_test_results()
-            # if no tests ran, count it as failure
-            if passed and not failed and not errors:
-                self.status = SuiteRun.PASS
-            else:
-                self.status = SuiteRun.FAIL
+            self.determine_status()
 
             log.large_separator(self._trial.name(), self.name(), self.status, sublevel=2, space_above=False)
 
     def passed(self):
         return self.status == SuiteRun.PASS
+
+    def determine_status(self):
+        passed, skipped, failed, errors = self.count_test_results()
+        # if no tests ran, count it as failure
+        if passed and not failed and not errors:
+            self.status = SuiteRun.PASS
+        else:
+            self.status = SuiteRun.FAIL
 
     def count_test_results(self):
         passed = 0

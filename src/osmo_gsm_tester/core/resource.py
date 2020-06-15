@@ -54,7 +54,7 @@ class ResourcesPool(log.Origin):
         self.read_conf()
 
     def read_conf(self):
-        self.all_resources = Resources(config.read(self.config_path, schema.get_resources_schema()))
+        self.all_resources = Resources(config.read(self.config_path, schema.get_resources_schema()) or {})
         self.all_resources.set_hashes()
 
     def reserve(self, origin, want, modifiers):

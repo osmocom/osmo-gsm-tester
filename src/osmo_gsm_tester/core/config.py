@@ -137,6 +137,8 @@ def _get_main_config():
     global MAIN_CONFIG
     if MAIN_CONFIG is None:
         cfg = read(_get_main_config_path(), MAIN_CONFIG_SCHEMA)
+        if cfg is None:
+            cfg = {}
         MAIN_CONFIG = {
             CFG_STATE_DIR: DF_CFG_STATE_DIR,
             CFG_SUITES_DIR: DF_CFG_SUITES_DIR,
@@ -195,7 +197,7 @@ def read(path, validation_schema=None, if_missing_return=False):
     with open(path, 'r') as f:
         config = yaml.safe_load(f)
     config = _standardize(config)
-    if validation_schema:
+    if config and validation_schema:
         schema.validate(config, validation_schema)
     return config
 

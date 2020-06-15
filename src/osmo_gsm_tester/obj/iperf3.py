@@ -219,7 +219,7 @@ class IPerf3Client(log.Origin):
         locally = not self._run_node or self._run_node.is_local()
         return locally
 
-    def prepare_test_proc(self, dir=None, netns=None, time_sec=None, proto=None, bitrate=0):
+    def prepare_test_proc(self, dir=None, netns=None, time_sec=None, proto=None, bitrate=0, tos=None):
         values = config.get_defaults('iperf3cli')
         config.overlay(values, self.testenv.suite().config().get('iperf3cli', {}))
 
@@ -256,6 +256,9 @@ class IPerf3Client(log.Origin):
             popen_args += ('--bidir',)
         if proto == IPerf3Client.PROTO_UDP:
             popen_args += ('-u', '-b', str(bitrate))
+        if tos is not None:
+            popen_args += ('-S', str(tos))
+
         if self.runs_locally():
             proc = self.prepare_test_proc_locally(netns, popen_args)
         else:

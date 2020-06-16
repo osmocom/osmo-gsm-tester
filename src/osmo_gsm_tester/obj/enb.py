@@ -130,6 +130,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             return 1
         return 2
 
+    def num_cells(self):
+        return self._num_cells
+
 ########################
 # PUBLIC - INTERNAL API
 ########################

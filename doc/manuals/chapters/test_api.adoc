@@ -34,10 +34,10 @@ One can also wait for events in the background, for instance launch a child
 process locally in the same host and wait for its termination:
 [source,python]
 ----
-proc = process.Process('process_description_name', working_dir_to_store_logs, 'sleep 4') <1>
-tenv.remember_to_stop(proc) <2>
-proc.launch() <3>
-proc.wait() <4>
+proc = process.Process('process_description_name', working_dir_to_store_logs, 'sleep 4') # <1>
+tenv.remember_to_stop(proc) # <2>
+proc.launch() # <3>
+proc.wait() # <4>
 ----
 <1> Create process object. This line doesn't yet runs it.
 <2> Make sure the core will kill the process if this test fails

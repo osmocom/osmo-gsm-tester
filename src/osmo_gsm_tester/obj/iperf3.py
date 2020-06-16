@@ -209,6 +209,7 @@ class IPerf3Client(log.Origin):
         self.server = iperf3srv
         self.testenv = testenv
         self._proto = None
+        self._time_sec = None
         self.log_file = None
         self.rem_host = None
         self.remote_log_file = None
@@ -237,6 +238,7 @@ class IPerf3Client(log.Origin):
             else:
                 time_sec = int(time_sec_str)
         assert(time_sec)
+        self._time_sec = time_sec
 
         if proto is None:
             proto = values.get('protocol', IPerf3Client.PROTO_TCP)
@@ -323,6 +325,9 @@ class IPerf3Client(log.Origin):
 
     def proto(self):
         return self._proto
+
+    def time_sec(self):
+        return self._time_sec
 
     def __str__(self):
         # FIXME: somehow differentiate between several clients connected to same server?

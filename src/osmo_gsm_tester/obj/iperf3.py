@@ -70,6 +70,14 @@ def print_result_node_tcp(result, node_str):
         print("Exception while using iperf3 %s results: %r" % (node_str, repr(result)))
         raise e
 
+def get_received_mbps(result, isUdp=True):
+    try:
+        recv = result['end']['sum' if isUdp else 'sum_received']
+        return recv['bits_per_second']/1e6
+    except Exception as e:
+        print("Exception while using iperf3 results: %r" % (repr(result)))
+        raise e
+
 class IPerf3Server(log.Origin):
 
     DEFAULT_SRV_PORT = 5003
@@ -169,6 +177,9 @@ class IPerf3Server(log.Origin):
             print_result_node_udp(self.get_results(), 'server')
         else:
             print_result_node_tcp(self.get_results(), 'server')
+
+    def get_received_mbps(self, client_was_udp):
+        return get_received_mbps(self.get_results(), client_was_udp)
 
     def addr(self):
         return self.ip_address.get('addr')
@@ -319,6 +330,12 @@ class IPerf3Client(log.Origin):
             print_result_node_udp(self.get_results(), 'client')
         else:
             print_result_node_tcp(self.get_results(), 'client')
+
+    def get_received_mbps(self):
+        if self.proto() == self.PROTO_UDP:
+            return get_received_mbps(self.get_results(), isUdp=True)
+        else:
+            return get_received_mbps(self.get_results(), isUdp=False)
 
     def set_run_node(self, run_node):
         self._run_node = run_node

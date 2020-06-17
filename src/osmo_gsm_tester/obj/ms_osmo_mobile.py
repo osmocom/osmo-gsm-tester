@@ -32,3 +32,9 @@ class MSOsmoMobile(ms.MS):
         if not ki:
             return "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
         return ki
+
+    def get_assigned_addr(self, ipv6=False):
+        raise log.Error('API not implemented!')
+
+    def is_registered(self, mcc_mnc=None):
+        raise log.Error('API not implemented!')

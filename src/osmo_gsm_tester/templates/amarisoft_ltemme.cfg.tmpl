@@ -68,6 +68,56 @@
           pre_emption_capability: "shall_not_trigger_pre_emption",
           pre_emption_vulnerability: "not_pre_emptable",
         },
+        {
+          qci: 1,
+          priority_level: 1,
+          pre_emption_capability: "shall_not_trigger_pre_emption",
+          pre_emption_vulnerability: "not_pre_emptable",
+          setup_type: "on_demand",
+          filters: [
+            {
+              direction: "both",
+              id: 1,
+              precedence: 0,
+              components: [
+                {
+                  type_of_service: 0xb8,
+                  mask: 255
+                }
+              ]
+            }
+          ],
+          on_demand_timeout: 10000,
+          on_demand_ul_trigger: true,
+          transaction_identifier: 20,
+          radio_priority: 1,
+          packet_flow_identifier: 20
+        },
+        {
+          qci: 2,
+          priority_level: 1,
+          pre_emption_capability: "shall_not_trigger_pre_emption",
+          pre_emption_vulnerability: "not_pre_emptable",
+          setup_type: "on_demand",
+          filters: [
+            {
+              direction: "both",
+              id: 2,
+              precedence: 1,
+              components: [
+                {
+                  type_of_service: 0x60,
+                  mask: 255
+                }
+              ]
+            }
+          ],
+          on_demand_timeout: 10000,
+          on_demand_ul_trigger: true,
+          transaction_identifier: 21,
+          radio_priority: 1,
+          packet_flow_identifier: 21
+        },
       ],
     },
   ],

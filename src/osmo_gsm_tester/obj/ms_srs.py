@@ -81,6 +81,7 @@ class srsUE(MS):
         self.log_file = None
         self.pcap_file = None
         self.metrics_file = None
+        self.have_metrics_file = False
         self.process = None
         self.rem_host = None
         self.remote_inst = None
@@ -107,6 +108,7 @@ class srsUE(MS):
         self.sleep_after_stop()
 
         # copy back files (may not exist, for instance if there was an early error of process):
+        self.scp_back_metrics(raiseException=False)
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
@@ -116,6 +118,29 @@ class srsUE(MS):
                 self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
             except Exception as e:
                 self.log(repr(e))
+
+    def scp_back_metrics(self, raiseException=True):
+        ''' Copy back metrics only if they have not been copied back yet '''
+        if not self.have_metrics_file:
+            # file is not properly flushed until the process has stopped.
+            if self.running():
+                self.stop()
+
+            # only SCP back if not running locally
+            if not self._run_node.is_local():
+                try:
+                    self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
+                except Exception as e:
+                    if raiseException:
+                        self.err('Failed copying back metrics file from remote host')
+                        raise e
+                    else:
+                        # only log error
+                        self.log(repr(e))
+            # make sure to only call it once
+            self.have_metrics_file = True
+        else:
+            self.dbg('Metrics have already been copied back')
 
     def netns(self):
         return "srsue1"
@@ -362,17 +387,8 @@ class srsUE(MS):
         raise log.Error('counter %s not implemented!' % counter_name)
 
     def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt', window=1):
-        # file is not properly flushed until the process has stopped.
-        if self.running():
-            self.stop()
-
-        if not self._run_node.is_local():
-            try:
-                self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
-            except Exception as e:
-                self.err('Failed copying back metrics file from remote host')
-                raise e
-
+        # copy back metrics if we have not already done so
+        self.scp_back_metrics(self)
         metrics = srsUEMetrics(self.metrics_file)
         return metrics.verify(value, operation, metric, criterion, window)
 

@@ -47,6 +47,7 @@ def on_register_schemas():
 
     config_schema = {
         'enable_pcap': schema.BOOL_STR,
+        'log_all_level': schema.STR,
         }
     schema.register_config_schema('modem', config_schema)
 

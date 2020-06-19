@@ -321,12 +321,20 @@ class Process(log.Origin):
         return self.process_obj is not None and self.result is None
 
     def get_output(self, which):
+        ''' Read process output '''
+        path = self.get_output_file(which)
+        if path is None:
+            return None
+        with open(path, 'r') as f2:
+            return f2.read()
+
+    def get_output_file(self, which):
+        ''' Return filename for given output '''
         v = self.outputs.get(which)
         if not v:
             return None
         path, f = v
-        with open(path, 'r') as f2:
-            return f2.read()
+        return path
 
     def get_output_tail(self, which, tail=10, prefix=''):
         out = self.get_output(which)

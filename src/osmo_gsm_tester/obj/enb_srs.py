@@ -23,6 +23,7 @@ import pprint
 from ..core import log, util, config, template, process, remote
 from . import enb
 from . import rfemu
+from .srslte_common import srslte_common
 
 from ..core import schema
 
@@ -36,7 +37,7 @@ def on_register_schemas():
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
 
-class srsENB(enb.eNodeB):
+class srsENB(enb.eNodeB, srslte_common):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsenb'
     BINFILE = 'srsenb'
@@ -68,6 +69,7 @@ class srsENB(enb.eNodeB):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.enable_pcap = False
+        self.metrics_file = None
         self.testenv = testenv
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -88,6 +90,9 @@ class srsENB(enb.eNodeB):
                 self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
             except Exception as e:
                 self.log(repr(e))
+
+        # Collect KPIs for each TC
+        self.testenv.test().set_kpis(self.get_kpis())
 
     def start(self, epc):
         self.log('Starting srsENB')

@@ -26,6 +26,7 @@ from ..core import schema
 from .run_node import RunNode
 from ..core.event_loop import MainLoop
 from .ms import MS
+from .srslte_common import srslte_common
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
@@ -64,7 +65,7 @@ def num_prb2symbol_sz(num_prb):
 def num_prb2base_srate(num_prb):
     return num_prb2symbol_sz(num_prb) * 15 * 1000
 
-class srsUE(MS):
+class srsUE(MS, srslte_common):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsue'
     BINFILE = 'srsue'
@@ -119,6 +120,9 @@ class srsUE(MS):
                 self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
             except Exception as e:
                 self.log(repr(e))
+
+        # Collect KPIs for each TC
+        self.testenv.test().set_kpis(self.get_kpis())
 
     def scp_back_metrics(self, raiseException=True):
         ''' Copy back metrics only if they have not been copied back yet '''

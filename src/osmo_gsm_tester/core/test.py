@@ -143,7 +143,10 @@ class Test(log.Origin):
     def set_kpis(self, kpis):
         if not isinstance(kpis, dict):
             raise log.Error('Expected dictionary in toplevel kpis')
-        self._kpis = kpis
+        if isinstance(self._kpis, dict):
+            self._kpis.update(kpis)
+        else:
+            self._kpis = kpis
 
     def kpis(self):
         return self._kpis

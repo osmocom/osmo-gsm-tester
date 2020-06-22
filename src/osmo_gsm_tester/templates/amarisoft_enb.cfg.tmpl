@@ -123,7 +123,7 @@
     /* If defined, force for number of CCEs for UE specific PDCCH to
        2^pdcch_format. Otherwise it is computed from the reported
        CQI. Range: 0 to 3. */
-    pdcch_format: 1,
+    //pdcch_format: 1,
 
     /* if defined, force the PDSCH MCS for all UEs. Otherwise it is
        computed from the reported CQI */
@@ -152,7 +152,7 @@
     sr_period: 20,
 
     /* CQI report config */
-    cqi_period: 160, /* period (ms). Must be >= 32 for HD-FDD */
+    cqi_period: 40, /* period (ms). Must be >= 32 for HD-FDD */
 
     /* RI reporting is done with a period of m_ri * cqi_period.
        m_ri = 0 (default) disables RI reporting. */
@@ -186,7 +186,7 @@
        parameters. srs_config_index and freq_domain_position are
        allocated for each UE) */
     srs_dedicated: {
-      srs_period: 80, /* period (ms). Must be >= 40 for HD-FDD */
+      srs_period: 160, /* period (ms). Must be >= 40 for HD-FDD */
       srs_bandwidth: 1,
       srs_hopping_bandwidth: 0,
     },

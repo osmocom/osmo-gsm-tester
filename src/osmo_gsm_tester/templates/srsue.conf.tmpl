@@ -31,7 +31,9 @@
 #                     Default is auto (yes for UHD, no for rest)
 #####################################################################
 [rf]
-% if int(ue.num_carriers) == 2:
+% if int(ue.num_carriers) == 4:
+dl_earfcn = 2850,3050,3250,3350
+% elif int(ue.num_carriers) == 2:
 dl_earfcn = 2850,3050
 % else:
 dl_earfcn = 2850

@@ -145,7 +145,6 @@ class AmarisoftUE(MS):
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for ltetue')
         # patchelf >= 0.10 is required to support passing several files at once:
-        self.rem_host.set_remote_env({'PATCHELF_BIN': '/opt/bin/patchelf-v0.10' })
         self.rem_host.change_elf_rpath(remote_binary, str(self.remote_inst))
         # We also need to patch the arch-optimized binaries that lteue() will exec() into:
         self.rem_host.change_elf_rpath(self.remote_inst.child('', 'lteue-*'), str(self.remote_inst))

@@ -176,7 +176,6 @@ class srsUE(MS):
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.
         self.log('Setting RPATH for srsue')
         # srsue binary needs patchelf >= 0.9+52 to avoid failing during patch. OS#4389, patchelf-GH#192.
-        self.rem_host.set_remote_env({'PATCHELF_BIN': '/opt/bin/patchelf-v0.10' })
         self.rem_host.change_elf_rpath(remote_binary, remote_lib)
 
         # srsue requires CAP_SYS_ADMIN to jump to net network namespace: netns(CLONE_NEWNET):

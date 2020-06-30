@@ -235,7 +235,7 @@ class srsENB(enb.eNodeB, srslte_common):
         if cell_list is None or len(cell_list) < cell + 1:
             raise log.Error('cell_list attribute or subitem not found!')
         rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
-        if rfemu_cfg is None: # craft amarisfot by default:
+        if rfemu_cfg is None:
             raise log.Error('rfemu attribute not found in cell_list item!')
         rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
         return rfemu_obj

@@ -400,7 +400,7 @@ numpy = None
 
 class srsUEMetrics(log.Origin):
 
-    VALID_OPERATIONS = ['avg', 'sum', 'max_rolling_avg']
+    VALID_OPERATIONS = ['avg', 'sum', 'max_rolling_avg', 'min_rolling_avg']
     VALID_CRITERION = ['eq','gt','lt']
     CRITERION_TO_SYM = { 'eq' : '==', 'gt' : '>', 'lt' : '<' }
     CRYTERION_TO_SYM_OPPOSITE = { 'eq' : '!=', 'gt' : '<=', 'lt' : '>=' }
@@ -458,6 +458,9 @@ class srsUEMetrics(log.Origin):
         elif operation == 'max_rolling_avg':
             # calculate rolling average over window and take maximum value
             result = numpy.amax(numpy.convolve(sel_data, numpy.ones((window,))/window, mode='valid'))
+        elif operation == 'min_rolling_avg':
+            # calculate rolling average over window and take minimum value
+            result = numpy.amin(numpy.convolve(sel_data, numpy.ones((window,))/window, mode='valid'))
 
         self.dbg(result=result, value=value)
 

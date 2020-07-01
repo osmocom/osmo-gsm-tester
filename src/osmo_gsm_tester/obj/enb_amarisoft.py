@@ -31,6 +31,11 @@ def on_register_schemas():
         }
     schema.register_config_schema('amarisoft', config_schema)
 
+    config_schema = {
+        'log_options': schema.STR,
+        }
+    schema.register_config_schema('amarisoftenb', config_schema)
+
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('uhd', 'zmq')
 

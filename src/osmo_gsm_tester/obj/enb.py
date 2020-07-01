@@ -36,6 +36,8 @@ def on_register_schemas():
         'rf_dev_args': schema.STR,
         'additional_args[]': schema.STR,
         'enable_measurements': schema.BOOL_STR,
+        'enable_dl_awgn': schema.BOOL_STR,
+        'dl_awgn_snr': schema.INT,
         'a1_report_type': schema.STR,
         'a1_report_value': schema.INT,
         'a1_hysteresis': schema.INT,

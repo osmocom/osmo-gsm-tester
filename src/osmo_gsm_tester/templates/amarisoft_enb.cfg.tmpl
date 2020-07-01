@@ -38,6 +38,13 @@
   /* RF driver configuration */
   include "amarisoft_rf_driver.cfg",
 
+% if enb.enable_dl_awgn:
+  channel_dl: {
+    type: "awgn",
+    snr: ${enb.dl_awgn_snr}
+  },
+% endif
+
   mme_list: [
     {
       s1ap_bind_addr: "${enb.addr}",

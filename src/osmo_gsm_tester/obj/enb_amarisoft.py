@@ -160,6 +160,8 @@ class AmarisoftENB(enb.eNodeB):
         self.enable_measurements = util.str2bool(values['enb'].get('enable_measurements', 'false'))
         config.overlay(values, dict(enb={'enable_measurements': self.enable_measurements}))
 
+        config.overlay(values, dict(enb={'enable_dl_awgn': util.str2bool(values['enb'].get('enable_dl_awgn', 'false'))}))
+
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = self.num_prb2base_srate(self.num_prb())

@@ -42,6 +42,10 @@ class RFemulationMinicircuitsHTTP(RFemulation):
             raise log.Error('No "port" attribute provided in supply conf!')
         self.set_name('minicircuits(%s:%r)' % (self.addr, self.ports))
 
+    def __del__(self):
+        self.dbg('Resetting channel attenuation to zero')
+        self.set_attenuation(0)
+
     def _url_prefix(self):
         #http://10.12.1.216/:SetAttPerChan:1:0_2:0_3:0_4:0
         return 'http://' + self.addr

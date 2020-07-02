@@ -318,6 +318,11 @@ class TestEnv(log_module.Origin):
         iperf3srv_obj = IPerf3Server(self, ip_address)
         return iperf3srv_obj
 
+    def stress(self, run_node=None):
+        from .obj.stress import StressTool
+        stress_obj = StressTool(self, run_node)
+        return stress_obj
+
     def msisdn(self):
         msisdn = self.suite_run.resource_pool().next_msisdn(self)
         self.log('using MSISDN', msisdn)

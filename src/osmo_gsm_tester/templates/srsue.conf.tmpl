@@ -145,7 +145,7 @@ imei = 353490069873319
 # mbms_service_port: Port of the MBMS service
 #####################################################################
 [rrc]
-% if int(ue.num_carriers) == 2:
+% if int(ue.num_carriers) > 1:
 ue_category       = 7
 release           = 10
 % else:

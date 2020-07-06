@@ -49,6 +49,7 @@ class AmarisoftENB(enb.eNodeB):
     CFGFILE_RF = 'amarisoft_rf_driver.cfg'
     CFGFILE_DRB = 'amarisoft_drb.cfg'
     LOGFILE = 'lteenb.log'
+    PHY_SIGNAL_FILE = 'lteenb.log.bin'
 
     def __init__(self, testenv, conf):
         super().__init__(testenv, conf, 'amarisoftenb')
@@ -92,6 +93,11 @@ class AmarisoftENB(enb.eNodeB):
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+        except Exception as e:
+            self.log(repr(e))
+
+        try:
+            self.rem_host.scpfrom('scp-back-phy-signal-log', self.remote_phy_signal_file, self.phy_signal_file)
         except Exception as e:
             self.log(repr(e))
 
@@ -140,6 +146,7 @@ class AmarisoftENB(enb.eNodeB):
         self.config_rf_file = self.run_dir.child(AmarisoftENB.CFGFILE_RF)
         self.config_drb_file = self.run_dir.child(AmarisoftENB.CFGFILE_DRB)
         self.log_file = self.run_dir.child(AmarisoftENB.LOGFILE)
+        self.phy_signal_file = self.run_dir.child(AmarisoftENB.PHY_SIGNAL_FILE)
 
         if not self._run_node.is_local():
             self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
@@ -153,6 +160,7 @@ class AmarisoftENB(enb.eNodeB):
             self.remote_config_rf_file = remote_run_dir.child(AmarisoftENB.CFGFILE_RF)
             self.remote_config_drb_file = remote_run_dir.child(AmarisoftENB.CFGFILE_DRB)
             self.remote_log_file = remote_run_dir.child(AmarisoftENB.LOGFILE)
+            self.remote_phy_signal_file = remote_run_dir.child(AmarisoftENB.PHY_SIGNAL_FILE)
 
         values = super().configure(['amarisoft', 'amarisoftenb'])
 
@@ -190,6 +198,9 @@ class AmarisoftENB(enb.eNodeB):
 
         logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
         config.overlay(values, dict(enb=dict(log_filename=logfile)))
+
+        phy_signal_file = self.phy_signal_file if self._run_node.is_local() else self.remote_phy_signal_file
+        config.overlay(values, dict(enb=dict(phy_signal_file=phy_signal_file)))
 
         # rf driver is shared between amarisoft enb and ue, so it has a
         # different cfg namespace 'trx'. Copy needed values over there:

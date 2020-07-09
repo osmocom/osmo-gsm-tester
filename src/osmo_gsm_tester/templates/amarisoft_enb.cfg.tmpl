@@ -93,7 +93,7 @@
   cell_default: {
     /* Broadcasted PLMN identities */
     plmn_list: [
-      "${enb.mcc}${enb.mnc}",
+      "${'{0:03}'.format(int(enb.mcc))}${'{0:02}'.format(int(enb.mnc))}",
     ],
 
 % if int(enb.get('transmission_mode')) == 1:

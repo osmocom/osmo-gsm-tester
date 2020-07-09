@@ -39,7 +39,7 @@
 
   s1ap_bind_addr: "${epc.run_addr}",
 
-  plmn: "${epc.mcc}${epc.mnc}",
+  plmn: "${'{0:03}'.format(int(epc.mcc))}${'{0:02}'.format(int(epc.mnc))}",
   mme_group_id: 32769,
   mme_code: 1,
 

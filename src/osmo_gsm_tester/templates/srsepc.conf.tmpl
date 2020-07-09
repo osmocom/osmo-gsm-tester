@@ -24,8 +24,8 @@
 mme_code = 0x1a
 mme_group = 0x0001
 tac = 0x0007
-mcc = ${epc.mcc}
-mnc = ${epc.mnc}
+mcc = ${'{0:03}'.format(int(epc.mcc))}
+mnc = ${'{0:02}'.format(int(epc.mnc))}
 mme_bind_addr = ${epc.run_addr}
 apn = srsapn
 dns_addr = 8.8.8.8

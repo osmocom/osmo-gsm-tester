@@ -4,6 +4,7 @@ set -e -x
 amarisoft_tgz="$1"
 
 BUILD_AMARISOFT_TRX_ZMQ="${BUILD_AMARISOFT_TRX_ZMQ:-1}"
+HAVE_AMARISOFT_LTEUE="${HAVE_AMARISOFT_LTEUE:-1}"
 
 if [ ! -f "$amarisoft_tgz" ]; then
         echo "Amarisoft tgz doesn't exist: $amarisoft_tgz"
@@ -57,18 +58,20 @@ tar -czf "$tar" -C inst-amarisoftenb/ .
 md5sum "$tar" > "${this}.md5"
 
 # Create amarisoftue inst:
-rm -rf inst-amarisoftue && mkdir inst-amarisoftue || exit 1
-tar --strip-components=1 -zxf inst-tmp/*/lteue-linux*.tar.gz -C inst-amarisoftue/
-if [ "x${BUILD_AMARISOFT_TRX_ZMQ}" = "x1" ]; then
-        cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftue/
-        cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftue/trx_zmq.so
-        patchelf --set-rpath '$ORIGIN/' inst-amarisoftue/trx_zmq.so
+if [ "x${HAVE_AMARISOFT_LTEUE}" = "x1" ]; then
+        rm -rf inst-amarisoftue && mkdir inst-amarisoftue || exit 1
+        tar --strip-components=1 -zxf inst-tmp/*/lteue-linux*.tar.gz -C inst-amarisoftue/
+        if [ "x${BUILD_AMARISOFT_TRX_ZMQ}" = "x1" ]; then
+                cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftue/
+                cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftue/trx_zmq.so
+                patchelf --set-rpath '$ORIGIN/' inst-amarisoftue/trx_zmq.so
+        fi
+        cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftue/
+        this="amarisoftue.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
+        tar="${this}.tgz"
+        tar -czf "$tar" -C inst-amarisoftue/ .
+        md5sum "$tar" > "${this}.md5"
 fi
-cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftue/
-this="amarisoftue.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
-tar="${this}.tgz"
-tar -czf "$tar" -C inst-amarisoftue/ .
-md5sum "$tar" > "${this}.md5"
 
 # Create amarisoftepc inst:
 rm -rf inst-amarisoftepc && mkdir inst-amarisoftepc || exit 1

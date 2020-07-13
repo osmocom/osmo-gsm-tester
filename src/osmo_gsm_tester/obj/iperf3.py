@@ -101,11 +101,12 @@ class IPerf3Server(log.Origin):
     def cleanup(self):
         if self.process is None:
             return
-        if self.runs_locally() or not self.logfile_supported:
+        if self.runs_locally() or not self.logfile_supported or self.log_copied:
             return
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
+            self.log_copied = True
         except Exception as e:
             self.log(repr(e))
 

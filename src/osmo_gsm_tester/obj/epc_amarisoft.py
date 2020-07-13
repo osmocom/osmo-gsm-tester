@@ -177,8 +177,11 @@ class AmarisoftEPC(epc.EPC):
         if algo_str != util.OSMO_AUTH_ALGO_NONE and not modem.ki():
             raise log.Error("Auth algo %r selected but no KI specified" % algo_str)
 
+        if algo_str == 'milenage' and not modem.opc():
+            raise log.Error("Auth algo milenage selected but no OPC specified")
+
         subscriber_id = len(self.subscriber_list) # list index
-        self.subscriber_list.append({'id': subscriber_id, 'imsi': modem.imsi(), 'msisdn': msisdn, 'auth_algo': algo_str, 'ki': modem.ki(), 'opc': None, 'apn_ipaddr': modem.apn_ipaddr()})
+        self.subscriber_list.append({'id': subscriber_id, 'imsi': modem.imsi(), 'msisdn': msisdn, 'auth_algo': algo_str, 'ki': modem.ki(), 'opc': modem.opc(), 'apn_ipaddr': modem.apn_ipaddr()})
 
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id,
                  algo_str=algo_str)

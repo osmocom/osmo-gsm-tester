@@ -231,7 +231,8 @@ class AmarisoftUE(MS):
         config.overlay(values, dict(ue=self.testenv.suite().config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
         config.overlay(values, dict(ue=dict(addr = self.addr(),
-                                            num_antennas = self.enb.num_ports())))
+                                            num_antennas = self.enb.num_ports(),
+                                            opc = self.opc())))
 
         logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
         ifupfile = self.ifup_file if self._run_node.is_local() else self.remote_ifup_file

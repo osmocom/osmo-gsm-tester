@@ -28,6 +28,7 @@ def on_register_schemas():
         'path': schema.STR,
         'imsi': schema.IMSI,
         'ki': schema.KI,
+        'opc': schema.OPC,
         'auth_algo': schema.AUTH_ALGO,
         'apn_ipaddr': schema.IPV4,
         'ciphers[]': schema.CIPHER,
@@ -99,6 +100,9 @@ class MS(log.Origin, metaclass=ABCMeta):
 
     def ki(self):
         return self._conf.get('ki')
+
+    def opc(self):
+        return self._conf.get('opc', None)
 
     def apn_ipaddr(self):
         return self._conf.get('apn_ipaddr', 'dynamic')

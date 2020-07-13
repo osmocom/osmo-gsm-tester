@@ -48,8 +48,12 @@
       ue_category: 4,
 
       /* USIM data */
+      sim_algo: "${sub.auth_algo}", /* USIM authentication algorithm: xor, milenage or tuak */
       imsi: "${ue.imsi}",
       K: "${ue.ki}",
+% if ue.opc is not None:
+      opc: "${ue.opc}",
+% endif
 
       /* If enabled, will try to use external SIM card using libpcsclite */
       //external_sim: true,

@@ -28,6 +28,7 @@ IPV4_RE = re.compile('([0-9]{1,3}.){3}[0-9]{1,3}')
 HWADDR_RE = re.compile('([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}')
 IMSI_RE = re.compile('[0-9]{6,15}')
 KI_RE = re.compile('[0-9a-fA-F]{32}')
+OPC_RE = re.compile('[0-9a-fA-F]{32}')
 MSISDN_RE = re.compile('[0-9]{1,15}')
 
 def match_re(name, regex, val):
@@ -59,6 +60,9 @@ def imsi(val):
 
 def ki(val):
     return match_re('KI', KI_RE, val)
+
+def opc(val):
+    return match_re('OPC', OPC_RE, val)
 
 def msisdn(val):
     return match_re('MSISDN', MSISDN_RE, val)
@@ -157,6 +161,7 @@ IPV4 = 'ipv4'
 HWADDR = 'hwaddr'
 IMSI = 'imsi'
 KI = 'ki'
+OPC = 'opc'
 MSISDN = 'msisdn'
 AUTH_ALGO = 'auth_algo'
 TIMES='times'
@@ -180,6 +185,7 @@ SCHEMA_TYPES = {
         HWADDR: hwaddr,
         IMSI: imsi,
         KI: ki,
+        OPC: opc,
         MSISDN: msisdn,
         AUTH_ALGO: auth_algo,
         TIMES: times,

@@ -246,7 +246,8 @@ class srsUE(MS, srslte_common):
         values = dict(ue=config.get_defaults('srsue'))
         config.overlay(values, dict(ue=self.testenv.suite().config().get('modem', {})))
         config.overlay(values, dict(ue=self._conf))
-        config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports())))
+        config.overlay(values, dict(ue=dict(num_antennas = self.enb.num_ports(),
+                                            opc = self.opc())))
 
         metricsfile = self.metrics_file if self._run_node.is_local() else self.remote_metrics_file
         logfile = self.log_file if self._run_node.is_local() else self.remote_log_file

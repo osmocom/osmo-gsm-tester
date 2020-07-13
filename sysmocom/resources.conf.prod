@@ -260,7 +260,8 @@ modem:
   rf_dev_args: auto
   imsi: '001010123456789'
   ki: '00112233445566778899aabbccddeeff'
-  auth_algo: 'xor'
+  opc: '63BFA50EE6523365FF14C1F45F88737D'
+  auth_algo: 'milenage'
   features: ['4g']
   run_node:
     run_type: ssh
@@ -274,6 +275,7 @@ modem:
   rf_dev_args: driver=lime,serial=00090706024F0A22,rxant=LNAW,txant=BAND1
   imsi: '001010123456789'
   ki: '00112233445566778899aabbccddeeff'
+  opc: '63BFA50EE6523365FF14C1F45F88737D'
   auth_algo: 'xor'
   features: ['4g']
   run_node:

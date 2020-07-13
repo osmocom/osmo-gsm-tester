@@ -154,10 +154,13 @@
       amf: 0x9001, /* Authentication Management Field */
       sqn: "000000000000", /* Sequence Number */
       K: "${sub.ki}", /* Anritsu Test USIM */
+% if sub.opc:
+      opc: "${sub.opc}",
+% endif
       /* if true, allow several UEs to have the same IMSI (useful
          with test SIM cards). They are distinguished with their
          IMEI. default = false. */
-      multi_sim: true,
+      multi_sim: false,
     },
 %endfor
     /* Add new entries for each IMSI/K */

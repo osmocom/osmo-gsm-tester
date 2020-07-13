@@ -190,8 +190,15 @@ class srsEPC(epc.EPC):
         if algo_str != util.OSMO_AUTH_ALGO_NONE and not modem.ki():
             raise log.Error("Auth algo %r selected but no KI specified" % algo_str)
 
+        if algo_str == 'milenage':
+            if not modem.opc():
+                raise log.Error("Auth algo milenage selected but no OPC specified")
+            # srsepc's used_db uses token 'mil' for milenage:
+            algo_str = 'mil'
+
+        opc = (modem.opc() or '')
         subscriber_id = len(self.subscriber_list) # list index
-        self.subscriber_list.append({'id': subscriber_id, 'imsi': modem.imsi(), 'msisdn': msisdn, 'auth_algo': algo_str, 'ki': modem.ki(), 'opc': None, 'apn_ipaddr': modem.apn_ipaddr()})
+        self.subscriber_list.append({'id': subscriber_id, 'imsi': modem.imsi(), 'msisdn': msisdn, 'auth_algo': algo_str, 'ki': modem.ki(), 'opc': opc, 'apn_ipaddr': modem.apn_ipaddr()})
 
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi(), subscriber_id=subscriber_id,
                  algo_str=algo_str)

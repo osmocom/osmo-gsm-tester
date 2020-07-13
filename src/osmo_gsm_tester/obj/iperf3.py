@@ -117,7 +117,7 @@ class IPerf3Server(log.Origin):
         self.log('Starting iperf3-srv')
         self.log_copied = False
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
-        self.log_file = self.run_dir.new_file(IPerf3Server.LOGFILE)
+        self.log_file = self.run_dir.new_child(IPerf3Server.LOGFILE)
         if self.runs_locally():
             self.start_locally()
         else:
@@ -258,7 +258,7 @@ class IPerf3Client(log.Origin):
         self.log('Preparing iperf3-client connecting to %s:%d (proto=%s,time=%ds)' % (self.server.addr(), self.server.port(), self._proto, time_sec))
         self.log_copied = False
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
-        self.log_file = self.run_dir.new_file(IPerf3Client.LOGFILE)
+        self.log_file = self.run_dir.new_child(IPerf3Client.LOGFILE)
 
         popen_args = ('iperf3', '-c',  self.server.addr(),
                       '-p', str(self.server.port()), '-J',

@@ -9,8 +9,10 @@ addr2="$7"  # Last IP address
 mask="$8"   # Mask
 echo "*** Configuring $type APN[$index] '$apn' on ${ifname}, $ifaddr/$mask, ${addr1}..${addr2}"
 if [ "$type" = "ipv4" ] ; then
-        ifconfig ${ifname} ${ifaddr}/${mask} up
+        ip addr add ${ifaddr}/${mask} dev ${ifname}
+        ip link set ${ifname} up
 else
-        ifconfig ${ifname} inet6 add ${addr1}/${mask} up
+        ip -6 addr add ${addr1}/${mask} dev ${ifname}
+        ip -6 link set ${ifname} up
 fi
 echo "*** done configuring interface ${ifname}"

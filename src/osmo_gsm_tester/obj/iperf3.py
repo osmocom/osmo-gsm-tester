@@ -277,7 +277,7 @@ class IPerf3Client(log.Origin):
             proc = self.prepare_test_proc_locally(netns, popen_args)
         else:
             proc = self.prepare_test_proc_remotely(netns, popen_args)
-        proc.set_default_wait_timeout(time_sec + 30) # leave 30 extra sec for remote run, ctrl conn establishment, etc.
+        proc.set_default_wait_timeout(time_sec + 120) # leave extra time for remote run, ctrl conn establishment, buffer draining, etc.
         return proc
 
     def prepare_test_proc_remotely(self, netns, popen_args):

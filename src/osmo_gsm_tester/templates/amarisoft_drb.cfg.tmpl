@@ -254,21 +254,18 @@
     },
   },
   {
-    qci: 8, /* AM - best effort (Internet traffic) */
+    qci: 8, /* Modified UM - best effort (Internet traffic) with full PDCP buffering */
     pdcp_config: {
       discardTimer: 0, /* in ms, 0 means infinity */
-      statusReportRequired: true,
+      pdcp_SN_Size: 12,
     },
     rlc_config: {
-      ul_am: {
-        t_PollRetransmit: 80, /* in ms */
-        pollPDU: 64,
-        pollByte: 125, /* in kBytes, 0 means infinity */
-        maxRetxThreshold: 32,
+      ul_um: {
+        sn_FieldLength: 10,
       },
-      dl_am: {
-        t_Reordering: 45, /* in ms, should be > to max_harq_tx * HARQ latency */
-        t_StatusProhibit: 60, /* in ms */
+      dl_um: {
+        sn_FieldLength: 10,
+        t_Reordering: 45, /* should be > to max_harq_tx * HARQ latency */
       },
     },
     logical_channel_config: {

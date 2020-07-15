@@ -32,6 +32,10 @@
   log_options: "${enb.log_options}",
   log_filename: "${enb.log_filename}",
 
+% if enb.enable_pcap == 'true':
+  pcap: {filename:"${enb.pcap_filename}"},
+%endif
+
   /* Enable remote API and Web interface */
   com_addr: "${enb.addr}:9001",
 

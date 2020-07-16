@@ -1,4 +1,3 @@
-
 // All times are in ms. Use -1 for infinity, where available
 
 qci_config = (
@@ -6,30 +5,53 @@ qci_config = (
 {
   qci=7;
   pdcp_config = {
-    discard_timer = 100;                
-    pdcp_sn_size = 12;                  
+    discard_timer = 100;
+    pdcp_sn_size = 12;
   }
   rlc_config = {
     ul_um = {
-      sn_field_length = 10; 
+      sn_field_length = 10;
     };
     dl_um = {
-      sn_field_length = 10; 
-      t_reordering    = 45;             
+      sn_field_length = 10;
+      t_reordering    = 45;
     };
   };
   logical_channel_config = {
-    priority = 13; 
-    prioritized_bit_rate   = -1; 
-    bucket_size_duration  = 100; 
-    log_chan_group = 2; 
+    priority = 13;
+    prioritized_bit_rate   = -1;
+    bucket_size_duration  = 100;
+    log_chan_group = 2;
+  };
+},
+// QCI 8 is a modified QCI 7 with PDCP discard timer set to infinity to avoid SDU drops at PDCP
+{
+  qci=8;
+  pdcp_config = {
+    discard_timer = -1;
+    pdcp_sn_size = 12;
+  }
+  rlc_config = {
+    ul_um = {
+      sn_field_length = 10;
+    };
+    dl_um = {
+      sn_field_length = 10;
+      t_reordering    = 45;
+    };
+  };
+  logical_channel_config = {
+    priority = 13;
+    prioritized_bit_rate   = -1;
+    bucket_size_duration  = 100;
+    log_chan_group = 2;
   };
 },
 {
   qci=9;
   pdcp_config = {
     discard_timer = -1;
-    status_report_required = true;
+    status_report_required = false;
   }
   rlc_config = {
     ul_am = {
@@ -44,10 +66,10 @@ qci_config = (
     };
   };
   logical_channel_config = {
-    priority = 11; 
-    prioritized_bit_rate   = -1; 
-    bucket_size_duration  = 100; 
-    log_chan_group = 3; 
+    priority = 11;
+    prioritized_bit_rate   = -1;
+    bucket_size_duration  = 100;
+    log_chan_group = 3;
   };
 }
 

@@ -80,7 +80,7 @@ class SuiteRun(log.Origin):
     def __init__(self, trial, suite_scenario_str, suite_definition, scenarios=[]):
         super().__init__(log.C_TST, suite_scenario_str)
         self.start_timestamp = None
-        self.duration = None
+        self.duration = 0
         self.reserved_resources = None
         self._resource_requirements = None
         self._resource_modifiers = None

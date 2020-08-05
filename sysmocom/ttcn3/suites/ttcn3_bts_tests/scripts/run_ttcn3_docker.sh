@@ -71,6 +71,7 @@ else
 fi
 docker run	--rm \
 		--network $NET_NAME --ip 172.18.9.10 \
+		--ulimit core=-1 \
 		-p ${BSC_RSL_ADDR}:3003:3003 \
 		-e "TTCN3_PCAP_PATH=/data" \
 		--mount type=bind,source=$VOL_BASE_DIR/bts-tester,destination=/data \

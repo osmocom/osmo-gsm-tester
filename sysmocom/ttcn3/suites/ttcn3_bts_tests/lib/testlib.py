@@ -21,7 +21,10 @@ def run_ttcn3(tenv, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute, ttcn3
 
     print('Creating template')
     mytemplate = Template(filename=bts_tmpl_file)
-    r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(), pcu_available=pcu_available, ttcn3_test_execute=ttcn3_test_execute, ttcn3_test_extra_module_params=ttcn3_test_extra_module_params)
+    r = mytemplate.render(btsvty_ctrl_hostname=bts.remote_addr(),
+                          pcu_available=pcu_available,
+                          ttcn3_test_execute=ttcn3_test_execute,
+                          ttcn3_test_extra_module_params=ttcn3_test_extra_module_params)
     with open(bts_cfg_file, 'w') as f:
         f.write(r)
 

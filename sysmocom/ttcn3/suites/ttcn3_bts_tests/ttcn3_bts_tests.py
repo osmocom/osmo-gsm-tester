@@ -6,7 +6,9 @@ import testlib
 tenv.test_import_modules_register_for_cleanup(testlib)
 from testlib import run_ttcn3
 
-ttcn3_test_execute="BTS_Tests.control"
+ttcn3_test_groups = [
+    'BTS_Tests',
+]
 
 hlr_dummy = tenv.hlr()
 mgw_dummy = tenv.mgw()
@@ -46,4 +48,4 @@ print('Starting osmocon')
 osmocon.start()
 
 testdir = os.path.dirname(os.path.realpath(__file__))
-run_ttcn3(tenv, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_execute)
+run_ttcn3(tenv, testdir, bts, osmocon, nat_rsl_ip, ttcn3_test_groups)

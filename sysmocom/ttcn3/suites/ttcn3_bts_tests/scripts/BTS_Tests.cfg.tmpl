@@ -29,4 +29,6 @@ ${ttcn3_test_extra_module_params}
 [MAIN_CONTROLLER]
 
 [EXECUTE]
-${ttcn3_test_execute}
+% for group in ttcn3_test_groups:
+${group}.control
+% endfor

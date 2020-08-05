@@ -8,6 +8,8 @@ from testlib import run_ttcn3
 
 ttcn3_test_groups = [
     'BTS_Tests',
+    'BTS_Tests_SMSCB',
+    'BTS_Tests_LAPDm',
 ]
 
 hlr_dummy = tenv.hlr()

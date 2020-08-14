@@ -36,7 +36,7 @@ def run_ttcn3(tenv, testdir, bts, osmocon, nat_rsl_ip,
     try:
         proc.launch()
         print('TTCN3 test suite launched, waiting until it finishes')
-        proc.wait(timeout=3600)
+        proc.wait(timeout=5400) # 1.5h
     except Exception as e:
         proc.terminate()
         raise e

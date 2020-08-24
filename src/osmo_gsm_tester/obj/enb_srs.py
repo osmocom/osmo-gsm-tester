@@ -21,6 +21,7 @@ import os
 import pprint
 
 from ..core import log, util, config, template, process, remote
+from ..core.event_loop import MainLoop
 from . import enb
 from . import rfemu
 from .srslte_common import srslte_common
@@ -70,6 +71,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.remote_pcap_file = None
         self.enable_pcap = False
         self.metrics_file = None
+        self.stop_sleep_time = 6 # We require at most 5s to stop
         self.testenv = testenv
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -80,6 +82,10 @@ class srsENB(enb.eNodeB, srslte_common):
             return
         if self._run_node.is_local():
             return
+
+        # Make sure we give the UE time to tear down
+        self.sleep_after_stop()
+
         # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
@@ -93,6 +99,12 @@ class srsENB(enb.eNodeB, srslte_common):
 
         # Collect KPIs for each TC
         self.testenv.test().set_kpis(self.get_kpis())
+
+    def sleep_after_stop(self):
+        # Only sleep once
+        if self.stop_sleep_time > 0:
+            MainLoop.sleep(self.stop_sleep_time)
+            self.stop_sleep_time = 0
 
     def start(self, epc):
         self.log('Starting srsENB')

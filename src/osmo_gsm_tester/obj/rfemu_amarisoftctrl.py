@@ -53,11 +53,15 @@ class RFemulationAmarisoftCtrl(RFemulation):
     def set_attenuation(self, db):
         msg = { "message": "cell_gain", "cell_id": int(self.cell_id), "gain": -db }
         msg_str = json.dumps(msg)
-        self.dbg('sending CTRL msg: "%s"' % msg_str)
-        self.ws.send(msg_str)
-        self.dbg('waiting CTRL recv...')
-        result = self.ws.recv()
-        self.dbg('Received CTRL msg: "%s"' % result)
+        try:
+            self.dbg('sending CTRL msg: "%s"' % msg_str)
+            self.ws.send(msg_str)
+            self.dbg('waiting CTRL recv...')
+            result = self.ws.recv()
+            self.dbg('Received CTRL msg: "%s"' % result)
+        except Exception:
+            log.Error('Error sending CTLR msg to eNB. eNB still running?')
+            pass
 
     def get_max_attenuation(self):
         return 200 # maximum cell_gain value in Amarisoft

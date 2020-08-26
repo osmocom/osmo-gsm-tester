@@ -35,6 +35,7 @@ def on_register_schemas():
         'rf_dev_type': schema.STR,
         'rf_dev_args': schema.STR,
         'additional_args[]': schema.STR,
+        'inactivity_timer': schema.INT,
         'enable_measurements': schema.BOOL_STR,
         'enable_dl_awgn': schema.BOOL_STR,
         'dl_awgn_snr': schema.INT,
@@ -99,6 +100,8 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self._txmode = int(values['enb'].get('transmission_mode', None))
         assert self._txmode
         config.overlay(values, dict(enb={ 'num_ports': self.num_ports() }))
+        self._inactivity_timer = int(values['enb'].get('inactivity_timer', None))
+        assert self._inactivity_timer
         assert self._epc is not None
         config.overlay(values, dict(enb={ 'addr': self.addr() }))
         config.overlay(values, dict(enb={ 'mme_addr': self._epc.addr() }))

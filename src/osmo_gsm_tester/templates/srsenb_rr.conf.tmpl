@@ -39,11 +39,7 @@ phy_cnfg =
     subframe = [1, 11, 21, 31]; // vector of subframe indices allowed for SR transmissions
 
     // number of PRBs on each extreme used for SR (total prb is twice this number)
-% if int(enb['num_prb']) <= 6:
     nof_prb = 1;
-% else:
-    nof_prb = 2;
-% endif
   };
   cqi_report_cnfg =
   {
@@ -51,11 +47,7 @@ phy_cnfg =
     simultaneousAckCQI = true;
     period = 40; // in ms
     subframe = [0, 10, 20, 30];
-% if int(enb['num_prb']) <= 6:
     nof_prb = 1;
-% else:
-    nof_prb = 2;
-% endif
     m_ri = 8; // RI period in CQI period
   };
 };

@@ -460,6 +460,8 @@ class srsUEMetrics(log.Origin):
             # calculate rolling average over window and take maximum value
             result = numpy.amax(numpy.convolve(sel_data, numpy.ones((window,))/window, mode='valid'))
         elif operation == 'min_rolling_avg':
+            # trim leading zeros to avoid false negative when UE attach takes longer
+            sel_data = numpy.trim_zeros(sel_data, 'f')
             # calculate rolling average over window and take minimum value
             result = numpy.amin(numpy.convolve(sel_data, numpy.ones((window,))/window, mode='valid'))
 

@@ -21,6 +21,7 @@ print('ENB is connected to EPC')
 ue.connect(enb)
 
 max_rate = enb.ue_max_rate(downlink=True)
+max_rate *= ue.num_carriers
 
 iperf3srv.start()
 proc = iperf3cli.prepare_test_proc(iperf3cli.DIR_DL, ue.netns(), bitrate=max_rate)

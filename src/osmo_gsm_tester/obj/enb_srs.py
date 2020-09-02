@@ -194,6 +194,8 @@ class srsENB(enb.eNodeB, srslte_common):
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
 
+        config.overlay(values, dict(enb={'enable_dl_awgn': util.str2bool(values['enb'].get('enable_dl_awgn', 'false'))}))
+
         self._additional_args = []
         for add_args in values['enb'].get('additional_args', []):
             self._additional_args += add_args.split()

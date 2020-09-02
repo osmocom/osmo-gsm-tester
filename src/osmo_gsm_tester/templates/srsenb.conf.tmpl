@@ -193,8 +193,16 @@ enable = false
 # hst.fd_hz:         Doppler frequency in Hz
 # hst.init_time_s:   Initial time in seconds
 #####################################################################
+% if enb.enable_dl_awgn:
 [channel.dl]
-#enable        = false
+enable        = true
+% endif
+
+% if enb.enable_dl_awgn:
+[channel.dl.awgn]
+enable        = true
+snr           = ${enb.dl_awgn_snr}
+% endif
 
 [channel.dl.fading]
 #enable        = false

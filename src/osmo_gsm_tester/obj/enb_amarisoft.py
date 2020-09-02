@@ -251,7 +251,7 @@ class AmarisoftENB(enb.eNodeB):
         rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
         return rfemu_obj
 
-    def ue_max_rate(self, downlink=True):
+    def ue_max_rate(self, downlink=True, num_carriers=1):
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64
         max_phy_rate_tm1_dl = { 6 : 3.2e6,
                                15 : 9.2e6,
@@ -277,6 +277,9 @@ class AmarisoftENB(enb.eNodeB):
             # Lower max MCS for TM2 and above results in lower max rate
             if self._txmode >= 2 and self.num_prb() <= 25:
                 max_rate *= 0.85
+
+        # Assume we schedule all carriers
+        max_rate *= num_carriers
 
         return max_rate
 

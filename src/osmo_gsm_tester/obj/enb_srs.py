@@ -249,10 +249,11 @@ class srsENB(enb.eNodeB, srslte_common):
         rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
         if rfemu_cfg is None:
             raise log.Error('rfemu attribute not found in cell_list item!')
+
         rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
         return rfemu_obj
 
-    def ue_max_rate(self, downlink=True):
+    def ue_max_rate(self, downlink=True, num_carriers=1):
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64
         max_phy_rate_tm1_dl = { 6 : 3.5e6,
                                15 : 11e6,
@@ -279,6 +280,9 @@ class srsENB(enb.eNodeB, srslte_common):
             # For 6 PRBs the max throughput is significantly lower
             if self._txmode >= 2 and self.num_prb() == 6:
                 max_rate *= 0.85
+
+        # Assume we schedule all carriers
+        max_rate *= num_carriers
 
         return max_rate
 

@@ -213,7 +213,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def ue_max_rate(self, downlink=True):
+    def ue_max_rate(self, downlink=True, num_carriers=1):
         pass
 
     @abstractmethod

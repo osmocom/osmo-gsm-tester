@@ -281,6 +281,11 @@ class AmarisoftENB(enb.eNodeB):
         # Assume we schedule all carriers
         max_rate *= num_carriers
 
+        # Reduce expected UL rate due to bug in UCI scheduling in Amarisoft eNB
+        if downlink == False and num_carriers == 2:
+            # 2nd carrier @ 25%
+            max_rate = max_rate / 2 + (.25 * max_rate / 2)
+
         return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

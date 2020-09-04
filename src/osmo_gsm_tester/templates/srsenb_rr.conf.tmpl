@@ -36,7 +36,7 @@ phy_cnfg =
   {
     dsr_trans_max = 64;
     period = 20;       // in ms
-    subframe = [1, 11, 21, 31]; // vector of subframe indices allowed for SR transmissions
+    //subframe = [1, 11]; // vector of subframe indices allowed for SR transmissions
 
     // number of PRBs on each extreme used for SR (total prb is twice this number)
     nof_prb = 1;
@@ -46,7 +46,7 @@ phy_cnfg =
     mode = "periodic";
     simultaneousAckCQI = true;
     period = 40; // in ms
-    subframe = [0, 10, 20, 30];
+    //subframe = [0, 10, 20, 30];
     nof_prb = 1;
     m_ri = 8; // RI period in CQI period
   };

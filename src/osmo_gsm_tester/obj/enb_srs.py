@@ -286,6 +286,11 @@ class srsENB(enb.eNodeB, srslte_common):
         # Assume we schedule all carriers
         max_rate *= num_carriers
 
+        # Reduce expected UL rate due to missing extendedBSR support (see issue #1708)
+        if downlink == False and num_carriers == 4 and self.num_prb() == 100:
+            # all carriers run at 70% approx.
+            max_rate *= 0.7
+
         return max_rate
 
 # vim: expandtab tabstop=4 shiftwidth=4

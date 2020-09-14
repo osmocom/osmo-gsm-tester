@@ -23,6 +23,7 @@ import pprint
 from ..core import log, util, config, template, process, remote
 from ..core import schema
 from . import epc
+from .srslte_common import srslte_common
 
 def on_register_schemas():
     config_schema = {
@@ -31,7 +32,7 @@ def on_register_schemas():
         }
     schema.register_config_schema('epc', config_schema)
 
-class srsEPC(epc.EPC):
+class srsEPC(epc.EPC, srslte_common):
 
     REMOTE_DIR = '/osmo-gsm-tester-srsepc'
     BINFILE = 'srsepc'
@@ -42,6 +43,7 @@ class srsEPC(epc.EPC):
 
     def __init__(self, testenv, run_node):
         super().__init__(testenv, run_node, 'srsepc')
+        srslte_common.__init__(self)
         self.run_dir = None
         self.config_file = None
         self.db_file = None
@@ -55,6 +57,7 @@ class srsEPC(epc.EPC):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.enable_pcap = False
+        self.kpis = None
         self.subscriber_list = []
 
     def cleanup(self):

@@ -24,7 +24,6 @@ import re
 from ..core import log, util, config, template, process, remote
 from ..core import schema
 from .run_node import RunNode
-from ..core.event_loop import MainLoop
 from .ms import MS
 from .srslte_common import srslte_common
 
@@ -77,6 +76,7 @@ class srsUE(MS, srslte_common):
     def __init__(self, testenv, conf):
         self._run_node = RunNode.from_conf(conf.get('run_node', {}))
         super().__init__('srsue_%s' % self.addr(), conf)
+        srslte_common.__init__(self)
         self.enb = None
         self.run_dir = None
         self.config_file = None
@@ -92,9 +92,9 @@ class srsUE(MS, srslte_common):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.remote_metrics_file = None
-        self.stop_sleep_time = 6 # We require at most 5s to stop
         self.enable_pcap = False
         self.num_carriers = 1
+        self.kpis = None
         self.testenv = testenv
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
@@ -149,16 +149,6 @@ class srsUE(MS, srslte_common):
 
     def netns(self):
         return "srsue1"
-
-    def sleep_after_stop(self):
-        # Only sleep once
-        if self.stop_sleep_time > 0:
-            MainLoop.sleep(self.stop_sleep_time)
-            self.stop_sleep_time = 0
-
-    def stop(self):
-        self.testenv.stop_process(self.process)
-        self.sleep_after_stop()
 
     def connect(self, enb):
         self.log('Starting srsue')

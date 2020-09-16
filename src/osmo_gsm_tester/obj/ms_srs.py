@@ -285,6 +285,17 @@ class srsUE(MS, srslte_common):
                 elif self.enb.num_ports() == 2:
                     # MIMO
                     rf_dev_args += ',rx_freq0=2630e6,rx_freq1=2630e6,rx_freq2=2650e6,rx_freq3=2650e6,tx_freq0=2510e6,tx_freq1=2510e6,tx_freq2=2530e6,tx_freq3=2530e6'
+            elif self.num_carriers == 4:
+                # 4x CA
+                if self.enb.num_ports() == 1:
+                    # SISO
+                    rf_dev_args += ',rx_freq0=2630e6,rx_freq1=2650e6,rx_freq2=2670e6,rx_freq3=2680e6,tx_freq0=2510e6,tx_freq1=2530e6,tx_freq2=2550e6,tx_freq3=2560e6'
+                elif self.enb.num_ports() == 2:
+                    # MIMO
+                    raise log.Error("4 carriers with MIMO isn't supported")
+            else:
+                # flag
+                raise log.Error('No rx/tx frequencies given for {} carriers' % self.num_carriers)
 
             rf_dev_args += ',id=ue,base_srate='+ str(base_srate)
             config.overlay(values, dict(ue=dict(rf_dev_args=rf_dev_args)))

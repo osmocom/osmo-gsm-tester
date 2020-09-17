@@ -37,7 +37,11 @@
             },
             pdsch-ConfigCommon {
               referenceSignalPower -5,
+              % if int(enb.get('transmission_mode')) == 1:
+              p-b 0
+              % else:
               p-b 1
+              % endif
             },
             pusch-ConfigCommon {
               pusch-ConfigBasic {

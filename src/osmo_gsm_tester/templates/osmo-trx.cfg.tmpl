@@ -9,6 +9,9 @@ log stderr
   logging print file basename
   logging print extended-timestamp 1
   logging level set-all info
+  logging level ctr notice
+  logging level trxddl notice
+  logging level trxdul notice
 !
 line vty
  bind ${osmo_trx.trx_ip}

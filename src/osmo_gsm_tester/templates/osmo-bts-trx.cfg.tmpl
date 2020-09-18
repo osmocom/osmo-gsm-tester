@@ -52,4 +52,7 @@ bts 0
 %for chan in osmo_bts_trx.osmo_trx.channels:
  trx ${loop.index}
   phy 0 instance ${loop.index}
+  power-ramp max-initial 23000 mdBm
+  power-ramp step-size 2000 mdB
+  power-ramp step-interval 1
 %endfor

@@ -23,6 +23,7 @@
 
 import sys
 
+from .core import util
 from .core import process
 from .core import template
 from .core import log as log_module

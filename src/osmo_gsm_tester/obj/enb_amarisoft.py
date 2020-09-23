@@ -183,16 +183,24 @@ class AmarisoftENB(enb.eNodeB):
                 rf_dev_args = values['enb'].get('rf_dev_args', '')
                 rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''
 
-                if self._num_prb < 25:
-                    rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
-                elif self._num_prb == 25:
-                    rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
-                elif self._num_prb > 25:
-                    rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
+                if self._txmode == 1:
+                    # SISO config
+                    if self._num_prb < 25:
+                        rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
+                    elif self._num_prb == 25:
+                        rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
+                    else:
+                        rf_dev_args += ''
+                else:
+                    # MIMO config
+                    if self._num_prb == 6:
+                        rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
+                    else:
+                        rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
 
-                if self._num_prb > 50:
-                    # Reduce over the wire format to sc12
-                    rf_dev_args += ',otw_format=sc12'
+                    if self._num_prb > 50:
+                        # Reduce over the wire format to sc12
+                        rf_dev_args += ',otw_format=sc12'
 
                 config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 

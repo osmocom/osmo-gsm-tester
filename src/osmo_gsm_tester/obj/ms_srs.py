@@ -306,12 +306,21 @@ class srsUE(MS, srslte_common):
                 rf_dev_args = values['ue'].get('rf_dev_args', '')
                 rf_dev_args += ',' if rf_dev_args != '' and not rf_dev_args.endswith(',') else ''
 
-                if self.enb.num_prb() < 25:
-                    rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
-                elif self.enb.num_prb() == 25:
-                    rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
-                elif self.enb.num_prb() > 50:
+                if self.enb.num_prb() == 75:
+                    rf_dev_args += 'master_clock_rate=15.36e6,'
+
+                if self.enb.num_ports() == 1:
+                    # SISO config
+                    if self.enb.num_prb() < 25:
+                        rf_dev_args += 'send_frame_size=512,recv_frame_size=512'
+                    elif self.enb.num_prb() == 25:
+                        rf_dev_args += 'send_frame_size=1024,recv_frame_size=1024'
+                    else:
+                        rf_dev_args += ''
+                else:
+                    # MIMO config
                     rf_dev_args += 'num_recv_frames=64,num_send_frames=64'
+                    # For the UE the otw12 format doesn't seem to work very well
 
                 config.overlay(values, dict(ue=dict(rf_dev_args=rf_dev_args)))
 

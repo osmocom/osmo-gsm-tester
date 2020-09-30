@@ -272,7 +272,7 @@ class AmarisoftENB(enb.eNodeB):
                                25 : 10e6,
                                50 : 21e6,
                                75 : 32e6,
-                               100 : 51e6 }
+                               100 : 47e6 }
         if downlink:
             max_rate = max_phy_rate_tm1_dl[self.num_prb()]
         else:

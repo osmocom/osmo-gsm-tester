@@ -100,6 +100,10 @@ class srsUE(MS, srslte_common):
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
+        self._zmq_base_bind_port = None
+        if conf.get('rf_dev_type') == 'zmq':
+            # Define all 4 possible local RF ports (2x CA with 2x2 MIMO)
+            self._zmq_base_bind_port = self.testenv.suite().resource_pool().next_zmq_port_range(self, 4)
 
     def cleanup(self):
         if self.process is None:
@@ -150,6 +154,9 @@ class srsUE(MS, srslte_common):
 
     def netns(self):
         return "srsue1"
+
+    def zmq_base_bind_port(self):
+        return self._zmq_base_bind_port
 
     def connect(self, enb):
         self.log('Starting srsue')
@@ -264,14 +271,15 @@ class srsUE(MS, srslte_common):
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.enb.num_prb())
             # Define all 8 possible RF ports (2x CA with 2x2 MIMO)
-            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':2001' \
-                        + ',tx_port1=tcp://' + self.addr() + ':2003' \
-                        + ',tx_port2=tcp://' + self.addr() + ':2005' \
-                        + ',tx_port3=tcp://' + self.addr() + ':2007' \
-                        + ',rx_port0=tcp://' + self.enb.addr() + ':2000' \
-                        + ',rx_port1=tcp://' + self.enb.addr() + ':2002' \
-                        + ',rx_port2=tcp://' + self.enb.addr() + ':2004' \
-                        + ',rx_port3=tcp://' + self.enb.addr() + ':2006'
+            enb_base_port = self.enb.zmq_base_bind_port()
+            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 0) \
+                        + ',tx_port1=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 1) \
+                        + ',tx_port2=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 2) \
+                        + ',tx_port3=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 3) \
+                        + ',rx_port0=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 0) \
+                        + ',rx_port1=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 1) \
+                        + ',rx_port2=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 2) \
+                        + ',rx_port3=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 3)
 
             if self.num_carriers == 1:
                 # Single carrier

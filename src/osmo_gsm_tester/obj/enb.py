@@ -85,6 +85,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self._num_prb = 0
         self._num_cells = None
         self._epc = None
+        self._zmq_base_bind_port = None
 
     def configure(self, config_specifics_li):
         values = dict(enb=config.get_defaults('enb'))
@@ -149,6 +150,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def num_prb(self):
         return self._num_prb
 
+    def zmq_base_bind_port(self):
+        return self._zmq_base_bind_port
+
     #reference: srsLTE.git srslte_symbol_sz()
     def num_prb2symbol_sz(self, num_prb):
         if num_prb == 6:
@@ -166,16 +170,19 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 
     def get_zmq_rf_dev_args(self):
         base_srate = self.num_prb2base_srate(self.num_prb())
+        if self._zmq_base_bind_port is None:
+            self._zmq_base_bind_port = self.testenv.suite().resource_pool().next_zmq_port_range(self, 4)
+        ue_base_port = self.ue.zmq_base_bind_port()
         # Define all 8 possible RF ports (2x CA with 2x2 MIMO)
         rf_dev_args = 'fail_on_disconnect=true' \
-                    + ',tx_port0=tcp://' + self.addr() + ':2000' \
-                    + ',tx_port1=tcp://' + self.addr() + ':2002' \
-                    + ',tx_port2=tcp://' + self.addr() + ':2004' \
-                    + ',tx_port3=tcp://' + self.addr() + ':2006' \
-                    + ',rx_port0=tcp://' + self.ue.addr() + ':2001' \
-                    + ',rx_port1=tcp://' + self.ue.addr() + ':2003' \
-                    + ',rx_port2=tcp://' + self.ue.addr() + ':2005' \
-                    + ',rx_port3=tcp://' + self.ue.addr() + ':2007'
+                    + ',tx_port0=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 0) \
+                    + ',tx_port1=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 1) \
+                    + ',tx_port2=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 2) \
+                    + ',tx_port3=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 3) \
+                    + ',rx_port0=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 0) \
+                    + ',rx_port1=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 1) \
+                    + ',rx_port2=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 2) \
+                    + ',rx_port3=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 3)
 
         rf_dev_args += ',id=enb,base_srate=' + str(base_srate)
 

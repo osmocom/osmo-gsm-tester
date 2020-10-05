@@ -184,6 +184,15 @@ class ResourcesPool(log.Origin):
         # BVCI=0 and =1 are reserved, avoid them.
         return self.next_persistent_value('bvci', '2', schema.uint16, lambda x: str(int(x)+1) if int(x) < pow(2,16) - 1 else '2', origin)
 
+    def next_zmq_port_range(self, origin, num_ports):
+        # Allocate continuous num_ports port between 2000 and 2200. returns base port.
+        # Assumption: base port is always an odd number.
+        num_ports = num_ports if num_ports % 2 == 0 else num_ports + 1
+        base_port = self.next_persistent_value('bvci', '2000', schema.uint16,
+                                               lambda x: str(int(x)+num_ports) if int(x) < 2200 - num_ports else '2000', origin)
+        return int(base_port)
+
+
 class NoResourceExn(log.Error):
     pass
 

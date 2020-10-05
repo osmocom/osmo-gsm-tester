@@ -101,6 +101,9 @@ class AmarisoftUE(MS):
         self.testenv = testenv
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
+        if conf.get('rf_dev_type') == 'zmq':
+            # Define all 4 possible local RF ports (2x CA with 2x2 MIMO)
+            self._zmq_base_bind_port = self.testenv.suite().resource_pool().next_zmq_port_range(self, 4)
 
     def bin_prefix(self):
         if self._bin_prefix is None:
@@ -122,6 +125,9 @@ class AmarisoftUE(MS):
 
     def netns(self):
         return "amarisoftue1"
+
+    def zmq_base_bind_port(self):
+        return self._zmq_base_bind_port
 
     def stop(self):
         self.testenv.stop_process(self.process)
@@ -242,10 +248,11 @@ class AmarisoftUE(MS):
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.enb.num_prb())
-            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':2001' \
-                        + ',tx_port1=tcp://' + self.addr() + ':2003' \
-                        + ',rx_port0=tcp://' + self.enb.addr() + ':2000' \
-                        + ',rx_port1=tcp://' + self.enb.addr() + ':2002' \
+            enb_base_port = self.enb.zmq_base_bind_port()
+            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 0) \
+                        + ',tx_port1=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 1) \
+                        + ',rx_port0=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 0) \
+                        + ',rx_port1=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 1) \
                         + ',tx_freq=2510e6,rx_freq=2630e6,tx_freq2=2530e6,rx_freq2=2650e6' \
                         + ',id=ue,base_srate='+ str(base_srate)
             config.overlay(values, dict(ue=dict(sample_rate = base_srate / (1000*1000),

@@ -52,6 +52,9 @@ def get_instance_by_type(rfemu_type, rfemu_opt):
     elif rfemu_type == 'minicircuits':
         from .rfemu_minicircuits import RFemulationMinicircuitsHTTP
         obj = RFemulationMinicircuitsHTTP
+    elif rfemu_type == 'srsenb_stdin':
+        from .rfemu_srsenb_stdin import RFemulationSrsStdin
+        obj = RFemulationSrsStdin
     else:
         raise log.Error('RFemulation type not supported:', rfemu_type)
 

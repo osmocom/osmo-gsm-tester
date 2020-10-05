@@ -259,6 +259,10 @@ class srsENB(enb.eNodeB, srslte_common):
         rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
         if rfemu_cfg is None:
             raise log.Error('rfemu attribute not found in cell_list item!')
+        if rfemu_cfg['type'] == 'srsenb_stdin':
+            # These fields are required so the rfemu class can interact with us:
+             config.overlay(rfemu_cfg, dict(enb=self,
+                                            cell_id=cell_list[cell]['cell_id']))
 
         rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
         return rfemu_obj

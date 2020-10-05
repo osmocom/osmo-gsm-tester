@@ -100,6 +100,8 @@ class AmarisoftENB(enb.eNodeB):
             self.rem_host.scpfrom('scp-back-phy-signal-log', self.remote_phy_signal_file, self.phy_signal_file)
         except Exception as e:
             self.log(repr(e))
+        # Clean up for parent class:
+        super().cleanup()
 
     def start(self, epc):
         self.log('Starting AmarisoftENB')
@@ -173,7 +175,7 @@ class AmarisoftENB(enb.eNodeB):
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = self.num_prb2base_srate(self.num_prb())
-            rf_dev_args = self.get_zmq_rf_dev_args()
+            rf_dev_args = self.get_zmq_rf_dev_args(values)
             config.overlay(values, dict(enb=dict(sample_rate = base_srate / (1000*1000),
                                                  rf_dev_args = rf_dev_args)))
 

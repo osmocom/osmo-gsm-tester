@@ -270,16 +270,9 @@ class srsUE(MS, srslte_common):
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.enb.num_prb())
+
             # Define all 8 possible RF ports (2x CA with 2x2 MIMO)
-            enb_base_port = self.enb.zmq_base_bind_port()
-            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 0) \
-                        + ',tx_port1=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 1) \
-                        + ',tx_port2=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 2) \
-                        + ',tx_port3=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 3) \
-                        + ',rx_port0=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 0) \
-                        + ',rx_port1=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 1) \
-                        + ',rx_port2=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 2) \
-                        + ',rx_port3=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 3)
+            rf_dev_args = self.enb.get_zmq_rf_dev_args_for_ue(self)
 
             if self.num_carriers == 1:
                 # Single carrier

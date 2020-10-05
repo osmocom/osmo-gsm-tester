@@ -21,6 +21,7 @@ from abc import ABCMeta, abstractmethod
 from ..core import log, config
 from ..core import schema
 from . import run_node
+from .rfemu_gnuradio_zmq import GrBroker
 
 def on_register_schemas():
     resource_schema = {
@@ -85,7 +86,53 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self._num_prb = 0
         self._num_cells = None
         self._epc = None
-        self._zmq_base_bind_port = None
+        self.gen_conf = None
+        self.gr_broker = None
+
+    def using_grbroker(self, cfg_values):
+        # whether we are to use Grbroker in between ENB and UE.
+        # Initial checks:
+        if cfg_values['enb'].get('rf_dev_type') != 'zmq':
+            return False
+        cell_list = cfg_values['enb']['cell_list']
+        use_match = False
+        notuse_match = False
+        for cell in cell_list:
+            if cell.get('dl_rfemu', False) and cell['dl_rfemu'].get('type', None) == 'gnuradio_zmq':
+                use_match = True
+            else:
+                notuse_match = True
+        if use_match and notuse_match:
+            raise log.Error('Some Cells are configured to use gnuradio_zmq and some are not, unsupported')
+        return use_match
+
+    def calc_required_zmq_ports(self, cfg_values):
+        cell_list = cfg_values['enb']['cell_list']
+        return len(cell_list) * self.num_ports() # *2 if MIMO
+
+    def calc_required_zmq_ports_joined_earfcn(self, cfg_values):
+        #gr_broker will join the earfcns, so we need to count uniqe earfcns:
+        cell_list = cfg_values['enb']['cell_list']
+        earfcn_li = []
+        [earfcn_li.append(int(cell['dl_earfcn'])) for cell in cell_list if int(cell['dl_earfcn']) not in earfcn_li]
+        return len(earfcn_li) * self.num_ports() # *2 if MIMO
+
+
+    def assign_enb_zmq_ports(self, cfg_values, port_name, base_port):
+        port_offset = 0
+        cell_list = cfg_values['enb']['cell_list']
+        for cell in cell_list:
+            cell[port_name] = base_port + port_offset
+            port_offset += self.num_ports()
+        # TODO: do we need to assign cell_list back?
+
+    def assign_enb_zmq_ports_joined_earfcn(self, cfg_values, port_name, base_port):
+        # TODO: Set in cell one bind port per unique earfcn, this is where UE will connect to when we use grbroker.
+        cell_list = cfg_values['enb']['cell_list']
+        earfcn_li = []
+        [earfcn_li.append(int(cell['dl_earfcn'])) for cell in cell_list if int(cell['dl_earfcn']) not in earfcn_li]
+        for cell in cell_list:
+            cell[port_name] = base_port + earfcn_li.index(int(cell['dl_earfcn'])) * self.num_ports()
 
     def configure(self, config_specifics_li):
         values = dict(enb=config.get_defaults('enb'))
@@ -127,6 +174,30 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
                     scell_list_new.append(scell_id)
             values['enb']['cell_list'][i]['scell_list'] = scell_list_new
 
+        # Assign ZMQ ports to each Cell/EARFCN.
+        if values['enb'].get('rf_dev_type') == 'zmq':
+            resourcep = self.testenv.suite().resource_pool()
+            num_ports = self.calc_required_zmq_ports(values)
+            num_ports_joined_earfcn = self.calc_required_zmq_ports_joined_earfcn(values)
+            ue_bind_port = self.ue.zmq_base_bind_port()
+            enb_bind_port = resourcep.next_zmq_port_range(self, num_ports)
+            self.assign_enb_zmq_ports(values, 'zmq_enb_bind_port', enb_bind_port)
+            # If we are to use a GrBroker, then initialize here to have remote zmq ports available:
+            if self.using_grbroker(values):
+                zmq_enb_peer_port = resourcep.next_zmq_port_range(self, num_ports)
+                self.assign_enb_zmq_ports(values, 'zmq_enb_peer_port', zmq_enb_peer_port) # These are actually bound to GrBroker
+                self.assign_enb_zmq_ports_joined_earfcn(values, 'zmq_ue_bind_port', ue_bind_port) # This is were GrBroker binds on the UE side
+                zmq_ue_peer_port = resourcep.next_zmq_port_range(self, num_ports_joined_earfcn)
+                self.assign_enb_zmq_ports_joined_earfcn(values, 'zmq_ue_peer_port', zmq_ue_peer_port) # This is were GrBroker binds on the UE side
+                # Already set gen_conf here in advance since gr_broker needs the cell list
+                self.gen_conf = values
+                self.gr_broker = GrBroker.ref()
+                self.gr_broker.handle_enb(self)
+            else:
+                self.assign_enb_zmq_ports(values, 'zmq_enb_peer_port', ue_bind_port)
+                self.assign_enb_zmq_ports(values, 'zmq_ue_bind_port', ue_bind_port) #If no broker we need to match amount of ports
+                self.assign_enb_zmq_ports(values, 'zmq_ue_peer_port', enb_bind_port)
+
         return values
 
     def id(self):
@@ -145,13 +216,12 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 ########################
     def cleanup(self):
         'Nothing to do by default. Subclass can override if required.'
-        pass
+        if self.gr_broker:
+            GrBroker.unref()
+            self.gr_broker = None
 
     def num_prb(self):
         return self._num_prb
-
-    def zmq_base_bind_port(self):
-        return self._zmq_base_bind_port
 
     #reference: srsLTE.git srslte_symbol_sz()
     def num_prb2symbol_sz(self, num_prb):
@@ -168,24 +238,50 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def num_prb2base_srate(self, num_prb):
         return self.num_prb2symbol_sz(num_prb) * 15 * 1000
 
-    def get_zmq_rf_dev_args(self):
+    def get_zmq_rf_dev_args(self, cfg_values):
         base_srate = self.num_prb2base_srate(self.num_prb())
-        if self._zmq_base_bind_port is None:
-            self._zmq_base_bind_port = self.testenv.suite().resource_pool().next_zmq_port_range(self, 4)
-        ue_base_port = self.ue.zmq_base_bind_port()
+
+        if self.gr_broker:
+            ul_rem_addr = self.addr()
+        else:
+            ul_rem_addr = self.ue.addr()
+
+        rf_dev_args = 'fail_on_disconnect=true'
+        idx = 0
+        cell_list = cfg_values['enb']['cell_list']
         # Define all 8 possible RF ports (2x CA with 2x2 MIMO)
-        rf_dev_args = 'fail_on_disconnect=true' \
-                    + ',tx_port0=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 0) \
-                    + ',tx_port1=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 1) \
-                    + ',tx_port2=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 2) \
-                    + ',tx_port3=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 3) \
-                    + ',rx_port0=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 0) \
-                    + ',rx_port1=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 1) \
-                    + ',rx_port2=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 2) \
-                    + ',rx_port3=tcp://' + self.ue.addr() + ':' + str(ue_base_port + 3)
+        for cell in cell_list:
+            rf_dev_args += ',tx_port%u=tcp://%s:%u' %(idx, self.addr(), cell['zmq_enb_bind_port'] + 0)
+            if self.num_ports() > 1:
+                rf_dev_args += ',tx_port%u=tcp://%s:%u' %(idx + 1, self.addr(), cell['zmq_enb_bind_port'] + 1)
+            rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx, ul_rem_addr, cell['zmq_enb_peer_port'] + 0)
+            if self.num_ports() > 1:
+                rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx + 1, ul_rem_addr, cell['zmq_enb_peer_port'] + 1)
+            idx += self.num_ports()
 
         rf_dev_args += ',id=enb,base_srate=' + str(base_srate)
+        return rf_dev_args
 
+    def get_zmq_rf_dev_args_for_ue(self, ue):
+        cell_list = self.gen_conf['enb']['cell_list']
+        rf_dev_args = ''
+        idx = 0
+        earfcns_done = []
+        for cell in cell_list:
+            if self.gr_broker:
+                if cell['dl_earfcn'] in earfcns_done:
+                    continue
+                earfcns_done.append(cell['dl_earfcn'])
+            rf_dev_args += ',tx_port%u=tcp://%s:%u' %(idx, ue.addr(), cell['zmq_ue_bind_port'] + 0)
+            if self.num_ports() > 1:
+                rf_dev_args += ',tx_port%u=tcp://%s:%u' %(idx + 1, ue.addr(), cell['zmq_ue_bind_port'] + 1)
+            rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx, self.addr(), cell['zmq_ue_peer_port'] + 0)
+            if self.num_ports() > 1:
+                rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx + 1, self.addr(), cell['zmq_ue_peer_port'] + 1)
+            idx += self.num_ports()
+        # remove trailing comma:
+        if rf_dev_args[0] == ',':
+            return rf_dev_args[1:]
         return rf_dev_args
 
     def get_instance_by_type(testenv, conf):

@@ -55,6 +55,9 @@ def get_instance_by_type(rfemu_type, rfemu_opt):
     elif rfemu_type == 'srsenb_stdin':
         from .rfemu_srsenb_stdin import RFemulationSrsStdin
         obj = RFemulationSrsStdin
+    elif rfemu_type == 'gnuradio_zmq':
+        from .rfemu_gnuradio_zmq import RFemulationGnuradioZmq
+        obj = RFemulationGnuradioZmq
     else:
         raise log.Error('RFemulation type not supported:', rfemu_type)
 

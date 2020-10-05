@@ -100,6 +100,8 @@ class srsENB(enb.eNodeB, srslte_common):
 
         # Collect KPIs for each TC
         self.testenv.test().set_kpis(self.get_kpis())
+        # Clean up for parent class:
+        super().cleanup()
 
     def start(self, epc):
         self.log('Starting srsENB')
@@ -198,7 +200,7 @@ class srsENB(enb.eNodeB, srslte_common):
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
-            rf_dev_args = self.get_zmq_rf_dev_args()
+            rf_dev_args = self.get_zmq_rf_dev_args(values)
             config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         # Set UHD frame size as a function of the cell bandwidth on B2XX
@@ -258,7 +260,7 @@ class srsENB(enb.eNodeB, srslte_common):
         rfemu_cfg = cell_list[cell].get('dl_rfemu', None)
         if rfemu_cfg is None:
             raise log.Error('rfemu attribute not found in cell_list item!')
-        if rfemu_cfg['type'] == 'srsenb_stdin':
+        if rfemu_cfg['type'] == 'srsenb_stdin' or rfemu_cfg['type'] == 'gnuradio_zmq':
             # These fields are required so the rfemu class can interact with us:
              config.overlay(rfemu_cfg, dict(enb=self,
                                             cell_id=cell_list[cell]['cell_id']))

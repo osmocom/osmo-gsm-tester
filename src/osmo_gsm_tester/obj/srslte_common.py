@@ -87,3 +87,14 @@ class srslte_common(): # don't inherit from log.Origin here but instead use .nam
           self.kpis = {}
 
       return self.kpis
+
+   def get_num_phy_errors(self, kpi):
+       """ Use KPI analyzer to calculate the number PHY errors for either UE or eNB components from parsed KPI vector """
+       try:
+           # Same as above, make sure the srsLTE scripts folder is included in your PYTHONPATH env variable
+           from kpi_analyzer import kpi_analyzer
+           analyzer = kpi_analyzer(self.name())
+           return analyzer.get_num_phy_errors(kpi)
+       except ImportError:
+           self.log("Can't load KPI analyzer module.")
+           return 0

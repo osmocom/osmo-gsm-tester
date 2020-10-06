@@ -40,6 +40,7 @@ def on_register_schemas():
         'airplane_t_off_ms': schema.INT,
         'tx_gain': schema.UINT,
         'rx_gain': schema.UINT,
+        'freq_offset': schema.INT,
         }
     for key, val in RunNode.schema().items():
         resource_schema['run_node.%s' % key] = val

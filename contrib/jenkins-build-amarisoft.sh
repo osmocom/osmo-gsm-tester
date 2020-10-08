@@ -50,6 +50,7 @@ if [ "x${BUILD_AMARISOFT_TRX_ZMQ}" = "x1" ]; then
         cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftenb/
         cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftenb/trx_zmq.so
         patchelf --set-rpath '$ORIGIN/' inst-amarisoftenb/trx_zmq.so
+        cd inst-amarisoftenb && ln -s libsrslte_rf.so libsrslte_rf.so.0 && cd ..
 fi
 cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftenb/
 this="amarisoftenb.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"

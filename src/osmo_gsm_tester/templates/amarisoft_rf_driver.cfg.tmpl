@@ -1,8 +1,7 @@
 rf_driver: {
     name: "${trx.rf_dev_type}",
-    sync: "${'1' if trx.rf_dev_type == 'zmq' else 'none'}",
-
     args: "${trx.rf_dev_args}",
+    sync: "${trx.rf_dev_sync}",
 
 % if trx.rf_dev_type == 'zmq':
     dl_sample_bits: 16,

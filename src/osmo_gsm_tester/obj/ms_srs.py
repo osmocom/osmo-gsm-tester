@@ -34,6 +34,7 @@ def on_register_schemas():
     resource_schema = {
         'rf_dev_type': schema.STR,
         'rf_dev_args': schema.STR,
+        'rf_dev_sync': schema.STR,
         'num_carriers': schema.UINT,
         'additional_args[]': schema.STR,
         'airplane_t_on_ms': schema.INT,
@@ -256,6 +257,9 @@ class srsUE(MS, srslte_common):
             self._additional_args += add_args.split()
 
         self.num_carriers = int(values['ue'].get('num_carriers', 1))
+
+        # Simply pass-through the sync options
+        config.overlay(values, dict(ue={'rf_dev_sync': values['ue'].get('rf_dev_sync', None)}))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':

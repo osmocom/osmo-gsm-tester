@@ -54,7 +54,7 @@ device_name = ${ue.rf_dev_type}
 # For best performance when BW<5 MHz (25 PRB), use the following device_args settings:
 #     USRP B210: send_frame_size=512,recv_frame_size=512
 
-device_args = ${ue.rf_dev_args}
+device_args = ${ue.rf_dev_args},${ue.rf_dev_sync}
 #time_adv_nsamples = auto
 #burst_preamble_us = auto
 #continuous_tx     = auto

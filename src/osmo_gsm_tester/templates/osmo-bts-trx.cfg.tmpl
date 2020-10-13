@@ -28,7 +28,7 @@ phy 0
 %endif
 %for chan in osmo_bts_trx.osmo_trx.channels:
  instance ${loop.index}
-  osmotrx rx-gain 25
+  osmotrx rx-gain 50
   osmotrx tx-attenuation oml
 %endfor
 bts 0

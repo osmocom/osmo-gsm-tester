@@ -96,7 +96,6 @@ class srsUE(MS, srslte_common):
         self.remote_metrics_file = None
         self.enable_pcap = False
         self.num_carriers = 1
-        self.kpis = None
         self.testenv = testenv
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):

@@ -74,7 +74,6 @@ class srsENB(enb.eNodeB, srslte_common):
         self.metrics_file = None
         self.stop_sleep_time = 6 # We require at most 5s to stop
         self.testenv = testenv
-        self.kpis = None
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))

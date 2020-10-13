@@ -57,7 +57,6 @@ class srsEPC(epc.EPC, srslte_common):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.enable_pcap = False
-        self.kpis = None
         self.subscriber_list = []
 
     def cleanup(self):

@@ -42,7 +42,7 @@ class RFemulationSrsStdin(RFemulation):
 # PUBLIC (test API included)
 #############################
     def set_attenuation(self, db):
-        msg_str = 'cell_gain %d %f' % (self.cell_id, db)
+        msg_str = 'cell_gain %d %f' % (self.cell_id, -db)
         self.dbg('sending stdin msg: "%s"' % msg_str)
         self.enb.process.stdin_write(msg_str + '\n')
 

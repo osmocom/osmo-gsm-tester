@@ -58,6 +58,11 @@ network
 % endif
   ip.access unit_id ${bts.ipa_unit_id} 0
   oml ip.access stream_id ${bts.stream_id} line 0
+% if bts.get('emergency_calls_allowed', False):
+  rach emergency call allowed 1
+% else:
+  rach emergency call allowed 0
+%endif
 % if bts.get('sgsn', False) and bts['gprs_mode'] != 'none':
   gprs mode ${bts.gprs_mode}
   gprs routing area ${bts.routing_area_code}
@@ -105,6 +110,7 @@ network
 msc
  core-mobile-country-code ${bsc.net.mcc}
  core-mobile-network-code ${bsc.net.mnc}
+ allow-emergency allow
  ip.access rtp-base 25000
  mgw remote-ip ${mgw.ip_address.addr}
  mgw remote-port 2427

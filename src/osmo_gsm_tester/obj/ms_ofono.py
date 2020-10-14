@@ -834,4 +834,10 @@ class Modem(MS):
         service_type, response = ss.Initiate(command)
         return response
 
+    def emergency_numbers(self):
+        cmgr = self.dbus.interface(I_CALLMGR)
+        props = cmgr.GetProperties()
+        self.dbg('got Call properties', props)
+        return props.get('EmergencyNumbers', [])
+
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -27,6 +27,7 @@ from . import osmo_ctrl, pcap_recorder, smsc
 def on_register_schemas():
     resource_schema = {
         'path': schema.STR,
+        'emergency_call_msisdn': schema.MSISDN,
         }
     schema.register_resource_schema('modem', resource_schema)
 
@@ -43,6 +44,7 @@ class OsmoMsc(log.Origin):
         self.use_osmux = "off"
         self.testenv = testenv
         self.ip_address = ip_address
+        self._emergency_call_msisdn = None
         self.hlr = hlr
         self.mgw = mgw
         self.stp = stp
@@ -94,7 +96,8 @@ class OsmoMsc(log.Origin):
         if self.authentication is not None:
             config.overlay(values, dict(msc=dict(net=dict(authentication=self.authentication))))
         config.overlay(values, dict(msc=dict(use_osmux=self.use_osmux)))
-
+        if self._emergency_call_msisdn is not None:
+            config.overlay(values, dict(msc=dict(emergency_call_msisdn=self._emergency_call_msisdn)))
 
         self.config = values
 
@@ -145,6 +148,10 @@ class OsmoMsc(log.Origin):
 
     def imsi_list_attached(self):
         return OsmoMscCtrl(self).subscriber_list_active()
+
+    def set_emergency_call_msisdn(self, msisdn):
+        self.dbg('Setting Emergency Call MSISDN', msisdn=msisdn)
+        self._emergency_call_msisdn = msisdn
 
     def running(self):
         return not self.process.terminated()

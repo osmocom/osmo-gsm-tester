@@ -19,7 +19,10 @@
 
 import copy
 from abc import ABCMeta, abstractmethod
-from ..core import log, config, schema
+from ..core import log
+from ..core import config
+from ..core import schema
+from ..core import util
 
 def on_register_schemas():
     resource_schema = {
@@ -31,6 +34,7 @@ def on_register_schemas():
         'ciphers[]': schema.CIPHER,
         'channel_allocator': schema.CHAN_ALLOCATOR,
         'gprs_mode': schema.GPRS_MODE,
+        'emergency_calls_allowed': schema.BOOL_STR,
         'num_trx': schema.UINT,
         'max_trx': schema.UINT,
         'trx_list[].addr': schema.IPV4,
@@ -131,6 +135,8 @@ class Bts(log.Origin, metaclass=ABCMeta):
             config.overlay(values, { 'cell_identity': self.cellid })
         if self.bvci is not None:
             config.overlay(values, { 'bvci': self.bvci })
+
+        config.overlay(values, { 'emergency_calls_allowed': util.str2bool(values.get('emergency_calls_allowed', 'false')) } )
 
         conf = copy.deepcopy(self.conf)
         trx_list = conf.get('trx_list')

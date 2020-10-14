@@ -120,5 +120,8 @@ class MS(log.Origin, metaclass=ABCMeta):
             self.set_msisdn(self.testenv.msisdn())
         return self._msisdn
 
+    def emergency_numbers(self):
+        return ['112']
+
     def get_counter(self, counter_name):
         raise log.Error('get_counter() not implemented!')

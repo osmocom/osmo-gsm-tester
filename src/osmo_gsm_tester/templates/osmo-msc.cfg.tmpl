@@ -31,6 +31,9 @@ msc
  mgw bts-base 8000
  osmux ${msc.use_osmux}
  assign-tmsi
+%if msc.get('emergency_call_msisdn', None) is not None:
+ emergency-call route-to-msisdn ${msc.emergency_call_msisdn}
+%endif
  cs7-instance-iu 0
  cs7-instance-a 0
 ctrl

@@ -45,14 +45,14 @@ while True:
   elif 'sms'.startswith(cmd):
     for mo in modems:
       for mt in modems:
-        mo.sms_send(mt.msisdn, 'to ' + mt.name())
+        mo.sms_send(mt.msisdn(), 'to ' + mt.name())
 
   elif cmd.startswith('call-list'):
       if len(params) != 1 and len(params) != 2:
         print('wrong format')
         continue
       for ms in modems:
-        if len(params) == 1 or str(ms.msisdn) == params[1]:
+        if len(params) == 1 or str(ms.msisdn()) == params[1]:
           print('call-list: %r %r' % (ms.name(), ms.call_id_list()))
 
   elif cmd.startswith('call-dial'):
@@ -61,7 +61,7 @@ while True:
       continue
     src_msisdn, dst_msisdn = params[1:]
     for mo in modems:
-      if str(mo.msisdn) == src_msisdn:
+      if str(mo.msisdn()) == src_msisdn:
         print('dialing %s->%s' % (src_msisdn, dst_msisdn))
         call_id = mo.call_dial(dst_msisdn)
         print('dial success: call_id=%r' % call_id)
@@ -72,7 +72,7 @@ while True:
       continue
     src_msisdn, dst_msisdn = params[1:]
     for mt in modems:
-      if str(mt.msisdn) == dst_msisdn:
+      if str(mt.msisdn()) == dst_msisdn:
         print('waiting for incoming %s->%s' % (src_msisdn, dst_msisdn))
         call_id = mt.call_wait_incoming(src_msisdn)
         print('incoming call success: call_id=%r' % call_id)
@@ -83,7 +83,7 @@ while True:
       continue
     mt_msisdn, call_id = params[1:]
     for mt in modems:
-      if str(mt.msisdn) == mt_msisdn:
+      if str(mt.msisdn()) == mt_msisdn:
         print('answering %s %r' % (mt.name(), call_id))
         mt.call_answer(call_id)
 
@@ -93,7 +93,7 @@ while True:
       continue
     ms_msisdn, call_id = params[1:]
     for ms in modems:
-      if str(ms.msisdn) == ms_msisdn:
+      if str(ms.msisdn()) == ms_msisdn:
         print('hanging up %s %r' % (ms.name(), call_id))
         ms.call_hangup(call_id)
 

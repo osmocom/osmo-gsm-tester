@@ -125,7 +125,7 @@ class OsmoHlr(log.Origin):
         try:
             c = conn.cursor()
             c.execute('insert into subscriber (id, imsi, msisdn) values (?, ?, ?)',
-                        (subscriber_id, modem.imsi(), modem.msisdn,))
+                        (subscriber_id, modem.imsi(), modem.msisdn(),))
             c.execute('insert into auc_2g (subscriber_id, algo_id_2g, ki) values (?, ?, ?)',
                         (subscriber_id, algo, modem.ki(),))
             conn.commit()

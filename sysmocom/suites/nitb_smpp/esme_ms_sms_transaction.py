@@ -32,16 +32,16 @@ wait(ms.is_registered, nitb.mcc_mnc())
 wait(nitb.subscriber_attached, ms)
 
 print('sending first sms...')
-msg = Sms(esme.msisdn, ms.msisdn, 'smpp send message')
+msg = Sms(esme.msisdn, ms.msisdn(), 'smpp send message')
 esme.sms_send(msg, esme.MSGMODE_TRANSACTION)
 wait(ms.sms_was_received, msg)
 
 print('sending second sms (unicode chars not in gsm aplhabet)...')
-msg = Sms(esme.msisdn, ms.msisdn, 'chars:[кизаçйж]')
+msg = Sms(esme.msisdn, ms.msisdn(), 'chars:[кизаçйж]')
 esme.sms_send(msg, esme.MSGMODE_TRANSACTION)
 wait(ms.sms_was_received, msg)
 
-wrong_msisdn = ms.msisdn + esme.msisdn
+wrong_msisdn = ms.msisdn() + esme.msisdn
 print('sending third sms (with wrong msisdn %s)' % wrong_msisdn)
 msg = Sms(esme.msisdn, wrong_msisdn, 'smpp message with wrong dest')
 esme.run_method_expect_failure(SMPP_ESME_RINVDSTADR, esme.sms_send_wait_resp, msg, esme.MSGMODE_TRANSACTION)

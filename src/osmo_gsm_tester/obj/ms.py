@@ -45,7 +45,7 @@ class MS(log.Origin, metaclass=ABCMeta):
     def __init__(self, name, conf):
         super().__init__(log.C_TST, name)
         self._conf = conf
-        self.msisdn = None
+        self._msisdn = None
 
 ########################
 # PUBLIC - INTERNAL API
@@ -111,10 +111,10 @@ class MS(log.Origin, metaclass=ABCMeta):
         return self._conf.get('auth_algo', None)
 
     def set_msisdn(self, msisdn):
-        self.msisdn = msisdn
+        self._msisdn = msisdn
 
     def msisdn(self):
-        return self.msisdn
+        return self._msisdn
 
     def get_counter(self, counter_name):
         raise log.Error('get_counter() not implemented!')

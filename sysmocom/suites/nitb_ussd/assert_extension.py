@@ -34,4 +34,4 @@ sleep(10)
 
 print('Sending ussd code %s' % USSD_COMMAND_GET_EXTENSION)
 response = ms.ussd_send(USSD_COMMAND_GET_EXTENSION)
-assert ' ' + ms.msisdn + '\r' in response
+assert ' ' + ms.msisdn() + '\r' in response

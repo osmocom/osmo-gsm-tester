@@ -45,7 +45,7 @@ def encryption_test_setup_run(enable_auth, algo):
         hlr.subscriber_delete(ms)
         print('KI changed: ' + bad_ki + " => " + good_ki)
         ms.set_ki(good_ki)
-        hlr.subscriber_add(ms, ms.msisdn)
+        hlr.subscriber_add(ms, ms.msisdn())
         print('Attempt connection with correct KI...')
     else:
         print('Attempt connection with wrong KI, should work as it is not used...')

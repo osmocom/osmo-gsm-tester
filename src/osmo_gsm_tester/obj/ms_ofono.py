@@ -706,12 +706,12 @@ class Modem(MS):
 
     def sms_send(self, to_msisdn_or_modem, *tokens):
         if isinstance(to_msisdn_or_modem, Modem):
-            to_msisdn = to_msisdn_or_modem.msisdn
+            to_msisdn = to_msisdn_or_modem.msisdn()
             tokens = list(tokens)
             tokens.append('to ' + to_msisdn_or_modem.name())
         else:
             to_msisdn = str(to_msisdn_or_modem)
-        msg = sms.Sms(self.msisdn, to_msisdn, 'from ' + self.name(), *tokens)
+        msg = sms.Sms(self.msisdn(), to_msisdn, 'from ' + self.name(), *tokens)
         self.log('sending sms to MSISDN', to_msisdn, sms=msg)
         mm = self.dbus.interface(I_SMS)
         mm.SendMessage(to_msisdn, str(msg))
@@ -743,7 +743,7 @@ class Modem(MS):
 
     def call_dial(self, to_msisdn_or_modem):
         if isinstance(to_msisdn_or_modem, Modem):
-            to_msisdn = to_msisdn_or_modem.msisdn
+            to_msisdn = to_msisdn_or_modem.msisdn()
         else:
             to_msisdn = str(to_msisdn_or_modem)
         self.dbg('Dialing:', to_msisdn)
@@ -766,7 +766,7 @@ class Modem(MS):
 
     def call_wait_incoming(self, caller_msisdn_or_modem, timeout=60):
         if isinstance(caller_msisdn_or_modem, Modem):
-            caller_msisdn = caller_msisdn_or_modem.msisdn
+            caller_msisdn = caller_msisdn_or_modem.msisdn()
         else:
             caller_msisdn = str(caller_msisdn_or_modem)
         self.dbg('Waiting for incoming call from:', caller_msisdn)

@@ -37,7 +37,7 @@ wait(bsc.bts_is_connected, bts)
 esme.connect()
 hlr.subscriber_add(ms)
 
-wrong_msisdn = ms.msisdn + esme.msisdn
+wrong_msisdn = ms.msisdn() + esme.msisdn
 print('sending sms with wrong msisdn %s, it will be stored but not delivered' % wrong_msisdn)
 msg = Sms(esme.msisdn, wrong_msisdn, 'smpp message with wrong dest')
 # Since osmo-msc 1e67fea7ba5c6336, we accept all sms in store&forward mode without looking at HLR
@@ -45,7 +45,7 @@ msg = Sms(esme.msisdn, wrong_msisdn, 'smpp message with wrong dest')
 umref_wrong = esme.sms_send_wait_resp(msg, esme.MSGMODE_STOREFORWARD, receipt=True)
 
 print('sending sms, it will be stored...')
-msg = Sms(esme.msisdn, ms.msisdn, 'smpp send not-yet-registered message')
+msg = Sms(esme.msisdn, ms.msisdn(), 'smpp send not-yet-registered message')
 umref = esme.sms_send_wait_resp(msg, esme.MSGMODE_STOREFORWARD, receipt=True)
 
 print('MS registers and will receive the SMS...')
@@ -57,7 +57,7 @@ print('Waiting to receive and consume sms receipt with reference', umref)
 wait(esme.receipt_was_received, umref)
 
 print('checking MS can receive SMS while registered...')
-msg = Sms(esme.msisdn, ms.msisdn, 'smpp send already-registered message')
+msg = Sms(esme.msisdn, ms.msisdn(), 'smpp send already-registered message')
 umref = esme.sms_send_wait_resp(msg, esme.MSGMODE_STOREFORWARD, receipt=True)
 wait(ms.sms_was_received, msg)
 print('Waiting to receive and consume sms receipt with reference', umref)

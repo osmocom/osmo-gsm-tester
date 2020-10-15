@@ -188,11 +188,12 @@ class RFemulationGnuradioZmq(RFemulation):
     def set_attenuation(self, db):
         for cell in self.enb.gen_conf['enb']['cell_list']:
             if int(cell['cell_id']) == self.cell_id:
-                max_att_db = self.get_max_attenuation()
-                self.broker.cmd_set_relative_gain_on_local_port(cell['zmq_enb_peer_port'], (max_att_db - db)/max_att_db)
+                # convert negative dB to amplitude
+                amp = pow(10, -db/20.0)
+                self.broker.cmd_set_relative_gain_on_local_port(cell['zmq_enb_peer_port'], amp)
                 break
 
     def get_max_attenuation(self):
-        return 12 # maximum cell_gain value in srs. Is this correct value?
+        return 200
 
 # vim: expandtab tabstop=4 shiftwidth=4

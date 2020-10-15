@@ -106,8 +106,7 @@ class OsmoHlr(log.Origin):
 
     def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:
-            msisdn = self.testenv.msisdn()
-        modem.set_msisdn(msisdn)
+            msisdn = modem.msisdn()
         subscriber_id = self.next_subscriber_id
         self.next_subscriber_id += 1
 

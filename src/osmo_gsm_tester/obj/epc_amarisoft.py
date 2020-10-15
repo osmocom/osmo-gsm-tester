@@ -168,8 +168,7 @@ class AmarisoftEPC(epc.EPC):
 
     def subscriber_add(self, modem, msisdn=None, algo_str=None):
         if msisdn is None:
-            msisdn = self.testenv.msisdn()
-        modem.set_msisdn(msisdn)
+            msisdn = modem.msisdn()
 
         if algo_str is None:
             algo_str = modem.auth_algo() or util.OSMO_AUTH_ALGO_NONE

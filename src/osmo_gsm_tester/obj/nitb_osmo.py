@@ -120,8 +120,7 @@ class OsmoNitb(log.Origin):
 
     def subscriber_add(self, modem, msisdn=None, algo=None):
         if msisdn is None:
-            msisdn = self.testenv.msisdn()
-        modem.set_msisdn(msisdn)
+            msisdn = modem.msisdn()
 
         if not algo:
             alg_str = modem.auth_algo()

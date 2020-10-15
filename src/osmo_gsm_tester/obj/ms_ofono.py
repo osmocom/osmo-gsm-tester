@@ -373,7 +373,7 @@ class Modem(MS):
     CTX_PROT_IPv46 = 'dual'
 
     def __init__(self, testenv, conf):
-        super().__init__('modem', conf)
+        super().__init__('modem', testenv, conf)
         _import_external_modules()
         self.syspath = conf.get('path')
         self.dbuspath = get_dbuspath_from_syspath(self.syspath)

@@ -42,8 +42,9 @@ class MS(log.Origin, metaclass=ABCMeta):
 ##############
 # PROTECTED
 ##############
-    def __init__(self, name, conf):
+    def __init__(self, name, testenv, conf):
         super().__init__(log.C_TST, name)
+        self.testenv = testenv
         self._conf = conf
         self._msisdn = None
 
@@ -114,6 +115,9 @@ class MS(log.Origin, metaclass=ABCMeta):
         self._msisdn = msisdn
 
     def msisdn(self):
+        # If none was set, allocate next one available:
+        if self._msisdn is None:
+            self.set_msisdn(self.testenv.msisdn())
         return self._msisdn
 
     def get_counter(self, counter_name):

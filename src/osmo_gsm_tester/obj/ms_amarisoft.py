@@ -82,7 +82,7 @@ class AmarisoftUE(MS):
 
     def __init__(self, testenv, conf):
         self._run_node = RunNode.from_conf(conf.get('run_node', {}))
-        super().__init__('amarisoftue_%s' % self.addr(), conf)
+        super().__init__('amarisoftue_%s' % self.addr(), testenv, conf)
         self.enb = None
         self.run_dir = None
         self.inst = None
@@ -98,7 +98,6 @@ class AmarisoftUE(MS):
         self.remote_config_rf_file =  None
         self.remote_log_file = None
         self.remote_ifup_file = None
-        self.testenv = testenv
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
         if conf.get('rf_dev_type') == 'zmq':

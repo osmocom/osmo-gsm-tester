@@ -77,7 +77,7 @@ class srsUE(MS, srslte_common):
 
     def __init__(self, testenv, conf):
         self._run_node = RunNode.from_conf(conf.get('run_node', {}))
-        super().__init__('srsue_%s' % self.addr(), conf)
+        super().__init__('srsue_%s' % self.addr(), testenv, conf)
         srslte_common.__init__(self)
         self.enb = None
         self.run_dir = None
@@ -96,7 +96,6 @@ class srsUE(MS, srslte_common):
         self.remote_metrics_file = None
         self.enable_pcap = False
         self.num_carriers = 1
-        self.testenv = testenv
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))

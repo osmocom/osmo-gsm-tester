@@ -23,6 +23,9 @@ from . import ms
 class MSOsmoMobile(ms.MS):
     """Represent a osmocom-bb mobile."""
 
+    def __init__(self, testenv, conf):
+        super().__init__('ms_osmo', testenv, conf)
+
     def cleanup(self):
         # do nothing for a virtual resource
         pass

@@ -263,6 +263,12 @@ class AmarisoftENB(enb.eNodeB):
         return rfemu_obj
 
     def ue_max_rate(self, downlink=True, num_carriers=1):
+        if self._duplex == 'fdd':
+            return self.ue_max_rate_fdd(downlink, num_carriers)
+        else:
+            return self.ue_max_rate_tdd(downlink, num_carriers)
+
+    def ue_max_rate_fdd(self, downlink, num_carriers):
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64
         max_phy_rate_tm1_dl = { 6 : 3.2e6,
                                15 : 9.2e6,
@@ -298,5 +304,20 @@ class AmarisoftENB(enb.eNodeB):
             max_rate = max_rate / 2 + (.25 * max_rate / 2)
 
         return max_rate
+
+    def ue_max_rate_tdd(self, downlink, num_carriers):
+        # Max rate calculation for TDD depends on the acutal TDD configuration
+        # See: https://www.sharetechnote.com/html/Handbook_LTE_ThroughputCalculationExample_TDD.html
+        # and https://i0.wp.com/www.techtrained.com/wp-content/uploads/2017/09/Blog_Post_1_TDD_Max_Throughput_Theoretical.jpg
+        max_phy_rate_tdd_uldl_config0_sp0 = { 6 : 1.5e6,
+                               15 : 3.7e6,
+                               25 : 6.1e6,
+                               50 : 12.2e6,
+                               75 : 18.4e6,
+                               100 : 54.5e6 }
+        if downlink:
+            max_rate = max_phy_rate_tdd_uldl_config0_sp0[self.num_prb()]
+        else:
+            return 1e6 # dummy value, we need to replace that later
 
 # vim: expandtab tabstop=4 shiftwidth=4

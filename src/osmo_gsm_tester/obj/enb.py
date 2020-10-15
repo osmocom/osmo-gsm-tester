@@ -30,6 +30,9 @@ def on_register_schemas():
         'gtp_bind_addr': schema.IPV4,
         'id': schema.UINT,
         'num_prb': schema.UINT,
+        'duplex': schema.STR,
+        'tdd_uldl_config': schema.UINT,
+        'tdd_special_subframe_pattern': schema.UINT,
         'transmission_mode': schema.LTE_TRANSMISSION_MODE,
         'tx_gain': schema.UINT,
         'rx_gain': schema.UINT,
@@ -83,6 +86,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self.set_name('%s_%s' % (name, self._run_node.run_addr()))
         self._txmode = 0
         self._id = None
+        self._duplex = None
         self._num_prb = 0
         self._num_cells = None
         self._epc = None
@@ -144,6 +148,8 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         config.overlay(values, dict(enb=self._conf))
         self._id = int(values['enb'].get('id', None))
         assert self._id is not None
+        self._duplex = values['enb'].get('duplex', None)
+        assert self._duplex
         self._num_prb = int(values['enb'].get('num_prb', None))
         assert self._num_prb
         self._txmode = int(values['enb'].get('transmission_mode', None))

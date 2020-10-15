@@ -100,6 +100,11 @@
       "${'{0:03}'.format(int(enb.mcc))}${'{0:02}'.format(int(enb.mnc))}",
     ],
 
+% if enb.get('duplex') == "tdd":
+    uldl_config: ${enb.tdd_uldl_config},
+    sp_config: ${enb.tdd_special_subframe_pattern},
+% endif
+
 % if int(enb.get('transmission_mode')) == 1:
     n_antenna_dl: 1, /* number of DL antennas */
     n_antenna_ul: 1, /* number of UL antennas */
@@ -180,7 +185,10 @@
         /* TDD ack/nack feedback mode when a rel 10 UE is detected. It
            can be "bundling", "multiplexing", "cs" or "pucch3". By
            default is it the same as tdd_ack_nack_feedback_mode. */
+% if enb.get('duplex') == "tdd":
+        tdd_ack_nack_feedback_mode: "bundling",
         // tdd_ack_nack_feedback_mode_r10: "cs",
+% endif
 
         /* number of PUCCH 1b CS resources. It determines
            the maximum number of UEs that can be scheduled in one TTI

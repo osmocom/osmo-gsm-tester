@@ -441,4 +441,9 @@ def encryption2osmovty(val):
     assert val[:3] == 'a5_'
     return 'a5 ' + val[3:]
 
+# Return abs path to external dir, where utils to run out of the process are placed
+def external_dir():
+    # ../external/
+    return os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'external'))
+
 # vim: expandtab tabstop=4 shiftwidth=4

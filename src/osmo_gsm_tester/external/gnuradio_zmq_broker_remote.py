@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
 
+# This is script is aimed at being copied to some remote target host where it
+# will be run by osmo-gsm-tester through ssh
+
 from distutils.version import StrictVersion
 
 from gnuradio.fft import window

@@ -19,6 +19,7 @@
 
 import json
 import socket
+import os
 
 from ..core import log
 from ..core import util
@@ -32,12 +33,18 @@ class GrBroker(log.Origin):
     refcount = 0
     instance = None
 
+    REMOTE_DIR = '/osmo-gsm-tester-grbroker'
+    TGT_SCRIPT_NAME = 'gnuradio_zmq_broker_remote.py' # File located in same directory as thine one
+    TGT_SCRIPT_LOCAL_PATH = os.path.join(util.external_dir(), TGT_SCRIPT_NAME)
+
     def __init__(self):
         super().__init__(log.C_RUN, 'gr_zmq_broker')
         self.process = None
         self.ctrl_port = 5005
         self.run_dir = None
         self.rem_host = None
+        self.remote_run_dir = None
+        self.remote_tgt_script = None
         self.enb_li = []
         self.addr = None
         self.ctrl_sk = None
@@ -116,19 +123,27 @@ class GrBroker(log.Origin):
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         if not self.enb_li[0]._run_node.is_local():
             self.rem_host = remote.RemoteHost(self.run_dir, self.enb_li[0]._run_node.ssh_user(), self.enb_li[0]._run_node.ssh_addr())
+            remote_prefix_dir = util.Dir(GrBroker.REMOTE_DIR)
+            self.remote_run_dir = util.Dir(remote_prefix_dir.child(self.name()))
+            self.remote_tgt_script = os.path.join(str(self.remote_run_dir), GrBroker.TGT_SCRIPT_NAME)
+            self.rem_host.recreate_remote_dir(self.remote_run_dir)
+            self.rem_host.scp('scp-grboker-to-remote', GrBroker.TGT_SCRIPT_LOCAL_PATH, self.remote_tgt_script)
 
     def start(self):
         self.num_enb_started += 1
         self.dbg('start(%d/%d)' % (self.num_enb_started, len(self.enb_li)))
         if self.num_enb_started == 1:
             self.configure()
-            args = ('osmo-gsm-tester_zmq_broker.py',
-                    '-c', str(self.ctrl_port),
-                    '-b', self.addr)
             if self.enb_li[0]._run_node.is_local():
+                args = (GrBroker.TGT_SCRIPT_LOCAL_PATH,
+                        '-c', str(self.ctrl_port),
+                        '-b', self.addr)
                 self.process = process.Process(self.name(), self.run_dir, args)
             else:
-                self.process = self.rem_host.RemoteProcessSafeExit('zmq_gr_broker', util.Dir('/tmp/ogt_%s' % self.name()), args, wait_time_sec=7)
+                args = (self.remote_tgt_script,
+                        '-c', str(self.ctrl_port),
+                        '-b', self.addr)
+                self.process = self.rem_host.RemoteProcessSafeExit(self.name(), self.remote_run_dir, args, wait_time_sec=7)
             self.testenv.remember_to_stop(self.process)
             self.process.launch()
         # Wait until all ENBs are configured/started:

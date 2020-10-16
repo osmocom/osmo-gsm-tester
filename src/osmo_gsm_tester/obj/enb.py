@@ -21,7 +21,7 @@ from abc import ABCMeta, abstractmethod
 from ..core import log, config
 from ..core import schema
 from . import run_node
-from .rfemu_gnuradio_zmq import GrBroker
+from .gnuradio_zmq_broker import GrBroker
 
 def on_register_schemas():
     resource_schema = {
@@ -91,7 +91,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         self._num_cells = None
         self._epc = None
         self.gen_conf = None
-        self.gr_broker = None
+        self.gr_broker = GrBroker.ref()
+        self.gr_broker.register_enb(self)
+        self._use_gr_broker = False
 
     def using_grbroker(self, cfg_values):
         # whether we are to use Grbroker in between ENB and UE.
@@ -189,7 +191,8 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             enb_bind_port = resourcep.next_zmq_port_range(self, num_ports)
             self.assign_enb_zmq_ports(values, 'zmq_enb_bind_port', enb_bind_port)
             # If we are to use a GrBroker, then initialize here to have remote zmq ports available:
-            if self.using_grbroker(values):
+            self._use_gr_broker = self.using_grbroker(values)
+            if self._use_gr_broker:
                 zmq_enb_peer_port = resourcep.next_zmq_port_range(self, num_ports)
                 self.assign_enb_zmq_ports(values, 'zmq_enb_peer_port', zmq_enb_peer_port) # These are actually bound to GrBroker
                 self.assign_enb_zmq_ports_joined_earfcn(values, 'zmq_ue_bind_port', ue_bind_port) # This is were GrBroker binds on the UE side
@@ -197,8 +200,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
                 self.assign_enb_zmq_ports_joined_earfcn(values, 'zmq_ue_peer_port', zmq_ue_peer_port) # This is were GrBroker binds on the UE side
                 # Already set gen_conf here in advance since gr_broker needs the cell list
                 self.gen_conf = values
-                self.gr_broker = GrBroker.ref()
-                self.gr_broker.handle_enb(self)
+                self.gr_broker.start()
             else:
                 self.assign_enb_zmq_ports(values, 'zmq_enb_peer_port', ue_bind_port)
                 self.assign_enb_zmq_ports(values, 'zmq_ue_bind_port', ue_bind_port) #If no broker we need to match amount of ports
@@ -223,6 +225,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def cleanup(self):
         'Nothing to do by default. Subclass can override if required.'
         if self.gr_broker:
+            self.gr_broker.unregister_enb(self)
             GrBroker.unref()
             self.gr_broker = None
 
@@ -247,7 +250,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def get_zmq_rf_dev_args(self, cfg_values):
         base_srate = self.num_prb2base_srate(self.num_prb())
 
-        if self.gr_broker:
+        if self._use_gr_broker:
             ul_rem_addr = self.addr()
         else:
             ul_rem_addr = self.ue.addr()
@@ -274,7 +277,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         idx = 0
         earfcns_done = []
         for cell in cell_list:
-            if self.gr_broker:
+            if self._use_gr_broker:
                 if cell['dl_earfcn'] in earfcns_done:
                     continue
                 earfcns_done.append(cell['dl_earfcn'])

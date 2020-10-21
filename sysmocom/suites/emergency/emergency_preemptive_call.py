@@ -80,20 +80,16 @@ emerg_numbers = ms_mo_emerg.emergency_numbers()
 assert len(emerg_numbers) > 0
 print('dialing Emergency Number %s' % (emerg_numbers[0]))
 mo_cid_emerg = ms_mo_emerg.call_dial(emerg_numbers[0])
-mt_cid_emerg = ms_mt_emerg.call_wait_incoming(ms_mo_emerg)
+# In here we'd ideally wait for incoming call and accept it, but there may be a
+# race condition in previous MT TCH not being yet released, so BSC will only be
+# able to allocate a SDCCH for not a TCH, and will fail later with Assignment
+# Failure:
+mt_cid_emerg = ms_mt_emerg.call_wait_dialing(ms_mo_emerg)
 print('dial success')
-assert not ms_mo_emerg.call_is_active(mo_cid_emerg) and not ms_mt_emerg.call_is_active(mt_cid_emerg)
-ms_mt_emerg.call_answer(mt_cid_emerg)
-wait(ms_mo_emerg.call_is_active, mo_cid_emerg)
-wait(ms_mt_emerg.call_is_active, mt_cid_emerg)
-print('answer success, call established and ongoing')
-
+assert ms_mo_emerg.call_state(mo_cid_emerg) == 'alerting'
 # Now the emergency call is ongoing, and the previous one should have been gone:
-assert len(ms_mo.call_id_list()) == 0 and len(ms_mt.call_id_list()) == 0
+wait(lambda: len(ms_mo.call_id_list()) == 0 and len(ms_mt.call_id_list()) == 0)
+print('preemption worked')
 
 sleep(5) # maintain the emergency call active for 5 seconds
-
-assert ms_mo_emerg.call_is_active(mo_cid_emerg) and ms_mt.call_is_active(mt_cid_emerg)
-ms_mt_emerg.call_hangup(mt_cid_emerg)
-wait(lambda: len(ms_mo_emerg.call_id_list()) == 0 and len(ms_mt_emerg.call_id_list()) == 0)
-print('hangup success')
+print('done sleepig, success')

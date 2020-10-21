@@ -773,6 +773,15 @@ class Modem(MS):
         MainLoop.wait(lambda: self._find_call_msisdn_state(caller_msisdn, 'incoming') is not None, timeout=timeout)
         return self._find_call_msisdn_state(caller_msisdn, 'incoming')
 
+    def call_wait_dialing(self, caller_msisdn_or_modem, timeout=60):
+        if isinstance(caller_msisdn_or_modem, Modem):
+            caller_msisdn = caller_msisdn_or_modem.msisdn()
+        else:
+            caller_msisdn = str(caller_msisdn_or_modem)
+        self.dbg('Waiting for dialing call from:', caller_msisdn)
+        MainLoop.wait(lambda: self._find_call_msisdn_state(caller_msisdn, 'dialing') is not None, timeout=timeout)
+        return self._find_call_msisdn_state(caller_msisdn, 'dialing')
+
     def call_answer(self, call_id):
         self.dbg('Answer call %s' % call_id)
         assert self.call_state(call_id) == 'incoming'

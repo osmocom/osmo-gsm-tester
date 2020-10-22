@@ -164,7 +164,7 @@ class srsENB(enb.eNodeB, srslte_common):
             self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(srsENB.REMOTE_DIR)
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
-            self.remote_run_dir = util.Dir(remote_prefix_dir.child(srsENB.BINFILE))
+            self.remote_run_dir = util.Dir(remote_prefix_dir.child(self.name()))
 
             self.remote_config_file = self.remote_run_dir.child(srsENB.CFGFILE)
             self.remote_config_sib_file = self.remote_run_dir.child(srsENB.CFGFILE_SIB)

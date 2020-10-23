@@ -252,7 +252,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         base_srate = self.num_prb2base_srate(self.num_prb())
 
         if self._use_gr_broker:
-            ul_rem_addr = self.addr()
+            ul_rem_addr = self.gr_broker.addr()
         else:
             ul_rem_addr = self.ue.addr()
 

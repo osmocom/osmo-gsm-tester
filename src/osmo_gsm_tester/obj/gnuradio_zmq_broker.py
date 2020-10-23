@@ -42,11 +42,11 @@ class GrBroker(log.Origin):
         self.process = None
         self.ctrl_port = 5005
         self.run_dir = None
+        self._run_node = None
         self.rem_host = None
         self.remote_run_dir = None
         self.remote_tgt_script = None
         self.enb_li = []
-        self.addr = None
         self.ctrl_sk = None
         self.num_enb_started = 0
 
@@ -64,7 +64,6 @@ class GrBroker(log.Origin):
             GrBroker.instance.cleanup()
             GrBroker.instance = None
 
-
     def cleanup(self):
         if self.ctrl_sk is not None:
             self.cmd_exit()
@@ -74,10 +73,16 @@ class GrBroker(log.Origin):
         self.testenv = None
 
     def register_enb(self, enb):
+        if len(self.enb_li) == 0:
+            # The gnuradio script is run on the first ENB host/addr.
+            self._run_node = enb._run_node
         self.enb_li.append(enb)
 
     def unregister_enb(self, enb):
         self.enb_li.remove(enb)
+
+    def addr(self):
+        return self._run_node.run_addr()
 
     def gen_json_enb(self, enb):
         res = []
@@ -118,11 +123,10 @@ class GrBroker(log.Origin):
         return res
 
     def configure(self):
-        self.addr = self.enb_li[0].addr()
         self.testenv = self.enb_li[0].testenv
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
-        if not self.enb_li[0]._run_node.is_local():
-            self.rem_host = remote.RemoteHost(self.run_dir, self.enb_li[0]._run_node.ssh_user(), self.enb_li[0]._run_node.ssh_addr())
+        if not self._run_node.is_local():
+            self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(GrBroker.REMOTE_DIR)
             self.remote_run_dir = util.Dir(remote_prefix_dir.child(self.name()))
             self.remote_tgt_script = os.path.join(str(self.remote_run_dir), GrBroker.TGT_SCRIPT_NAME)
@@ -134,15 +138,15 @@ class GrBroker(log.Origin):
         self.dbg('start(%d/%d)' % (self.num_enb_started, len(self.enb_li)))
         if self.num_enb_started == 1:
             self.configure()
-            if self.enb_li[0]._run_node.is_local():
+            if self._run_node.is_local():
                 args = (GrBroker.TGT_SCRIPT_LOCAL_PATH,
                         '-c', str(self.ctrl_port),
-                        '-b', self.addr)
+                        '-b', self.addr())
                 self.process = process.Process(self.name(), self.run_dir, args)
             else:
                 args = (self.remote_tgt_script,
                         '-c', str(self.ctrl_port),
-                        '-b', self.addr)
+                        '-b', self.addr())
                 self.process = self.rem_host.RemoteProcessSafeExit(self.name(), self.remote_run_dir, args, wait_time_sec=7)
             self.testenv.remember_to_stop(self.process)
             self.process.launch()
@@ -155,7 +159,7 @@ class GrBroker(log.Origin):
 
     def send_cmd(self, str_buf):
         self.dbg('sending cmd: "%s"' % str_buf)
-        self.ctrl_sk.sendto(str_buf.encode('utf-8'), (self.addr, self.ctrl_port))
+        self.ctrl_sk.sendto(str_buf.encode('utf-8'), (self.addr(), self.ctrl_port))
 
     def cmd_setup(self):
         cfg = self.gen_json()

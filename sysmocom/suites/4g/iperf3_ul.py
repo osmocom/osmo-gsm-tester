@@ -36,6 +36,8 @@ iperf3srv.stop()
 iperf3cli.print_results()
 iperf3srv.print_results(iperf3cli.proto() == iperf3cli.PROTO_UDP)
 
-res_str = ue.verify_metric(max_rate * 0.8, operation='avg', metric='ul_brate', criterion='gt')
+# 80% of the maximum rate for half of the test duration
+half_duration = int(round(iperf3cli.time_sec() / 2))
+res_str = ue.verify_metric(max_rate * 0.8, operation='max_rolling_avg', metric='ul_brate', criterion='gt', window=half_duration)
 print(res_str)
 test.set_report_stdout(res_str)

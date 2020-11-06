@@ -59,9 +59,9 @@ cell_list =
   {
     rf_port = ${cell.rf_port};
     cell_id = ${cell.cell_id};
-    tac = 0x0007;
-    pci = ${loop.index + 1};
-    root_seq_idx = ${loop.index + 204};
+    tac = ${cell.tac};
+    pci = ${cell.pci};
+    root_seq_idx = ${cell.root_seq_idx};
     dl_earfcn = ${cell.dl_earfcn};
     //ul_earfcn = 20850;
     ho_active = true;

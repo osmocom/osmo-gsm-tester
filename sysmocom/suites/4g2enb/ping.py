@@ -18,6 +18,9 @@ wait(epc.enb_is_connected, enbA)
 wait(epc.enb_is_connected, enbB)
 print('ENBs is connected to EPC')
 
+rfemu_enbA = enbA.get_rfemu(0)
+rfemu_enbA.set_attenuation(-10)
+
 ue.connect(enbA)
 print('waiting for UE to attach...')
 wait(ue.is_registered)

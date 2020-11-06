@@ -63,6 +63,8 @@ def on_register_schemas():
         'cell_list[].ncell_list[]': schema.UINT,
         'cell_list[].scell_list[]': schema.UINT,
         'cell_list[].dl_earfcn': schema.UINT,
+        'cell_list[].root_seq_idx': schema.UINT,
+        'cell_list[].tac': schema.UINT,
         'cell_list[].dl_rfemu.type': schema.STR,
         'cell_list[].dl_rfemu.addr': schema.IPV4,
         'cell_list[].dl_rfemu.ports[]': schema.UINT,

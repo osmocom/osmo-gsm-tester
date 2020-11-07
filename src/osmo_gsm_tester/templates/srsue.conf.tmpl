@@ -150,6 +150,10 @@ imei = 353490069873319
 % if int(ue.num_carriers) > 1:
 ue_category       = 7
 release           = 10
+% elif "dl_qam256" in ue.features:
+ue_category       = 7
+release           = 13
+ue_category_dl    = 14
 % else:
 #ue_category       = 4
 #release           = 8

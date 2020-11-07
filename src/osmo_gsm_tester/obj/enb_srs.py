@@ -269,19 +269,30 @@ class srsENB(enb.eNodeB, srslte_common):
         return rfemu_obj
 
     def ue_max_rate(self, downlink=True, num_carriers=1):
-        # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64
-        max_phy_rate_tm1_dl = { 6 : 3.5e6,
-                               15 : 11e6,
-                               25 : 18e6,
-                               50 : 36e6,
-                               75 : 55e6,
-                               100 : 75e6 }
+
+
+        # The max rate for a single UE per PRB configuration in TM1 with MCS 28
+        if 'dl_qam256' in self.ue.features():
+            max_phy_rate_tm1_dl = {6: 5.9e6,
+                                   15: 14.6e6,
+                                   25: 24.5e6,
+                                   50: 48.9e6,
+                                   75: 75.3e6,
+                                   100: 97.8e6}
+        else:
+            max_phy_rate_tm1_dl = {6: 3.5e6,
+                                   15: 11e6,
+                                   25: 18e6,
+                                   50: 36e6,
+                                   75: 55e6,
+                                   100: 75e6}
         max_phy_rate_tm1_ul = { 6 : 1.7e6,
                                15 : 4.7e6,
                                25 : 10e6,
                                50 : 23e6,
                                75 : 34e6,
                                100 : 51e6 }
+
         if downlink:
             max_rate = max_phy_rate_tm1_dl[self.num_prb()]
         else:

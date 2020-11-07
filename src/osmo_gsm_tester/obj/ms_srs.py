@@ -128,6 +128,9 @@ class srsUE(MS, srslte_common):
         # Collect KPIs for each TC
         self.testenv.test().set_kpis(self.get_kpis())
 
+    def features(self):
+        return self._conf.get('features', [])
+
     def scp_back_metrics(self, raiseException=True):
         ''' Copy back metrics only if they have not been copied back yet '''
         if not self.have_metrics_file:

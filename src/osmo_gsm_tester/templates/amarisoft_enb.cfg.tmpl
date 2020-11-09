@@ -77,10 +77,8 @@
     root_sequence_index: ${loop.index * 10 + 204}, /* PRACH root sequence index */
 
     ncell_list: [
-%for ncell in enb.cell_list:
-%if ncell.cell_id in cell.ncell_list:
-      { n_id_cell: ${ncell.pci}, dl_earfcn: ${ncell.dl_earfcn}, cell_id: ${ncell.cell_id}, tac: 1 },
-%endif
+%for ncell in cell.ncell_list:
+      { n_id_cell: ${ncell.pci}, dl_earfcn: ${ncell.dl_earfcn}, cell_id: ${ncell.cell_id}, tac: 7 },
 %endfor
     ],
 

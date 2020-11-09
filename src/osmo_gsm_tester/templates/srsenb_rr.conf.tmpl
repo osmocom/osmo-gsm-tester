@@ -82,17 +82,13 @@ cell_list =
     // Cells available for handover
     meas_cell_list =
     (
-%for ncell in enb.cell_list:
-        <% loop.my_num_items = 0 if loop.index == 0 else loop.my_num_items %>
-%if ncell.cell_id in cell.ncell_list:
-        ${',' if loop.my_num_items != 0 else ''}
-        <% loop.my_num_items += 1 %>
+%for ncell in cell.ncell_list:
+        ${',' if loop.index != 0 else ''}
         {
-          eci = ${hex((int(enb.id)<<8) + int(ncell.cell_id))};
+          eci = ${hex((int(ncell.enb_id)<<8) + int(ncell.cell_id))};
           dl_earfcn = ${ncell.dl_earfcn};
           pci = ${ncell.pci};
         }
-%endif
 %endfor
     );
 

@@ -28,6 +28,8 @@ import atexit
 import threading
 import importlib.util
 import subprocess
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 # This mirrors enum osmo_auth_algo in libosmocore/include/osmocom/crypt/auth.h
 # so that the index within the tuple matches the enum value.
@@ -301,6 +303,51 @@ class Dir():
         return self.path
     def __repr__(self):
         return self.path
+
+class FileWatch(FileSystemEventHandler):
+    def __init__(self, origin, watch_path, event_func):
+        FileSystemEventHandler.__init__(self)
+        self.origin = origin
+        self.watch_path = watch_path
+        self.event_func = event_func
+        self.observer = Observer()
+        self.watch = None
+        self.mutex = threading.Lock()
+
+    def get_lock(self):
+        return self.mutex
+
+    def start(self):
+        dir = os.path.abspath(os.path.dirname(self.watch_path))
+        self.origin.dbg('FileWatch: scheduling watch for directory %s' % dir)
+        self.watch = self.observer.schedule(self, dir, recursive = False)
+        self.observer.start()
+
+    def stop(self):
+        if self.watch:
+            self.origin.dbg('FileWatch: unscheduling watch %r' % self.watch)
+            self.observer.unschedule(self.watch)
+            self.watch = None
+        if self.observer.is_alive():
+            self.observer.stop()
+            self.observer.join()
+
+    def __del__(self):
+        self.stop()
+        self.observer = None
+
+    # Override from FileSystemEventHandler
+    def on_any_event(self, event):
+        if event.is_directory:
+            return None
+        if os.path.abspath(event.src_path) != os.path.abspath(self.watch_path):
+            return None
+        self.origin.dbg('FileWatch: received event %r' % event)
+        try:
+            self.mutex.acquire()
+            self.event_func(event)
+        finally:
+             self.mutex.release()
 
 def touch_file(path):
     with open(path, 'a') as f:

@@ -43,6 +43,57 @@ tst test_suite: DBG: {combining='resources'}
 tst {combining_scenarios='resources'}: DBG: {definition_conf={bts=[{'label': 'sysmoCell 5000'}, {'label': 'sysmoCell 5000'}, {'type': 'sysmo'}], ip_address=[{}], modem=[{}, {}]}}  [test_suite↪{combining_scenarios='resources'}]
 tst test_suite: DBG: {combining='modifiers'}
 tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]
+tst test_suite: Verifying 3 x bts (candidates: 6)
+tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: c2feabd082c36a1cdeccb9a5237dfff7dbadb009
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+tst test_suite: Verifying 1 x ip_address (candidates: 3)
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+tst test_suite: Verifying 2 x modem (candidates: 16)
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+tst test_suite: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/suite_test/test_work/state_dir
 tst test_suite: Reserving 3 x bts (candidates: 6)
 tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
   addr: 10.42.42.53
@@ -93,6 +144,7 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
   label: m7802
   path: /wavecom_1
+tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>
 
 ----------------------------------------------
 trial test_suite hello_world.py
@@ -204,6 +256,60 @@ tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite: Verifying 3 x bts (candidates: 6)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: c2feabd082c36a1cdeccb9a5237dfff7dbadb009
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 2 x modem (candidates: 16)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+  [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/suite_test/test_work/state_dir  [util.py:[LINENR]]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
   addr: 10.42.42.53
@@ -257,6 +363,7 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   label: m7802
   path: /wavecom_1
   [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
 
 ----------------------------------------------
 trial test_suite hello_world.py
@@ -294,6 +401,60 @@ tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite: Verifying 3 x bts (candidates: 6)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: c2feabd082c36a1cdeccb9a5237dfff7dbadb009
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 2 x modem (candidates: 16)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+  [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/suite_test/test_work/state_dir  [util.py:[LINENR]]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
   addr: 10.42.42.53
@@ -347,6 +508,7 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   label: m7802
   path: /wavecom_1
   [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
 
 ----------------------------------------------
 trial test_suite hello_world.py
@@ -380,6 +542,60 @@ tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={bts=[{'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'trx_list': [{'nominal_power': '20'}, {'nominal_power': '20'}]}, {'type': 'sysmo'}]}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite: Verifying 3 x bts (candidates: 6)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: c2feabd082c36a1cdeccb9a5237dfff7dbadb009
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 2 x modem (candidates: 16)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+  [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/suite_test/test_work/state_dir  [util.py:[LINENR]]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
   addr: 10.42.42.53
@@ -433,6 +649,7 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   label: m7802
   path: /wavecom_1
   [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
 resources(test_suite)={'bts': [{'_hash': 'a59640b8ba6a373552b24a6f9f65cadd2347bace',
           '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
           'addr': '10.42.42.53',
@@ -516,6 +733,60 @@ tst {combining_scenarios='resources', scenario='foo'}: [RESOURCE_DICT]
 tst test_suite: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [test_suite↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers', scenario='foo'}: DBG: {conf={}, scenario='foo'}  [test_suite↪{combining_scenarios='modifiers', scenario='foo'}]  [suite.py:[LINENR]]
+tst test_suite: Verifying 3 x bts (candidates: 6)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - max_power_red: '3'
+    nominal_power: '10'
+  - max_power_red: '0'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: c2feabd082c36a1cdeccb9a5237dfff7dbadb009
+  addr: 10.42.42.53
+  band: GSM-1800
+  ipa_unit_id: '7'
+  label: sysmoCell 5000
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'False'
+    trx_ip: 10.42.42.112
+  trx_list:
+  - nominal_power: '10'
+  - max_power_red: '1'
+    nominal_power: '12'
+  type: osmo-bts-trx
+- _hash: 07d9c8aaa940b674efcbbabdd69f58a6ce4e94f9
+  addr: 10.42.42.114
+  band: GSM-1800
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: sysmo
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: cde1debf28f07f94f92c761b4b7c6bf35785ced4
+  addr: 10.42.42.1
+  [resource.py:[LINENR]]
+tst test_suite: Verifying 2 x modem (candidates: 16)  [resource.py:[LINENR]]
+tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
+  imsi: '901700000007801'
+  ki: D620F48487B1B782DA55DF6717F08FF9
+  label: m7801
+  path: /wavecom_0
+- _hash: e1a46516a1fb493b2617ab14fc1693a9a45ec254
+  imsi: '901700000007802'
+  ki: 47FDB2D55CE6A10A85ABDAD034A5B7B3
+  label: m7802
+  path: /wavecom_1
+  [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/suite_test/test_work/state_dir  [util.py:[LINENR]]
 tst test_suite: Reserving 3 x bts (candidates: 6)  [resource.py:[LINENR]]
 tst test_suite: DBG: Picked - _hash: a59640b8ba6a373552b24a6f9f65cadd2347bace
   addr: 10.42.42.53
@@ -569,6 +840,7 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   label: m7802
   path: /wavecom_1
   [resource.py:[LINENR]]
+tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
 resources(test_suite)={'bts': [{'_hash': 'a59640b8ba6a373552b24a6f9f65cadd2347bace',
           '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
           'addr': '10.42.42.53',
@@ -662,10 +934,16 @@ tst suiteC: DBG: {combining='resources'}  [suite.py:[LINENR]]
 tst {combining_scenarios='resources'}: DBG: {definition_conf={ip_address=[{'addr': '10.42.42.2'}]}}  [suiteC↪{combining_scenarios='resources'}]  [suite.py:[LINENR]]
 tst suiteC: DBG: {combining='modifiers'}  [suite.py:[LINENR]]
 tst {combining_scenarios='modifiers'}: DBG: {definition_conf={}}  [suiteC↪{combining_scenarios='modifiers'}]  [suite.py:[LINENR]]
+tst suiteC: Verifying 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
+tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
+  addr: 10.42.42.2
+  [resource.py:[LINENR]]
+tst suiteC: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/suite_test/test_work/state_dir  [util.py:[LINENR]]
 tst suiteC: Reserving 1 x ip_address (candidates: 3)  [resource.py:[LINENR]]
 tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
   addr: 10.42.42.2
   [resource.py:[LINENR]]
+tst suiteC: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
 
 ----------------------------------------------
 trial suiteC test_template_overlay.py

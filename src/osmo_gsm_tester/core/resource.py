@@ -26,6 +26,7 @@ from . import log
 from . import config
 from . import util
 from . import schema
+from .event_loop import MainLoop
 
 from .util import is_dict, is_list
 
@@ -48,6 +49,7 @@ class ResourcesPool(log.Origin):
     _registered_exit_handler = False
 
     def __init__(self):
+        self.reserved_modified = False
         self.config_path = config.get_main_config_value(config.CFG_RESOURCES_CONF)
         self.state_dir = config.get_state_dir()
         super().__init__(log.C_CNF, conf=self.config_path, state=self.state_dir.path)
@@ -56,6 +58,11 @@ class ResourcesPool(log.Origin):
     def read_conf(self):
         self.all_resources = Resources(config.read(self.config_path, schema.get_resources_schema()) or {})
         self.all_resources.set_hashes()
+
+    # Used by FileWatch in reserve() method below
+    def reserve_resources_fw_cb(self, event):
+        if event.event_type == 'modified':
+            self.reserved_modified = True
 
     def reserve(self, origin, want, modifiers):
         '''
@@ -94,18 +101,42 @@ class ResourcesPool(log.Origin):
 
         origin_id = origin.origin_id()
 
-        with self.state_dir.lock(origin_id):
-            rrfile_path = self.state_dir.mk_parentdir(RESERVED_RESOURCES_FILE)
-            reserved = Resources(config.read(rrfile_path, if_missing_return={}))
-            to_be_reserved = self.all_resources.without(reserved).find(origin, want)
+        # Make sure wanted resources can ever be reserved, even if all
+        # resources are unallocated. It will throw an exception if not
+        # possible:
+        self.all_resources.find(origin, want, None, False, True, 'Verifying')
+        self.reserved_modified = True # go through on first attempt
+        rrfile_path = self.state_dir.mk_parentdir(RESERVED_RESOURCES_FILE)
+        fw = util.FileWatch(origin, rrfile_path, self.reserve_resources_fw_cb)
+        fw.start()
+        while True:
+            # First, figure out if  RESERVED_RESOURCES_FILE was modified since last time we checked:
+            modified = False
+            try:
+                fw.get_lock().acquire()
+                if self.reserved_modified:
+                    modified = True
+                    self.reserved_modified = False
+            finally:
+                fw.get_lock().release()
 
-            to_be_reserved.mark_reserved_by(origin_id)
-
-            reserved.add(to_be_reserved)
-            config.write(rrfile_path, reserved)
-
-            self.remember_to_free(to_be_reserved)
-            return ReservedResources(self, origin, to_be_reserved, modifiers)
+            if modified: # file was modified, attempt to reserve resources
+                # It should be possible at some point to reserve the wanted
+                # resources, so try and wait for some to be released if it's not
+                # possible to allocate them now:
+                try:
+                    with self.state_dir.lock(origin_id):
+                        reserved = Resources(config.read(rrfile_path, if_missing_return={}))
+                        to_be_reserved = self.all_resources.without(reserved).find(origin, want)
+                        to_be_reserved.mark_reserved_by(origin_id)
+                        reserved.add(to_be_reserved)
+                        fw.stop()
+                        config.write(rrfile_path, reserved)
+                        self.remember_to_free(to_be_reserved)
+                        return ReservedResources(self, origin, to_be_reserved, modifiers)
+                except NoResourceExn:
+                    origin.log('Unable to reserve resources, too many currently reserved. Waiting until some are available again')
+            MainLoop.sleep(1)
 
     def free(self, origin, to_be_freed):
         log.ctx(origin)

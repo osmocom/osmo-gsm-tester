@@ -116,6 +116,59 @@ cnf -: DBG: MAIN CONFIG:
 *** end: all resources
 
 - request some resources
+--- testowner: Verifying 2 x arfcn (candidates: 10)
+--- testowner: DBG: Picked - _hash: e620569450f8259b3f0212ec19c285dd07df063c
+  arfcn: '512'
+  band: GSM-1800
+- _hash: 022621e513c5a5bf33b77430a1e9c886be676fa1
+  arfcn: '514'
+  band: GSM-1800
+--- testowner: Verifying 2 x bts (candidates: 3)
+--- testowner: DBG: Picked - _hash: d2aa7c1124943de352351b650ca0c751784da6b6
+  addr: 10.42.42.114
+  band: GSM-1800
+  ciphers:
+  - a5_0
+  - a5_1
+  direct_pcu: 'True'
+  ipa_unit_id: '1'
+  label: sysmoBTS 1002
+  type: osmo-bts-sysmo
+- _hash: 2158317d5e0055070e7174c2498dedf53a2957e9
+  addr: 10.42.42.50
+  band: GSM-1800
+  ciphers:
+  - a5_0
+  - a5_1
+  ipa_unit_id: '6'
+  label: Ettus B200
+  osmo_trx:
+    clock_reference: external
+    launch_trx: 'True'
+  type: osmo-bts-trx
+--- testowner: Verifying 1 x ip_address (candidates: 5)
+--- testowner: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
+  addr: 10.42.42.2
+--- testowner: Verifying 2 x modem (candidates: 4)
+--- testowner: DBG: Picked - _hash: 0b538cb6ad799fbd7c2953fd3b4463a76c7cc9c0
+  auth_algo: comp128v1
+  ciphers:
+  - a5_0
+  - a5_1
+  imsi: '901700000009031'
+  ki: 80A37E6FDEA931EAC92FFA5F671EFEAD
+  label: sierra_1
+  path: /sierra_1
+- _hash: 3a6e7747dfe7dfdf817bd3351031bd08051605c3
+  auth_algo: comp128v1
+  ciphers:
+  - a5_0
+  - a5_1
+  imsi: '901700000009029'
+  ki: 00969E283349D354A8239E877F2E0866
+  label: sierra_2
+  path: /sierra_2
+--- testowner: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/resource_test/conf/test_work/state_dir
 --- testowner: Reserving 2 x arfcn (candidates: 10)
 --- testowner: DBG: Picked - _hash: e620569450f8259b3f0212ec19c285dd07df063c
   arfcn: '512'
@@ -168,6 +221,7 @@ cnf -: DBG: MAIN CONFIG:
   ki: 00969E283349D354A8239E877F2E0866
   label: sierra_2
   path: /sierra_2
+--- testowner: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/resource_test/conf/test_work/state_dir, is_recursive=False>
 ~~~ currently reserved:
 arfcn:
 - _hash: e620569450f8259b3f0212ec19c285dd07df063c
@@ -290,3 +344,27 @@ resources(testowner)={'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df0
 3rd subset should not match, pass
 3rd subset should not match, pass
 4th subset should not match, pass
+*** concurrent allocation:
+--- testowner1: Verifying 2 x arfcn (candidates: 10)
+--- testowner1: Verifying 2 x bts (candidates: 3)
+--- testowner1: Verifying 1 x ip_address (candidates: 5)
+--- testowner1: Verifying 2 x modem (candidates: 4)
+--- testowner1: Reserving 2 x arfcn (candidates: 10)
+--- testowner1: Reserving 2 x bts (candidates: 3)
+--- testowner1: Reserving 1 x ip_address (candidates: 5)
+--- testowner1: Reserving 2 x modem (candidates: 4)
+- 2nd instance reserve() start
+--- testowner2: Verifying 2 x arfcn (candidates: 10)
+--- testowner2: Verifying 2 x bts (candidates: 3)
+--- testowner2: Verifying 1 x ip_address (candidates: 5)
+--- testowner2: Verifying 2 x modem (candidates: 4)
+--- testowner2: Reserving 2 x arfcn (candidates: 8)
+--- testowner2: Reserving 2 x bts (candidates: 1)
+--- testowner2: Unable to reserve resources, too many currently reserved. Waiting until some are available again
+- 1st instance free()
+--- testowner2: Reserving 2 x arfcn (candidates: 10)
+--- testowner2: Reserving 2 x bts (candidates: 3)
+--- testowner2: Reserving 1 x ip_address (candidates: 5)
+--- testowner2: Reserving 2 x modem (candidates: 4)
+- 2nd instance reserve() done
+*** end: concurrent allocation

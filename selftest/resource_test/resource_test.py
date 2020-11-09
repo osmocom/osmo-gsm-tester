@@ -6,6 +6,8 @@ import sys
 import pprint
 import shutil
 import atexit
+import time
+import threading
 import _prep
 from osmo_gsm_tester.core import config, log, util, resource
 from osmo_gsm_tester.core.schema import generate_schemas
@@ -127,5 +129,27 @@ if not resource.item_matches(superset, subset):
 subset =  { 'unordered_list_set': [4] }
 if not resource.item_matches(superset, subset):
     print('4th subset should not match, pass')
+
+print('*** concurrent allocation:')
+origin1 = log.Origin(None, 'testowner1')
+origin2 = log.Origin(None, 'testowner2')
+# We disable dbg() for second thread since FileWatch output result is
+# non-deterministic, since sometimes 1 Modiffied event is triggered, sometimes 2.
+origin1.dbg = origin2.dbg = lambda obj, *messages, _src=3, **named_items: None
+resources2 = None
+def second_ogt_instance():
+    # should block here until "resources" are freed.
+    print('- 2nd instance reserve() start')
+    resources2 = pool.reserve(origin2, config.replicate_times(want), config.replicate_times(modifiers))
+    print('- 2nd instance reserve() done')
+    resources2.free()
+resources = pool.reserve(origin1, config.replicate_times(want), config.replicate_times(modifiers))
+th = threading.Thread(target=second_ogt_instance)
+th.start()
+time.sleep(1.0)
+print('- 1st instance free()')
+resources.free()
+th.join()
+print('*** end: concurrent allocation')
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -102,8 +102,8 @@ class srsEPC(epc.EPC, srslte_common):
         self.process.launch()
 
     def start_locally(self):
-        binary = inst.child('bin', BINFILE)
-        lib = inst.child('lib')
+        binary = self.inst.child('bin', srsEPC.BINFILE)
+        lib = self.inst.child('lib')
         env = {}
 
         # setting capabilities will later disable use of LD_LIBRARY_PATH from ELF loader -> modify RPATH instead.

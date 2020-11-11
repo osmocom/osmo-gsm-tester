@@ -307,7 +307,7 @@ def validate(config, schema):
             if util.is_dict(value):
                 nest(path, value, schema)
                 return
-            if util.is_list(value) and value:
+            if util.is_list(value):
                 for list_v in value:
                     validate_item(path, list_v, schema)
                 return

@@ -31,6 +31,7 @@ from ..core import schema
 def on_register_schemas():
     config_schema = {
         'enable_pcap': schema.BOOL_STR,
+        'enable_ul_qam64': schema.BOOL_STR,
         'log_all_level': schema.STR,
         }
     schema.register_config_schema('enb', config_schema)
@@ -191,6 +192,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
 
+        config.overlay(values, dict(enb={'enable_ul_qam64': util.str2bool(values['enb'].get('enable_ul_qam64', 'false'))}))
         config.overlay(values, dict(enb={'enable_dl_awgn': util.str2bool(values['enb'].get('enable_dl_awgn', 'false'))}))
         config.overlay(values, dict(enb={'rf_dev_sync': values['enb'].get('rf_dev_sync', None)}))
 
@@ -269,8 +271,6 @@ class srsENB(enb.eNodeB, srslte_common):
         return rfemu_obj
 
     def ue_max_rate(self, downlink=True, num_carriers=1):
-
-
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28
         if 'dl_qam256' in self.ue.features():
             max_phy_rate_tm1_dl = {6: 5.9e6,
@@ -286,12 +286,21 @@ class srsENB(enb.eNodeB, srslte_common):
                                    50: 36e6,
                                    75: 55e6,
                                    100: 75e6}
-        max_phy_rate_tm1_ul = { 6 : 1.7e6,
-                               15 : 4.7e6,
-                               25 : 10e6,
-                               50 : 23e6,
-                               75 : 34e6,
-                               100 : 51e6 }
+
+        if 'ul_qam64' in self.ue.features():
+            max_phy_rate_tm1_ul = { 6 : 2.7e6,
+                                    15 : 6.5e6,
+                                    25 : 14e6,
+                                    50 : 32e6,
+                                    75 : 34e6,
+                                    100 : 70e6 }
+        else:
+            max_phy_rate_tm1_ul = { 6 : 1.7e6,
+                                    15 : 4.7e6,
+                                    25 : 10e6,
+                                    50 : 23e6,
+                                    75 : 34e6,
+                                    100 : 51e6 }
 
         if downlink:
             max_rate = max_phy_rate_tm1_dl[self.num_prb()]

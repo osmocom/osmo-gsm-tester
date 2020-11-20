@@ -98,6 +98,7 @@ class AmarisoftUE(MS):
         self.remote_config_rf_file =  None
         self.remote_log_file = None
         self.remote_ifup_file = None
+        self.num_carriers = 1
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
         if conf.get('rf_dev_type') == 'zmq':
@@ -247,13 +248,17 @@ class AmarisoftUE(MS):
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = num_prb2base_srate(self.enb.num_prb())
-            enb_base_port = self.enb.zmq_base_bind_port()
-            rf_dev_args = 'tx_port0=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 0) \
-                        + ',tx_port1=tcp://' + self.addr() + ':' + str(self._zmq_base_bind_port + 1) \
-                        + ',rx_port0=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 0) \
-                        + ',rx_port1=tcp://' + self.enb.addr() + ':' + str(enb_base_port + 1) \
-                        + ',tx_freq=2510e6,rx_freq=2630e6,tx_freq2=2530e6,rx_freq2=2650e6' \
-                        + ',id=ue,base_srate='+ str(base_srate)
+            rf_dev_args = self.enb.get_zmq_rf_dev_args_for_ue(self)
+
+            # Single carrier
+            if self.enb.num_ports() == 1:
+                # SISO
+                rf_dev_args += ',rx_freq0=2630e6,tx_freq0=2510e6'
+            elif self.enb.num_ports() == 2:
+                # MIMO
+                rf_dev_args += ',rx_freq0=2630e6,rx_freq1=2630e6,tx_freq0=2510e6,tx_freq1=2510e6'
+
+            rf_dev_args += ',id=ue,base_srate='+ str(base_srate)
             config.overlay(values, dict(ue=dict(sample_rate = base_srate / (1000*1000),
                                                 rf_dev_args = rf_dev_args)))
 
@@ -285,6 +290,7 @@ class AmarisoftUE(MS):
         # different cfg namespace 'trx'. Copy needed values over there:
         config.overlay(values, dict(trx=dict(rf_dev_type=values['ue'].get('rf_dev_type', None),
                                              rf_dev_args=values['ue'].get('rf_dev_args', None),
+                                             rf_dev_sync=values['ue'].get('rf_dev_sync', None),
                                              rx_gain=values['ue'].get('rx_gain', None),
                                              tx_gain=values['ue'].get('tx_gain', None),
                                             )))
@@ -331,7 +337,7 @@ class AmarisoftUE(MS):
         proc.launch_sync()
         return proc
 
-    def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt'):
+    def verify_metric(self, value, operation='avg', metric='dl_brate', criterion='gt', window=None):
         return 'metrics not yet implemented with Amarisoft UE'
 
 # vim: expandtab tabstop=4 shiftwidth=4

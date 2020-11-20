@@ -48,7 +48,7 @@
       ue_category: 4,
 
       /* USIM data */
-      sim_algo: "${sub.auth_algo}", /* USIM authentication algorithm: xor, milenage or tuak */
+      sim_algo: "${ue.auth_algo}", /* USIM authentication algorithm: xor, milenage or tuak */
       imsi: "${ue.imsi}",
       K: "${ue.ki}",
 % if ue.opc is not None:
@@ -65,7 +65,7 @@
         event: "power_on",
         start_time: 1,
       }],
-      ue_count: 1,
+      ue_count: ${ue.count},
     }
   ],
 

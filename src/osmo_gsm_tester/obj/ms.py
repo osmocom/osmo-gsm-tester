@@ -36,6 +36,11 @@ def on_register_schemas():
         }
     schema.register_resource_schema('modem', resource_schema)
 
+    config_schema = {
+        'count': schema.UINT
+        }
+    schema.register_config_schema('modem', config_schema)
+
 class MS(log.Origin, metaclass=ABCMeta):
     """Base for everything about mobile/modem and SIMs."""
 
@@ -125,3 +130,6 @@ class MS(log.Origin, metaclass=ABCMeta):
 
     def get_counter(self, counter_name):
         raise log.Error('get_counter() not implemented!')
+
+    def features(self):
+        return self._conf.get('features', [])

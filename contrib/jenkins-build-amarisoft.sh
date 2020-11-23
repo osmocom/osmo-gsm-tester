@@ -66,6 +66,7 @@ if [ "x${HAVE_AMARISOFT_LTEUE}" = "x1" ]; then
                 cp ${base}/${project_name_srslte}/build/lib/src/phy/rf/libsrslte_rf.so inst-amarisoftue/
                 cp ${base}/${project_name_zmq}/build/libtrx_zmq-linux-2018-10-18.so inst-amarisoftue/trx_zmq.so
                 patchelf --set-rpath '$ORIGIN/' inst-amarisoftue/trx_zmq.so
+                cd inst-amarisoftue && ln -s libsrslte_rf.so libsrslte_rf.so.0 && cd ..
         fi
         cp ${base}/inst-tmp/trx_uhd-linux*/trx_uhd.so inst-amarisoftue/
         this="amarisoftue.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"

@@ -381,12 +381,14 @@ class Process(log.Origin):
 
 class RemoteProcess(Process):
 
-    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args, remote_env={}, **popen_kwargs):
+    def __init__(self, name, run_dir, remote_user, remote_host, remote_cwd, popen_args,
+                 remote_env={}, remote_port=None, **popen_kwargs):
         super().__init__(name, run_dir, popen_args, **popen_kwargs)
         self.remote_user = remote_user
         self.remote_host = remote_host
         self.remote_cwd = remote_cwd
         self.remote_env = remote_env
+        self.remote_port = remote_port
 
         # hacky: instead of just prepending ssh, i.e. piping stdout and stderr
         # over the ssh link, we should probably run on the remote side,
@@ -402,6 +404,10 @@ class RemoteProcess(Process):
                            '%s %s %s' % (cd,
                                          ' '.join(['%s=%r'%(k,v) for k,v in self.remote_env.items()]),
                                          ' '.join(self.popen_args))]
+        if self.remote_port:
+            self.popen_args.insert(1, '-p')
+            self.popen_args.insert(2, self.remote_port)
+
         self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs, remote_env=self.remote_env)
 
     def RunError(self, msg_prefix):

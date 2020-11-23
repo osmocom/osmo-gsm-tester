@@ -28,13 +28,14 @@ class RemoteHost(log.Origin):
 
     WRAPPER_SCRIPT = 'ssh_sigkiller.sh'
 
-    def __init__(self, run_dir, remote_user = 'root', remote_host = 'localhost', remote_cwd=None):
+    def __init__(self, run_dir, remote_user = 'root', remote_host = 'localhost', remote_cwd=None, remote_port=None):
         super().__init__(log.C_RUN, 'host-' + remote_user + '@' + remote_host)
         self.run_dir = util.Dir(run_dir.new_dir(self.name()))
         self.remote_user = remote_user
         self.remote_host = remote_host
         self.remote_cwd = remote_cwd
         self.remote_env = {}
+        self.remote_port = remote_port
 
     def user(self):
         return self.remote_user
@@ -51,9 +52,13 @@ class RemoteHost(log.Origin):
     def get_remote_env(self):
         return self.remote_env
 
+    def get_remote_port(self):
+        return self.remote_port
+
     def RemoteProcess(self, name, popen_args, remote_env={}, **popen_kwargs):
         run_dir = self.run_dir.new_dir(name)
-        return process.RemoteProcess(name, run_dir, self.user(), self.host(), self.cwd(), popen_args, remote_env=remote_env, **popen_kwargs)
+        return process.RemoteProcess(name, run_dir, self.user(), self.host(), self.cwd(), popen_args,
+                                     remote_env=remote_env, remote_port=self.get_remote_port(), **popen_kwargs)
 
     def generate_wrapper_script(self, wait_time_sec):
         wrapper_script = self.run_dir.new_file(RemoteHost.WRAPPER_SCRIPT)

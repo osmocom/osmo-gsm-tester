@@ -30,13 +30,14 @@ class RunNode(log.Origin):
     T_LOCAL = 'local'
     T_REM_SSH = 'ssh'
 
-    def __init__(self, type=None, run_addr=None, ssh_user=None, ssh_addr=None, run_label=None):
+    def __init__(self, type=None, run_addr=None, ssh_user=None, ssh_addr=None, run_label=None, ssh_port=None):
         super().__init__(log.C_RUN, 'runnode')
         self._type = type
         self._run_addr = run_addr
         self._ssh_user = ssh_user
         self._ssh_addr = ssh_addr
         self._run_label = run_label
+        self._ssh_port = ssh_port
         if not self._type:
             raise log.Error('run_type not set')
         if not self._run_addr:
@@ -55,7 +56,7 @@ class RunNode(log.Origin):
     def from_conf(cls, conf):
         return cls(conf.get('run_type', None), conf.get('run_addr', None),
                    conf.get('ssh_user', None), conf.get('ssh_addr', None),
-                   conf.get('run_label', None))
+                   conf.get('run_label', None), conf.get('ssh_port', None))
 
     @classmethod
     def schema(cls):
@@ -65,6 +66,7 @@ class RunNode(log.Origin):
             'ssh_user': schema.STR,
             'ssh_addr': schema.IPV4,
             'run_label': schema.STR,
+            'ssh_port': schema.STR,
             }
         return resource_schema
 
@@ -88,5 +90,8 @@ class RunNode(log.Origin):
 
     def run_label(self):
         return self._run_label
+
+    def ssh_port(self):
+        return self._ssh_port
 
 # vim: expandtab tabstop=4 shiftwidth=4

@@ -227,6 +227,7 @@ class IPerf3Client(log.Origin):
         self.remote_log_file = None
         self.log_copied = False
         self.logfile_supported = False # some older versions of iperf doesn't support --logfile arg
+        self.is_android_ue = False
 
     def runs_locally(self):
         locally = not self._run_node or self._run_node.is_local()
@@ -281,7 +282,8 @@ class IPerf3Client(log.Origin):
         return proc
 
     def prepare_test_proc_remotely(self, netns, popen_args):
-        self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
+        self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr(), None,
+                                          self._run_node.ssh_port())
 
         remote_prefix_dir = util.Dir(IPerf3Client.REMOTE_DIR)
         remote_run_dir = util.Dir(remote_prefix_dir.child('cli-' + str(self)))
@@ -307,6 +309,8 @@ class IPerf3Client(log.Origin):
 
         if netns:
             self.process = process.NetNSProcess(self.name(), self.run_dir, netns, popen_args, env={})
+        elif self._run_node.adb_serial_id():
+            self.process = process.AdbProcess(self.name(), self.run_dir, self._run_node.adb_serial_id(), popen_args, env={})
         else:
             self.process = process.Process(self.name(), self.run_dir, popen_args, env={})
         return self.process

@@ -493,6 +493,14 @@ class RemoteNetNSProcess(RemoteProcess):
         args = ['sudo', self.NETNS_EXEC_BIN, self.netns] + list(popen_args)
         super().__init__(name, run_dir, remote_user, remote_host, remote_cwd, args, **popen_kwargs)
 
+class AdbProcess(Process):
+    def __init__(self, name, run_dir, adb_serial, popen_args, **popen_kwargs):
+        super().__init__(name, run_dir, popen_args, **popen_kwargs)
+        self.adb_serial = adb_serial
+
+        self.popen_args = ['adb', '-s', self.adb_serial, 'exec-out', 'su', '-c'] + list(popen_args)
+        self.dbg(self.popen_args, dir=self.run_dir, conf=self.popen_kwargs)
+
 def run_local_sync(run_dir, name, popen_args):
     run_dir =run_dir.new_dir(name)
     proc = Process(name, run_dir, popen_args)

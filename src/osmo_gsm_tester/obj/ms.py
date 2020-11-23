@@ -48,7 +48,7 @@ class MS(log.Origin, metaclass=ABCMeta):
 # PROTECTED
 ##############
     def __init__(self, name, testenv, conf):
-        super().__init__(log.C_TST, name)
+        log.Origin.__init__(self, log.C_TST, name)
         self.testenv = testenv
         self._conf = conf
         self._msisdn = None
@@ -77,6 +77,9 @@ class MS(log.Origin, metaclass=ABCMeta):
         elif ms_type == 'srsue':
             from .ms_srs import srsUE
             ms_class = srsUE
+        elif ms_type == 'androidue':
+            from .ms_android import AndroidUE
+            ms_class = AndroidUE
         elif ms_type == 'amarisoftue':
             from .ms_amarisoft import AmarisoftUE
             ms_class = AmarisoftUE

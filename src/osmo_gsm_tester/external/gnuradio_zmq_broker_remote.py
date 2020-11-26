@@ -22,7 +22,7 @@ from signal import *
 class GrBroker(gr.top_block):
 
     def __init__(self, args, cfg):
-        gr.top_block.__init__(self, "Intra Handover Flowgraph")
+        gr.top_block.__init__(self, "InterENB Handover Flowgraph")
 
         ##################################################
         # Variables
@@ -83,10 +83,10 @@ class GrBroker(gr.top_block):
         idx = 0
         for enb in self.cfg['enb']:
             for it in enb:
-                print('Connecting ENB port %u to Adder[%u] for earfcn %u' % (it['bind_port'], blocks_add_next_avail_port[earfcn], it['earfcn']))
-                self.connect((it['gr_block_multiply'], 0), (self.blocks_add[it['earfcn']], blocks_add_next_avail_port[earfcn]))
+                print('Connecting ENB port %u to Adder[%u] for earfcn %u' % (it['bind_port'], blocks_add_next_avail_port[it['earfcn']], it['earfcn']))
+                self.connect((it['gr_block_multiply'], 0), (self.blocks_add[it['earfcn']], blocks_add_next_avail_port[it['earfcn']]))
                 # TODO: if it['use_mimo'], connect it['gr_block_multiply2'] to some adder...
-                blocks_add_next_avail_port[earfcn] += 1
+                blocks_add_next_avail_port[it['earfcn']] += 1
 
         # Connect the Adder to the UE-side (Dl):
         for earfcn, bl_add in self.blocks_add.items():

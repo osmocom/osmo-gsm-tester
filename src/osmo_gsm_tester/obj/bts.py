@@ -35,6 +35,7 @@ def on_register_schemas():
         'channel_allocator': schema.CHAN_ALLOCATOR,
         'gprs_mode': schema.GPRS_MODE,
         'emergency_calls_allowed': schema.BOOL_STR,
+        'base_station_id_code': schema.UINT,
         'num_trx': schema.UINT,
         'max_trx': schema.UINT,
         'trx_list[].addr': schema.IPV4,
@@ -46,6 +47,7 @@ def on_register_schemas():
         'trx_list[].power_supply.type': schema.STR,
         'trx_list[].power_supply.device': schema.STR,
         'trx_list[].power_supply.port': schema.STR,
+        'trx_list[].arfcn': schema.UINT,
         }
     schema.register_resource_schema('bts', resource_schema)
 

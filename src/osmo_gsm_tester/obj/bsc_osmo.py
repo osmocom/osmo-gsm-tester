@@ -192,4 +192,53 @@ class OsmoBscVty(osmo_vty.OsmoVty):
         self.bsc = bsc
         super().__init__(self.bsc.addr(), port)
 
+    def get_active_lchans(self):
+        lchan_summary = self.cmd('show lchan summary')
+
+        re_lchan_summary = re.compile('BTS ([0-9]+), TRX ([0-9]+), Timeslot ([0-9]+) *([^,]*), Lchan ([0-9]+),.* State ([A-Za-z_]+).*')
+        active_lchans = set()
+        for line in lchan_summary:
+            m = re_lchan_summary.match(line)
+            if m:
+                bts, trx, ts, lchan_type, subslot, state = m.groups()
+                active_lchans.add('%s-%s-%s-%s %s %s' % (bts, trx, ts, subslot, lchan_type, state))
+        if not active_lchans:
+            self.dbg('No active lchans')
+        else:
+            self.dbg('Active lchans:\n|', '\n| '.join(active_lchans), '\n');
+        return active_lchans
+
+    def active_lchans_match(self, expected=[], not_expected=[]):
+        active_lchans = self.get_active_lchans()
+        matches = []
+        mismatches = []
+
+        for expected_lchan in expected:
+            found = False
+            for active_lchan in active_lchans:
+                if active_lchan.startswith(expected_lchan):
+                    found = True
+                    break
+            if found:
+                matches.append(expected_lchan)
+            else:
+                mismatches.append('missing: ' + expected_lchan)
+
+        for not_expected_lchan in not_expected:
+            found = False
+            for active_lchan in active_lchans:
+                if active_lchan.startswith(not_expected_lchan):
+                    found = True
+                    break
+            if not found:
+                matches.append('not: ' + not_expected_lchan)
+            else:
+                mismatches.append('unexpected: ' + not_expected_lchan)
+
+        if matches:
+            self.log('Found matching lchan activity (%d of %d requirements):' % (len(matches), len(expected) + len(not_expected)), matches)
+        if mismatches:
+            self.err('Found unexpected lchan activity (%d of %d requirements):' % (len(mismatches), len(expected) + len(not_expected)), mismatches)
+        return not mismatches
+
 # vim: expandtab tabstop=4 shiftwidth=4

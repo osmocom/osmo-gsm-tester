@@ -38,6 +38,9 @@ class OsmoVty(log.Origin):
 
        Using 'with' ensures that the connection is closed again.
        There should not be nested 'with' statements on this object.
+
+       Note that test env objects (like tenv.bsc()) may keep a VTY connected until the test exits. A 'with' should not
+       be used on those.
     '''
 
 ##############

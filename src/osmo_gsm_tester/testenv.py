@@ -235,7 +235,9 @@ class TestEnv(log_module.Origin):
         from .obj.bsc_osmo import OsmoBsc
         if ip_address is None:
             ip_address = self.ip_address()
-        return OsmoBsc(self, msc, mgw, stp, ip_address)
+        bsc_obj = OsmoBsc(self, msc, mgw, stp, ip_address)
+        self.register_for_cleanup(bsc_obj)
+        return bsc_obj
 
     def stp(self, ip_address=None):
         from .obj.stp_osmo import OsmoStp

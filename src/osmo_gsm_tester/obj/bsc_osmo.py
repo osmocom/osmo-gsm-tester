@@ -20,10 +20,11 @@
 import os
 import re
 import pprint
+import re
 
 from ..core import log, util, config, template, process
 from ..core import schema
-from . import osmo_ctrl, pcap_recorder
+from . import osmo_ctrl, osmo_vty, pcap_recorder
 
 def on_register_schemas():
     config_schema = {
@@ -48,6 +49,7 @@ class OsmoBsc(log.Origin):
         self.msc = msc
         self.mgw = mgw
         self.stp = stp
+        self.vty = None
 
     def start(self):
         self.log('Starting osmo-bsc')
@@ -78,6 +80,9 @@ class OsmoBsc(log.Origin):
                                        env=env)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
+
+        self.vty = OsmoBscVty(self)
+        self.vty.connect()
 
     def configure(self):
         self.config_file = self.run_dir.new_file('osmo-bsc.cfg')
@@ -150,6 +155,10 @@ class OsmoBsc(log.Origin):
     def running(self):
         return not self.process.terminated()
 
+    def cleanup(self):
+        if self.vty is not None:
+            self.vty.disconnect()
+            self.vty = None
 
 class OsmoBscCtrl(log.Origin):
     PORT = 4249
@@ -177,5 +186,10 @@ class OsmoBscCtrl(log.Origin):
                     if oml_state == 'connected':
                         return True
         return False
+
+class OsmoBscVty(osmo_vty.OsmoVty):
+    def __init__(self, bsc, port=4242):
+        self.bsc = bsc
+        super().__init__(self.bsc.addr(), port)
 
 # vim: expandtab tabstop=4 shiftwidth=4

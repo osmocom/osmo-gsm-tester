@@ -31,6 +31,7 @@ from .core import process as process_module
 from .core import resource
 from .core.event_loop import MainLoop
 
+test = None
 suite = None
 log = None
 dbg = None

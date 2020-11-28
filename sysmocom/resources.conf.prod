@@ -23,6 +23,8 @@ bts:
   ipa_unit_id: 1
   addr: 10.42.42.114
   band: GSM-1800
+  trx_list:
+  - arfcn: 868
   direct_pcu: true
   ciphers: [a5_0, a5_1, a5_3]
 
@@ -31,6 +33,9 @@ bts:
   ipa_unit_id: 6
   addr: 10.42.42.50
   band: GSM-1800
+  trx_list:
+  - arfcn: 850
+  - arfcn: 852
   ciphers: [a5_0, a5_1, a5_3]
   osmo_trx:
     type: uhd
@@ -46,6 +51,9 @@ bts:
   ipa_unit_id: 12
   addr: 10.42.42.54
   band: GSM-1800
+  trx_list:
+  - arfcn: 854
+  - arfcn: 856
   ciphers: [a5_0, a5_1, a5_3]
   osmo_trx:
     type: uhd
@@ -60,6 +68,8 @@ bts:
   ipa_unit_id: 11
   addr: 10.42.42.53
   band: GSM-1800
+  trx_list:
+  - arfcn: 858
   ciphers: [a5_0, a5_1, a5_3]
   osmo_trx:
     type: lms
@@ -76,6 +86,8 @@ bts:
   ipa_unit_id: 15
   addr: 10.42.42.53
   band: GSM-1800
+  trx_list:
+  - arfcn: 860
   ciphers: [a5_0, a5_1]
   osmo_trx:
     type: lms
@@ -96,6 +108,7 @@ bts:
         type: 'intellinet'
         device: '10.42.42.250'
         port: '5'
+      arfcn: 862
   osmo_trx:
     type: sc5
     launch_trx: true
@@ -111,6 +124,7 @@ bts:
   trx_list:
   - hw_addr: 00:0c:90:2e:80:1e
     net_device: enp2s0
+    arfcn: 864
 
 - label: NanoBTS-ONW-1900
   type: nanobts
@@ -122,6 +136,8 @@ bts:
         type: 'intellinet'
         device: '10.42.42.250'
         port: '1'
+      arfcn: 533
+    - arfcn: 535
 
 - label: NanoBTS-ONW-900
   type: nanobts
@@ -134,23 +150,29 @@ bts:
         type: 'intellinet'
         device: '10.42.42.250'
         port: '2'
+      arfcn: 52
     - addr: 10.42.42.122
       power_supply:
         type: 'intellinet'
         device: '10.42.42.250'
         port: '3'
+      arfcn: 54
 
 - label: OsmoBTS Virtual
   type: osmo-bts-virtual
   ipa_unit_id: 13
   addr: 10.42.42.55
   band: GSM-1800
+  trx_list:
+  - arfcn: 882
 
 - label: OC-2G
   type: osmo-bts-oc2g
   ipa_unit_id: 14
   addr: 10.42.42.100
   band: GSM-900
+  trx_list:
+  - arfcn: 50
   direct_pcu: true
   ciphers: [a5_0, a5_1, a5_3]
 
@@ -174,28 +196,6 @@ enb:
     run_addr: 10.42.42.117
     ssh_user: jenkins
     ssh_addr: 10.42.42.117
-
-arfcn:
-  - arfcn: 512
-    band: GSM-1800
-  - arfcn: 514
-    band: GSM-1800
-  - arfcn: 516
-    band: GSM-1800
-  - arfcn: 518
-    band: GSM-1800
-  - arfcn: 520
-    band: GSM-1800
-  - arfcn: 540
-    band: GSM-1900
-  - arfcn: 542
-    band: GSM-1900
-  - arfcn: 544
-    band: GSM-1900
-  - arfcn: 546
-    band: GSM-1900
-  - arfcn: 548
-    band: GSM-1900
 
 modem:
 - label: sierra_1st

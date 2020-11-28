@@ -81,7 +81,6 @@ print('- request some resources')
 want = {
        'ip_address': [ { 'times': 1 } ],
        'bts': [ { 'type': 'osmo-bts-sysmo', 'times': 1 , 'ciphers': ['a5_1']}, { 'type': 'osmo-bts-trx', 'times': 1 } ],
-       'arfcn': [ { 'band': 'GSM-1800', 'times': 2 } ],
        'modem': [ { 'times': 2 , 'ciphers': ['a5_0', 'a5_1']} ],
      }
 modifiers = {

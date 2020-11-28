@@ -375,12 +375,10 @@ def generate_schemas():
         util.run_python_file_method(module_name, 'on_register_schemas', False)
 
 
-_RESOURCE_TYPES = ['ip_address', 'arfcn']
+_RESOURCE_TYPES = ['ip_address',]
 
 _RESOURCES_SCHEMA = {
         'ip_address[].addr': IPV4,
-        'arfcn[].arfcn': INT,
-        'arfcn[].band': BAND,
     }
 
 _CONFIG_SCHEMA = {}

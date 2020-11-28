@@ -19,37 +19,7 @@ cnf -: DBG: MAIN CONFIG:
  'suites_dir': ['[PATH]/selftest/resource_test/conf/suite_test'],
  'trial_dir': '[PATH]/selftest/resource_test/conf/trial'}
 *** all resources:
-{'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df063c',
-            'arfcn': '512',
-            'band': 'GSM-1800'},
-           {'_hash': '022621e513c5a5bf33b77430a1e9c886be676fa1',
-            'arfcn': '514',
-            'band': 'GSM-1800'},
-           {'_hash': '3199abf375a1dd899e554e9d63a552e06d7f38bf',
-            'arfcn': '516',
-            'band': 'GSM-1800'},
-           {'_hash': '57aa7bd1da62495f2857ae6b859193dd592a0a02',
-            'arfcn': '518',
-            'band': 'GSM-1800'},
-           {'_hash': '53dd2e2682b736f427abd2ce59a9a50ca8130678',
-            'arfcn': '520',
-            'band': 'GSM-1800'},
-           {'_hash': '31687a5e6d5140a4b3877606ca5f18244f11d706',
-            'arfcn': '540',
-            'band': 'GSM-1900'},
-           {'_hash': '1def43a5c88a83cdb21279eacab0679ea08ffaf3',
-            'arfcn': '542',
-            'band': 'GSM-1900'},
-           {'_hash': '1d6e3b08a3861fd4d748f111295ec5a93ecd3d23',
-            'arfcn': '544',
-            'band': 'GSM-1900'},
-           {'_hash': '8fb36927de15466fcdbee01f7f65704c312cb36c',
-            'arfcn': '546',
-            'band': 'GSM-1900'},
-           {'_hash': 'dc9ce027a257da087f31a5bc1ee6b4abd2637369',
-            'arfcn': '548',
-            'band': 'GSM-1900'}],
- 'bts': [{'_hash': 'd2aa7c1124943de352351b650ca0c751784da6b6',
+{'bts': [{'_hash': 'd2aa7c1124943de352351b650ca0c751784da6b6',
           'addr': '10.42.42.114',
           'band': 'GSM-1800',
           'ciphers': ['a5_0', 'a5_1'],
@@ -116,13 +86,6 @@ cnf -: DBG: MAIN CONFIG:
 *** end: all resources
 
 - request some resources
---- testowner: Verifying 2 x arfcn (candidates: 10)
---- testowner: DBG: Picked - _hash: e620569450f8259b3f0212ec19c285dd07df063c
-  arfcn: '512'
-  band: GSM-1800
-- _hash: 022621e513c5a5bf33b77430a1e9c886be676fa1
-  arfcn: '514'
-  band: GSM-1800
 --- testowner: Verifying 2 x bts (candidates: 3)
 --- testowner: DBG: Picked - _hash: d2aa7c1124943de352351b650ca0c751784da6b6
   addr: 10.42.42.114
@@ -169,13 +132,6 @@ cnf -: DBG: MAIN CONFIG:
   label: sierra_2
   path: /sierra_2
 --- testowner: DBG: FileWatch: scheduling watch for directory [PATH]/selftest/resource_test/conf/test_work/state_dir
---- testowner: Reserving 2 x arfcn (candidates: 10)
---- testowner: DBG: Picked - _hash: e620569450f8259b3f0212ec19c285dd07df063c
-  arfcn: '512'
-  band: GSM-1800
-- _hash: 022621e513c5a5bf33b77430a1e9c886be676fa1
-  arfcn: '514'
-  band: GSM-1800
 --- testowner: Reserving 2 x bts (candidates: 3)
 --- testowner: DBG: Picked - _hash: d2aa7c1124943de352351b650ca0c751784da6b6
   addr: 10.42.42.114
@@ -223,15 +179,6 @@ cnf -: DBG: MAIN CONFIG:
   path: /sierra_2
 --- testowner: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/resource_test/conf/test_work/state_dir, is_recursive=False>
 ~~~ currently reserved:
-arfcn:
-- _hash: e620569450f8259b3f0212ec19c285dd07df063c
-  _reserved_by: testowner-123-1490837279
-  arfcn: '512'
-  band: GSM-1800
-- _hash: 022621e513c5a5bf33b77430a1e9c886be676fa1
-  _reserved_by: testowner-123-1490837279
-  arfcn: '514'
-  band: GSM-1800
 bts:
 - _hash: d2aa7c1124943de352351b650ca0c751784da6b6
   _reserved_by: testowner-123-1490837279
@@ -286,15 +233,7 @@ modem:
 ~~~ end: currently reserved
 
 ~~~ with modifiers:
-resources(testowner)={'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df063c',
-            '_reserved_by': 'testowner-123-1490837279',
-            'arfcn': '512',
-            'band': 'GSM-1800'},
-           {'_hash': '022621e513c5a5bf33b77430a1e9c886be676fa1',
-            '_reserved_by': 'testowner-123-1490837279',
-            'arfcn': '514',
-            'band': 'GSM-1800'}],
- 'bts': [{'_hash': 'd2aa7c1124943de352351b650ca0c751784da6b6',
+resources(testowner)={'bts': [{'_hash': 'd2aa7c1124943de352351b650ca0c751784da6b6',
           '_reserved_by': 'testowner-123-1490837279',
           'addr': '10.42.42.114',
           'band': 'GSM-1800',
@@ -345,24 +284,19 @@ resources(testowner)={'arfcn': [{'_hash': 'e620569450f8259b3f0212ec19c285dd07df0
 3rd subset should not match, pass
 4th subset should not match, pass
 *** concurrent allocation:
---- testowner1: Verifying 2 x arfcn (candidates: 10)
 --- testowner1: Verifying 2 x bts (candidates: 3)
 --- testowner1: Verifying 1 x ip_address (candidates: 5)
 --- testowner1: Verifying 2 x modem (candidates: 4)
---- testowner1: Reserving 2 x arfcn (candidates: 10)
 --- testowner1: Reserving 2 x bts (candidates: 3)
 --- testowner1: Reserving 1 x ip_address (candidates: 5)
 --- testowner1: Reserving 2 x modem (candidates: 4)
 - 2nd instance reserve() start
---- testowner2: Verifying 2 x arfcn (candidates: 10)
 --- testowner2: Verifying 2 x bts (candidates: 3)
 --- testowner2: Verifying 1 x ip_address (candidates: 5)
 --- testowner2: Verifying 2 x modem (candidates: 4)
---- testowner2: Reserving 2 x arfcn (candidates: 8)
 --- testowner2: Reserving 2 x bts (candidates: 1)
 --- testowner2: Unable to reserve resources, too many currently reserved. Waiting until some are available again
 - 1st instance free()
---- testowner2: Reserving 2 x arfcn (candidates: 10)
 --- testowner2: Reserving 2 x bts (candidates: 3)
 --- testowner2: Reserving 1 x ip_address (candidates: 5)
 --- testowner2: Reserving 2 x modem (candidates: 4)

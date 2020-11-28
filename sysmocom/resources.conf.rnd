@@ -19,6 +19,8 @@ bts:
   band: GSM-1800
   direct_pcu: true
   ciphers: [a5_0, a5_1, a5_3]
+  trx_list:
+  - arfcn: 868
 
 - label: Ettus B200
   type: osmo-bts-trx
@@ -34,6 +36,8 @@ bts:
     trx_ip: 127.0.0.1
     dev_args: "type=b200,serial=30A9FFB"
   ciphers: [a5_0, a5_1, a5_3]
+  trx_list:
+  - arfcn: 870
 
 - label: NanoBTS-ONW-1900
   type: nanobts
@@ -45,28 +49,7 @@ bts:
         type: 'sispm'
         device: '01:01:55:2e:b6'
         port: '1'
-
-arfcn:
-  - arfcn: 512
-    band: GSM-1800
-  - arfcn: 514
-    band: GSM-1800
-  - arfcn: 516
-    band: GSM-1800
-  - arfcn: 518
-    band: GSM-1800
-  - arfcn: 520
-    band: GSM-1800
-  - arfcn: 540
-    band: GSM-1900
-  - arfcn: 542
-    band: GSM-1900
-  - arfcn: 544
-    band: GSM-1900
-  - arfcn: 546
-    band: GSM-1900
-  - arfcn: 548
-    band: GSM-1900
+      arfcn: 533
 
 modem:
 - label: sierra_1st

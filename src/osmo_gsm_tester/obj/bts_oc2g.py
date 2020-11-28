@@ -78,12 +78,6 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
 
     def conf_for_bsc(self):
         values = self.conf_for_bsc_prepare()
-        # Hack until we have proper ARFCN resource allocation support (OS#2230)
-        band = values.get('band')
-        trx_list = values.get('trx_list')
-        if band == 'GSM-900':
-            for trx_i in range(len(trx_list)):
-                config.overlay(trx_list[trx_i], { 'arfcn' : str(50 + trx_i * 2) })
         self.dbg(conf=values)
         return values
 

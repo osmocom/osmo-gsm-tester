@@ -164,12 +164,14 @@ def test_to_junit(t):
     return testcase
 
 def trial_to_text(trial):
+    suite_passes = []
     suite_failures = []
     count_fail = 0
     count_pass = 0
     for suite in trial.suites:
         if suite.passed():
             count_pass += 1
+            suite_passes.append(suite_to_text(suite))
         else:
             count_fail += 1
             suite_failures.append(suite_to_text(suite))
@@ -181,6 +183,7 @@ def trial_to_text(trial):
         summary.append('%d suites passed' % count_pass)
     msg = [', '.join(summary)]
     msg.extend(suite_failures)
+    msg.extend(suite_passes)
     return '\n'.join(msg)
 
 def suite_to_text(suite):

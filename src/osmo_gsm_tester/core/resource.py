@@ -485,6 +485,18 @@ class ReservedResources(log.Origin):
     def __repr__(self):
         return 'resources(%s)=%s' % (self.origin.name(), pprint.pformat(self.reserved))
 
+    def __str__(self):
+        return repr(self)
+
+    def summary_str(self, prefix=''):
+        lines = []
+        for key, reserved_list in sorted(self.reserved.items()):
+            lines.append(key)
+            for item in reserved_list:
+                label = item.get('label') or item.get('addr') or item.get('type') or item.get('_hash') or '?'
+                lines.append('  ' + label)
+        return prefix + ('\n' + prefix).join(lines)
+
     def get(self, kind, specifics=None):
         if specifics is None:
             specifics = {}

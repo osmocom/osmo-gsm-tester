@@ -145,6 +145,16 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   label: m7802
   path: /wavecom_1
 tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>
+tst test_suite: RESERVED RESOURCES for test_suite:
+bts
+  sysmoCell 5000
+  sysmoCell 5000
+  sysmoBTS 1002
+ip_address
+  10.42.42.1
+modem
+  m7801
+  m7802
 
 ----------------------------------------------
 trial test_suite hello_world.py
@@ -364,6 +374,16 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   path: /wavecom_1
   [resource.py:[LINENR]]
 tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
+tst test_suite: RESERVED RESOURCES for test_suite:
+bts
+  sysmoCell 5000
+  sysmoCell 5000
+  sysmoBTS 1002
+ip_address
+  10.42.42.1
+modem
+  m7801
+  m7802  [suite.py:[LINENR]]
 
 ----------------------------------------------
 trial test_suite hello_world.py
@@ -509,6 +529,16 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   path: /wavecom_1
   [resource.py:[LINENR]]
 tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
+tst test_suite: RESERVED RESOURCES for test_suite:
+bts
+  sysmoCell 5000
+  sysmoCell 5000
+  sysmoBTS 1002
+ip_address
+  10.42.42.1
+modem
+  m7801
+  m7802  [suite.py:[LINENR]]
 
 ----------------------------------------------
 trial test_suite hello_world.py
@@ -650,6 +680,16 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   path: /wavecom_1
   [resource.py:[LINENR]]
 tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
+tst test_suite: RESERVED RESOURCES for test_suite:
+bts
+  sysmoCell 5000
+  sysmoCell 5000
+  sysmoBTS 1002
+ip_address
+  10.42.42.1
+modem
+  m7801
+  m7802  [suite.py:[LINENR]]
 resources(test_suite)={'bts': [{'_hash': 'a59640b8ba6a373552b24a6f9f65cadd2347bace',
           '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
           'addr': '10.42.42.53',
@@ -841,6 +881,16 @@ tst test_suite: DBG: Picked - _hash: 19c69e45aa090fb511446bd00797690aa82ff52f
   path: /wavecom_1
   [resource.py:[LINENR]]
 tst test_suite: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
+tst test_suite: RESERVED RESOURCES for test_suite:
+bts
+  sysmoCell 5000
+  sysmoCell 5000
+  sysmoBTS 1002
+ip_address
+  10.42.42.1
+modem
+  m7801
+  m7802  [suite.py:[LINENR]]
 resources(test_suite)={'bts': [{'_hash': 'a59640b8ba6a373552b24a6f9f65cadd2347bace',
           '_reserved_by': 'test_suite-[ID_NUM]-[ID_NUM]',
           'addr': '10.42.42.53',
@@ -944,6 +994,9 @@ tst suiteC: DBG: Picked - _hash: fd103b22c7cf2480d609150e06f4bbd92ac78d8c
   addr: 10.42.42.2
   [resource.py:[LINENR]]
 tst suiteC: DBG: FileWatch: unscheduling watch <ObservedWatch: path=[PATH]/selftest/suite_test/test_work/state_dir, is_recursive=False>  [util.py:[LINENR]]
+tst suiteC: RESERVED RESOURCES for suiteC:
+ip_address
+  10.42.42.2  [suite.py:[LINENR]]
 
 ----------------------------------------------
 trial suiteC test_template_overlay.py

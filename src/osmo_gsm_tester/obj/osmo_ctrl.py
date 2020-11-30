@@ -238,4 +238,230 @@ class OsmoCtrl(log.Origin):
     def __exit__(self, *exc_info):
         self.disconnect()
 
+class RateCountersExn(log.Error):
+    pass
+
+class RateCounters(dict):
+    '''Usage example:
+        counter_names = (
+                'handover:completed',
+                'handover:stopped',
+                'handover:no_channel',
+                'handover:timeout',
+                'handover:failed',
+                'handover:error',
+                )
+
+        # initialize the listing of CTRL vars of the counters to watch.
+        # First on the 'bsc' node:
+        #   rate_ctr.abs.bsc.0.handover:completed
+        #   rate_ctr.abs.bsc.0.handover:stopped
+        #   ...
+        counters = RateCounters('bsc', counter_names, from_ctrl=bsc.ctrl)
+
+        # And also add counters for two 'bts' instances:
+        #   rate_ctr.abs.bts.0.handover:completed
+        #   rate_ctr.abs.bts.0.handover:stopped
+        #   ...
+        #   rate_ctr.abs.bts.1.handover:completed
+        #   ...
+        counters.add(RateCounters('bts', counter_names, instances=(0, 1)))
+
+        # read initial counter values, from the bsc_ctrl, as set in
+        # counters.from_ctrl in the RateCounters() constructor above.
+        counters.read()
+
+        # Do some actions that should increment counters in the SUT
+        do_a_handover()
+
+        if approach_without_wait:
+            # increment the counters as expected
+            counters.inc('bts', 'handover:completed')
+
+            # read counters from CTRL again, and fail if they differ
+            counters.verify()
+
+        if approach_with_wait:
+            # you can wait for counters to change. counters.changed() does not
+            # modify counters' values, just reads values from CTRL and stores
+            # the changes in counters.diff.
+            wait(counters.changed, timeout=20)
+
+            # log which counters changed by how much, found in counters.diff
+            # after each counters.changed() call:
+            print(counters.diff.str(skip_zero_vals=True))
+
+            if check_all_vals:
+                # Assert all values:
+                expected_diff = counters.copy().clear()
+                expected_diff.inc('bts', 'handover:completed', instances=(0, 1))
+                counters.diff.expect(expected_diff)
+            else:
+                # Assert only some specific counters:
+                expected_diff = RateCounters()
+                expected_diff.inc('bts', 'handover:completed', instances=(0, 1))
+                counters.diff.expect(expected_diff)
+
+            # update counters to the last read values if desired
+            counters.add(counters.diff)
+    '''
+
+    def __init__(self, instance_names=(), counter_names=(), instances=0, kinds='abs', init_val=0, from_ctrl=None):
+        def init_cb(var):
+            self[var] = init_val
+        RateCounters.for_each(init_cb, instance_names, counter_names, instances, kinds, results=False)
+        self.from_ctrl = from_ctrl
+        self.diff = None
+
+    @staticmethod
+    def for_each(callback_func, instance_names, counter_names, instances=0, kinds='abs', results=True):
+        '''Call callback_func for a set of rate counter var names, mostly
+           called by more convenient functions. See inc() for a comprehensive
+           explanation.
+        '''
+        if type(instance_names) is str:
+            instance_names = (instance_names, )
+        if type(counter_names) is str:
+            counter_names = (counter_names, )
+        if type(kinds) is str:
+            kinds = (kinds, )
+        if type(instances) is int:
+            instances = (instances, )
+        if results is True:
+            results = RateCounters()
+        elif results is False:
+            results = None
+        for instance_name in instance_names:
+            for instance_nr in instances:
+                for counter_name in counter_names:
+                    for kind in kinds:
+                        var = 'rate_ctr.{kind}.{instance_name}.{instance_nr}.{counter_name}'.format(**locals())
+                        result = callback_func(var)
+                        if results is not None:
+                            results[var] = result
+        return results
+
+    def __str__(self):
+        return self.str(', ', '')
+
+    def str(self, sep='\n| ', prefix='\n| ', vals=None, skip_zero_vals=False):
+        '''The 'vals' arg is useful to print a plain dict() of counter values like a RateCounters class.
+           By default print self.'''
+        if vals is None:
+            vals = self
+        return prefix + sep.join('%s = %d' % (var, val) for var, val in sorted(vals.items())
+                                 if (not skip_zero_vals) or (val != 0))
+
+    def inc(self, instance_names, counter_names, inc=1, instances=0, kinds='abs'):
+        '''Increment a set of counters.
+           inc('xyz', 'val')             --> rate_ctr.abs.xyz.0.val += 1
+
+           inc('xyz', ('foo', 'bar'))    --> rate_ctr.abs.xyz.0.foo += 1
+                                             rate_ctr.abs.xyz.0.bar += 1
+
+           inc(('xyz', 'pqr'), 'val')    --> rate_ctr.abs.xyz.0.val += 1
+                                             rate_ctr.abs.pqr.0.val += 1
+
+           inc('xyz', 'val', instances=range(3))
+                                         --> rate_ctr.abs.xyz.0.val += 1
+                                             rate_ctr.abs.xyz.1.val += 1
+                                             rate_ctr.abs.xyz.2.val += 1
+        '''
+        def inc_cb(var):
+            val = self.get(var, 0)
+            val += inc
+            self[var] = val
+            return val
+        RateCounters.for_each(inc_cb, instance_names, counter_names, instances, kinds, results=False)
+        return self
+
+    def add(self, rate_counters):
+        '''Add the given values up to the values in self.
+           rate_counters can be a RateCounters instance or a plain dict of CTRL
+           var as key and counter integer as value.
+        '''
+        for var, add_val in rate_counters.items():
+            val = self.get(var, 0)
+            val += add_val
+            self[var] = val
+        return self
+
+    def subtract(self, rate_counters):
+        '''Same as add(), but subtract values from self instead.
+           Useful to verify counters relative to an arbitrary reference.'''
+        for var, subtract_val in rate_counters.items():
+            val = self.get(var, 0)
+            val -= subtract_val
+            self[var] = val
+        return self
+
+
+    def clear(self, val=0):
+        '''Set all counts to 0 (or a specific value)'''
+        for var in self.keys():
+            self[var] = val
+        return self
+
+    def copy(self):
+        '''Return a copy of all keys and values stored in self.'''
+        cpy = RateCounters(from_ctrl = self.from_ctrl)
+        cpy.update(self)
+        return cpy
+
+    def read(self):
+        '''Read all counters from the CTRL connection passed to RateCounters(from_ctrl=x).
+           The CTRL must be connected, e.g.
+           with bsc.ctrl() as ctrl:
+               counters = RateCounters(ctrl)
+               counters.read()
+        '''
+        for var in self.keys():
+            self[var] = self.from_ctrl.get_int_var(var)
+        self.from_ctrl.dbg('Read counters:', self.str())
+        return self
+
+    def verify(self):
+        '''Read counters from CTRL and assert that they match the current counts'''
+        got_vals = self.copy()
+        got_vals.read()
+        got_vals.expect(self)
+
+    def changed(self):
+        '''Read counters from CTRL, and return True if anyone is different now.
+           Store the difference in counts in self.diff (replace self.diff for
+           each changed() call). The counts in self are never modified.'''
+        self.diff = None
+        got_vals = self.copy()
+        got_vals.read()
+        if self != got_vals:
+            self.diff = got_vals
+            self.diff.subtract(self)
+            self.from_ctrl.dbg('Changed counters:', self.diff.str(skip_zero_vals=True))
+            return True
+        return False
+
+    def expect(self, expect_vals):
+        '''Iterate expect_vals and fail if any counter value differs from self.
+           expect_vals can be a RateCounters instance or a plain dict of CTRL
+           var as key and counter integer as value.
+        '''
+        ok = 0
+        errs = []
+        for var, expect_val in expect_vals.items():
+            got_val = self.get(var)
+            if got_val is None:
+                errs.append('expected {var} == {expect_val}, but no such value found'.format(**locals()))
+                continue
+            if got_val != expect_val:
+                errs.append('expected {var} == {expect_val}, but is {got_val}'.format(**locals()))
+                continue
+            ok += 1
+        if errs:
+            self.from_ctrl.dbg('Expected rate counters:', self.str(vals=expect_vals))
+            self.from_ctrl.dbg('Got rate counters:', self.str())
+            raise RateCountersExn('%d of %d rate counters mismatch:' % (len(errs), len(errs) + ok), '\n| ' + '\n| '.join(errs))
+        else:
+            self.from_ctrl.log('Verified %d rate counters' % ok)
+            self.from_ctrl.dbg('Verified %d rate counters:' % ok, expect_vals)
+
 # vim: expandtab tabstop=4 shiftwidth=4

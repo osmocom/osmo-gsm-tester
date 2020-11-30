@@ -1,0 +1,155 @@
+- empty RateCounters()
+| 
+- initialized RateCounters, single var
+| rate_ctr.abs.inst.0.var = 0
+- incremented inst.var
+| rate_ctr.abs.inst.0.var = 1
+- incremented inst.var again
+| rate_ctr.abs.inst.0.var = 2
+- incremented inst.var by 5
+| rate_ctr.abs.inst.0.var = 7
+- initialized RateCounters, two vars
+| rate_ctr.abs.inst.0.foo = 0
+| rate_ctr.abs.inst.0.var = 0
+- incremented foo and var
+| rate_ctr.abs.inst.0.foo = 1
+| rate_ctr.abs.inst.0.var = 1
+- incremented var again
+| rate_ctr.abs.inst.0.foo = 1
+| rate_ctr.abs.inst.0.var = 2
+- incremented foo by 5
+| rate_ctr.abs.inst.0.foo = 6
+| rate_ctr.abs.inst.0.var = 2
+- initialized RateCounters, two vars, three instances
+| rate_ctr.abs.inst.0.foo = 0
+| rate_ctr.abs.inst.0.var = 0
+| rate_ctr.abs.inst.1.foo = 0
+| rate_ctr.abs.inst.1.var = 0
+| rate_ctr.abs.inst.2.foo = 0
+| rate_ctr.abs.inst.2.var = 0
+- incremented foo and var on separate instances
+| rate_ctr.abs.inst.0.foo = 1
+| rate_ctr.abs.inst.0.var = 0
+| rate_ctr.abs.inst.1.foo = 0
+| rate_ctr.abs.inst.1.var = 1
+| rate_ctr.abs.inst.2.foo = 0
+| rate_ctr.abs.inst.2.var = 0
+- incremented var on instance 2
+| rate_ctr.abs.inst.0.foo = 1
+| rate_ctr.abs.inst.0.var = 0
+| rate_ctr.abs.inst.1.foo = 0
+| rate_ctr.abs.inst.1.var = 1
+| rate_ctr.abs.inst.2.foo = 0
+| rate_ctr.abs.inst.2.var = 1
+- incremented foo by 5 on instances 1,2
+| rate_ctr.abs.inst.0.foo = 1
+| rate_ctr.abs.inst.0.var = 0
+| rate_ctr.abs.inst.1.foo = 5
+| rate_ctr.abs.inst.1.var = 1
+| rate_ctr.abs.inst.2.foo = 5
+| rate_ctr.abs.inst.2.var = 1
+- copy
+| rate_ctr.abs.inst.0.foo = 1
+| rate_ctr.abs.inst.0.var = 0
+| rate_ctr.abs.inst.1.foo = 5
+| rate_ctr.abs.inst.1.var = 1
+| rate_ctr.abs.inst.2.foo = 5
+| rate_ctr.abs.inst.2.var = 1
+- increment two vars by 100 on all three instances
+| rate_ctr.abs.inst.0.foo = 101
+| rate_ctr.abs.inst.0.var = 100
+| rate_ctr.abs.inst.1.foo = 105
+| rate_ctr.abs.inst.1.var = 101
+| rate_ctr.abs.inst.2.foo = 105
+| rate_ctr.abs.inst.2.var = 101
+- subtract original copy
+| rate_ctr.abs.inst.0.foo = 100
+| rate_ctr.abs.inst.0.var = 100
+| rate_ctr.abs.inst.1.foo = 100
+| rate_ctr.abs.inst.1.var = 100
+| rate_ctr.abs.inst.2.foo = 100
+| rate_ctr.abs.inst.2.var = 100
+- add original copy
+| rate_ctr.abs.inst.0.foo = 101
+| rate_ctr.abs.inst.0.var = 100
+| rate_ctr.abs.inst.1.foo = 105
+| rate_ctr.abs.inst.1.var = 101
+| rate_ctr.abs.inst.2.foo = 105
+| rate_ctr.abs.inst.2.var = 101
+- increment types per_hour, per_day by 23
+| rate_ctr.abs.inst.0.foo = 101
+| rate_ctr.abs.inst.0.var = 100
+| rate_ctr.abs.inst.1.foo = 105
+| rate_ctr.abs.inst.1.var = 101
+| rate_ctr.abs.inst.2.foo = 105
+| rate_ctr.abs.inst.2.var = 101
+| rate_ctr.per_day.inst.0.foo = 23
+| rate_ctr.per_day.inst.0.moo = 23
+| rate_ctr.per_day.inst.0.var = 23
+| rate_ctr.per_day.inst.1.foo = 23
+| rate_ctr.per_day.inst.1.moo = 23
+| rate_ctr.per_day.inst.1.var = 23
+| rate_ctr.per_day.inst.2.foo = 23
+| rate_ctr.per_day.inst.2.moo = 23
+| rate_ctr.per_day.inst.2.var = 23
+| rate_ctr.per_hour.inst.0.foo = 23
+| rate_ctr.per_hour.inst.0.moo = 23
+| rate_ctr.per_hour.inst.0.var = 23
+| rate_ctr.per_hour.inst.1.foo = 23
+| rate_ctr.per_hour.inst.1.moo = 23
+| rate_ctr.per_hour.inst.1.var = 23
+| rate_ctr.per_hour.inst.2.foo = 23
+| rate_ctr.per_hour.inst.2.moo = 23
+| rate_ctr.per_hour.inst.2.var = 23
+- copy
+| rate_ctr.abs.inst.0.foo = 101
+| rate_ctr.abs.inst.0.var = 100
+| rate_ctr.abs.inst.1.foo = 105
+| rate_ctr.abs.inst.1.var = 101
+| rate_ctr.abs.inst.2.foo = 105
+| rate_ctr.abs.inst.2.var = 101
+| rate_ctr.per_day.inst.0.foo = 23
+| rate_ctr.per_day.inst.0.moo = 23
+| rate_ctr.per_day.inst.0.var = 23
+| rate_ctr.per_day.inst.1.foo = 23
+| rate_ctr.per_day.inst.1.moo = 23
+| rate_ctr.per_day.inst.1.var = 23
+| rate_ctr.per_day.inst.2.foo = 23
+| rate_ctr.per_day.inst.2.moo = 23
+| rate_ctr.per_day.inst.2.var = 23
+| rate_ctr.per_hour.inst.0.foo = 23
+| rate_ctr.per_hour.inst.0.moo = 23
+| rate_ctr.per_hour.inst.0.var = 23
+| rate_ctr.per_hour.inst.1.foo = 23
+| rate_ctr.per_hour.inst.1.moo = 23
+| rate_ctr.per_hour.inst.1.var = 23
+| rate_ctr.per_hour.inst.2.foo = 23
+| rate_ctr.per_hour.inst.2.moo = 23
+| rate_ctr.per_hour.inst.2.var = 23
+- match?  True
+- increment foo
+| rate_ctr.abs.inst.0.foo = 102
+| rate_ctr.abs.inst.0.var = 100
+| rate_ctr.abs.inst.1.foo = 105
+| rate_ctr.abs.inst.1.var = 101
+| rate_ctr.abs.inst.2.foo = 105
+| rate_ctr.abs.inst.2.var = 101
+| rate_ctr.per_day.inst.0.foo = 23
+| rate_ctr.per_day.inst.0.moo = 23
+| rate_ctr.per_day.inst.0.var = 23
+| rate_ctr.per_day.inst.1.foo = 23
+| rate_ctr.per_day.inst.1.moo = 23
+| rate_ctr.per_day.inst.1.var = 23
+| rate_ctr.per_day.inst.2.foo = 23
+| rate_ctr.per_day.inst.2.moo = 23
+| rate_ctr.per_day.inst.2.var = 23
+| rate_ctr.per_hour.inst.0.foo = 23
+| rate_ctr.per_hour.inst.0.moo = 23
+| rate_ctr.per_hour.inst.0.var = 23
+| rate_ctr.per_hour.inst.1.foo = 23
+| rate_ctr.per_hour.inst.1.moo = 23
+| rate_ctr.per_hour.inst.1.var = 23
+| rate_ctr.per_hour.inst.2.foo = 23
+| rate_ctr.per_hour.inst.2.moo = 23
+| rate_ctr.per_hour.inst.2.var = 23
+- match?  False

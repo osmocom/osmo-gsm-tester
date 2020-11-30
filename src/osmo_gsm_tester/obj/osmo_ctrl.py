@@ -33,6 +33,12 @@ class OsmoCtrl(log.Origin):
         self.host = host
         self.port = port
         self.sck = None
+        self._next_id = 0
+
+    def next_id(self):
+        ret = self._next_id
+        self._next_id += 1
+        return ret
 
     def prefix_ipa_ctrl_header(self, data):
         if isinstance(data, str):
@@ -72,13 +78,19 @@ class OsmoCtrl(log.Origin):
         self.dbg('Receiving', data=data)
         return data
 
-    def do_set(self, var, value, id=0):
-        setmsg = "SET %s %s %s" %(id, var, value)
+    def do_set(self, var, value, use_id=None):
+        if use_id is None:
+            use_id = self.next_id()
+        setmsg = "SET %s %s %s" %(use_id, var, value)
         self._send(setmsg)
+        return use_id
 
-    def do_get(self, var, id=0):
-        getmsg = "GET %s %s" %(id, var)
+    def do_get(self, var, use_id=None):
+        if use_id is None:
+            use_id = self.next_id()
+        getmsg = "GET %s %s" %(use_id, var)
         self._send(getmsg)
+        return use_id
 
     def __enter__(self):
         self.connect()

@@ -23,6 +23,7 @@ import subprocess
 import signal
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
+import re
 
 from . import log
 from .event_loop import MainLoop
@@ -320,13 +321,24 @@ class Process(log.Origin):
             self.poll()
         return self.process_obj is not None and self.result is None
 
-    def get_output(self, which):
-        ''' Read process output '''
+    @staticmethod
+    def end_ansi_colors(txt):
+        '''Make sure no ANSI colors leak out of logging output'''
+        color_off = '\033[0;m'
+        color_any = '\033['
+        if txt.rfind(color_any) > txt.rfind(color_off):
+            return txt + color_off
+        return txt
+
+    def get_output(self, which, since_mark=0):
+        ''' Read process output. For since_mark, see get_output_mark(). '''
         path = self.get_output_file(which)
         if path is None:
             return None
-        with open(path, 'r') as f2:
-            return f2.read()
+        with open(path, 'r') as f:
+            if since_mark > 0:
+                f.seek(since_mark)
+            return f.read()
 
     def get_output_file(self, which):
         ''' Return filename for given output '''
@@ -344,11 +356,44 @@ class Process(log.Origin):
         tail = min(len(out), tail)
         return prefix + ('\n' + prefix).join(out[-tail:])
 
-    def get_stdout(self):
-        return self.get_output('stdout')
+    def get_output_mark(self, which):
+        '''Usage:
+             # remember a start marker
+             my_mark = my_process.get_output_mark('stderr')
 
-    def get_stderr(self):
-        return self.get_output('stderr')
+             do_actions_that_produce_log_output()
+
+             my_log = my_process.get_output('stderr', since_mark=my_mark)
+             # my_log contains the stderr of that process since the start marker.
+        '''
+        path = self.get_output_file(which)
+        if path is None:
+            return None
+        with open(path, 'r') as f:
+            return f.seek(0, 2)
+
+    def grep_output(self, which, regex, since_mark=0, line_nrs=False):
+        lines = self.get_output(which, since_mark=since_mark).splitlines()
+        if not lines:
+            return None
+        matches = []
+        r = re.compile(regex)
+        line_nr = since_mark
+        for line in lines:
+            line_nr += 1
+            if r.search(line):
+                line = self.end_ansi_colors(line)
+                if line_nrs:
+                    matches.append((line_nr, line))
+                else:
+                    matches.append(line)
+        return matches
+
+    def get_stdout(self, since_mark=0):
+        return self.get_output('stdout', since_mark=since_mark)
+
+    def get_stderr(self, since_mark=0):
+        return self.get_output('stderr', since_mark=since_mark)
 
     def get_stdout_tail(self, tail=10, prefix=''):
         return self.get_output_tail('stdout', tail, prefix)

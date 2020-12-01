@@ -55,6 +55,7 @@ class OsmoCtrl(log.Origin):
         self.sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sck.connect((self.host, self.port))
         self.sck.setblocking(1)
+        self.sck.settimeout(10)
 
     def disconnect(self):
         self.dbg('Disconnecting')

@@ -158,22 +158,10 @@ class OsmoNitb(log.Origin):
         return not self.process.terminated()
 
 
-class OsmoNitbCtrl(log.Origin):
-    PORT = 4249
-    SUBSCR_MODIFY_VAR = 'subscriber-modify-v1'
-    SUBSCR_MODIFY_REPLY_RE = re.compile("SET_REPLY (\d+) %s OK" % SUBSCR_MODIFY_VAR)
-    SUBSCR_DELETE_VAR = 'subscriber-delete-v1'
-    SUBSCR_DELETE_REPLY_RE = re.compile("SET_REPLY (\d+) %s Removed" % SUBSCR_DELETE_VAR)
-    SUBSCR_LIST_ACTIVE_VAR = 'subscriber-list-active-v1'
-    BTS_OML_STATE_VAR = "bts.%d.oml-connection-state"
-    BTS_OML_STATE_RE = re.compile("GET_REPLY (\d+) bts.\d+.oml-connection-state (?P<oml_state>\w+)")
-
-    def __init__(self, nitb):
+class OsmoNitbCtrl(osmo_ctrl.OsmoCtrl):
+    def __init__(self, nitb, port=4249):
         self.nitb = nitb
-        super().__init__(log.C_BUS, 'CTRL(%s:%d)' % (self.nitb.addr(), OsmoNitbCtrl.PORT))
-
-    def ctrl(self):
-        return osmo_ctrl.OsmoCtrl(self.nitb.addr(), OsmoNitbCtrl.PORT)
+        super().__init__(nitb.addr(), port)
 
     def subscriber_add(self, imsi, msisdn, ki=None, algo=None):
         if algo:
@@ -181,54 +169,17 @@ class OsmoNitbCtrl(log.Origin):
         else:
             value = '%s,%s' % (imsi, msisdn)
 
-        with self.ctrl() as ctrl:
-            ctrl.do_set(OsmoNitbCtrl.SUBSCR_MODIFY_VAR, value)
-            data = ctrl.receive()
-            (answer, data) = ctrl.remove_ipa_ctrl_header(data)
-            answer_str = answer.decode('utf-8')
-            res = OsmoNitbCtrl.SUBSCR_MODIFY_REPLY_RE.match(answer_str)
-            if not res:
-                raise RuntimeError('Cannot create subscriber %r (answer=%r)' % (imsi, answer_str))
-            self.dbg('Created subscriber', imsi=imsi, msisdn=msisdn)
+        assert self.set_var('subscriber-modify-v1', value) == 'OK'
+        self.dbg('Created subscriber', imsi=imsi, msisdn=msisdn)
 
     def subscriber_delete(self, imsi):
-        with self.ctrl() as ctrl:
-            ctrl.do_set(OsmoNitbCtrl.SUBSCR_DELETE_VAR, imsi)
-            data = ctrl.receive()
-            (answer, data) = ctrl.remove_ipa_ctrl_header(data)
-            answer_str = answer.decode('utf-8')
-            res = OsmoNitbCtrl.SUBSCR_DELETE_REPLY_RE.match(answer_str)
-            if not res:
-                raise RuntimeError('Cannot delete subscriber %r (answer=%r)' % (imsi, answer_str))
-            self.dbg('Deleted subscriber', imsi=imsi)
+        assert self.set_var('subscriber-delete-v1', imsi) == 'Removed'
+        self.dbg('Deleted subscriber', imsi=imsi)
 
     def subscriber_list_active(self):
-        aslist_str = ""
-        with self.ctrl() as ctrl:
-            ctrl.do_get(OsmoNitbCtrl.SUBSCR_LIST_ACTIVE_VAR)
-            # This is legacy code from the old osmo-gsm-tester.
-            # looks like this doesn't work for long data.
-            data = ctrl.receive()
-            while (len(data) > 0):
-                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
-                answer_str = answer.decode('utf-8')
-                answer_str = answer_str.replace('\n', ' ')
-                aslist_str = answer_str
-            return aslist_str
+        return self.get_var('subscriber-list-active-v1').replace('\n', ' ')
 
     def bts_is_connected(self, bts_num):
-        with self.ctrl() as ctrl:
-            ctrl.do_get(OsmoNitbCtrl.BTS_OML_STATE_VAR % bts_num)
-            data = ctrl.receive()
-            while (len(data) > 0):
-                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
-                answer_str = answer.decode('utf-8')
-                answer_str = answer_str.replace('\n', ' ')
-                res = OsmoNitbCtrl.BTS_OML_STATE_RE.match(answer_str)
-                if res:
-                    oml_state = str(res.group('oml_state'))
-                    if oml_state == 'connected':
-                        return True
-        return False
+        return self.get_var('bts.%d.oml-connection-state' % bts_num) == 'connected'
 
 # vim: expandtab tabstop=4 shiftwidth=4

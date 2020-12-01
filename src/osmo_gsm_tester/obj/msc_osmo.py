@@ -157,29 +157,12 @@ class OsmoMsc(log.Origin):
         return not self.process.terminated()
 
 
-class OsmoMscCtrl(log.Origin):
-    PORT = 4255
-    SUBSCR_LIST_ACTIVE_VAR = 'subscriber-list-active-v1'
-
-    def __init__(self, msc):
+class OsmoMscCtrl(osmo_ctrl.OsmoCtrl):
+    def __init__(self, msc, port=4255):
         self.msc = msc
-        super().__init__(log.C_BUS, 'CTRL(%s:%d)' % (self.msc.addr(), self.PORT))
-
-    def ctrl(self):
-        return osmo_ctrl.OsmoCtrl(self.msc.addr(), self.PORT)
+        super().__init__(self.msc.addr(), port)
 
     def subscriber_list_active(self):
-        aslist_str = ""
-        with self.ctrl() as ctrl:
-            ctrl.do_get(self.SUBSCR_LIST_ACTIVE_VAR)
-            # This is legacy code from the old osmo-gsm-tester.
-            # looks like this doesn't work for long data.
-            data = ctrl.receive()
-            while (len(data) > 0):
-                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
-                answer_str = answer.decode('utf-8')
-                answer_str = answer_str.replace('\n', ' ')
-                aslist_str = answer_str
-            return aslist_str
+        return self.get_var('subscriber-list-active-v1').replace('\n', ' ')
 
 # vim: expandtab tabstop=4 shiftwidth=4

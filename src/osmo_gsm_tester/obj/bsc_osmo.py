@@ -149,8 +149,10 @@ class OsmoBsc(log.Origin):
         # over this list, we have a 1:1 match in indexes.
         return self.bts.index(bts)
 
-    def bts_is_connected(self, bts):
-        return OsmoBscCtrl(self).bts_is_connected(self.bts_num(bts))
+    def bts_is_connected(self, bts, use_ctrl=None):
+        if use_ctrl is None:
+            use_ctrl = self.ctrl()
+        return use_ctrl.bts_is_connected(self.bts_num(bts))
 
     def running(self):
         return not self.process.terminated()
@@ -160,32 +162,16 @@ class OsmoBsc(log.Origin):
             self.vty.disconnect()
             self.vty = None
 
-class OsmoBscCtrl(log.Origin):
-    PORT = 4249
-    BTS_OML_STATE_VAR = "bts.%d.oml-connection-state"
-    BTS_OML_STATE_RE = re.compile("GET_REPLY (\d+) bts.\d+.oml-connection-state (?P<oml_state>\w+)")
-
-    def __init__(self, bsc):
-        self.bsc = bsc
-        super().__init__(log.C_BUS, 'CTRL(%s:%d)' % (self.bsc.addr(), OsmoBscCtrl.PORT))
-
     def ctrl(self):
-        return osmo_ctrl.OsmoCtrl(self.bsc.addr(), OsmoBscCtrl.PORT)
+        return OsmoBscCtrl(self)
+
+class OsmoBscCtrl(osmo_ctrl.OsmoCtrl):
+    def __init__(self, bsc, port=4249):
+        self.bsc = bsc
+        super().__init__(bsc.addr(), port)
 
     def bts_is_connected(self, bts_num):
-        with self.ctrl() as ctrl:
-            ctrl.do_get(OsmoBscCtrl.BTS_OML_STATE_VAR % bts_num)
-            data = ctrl.receive()
-            while (len(data) > 0):
-                (answer, data) = ctrl.remove_ipa_ctrl_header(data)
-                answer_str = answer.decode('utf-8')
-                answer_str = answer_str.replace('\n', ' ')
-                res = OsmoBscCtrl.BTS_OML_STATE_RE.match(answer_str)
-                if res:
-                    oml_state = str(res.group('oml_state'))
-                    if oml_state == 'connected':
-                        return True
-        return False
+        return self.get_var('bts.%d.oml-connection-state' % bts_num) == 'connected'
 
 class OsmoBscVty(osmo_vty.OsmoVty):
     def __init__(self, bsc, port=4242):

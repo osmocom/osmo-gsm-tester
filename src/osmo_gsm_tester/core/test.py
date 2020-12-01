@@ -71,9 +71,8 @@ class Test(log.Origin):
             self.status = Test.UNKNOWN
             self.start_timestamp = time.time()
             testenv_obj = testenv.setup(self.suite_run, self)
-            with self.redirect_stdout():
-                util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
-                                     self.path)
+            util.run_python_file('%s.%s' % (self.suite_run.definition.name(), self.basename),
+                                 self.path)
             if self.status == Test.UNKNOWN:
                  self.set_pass()
         except Exception as e:

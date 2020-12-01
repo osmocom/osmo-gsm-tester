@@ -161,9 +161,9 @@ trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: one
+two
+three  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
@@ -390,9 +390,9 @@ trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: one
+two
+three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite PASS
@@ -545,9 +545,9 @@ trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: one
+two
+three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite PASS
@@ -746,9 +746,9 @@ trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: one
+two
+three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]  [test.py:[LINENR]]
 ---------------------------------------------------------------------
 trial test_suite PASS
@@ -946,10 +946,10 @@ trial test_suite
 trial test_suite test_suite_params.py
 ----------------------------------------------
 tst test_suite_params.py:[LINENR]: starting test  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
-tst test_suite_params.py:[LINENR]: SPECIFIC SUITE CONFIG: {'some_suite_global_param': 'heyho',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
-tst test_suite_params.py:[LINENR]:  'test_suite_params': {'one_bool_parameter': 'true',  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
-tst test_suite_params.py:[LINENR]:                        'second_list_parameter': ['23', '45']},  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
-tst test_suite_params.py:[LINENR]:  'test_timeout': {'timeout': '1'}}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
+tst test_suite_params.py:[LINENR]: SPECIFIC SUITE CONFIG: {'some_suite_global_param': 'heyho',
+ 'test_suite_params': {'one_bool_parameter': 'true',
+                       'second_list_parameter': ['23', '45']},
+ 'test_timeout': {'timeout': '1'}}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR]: SPECIFIC TEST CONFIG: {'one_bool_parameter': 'true', 'second_list_parameter': ['23', '45']}  [test_suite↪test_suite_params.py:[LINENR]]  [test_suite_params.py:[LINENR]]
 tst test_suite_params.py:[LINENR] Test passed (N.N sec)  [test_suite↪test_suite_params.py]  [test.py:[LINENR]]
 

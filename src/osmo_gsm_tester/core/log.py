@@ -21,7 +21,6 @@ import os
 import sys
 import time
 import traceback
-import contextlib
 import atexit
 from datetime import datetime # we need this for strftime as the one from time doesn't carry microsecond info
 from inspect import getframeinfo, stack
@@ -466,9 +465,6 @@ class Origin:
     def _set_log_category(self, category):
         self._log_category = category
 
-    def redirect_stdout(self):
-        return contextlib.redirect_stdout(SafeRedirectStdout(self))
-
     def ancestry(self):
         origins = []
         n = 10
@@ -500,37 +496,6 @@ class Origin:
     def err(self, *messages, _src=3, **named_items):
         '''same as log.err() but passes this object to skip looking up an origin'''
         err(*messages, _origin=self, _src=_src, **named_items)
-
-class SafeRedirectStdout:
-    '''
-    To be able to use 'print' in test scripts, this is used to redirect stdout
-    to a test class' log() function. However, it turns out doing that breaks
-    python debugger sessions -- it uses extended features of stdout, and will
-    fail dismally if it finds this wrapper in sys.stdout. Luckily, overriding
-    __getattr__() to return the original sys.__stdout__ attributes for anything
-    else than write() makes the debugger session work nicely again!
-    '''
-    _log_line_buf = None
-
-    def __init__(self, origin):
-        self.origin = origin
-
-    def write(self, message):
-        lines = message.splitlines()
-        if not lines:
-            return
-        if self._log_line_buf:
-            lines[0] = self._log_line_buf + lines[0]
-            self._log_line_buf = None
-        if not message.endswith('\n'):
-            self._log_line_buf = lines[-1]
-            lines = lines[:-1]
-        for line in lines:
-            _log(messages=(line,),
-                 origin=self.origin, level=L_LOG, src=2)
-
-    def __getattr__(self, name):
-        return sys.__stdout__.__getattribute__(name)
 
 def trace(exc_info=None, origin=None):
     if exc_info is None:

@@ -43,6 +43,7 @@ prompt = None
 Sms = None
 process = None
 tenv = None
+print = None
 
 class Timeout(Exception):
     pass
@@ -351,12 +352,15 @@ class TestEnv(log_module.Origin):
         self.log('using BVCI', bvci)
         return bvci
 
+    def print(self, *messages, **named_items):
+        log_module.log(*messages, _origin=self.test(), _src=3, **named_items)
+
 
 def setup(suite_run, _test):
     from .core.event_loop import MainLoop
     from .obj.sms import Sms as Sms_class
 
-    global test, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process, tenv
+    global test, log, dbg, err, wait, wait_no_raise, sleep, poll, prompt, Sms, process, tenv, print
 
     test = _test
     log = test.log
@@ -370,6 +374,7 @@ def setup(suite_run, _test):
     Sms = Sms_class
     process = process_module
     prompt = tenv.prompt
+    print = tenv.print
     return tenv
 
 # vim: expandtab tabstop=4 shiftwidth=4

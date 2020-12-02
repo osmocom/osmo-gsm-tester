@@ -165,4 +165,22 @@ class Test(log.Origin):
         else:
             return 'test log file not available'
 
+    def log_file(self):
+        for lt in self.log_targets:
+            if isinstance(lt, log.FileLogTarget):
+                return lt
+        return None
+
+    def get_log_mark(self):
+        lt = self.log_file()
+        if lt is None:
+            return 0
+        return lt.get_mark()
+
+    def get_log_output(self, since_mark=0):
+        lt = self.log_file()
+        if lt is None:
+            return ''
+        return lt.get_output(since_mark)
+
 # vim: expandtab tabstop=4 shiftwidth=4

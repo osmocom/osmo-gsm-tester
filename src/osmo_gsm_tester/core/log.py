@@ -264,6 +264,15 @@ class LogTarget:
             lines.insert(0, '')
         self.log_write_func('\n'.join(lines))
 
+    def get_mark(self):
+        # implemented in FileLogTarget
+        return 0
+
+    def get_output(self, since_mark=0):
+        # implemented in FileLogTarget
+        return ''
+
+
 def level_str(level):
     if level == L_TRACEBACK:
         return L_TRACEBACK
@@ -568,6 +577,21 @@ class FileLogTarget(LogTarget):
 
     def log_file_path(self):
         return self.path
+
+    def get_mark(self):
+        if self.path is None:
+            return 0
+        # return current file length
+        with open(self.path, 'r') as logfile:
+            return logfile.seek(0, 2)
+
+    def get_output(self, since_mark=0):
+        if self.path is None:
+            return ''
+        with open(self.path, 'r') as logfile:
+            if since_mark:
+                logfile.seek(since_mark)
+            return logfile.read()
 
 def run_logging_exceptions(func, *func_args, return_on_failure=None, **func_kwargs):
     try:

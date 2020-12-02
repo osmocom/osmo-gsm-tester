@@ -291,13 +291,13 @@ class Process(log.Origin):
         m = self.get_stdout_tail(prefix='| ')
         if not m:
             return
-        self.log('stdout:\n', m, '\n')
+        self.log('stdout:', '\n' + m, '\n')
 
     def log_stderr_tail(self):
         m = self.get_stderr_tail(prefix='| ')
         if not m:
             return
-        self.log('stderr:\n', m, '\n')
+        self.log('stderr:', '\n' + m, '\n')
 
     def close_output_logs(self):
         for k, v in self.outputs.items():

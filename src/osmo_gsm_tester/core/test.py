@@ -43,6 +43,7 @@ class Test(log.Origin):
         self._config_test_specific = config_test_specific
         self.path = os.path.join(self.suite_run.definition.suite_dir, self.basename)
         self.status = Test.UNKNOWN
+        self.report_fragments = []
         self.start_timestamp = 0
         self.duration = 0
         self.fail_type = None
@@ -182,5 +183,56 @@ class Test(log.Origin):
         if lt is None:
             return ''
         return lt.get_output(since_mark)
+
+    def report_fragment(self, name, result=None, **kwargs):
+        return Test.ReportFragment(parent_test=self, name=name, result=result, **kwargs)
+
+    class ReportFragment:
+        '''Add additional test results in junit XML.
+           Convenient method that includes a test log:
+             with test.report_fragment('foo'):
+                 do_test_steps()
+
+           Or manually add a report fragment directly:
+             test.report_fragment('foo', result = test.PASS if worked else test.FAIL)
+        '''
+
+        def __init__(self, parent_test, name, result=None, output=None, since_mark=None, start_time=0.0):
+            self.parent_test = parent_test
+            self.name = name
+            self.result = Test.UNKNOWN
+            self.duration = 0.0
+            self.output = output
+            self.start_time = start_time
+            self.log_mark = since_mark
+            assert name not in (x.name for x in self.parent_test.report_fragments)
+            self.parent_test.report_fragments.append(self)
+            if result is not None:
+                self.got_result(result)
+
+        def __str__(self):
+            return '%s/%s/%s: %s (%.1fs)' % (self.parent_test.suite_run.name(),
+                    self.parent_test.name(), self.name, self.result, self.duration)
+
+        def __enter__(self):
+            self.start_time = self.parent_test.elapsed_time()
+            self.log_mark = self.parent_test.get_log_mark()
+
+        def __exit__(self, *exc_info):
+            self.got_result(self.parent_test.PASS if exc_info[0] is None else self.parent_test.FAIL,
+                            exc_info=exc_info)
+
+        def got_result(self, result, exc_info=None):
+            self.result = result
+            self.duration = self.parent_test.elapsed_time() - self.start_time
+            if self.log_mark is not None and self.output is None:
+                self.output = self.parent_test.get_log_output(since_mark=self.log_mark)
+            if exc_info is not None and exc_info[0] is not None:
+                o = []
+                if self.output:
+                    o.append(self.output)
+                o.extend(traceback.format_exception(*exc_info))
+                self.output = '\n'.join(o)
+            self.parent_test.log('----- Report fragment:', self)
 
 # vim: expandtab tabstop=4 shiftwidth=4

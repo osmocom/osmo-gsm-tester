@@ -168,15 +168,67 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 7)
+PASS: test_suite (pass: 1, skip: 8)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_report_fragment.py
     skip: test_suite_params.py
     skip: test_timeout.py
+- run report fragment test
+
+---------------------------------------------------------------------
+trial test_suite
+---------------------------------------------------------------------
+
+----------------------------------------------
+trial test_suite test_report_fragment.py
+----------------------------------------------
+tst test_report_fragment.py:[LINENR]: a step in the first fragment  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: ----- Report fragment: test_suite/test_report_fragment.py/fragment1: pass (N.Ns)  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: a step in the second fragment  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: ----- Report fragment: test_suite/test_report_fragment.py/fragment2: pass (N.Ns)  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: a step in the third fragment  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: ----- Report fragment: test_suite/test_report_fragment.py/fragment3: FAIL (N.Ns)  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: ERR: Exception: failure in the third fragment  [test_suite↪test_report_fragment.py:[LINENR]]
+tst test_report_fragment.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_report_fragment.py:[LINENR]]
+---------------------------------------------------------------------
+trial test_suite FAIL
+---------------------------------------------------------------------
+FAIL: test_suite (fail: 1, skip: 8)
+    skip: hello_world.py (N.N sec)
+    skip: mo_mt_sms.py
+    skip: mo_sms.py
+    skip: test_error.py
+    skip: test_fail.py
+    skip: test_fail_raise.py
+    FAIL: test_report_fragment.py (N.N sec) Exception: failure in the third fragment
+    skip: test_suite_params.py
+    skip: test_timeout.py
+
+
+################################### junit XML:
+<testsuite disabled="8" errors="0" failures="2" hostname="localhost" name="test_suite" skipped="8" tests="9" time="[VAL]" timestamp="[TIMESTAMP]"><testcase classname="test_suite" name="hello_world.py" time="[VAL]"><skipped /><system-out>
+----------------------------------------------
+trial test_suite hello_world.py
+----------------------------------------------
+[TIMESTAMP] tst                 hello_world.py:[LINENR]: hello world
+[TIMESTAMP] tst                 hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'
+[TIMESTAMP] tst                 hello_world.py:[LINENR]: one
+two
+three
+[TIMESTAMP] tst                   hello_world.py:[LINENR] Test passed (N.N sec)
+</system-out></testcase><testcase classname="test_suite" name="mo_mt_sms.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase><testcase classname="test_suite" name="mo_sms.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase><testcase classname="test_suite" name="test_error.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase><testcase classname="test_suite" name="test_fail.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase><testcase classname="test_suite" name="test_fail_raise.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase><testcase classname="test_suite" name="test_report_fragment.py" time="[VAL]"><failure type="Exception">failure in the third fragment</failure><system-err>[BACKTRACE]
+raise Exception('failure in the third fragment')
+
+Exception: failure in the third fragment
+</system-out></testcase><testcase classname="test_suite" name="test_suite_params.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase><testcase classname="test_suite" name="test_timeout.py" time="[VAL]"><skipped /><system-out>test log file not available</system-out></testcase></testsuite>
+###################################
+
+
 
 - a test with an error
 
@@ -193,13 +245,14 @@ tst test_error.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_error.py:[
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 7)
+FAIL: test_suite (fail: 1, skip: 8)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     FAIL: test_error.py (N.N sec) AssertionError: test_error.py:[LINENR]: assert False
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_report_fragment.py (N.N sec)
     skip: test_suite_params.py
     skip: test_timeout.py
 
@@ -218,13 +271,14 @@ tst test_fail.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail.py:[LI
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 7)
+FAIL: test_suite (fail: 1, skip: 8)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py (N.N sec)
     FAIL: test_fail.py (N.N sec) EpicFail: This failure is expected
     skip: test_fail_raise.py
+    skip: test_report_fragment.py (N.N sec)
     skip: test_suite_params.py
     skip: test_timeout.py
 
@@ -242,13 +296,14 @@ tst test_fail_raise.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail_
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, skip: 7)
+FAIL: test_suite (fail: 1, skip: 8)
     skip: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py (N.N sec)
     skip: test_fail.py (N.N sec)
     FAIL: test_fail_raise.py (N.N sec) ExpectedFail: This failure is expected
+    skip: test_report_fragment.py (N.N sec)
     skip: test_suite_params.py
     skip: test_timeout.py
 - test with half empty scenario
@@ -397,13 +452,14 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 7)
+PASS: test_suite (pass: 1, skip: 8)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_report_fragment.py
     skip: test_suite_params.py
     skip: test_timeout.py
 - test with scenario
@@ -552,13 +608,14 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 7)
+PASS: test_suite (pass: 1, skip: 8)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_report_fragment.py
     skip: test_suite_params.py
     skip: test_timeout.py
 - test with scenario and modifiers
@@ -753,13 +810,14 @@ tst hello_world.py:[LINENR] Test passed (N.N sec)  [test_suite↪hello_world.py]
 ---------------------------------------------------------------------
 trial test_suite PASS
 ---------------------------------------------------------------------
-PASS: test_suite (pass: 1, skip: 7)
+PASS: test_suite (pass: 1, skip: 8)
     pass: hello_world.py (N.N sec)
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_report_fragment.py
     skip: test_suite_params.py
     skip: test_timeout.py
 - test with suite-specific config
@@ -962,13 +1020,14 @@ tst test_timeout.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_timeout.
 ---------------------------------------------------------------------
 trial test_suite FAIL
 ---------------------------------------------------------------------
-FAIL: test_suite (fail: 1, pass: 1, skip: 6)
+FAIL: test_suite (fail: 1, pass: 1, skip: 7)
     skip: hello_world.py
     skip: mo_mt_sms.py
     skip: mo_sms.py
     skip: test_error.py
     skip: test_fail.py
     skip: test_fail_raise.py
+    skip: test_report_fragment.py
     pass: test_suite_params.py (N.N sec)
     FAIL: test_timeout.py (N.N sec) Error: test_timeout.py:[LINENR] Test Timeout triggered: 1 seconds elapsed [test_suite↪test_timeout.py:[LINENR]↪test_timeout.py]
 - test with template overlay

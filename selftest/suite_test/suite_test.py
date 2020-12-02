@@ -3,6 +3,7 @@ import os
 import sys
 import _prep
 import shutil
+import re
 from osmo_gsm_tester.core import log
 from osmo_gsm_tester.core import config
 from osmo_gsm_tester.core import util
@@ -10,6 +11,8 @@ from osmo_gsm_tester.core import report
 from osmo_gsm_tester.core import scenario
 from osmo_gsm_tester.core import suite
 from osmo_gsm_tester.core.schema import generate_schemas, get_all_schema
+
+import xml.etree.ElementTree as et
 
 config.override_conf = os.path.join(os.path.dirname(sys.argv[0]), 'paths.conf')
 
@@ -50,6 +53,15 @@ trial = FakeTrial()
 s = suite.SuiteRun(trial, 'test_suite', s_def)
 results = s.run_tests('hello_world.py')
 print(report.suite_to_text(s))
+
+print('- run report fragment test')
+results = s.run_tests('test_report_fragment.py')
+print(report.suite_to_text(s))
+xml = et.tostring(report.suite_to_junit(s)).decode('utf-8')
+xml = re.sub('Traceback.*raise', '[BACKTRACE]\nraise', xml, flags=re.M + re.DOTALL)
+print('\n\n################################### junit XML:\n'
+      + xml
+      + '\n###################################\n\n')
 
 log.style_change(src=True)
 #log.style_change(trace=True)

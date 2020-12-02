@@ -132,14 +132,37 @@ def suite_to_junit(suite):
         testsuite.set('time', str(math.ceil(suite.duration)))
     testsuite.set('tests', str(len(suite.tests)))
     passed, skipped, failed, errors = suite.count_test_results()
-    testsuite.set('errors', str(errors))
-    testsuite.set('failures', str(failed))
-    testsuite.set('skipped', str(skipped))
-    testsuite.set('disabled', str(skipped))
     for suite_test in suite.tests:
         testcase = test_to_junit(suite_test)
         testcase.set('classname', suite.name())
         testsuite.append(testcase)
+
+        for report_fragment in suite_test.report_fragments:
+            full_name = '%s/%s' % (suite_test.name(), report_fragment.name)
+            el = et.Element('testcase')
+            el.set('name', full_name)
+            el.set('time', str(math.ceil(report_fragment.duration)))
+            if report_fragment.result == test.Test.SKIP:
+                et.SubElement(el, 'skipped')
+                skipped += 1
+            elif report_fragment.result == test.Test.FAIL:
+                failure = et.SubElement(el, 'failure')
+                failure.set('type', suite_test.fail_type or 'failure')
+                failed += 1
+            elif report_fragment.result != test.Test.PASS:
+                error = et.SubElement(el, 'error')
+                error.text = 'could not run'
+                errors += 1
+
+            if report_fragment.output:
+                sout = et.SubElement(el, 'system-out')
+                sout.text = escape_xml_invalid_characters(report_fragment.output)
+            testsuite.append(el)
+
+    testsuite.set('errors', str(errors))
+    testsuite.set('failures', str(failed))
+    testsuite.set('skipped', str(skipped))
+    testsuite.set('disabled', str(skipped))
     return testsuite
 
 def test_to_junit(t):

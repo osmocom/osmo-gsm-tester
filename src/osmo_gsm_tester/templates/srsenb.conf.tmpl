@@ -285,5 +285,5 @@ nof_prach_threads = 0
 #link_failure_nof_err = 50
 rrc_inactivity_timer = ${enb.inactivity_timer}
 #max_prach_offset_us  = 30
-#eea_pref_list = EEA0, EEA2, EEA1
-#eia_pref_list = EIA2, EIA1, EIA0
+eea_pref_list = ${', '.join(list(dict.fromkeys(enb.cipher_list))).upper()}
+eia_pref_list = ${', '.join(list(dict.fromkeys(enb.integrity_list))).upper()}

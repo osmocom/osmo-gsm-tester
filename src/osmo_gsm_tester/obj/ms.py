@@ -31,7 +31,7 @@ def on_register_schemas():
         'opc': schema.OPC,
         'auth_algo': schema.AUTH_ALGO,
         'apn_ipaddr': schema.IPV4,
-        'ciphers[]': schema.CIPHER,
+        'ciphers[]': schema.CIPHER_2G,
         'features[]': schema.MODEM_FEATURE
         }
     schema.register_resource_schema('modem', resource_schema)

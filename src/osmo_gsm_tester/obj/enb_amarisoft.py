@@ -176,6 +176,10 @@ class AmarisoftENB(enb.eNodeB):
 
         config.overlay(values, dict(enb={'enable_dl_awgn': util.str2bool(values['enb'].get('enable_dl_awgn', 'false'))}))
 
+        # Remove EEA0 from cipher list, if specified, as it's always assumed as default
+        cipher_list = values['enb'].get('cipher_list', None)
+        if "eea0" in cipher_list: cipher_list.remove("eea0")
+
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':
             base_srate = self.num_prb2base_srate(self.num_prb())

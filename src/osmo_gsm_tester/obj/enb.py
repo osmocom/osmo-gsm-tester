@@ -44,6 +44,8 @@ def on_register_schemas():
         'enable_measurements': schema.BOOL_STR,
         'enable_dl_awgn': schema.BOOL_STR,
         'dl_awgn_snr': schema.INT,
+        'cipher_list[]': schema.CIPHER_4G,
+        'integrity_list[]': schema.INTEGRITY_4G,
         'a1_report_type': schema.STR,
         'a1_report_value': schema.INT,
         'a1_hysteresis': schema.INT,

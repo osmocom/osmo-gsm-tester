@@ -31,7 +31,7 @@ def on_register_schemas():
         'addr': schema.IPV4,
         'band': schema.BAND,
         'direct_pcu': schema.BOOL_STR,
-        'ciphers[]': schema.CIPHER,
+        'ciphers[]': schema.CIPHER_2G,
         'channel_allocator': schema.CHAN_ALLOCATOR,
         'gprs_mode': schema.GPRS_MODE,
         'emergency_calls_allowed': schema.BOOL_STR,

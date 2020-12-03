@@ -224,9 +224,9 @@
     dpc_pucch_snr_target: 10,
 
     /* RRC/UP ciphering algorithm preference. EEA0 is always the last. */
-    cipher_algo_pref: [],
+    cipher_algo_pref: [${', '.join(list(dict.fromkeys(enb.cipher_list))).split("eea")[1] if len(list(dict.fromkeys(enb.cipher_list))) > 0 else ''}],
     /* RRC integrity algorithm preference. EIA0 is always the last. */
-    integ_algo_pref: [2, 1],
+    integ_algo_pref: [${', '.join(list(dict.fromkeys(enb.integrity_list))).split("eia")[1]}],
 
     /* (in ms) send RRC connection release after this time of network
        inactivity */

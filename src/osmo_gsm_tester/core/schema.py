@@ -105,10 +105,21 @@ def times(val):
         raise ValueError('Positive value >0 expected instead of %d' % n)
     return True
 
-def cipher(val):
+def cipher_2g(val):
     if val in ('a5_0', 'a5_1', 'a5_2', 'a5_3', 'a5_4', 'a5_5', 'a5_6', 'a5_7'):
         return True
     raise ValueError('Unknown Cipher value: %r' % val)
+
+def cipher_4g(val):
+    if val.lower() in ('eea0', 'eea1', 'eea2'):
+        return True
+    raise ValueError('Unknown 4G cipher value: %r' % val)
+
+def integrity_4g(val):
+    if val.lower() in ('eia0', 'eia1', 'eia2'):
+        # srsENB
+        return True
+    raise ValueError('Unknown 4G integrity value %r' % val)
 
 def modem_feature(val):
     if val in ('sms', 'gprs', 'voice', 'ussd', 'sim', '2g', '3g', '4g', 'dl_qam256', 'ul_qam64', 'qc_diag'):
@@ -165,7 +176,9 @@ OPC = 'opc'
 MSISDN = 'msisdn'
 AUTH_ALGO = 'auth_algo'
 TIMES='times'
-CIPHER = 'cipher'
+CIPHER_2G = 'cipher_2g'
+CIPHER_4G = 'cipher_4g'
+INTEGRITY_4G = 'integrity_4g'
 MODEM_FEATURE = 'modem_feature'
 PHY_CHAN = 'chan'
 CHAN_ALLOCATOR = 'chan_allocator'
@@ -189,7 +202,8 @@ SCHEMA_TYPES = {
         MSISDN: msisdn,
         AUTH_ALGO: auth_algo,
         TIMES: times,
-        CIPHER: cipher,
+        CIPHER_2G: cipher_2g,
+        CIPHER_4G: cipher_4g,
         MODEM_FEATURE: modem_feature,
         PHY_CHAN: phy_channel_config,
         CHAN_ALLOCATOR: channel_allocator,
@@ -198,6 +212,7 @@ SCHEMA_TYPES = {
         OSMO_TRX_CLOCK_REF: osmo_trx_clock_ref,
         LTE_TRANSMISSION_MODE: lte_transmission_mode,
         DURATION: duration,
+        INTEGRITY_4G: integrity_4g,
     }
 
 def add(dest, src):

@@ -22,6 +22,7 @@ import sys
 import time
 import traceback
 import atexit
+import re
 from datetime import datetime # we need this for strftime as the one from time doesn't carry microsecond info
 from inspect import getframeinfo, stack
 

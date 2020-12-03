@@ -41,10 +41,14 @@ if sys.maxunicode >= 0x10000:  # not narrow build
 invalid_xml_char_ranges_str = ['%s-%s' % (chr(low), chr(high))
                    for (low, high) in invalid_xml_char_ranges]
 invalid_xml_char_ranges_regex = re.compile('[%s]' % ''.join(invalid_xml_char_ranges_str))
+ansi_color_re = re.compile('\033[0-9;]{1,4}m')
 
 def escape_xml_invalid_characters(str):
     replacement_char = '\uFFFD' # Unicode replacement character
     return invalid_xml_char_ranges_regex.sub(replacement_char, escape(str))
+
+def strip_ansi_colors(text):
+    return ''.join(ansi_color_re.split(text))
 
 def hash_info_to_junit(testsuite, hash_info):
     properties = et.SubElement(testsuite, 'properties')
@@ -156,7 +160,7 @@ def suite_to_junit(suite):
 
             if report_fragment.output:
                 sout = et.SubElement(el, 'system-out')
-                sout.text = escape_xml_invalid_characters(report_fragment.output)
+                sout.text = escape_xml_invalid_characters(strip_ansi_colors(report_fragment.output))
             testsuite.append(el)
 
     testsuite.set('errors', str(errors))

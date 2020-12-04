@@ -11,7 +11,7 @@ try:
     sys.stderr.write('Error: setting non-existing templates dir should raise RuntimeError\n')
     assert(False)
 except RuntimeError:
-    print('sucess: setting non-existing templates dir raised RuntimeError\n')
+    print('success: setting non-existing templates dir raised RuntimeError')
     pass
 
 mytemplatedir = os.path.join(os.path.dirname(__file__), 'mytemplatedir')

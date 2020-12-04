@@ -189,8 +189,7 @@ ctrl
  bind val_ip_address
 
 - Testing: expect to fail on invalid templates dir
-sucess: setting non-existing templates dir raised RuntimeError
-
+success: setting non-existing templates dir raised RuntimeError
 - Testing: template directory overlay (still can find default one?)
 cnf Templates: DBG: rendering osmo-nitb.cfg.tmpl
 ! Configuration rendered by osmo-gsm-tester

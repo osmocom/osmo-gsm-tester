@@ -1003,8 +1003,7 @@ trial suiteC test_template_overlay.py
 ----------------------------------------------
 tst test_template_overlay.py:[LINENR]: - Testing: expect to fail on invalid templates overlay dir  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
 tst test_template_overlay.py:[LINENR] DBG: template dir overlay set: [PATH]/selftest/suite_test/suitedirB/suiteC/nonexistent-templatedir  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py]  [testenv.py:[LINENR]]
-tst test_template_overlay.py:[LINENR]: sucess: setting non-existing templates dir raised RuntimeError  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
-tst test_template_overlay.py:[LINENR]:   [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
+tst test_template_overlay.py:[LINENR]: success: setting non-existing templates dir raised RuntimeError  [suiteC↪test_template_overlay.py:[LINENR]]  [test_template_overlay.py:[LINENR]]
 tst test_template_overlay.py:[LINENR] DBG: template dir overlay set: [PATH]/selftest/suite_test/suitedirB/suiteC/mytemplatedir  [suiteC↪test_template_overlay.py:[LINENR]↪test_template_overlay.py]  [testenv.py:[LINENR]]
 --- ReservedResources: DBG: requesting use of ip_address {specifics={}}  [resource.py:[LINENR]]
 tst suiteC: Using 1 x ip_address (candidates: 1)  [resource.py:[LINENR]]

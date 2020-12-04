@@ -89,7 +89,7 @@ try:
     assert(False)
 except RuntimeError:
     # not logging exception to omit non-constant path name from expected output
-    print('sucess: setting non-existing templates dir raised RuntimeError\n')
+    print('success: setting non-existing templates dir raised RuntimeError')
     pass
 
 mytemplatedir = os.path.join(os.path.dirname(__file__), 'mytemplatedir')

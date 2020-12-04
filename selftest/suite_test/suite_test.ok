@@ -160,7 +160,7 @@ modem
 trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py:[LINENR]'  [test_suite↪hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]
@@ -187,7 +187,7 @@ trial test_suite
 ----------------------------------------------
 trial test_suite test_error.py
 ----------------------------------------------
-tst test_error.py:[LINENR]: I am 'test_suite' / 'test_error.py:[LINENR]'  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]]
+tst test_error.py:[LINENR]: I am 'test_suite' / 'test_error.py'  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]]
 tst test_error.py:[LINENR]: ERR: AssertionError: test_error.py:[LINENR]: assert False  [test_suite↪test_error.py:[LINENR]]  [test_error.py:[LINENR]: assert False]
 tst test_error.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_error.py:[LINENR]]  [test.py:[LINENR]]
 ---------------------------------------------------------------------
@@ -212,7 +212,7 @@ trial test_suite
 ----------------------------------------------
 trial test_suite test_fail.py
 ----------------------------------------------
-tst test_fail.py:[LINENR]: I am 'test_suite' / 'test_fail.py:[LINENR]'  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
+tst test_fail.py:[LINENR]: I am 'test_suite' / 'test_fail.py'  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
 tst test_fail.py:[LINENR]: ERR: EpicFail: This failure is expected  [test_suite↪test_fail.py:[LINENR]]  [test_fail.py:[LINENR]]
 tst test_fail.py:[LINENR]: Test FAILED (N.N sec)  [test_suite↪test_fail.py:[LINENR]]  [test.py:[LINENR]]
 ---------------------------------------------------------------------
@@ -389,7 +389,7 @@ modem
 trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py:[LINENR]'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
@@ -544,7 +544,7 @@ modem
 trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py:[LINENR]'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
@@ -745,7 +745,7 @@ trial test_suite
 trial test_suite hello_world.py
 ----------------------------------------------
 tst hello_world.py:[LINENR]: hello world  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
-tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py:[LINENR]'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
+tst hello_world.py:[LINENR]: I am 'test_suite' / 'hello_world.py'  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: one  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: two  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]
 tst hello_world.py:[LINENR]: three  [test_suite↪hello_world.py:[LINENR]]  [hello_world.py:[LINENR]]

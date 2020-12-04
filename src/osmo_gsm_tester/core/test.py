@@ -102,11 +102,11 @@ class Test(log.Origin):
             for log_tgt in self.log_targets:
                 log_tgt.remove()
 
-    def name(self):
+    def src(self):
         l = log.get_line_for_src(self.path)
         if l is not None:
-            return '%s:%s' % (self._name, l)
-        return super().name()
+            return '%s:%s' % (self.name(), l)
+        return self.name()
 
     def elapsed_time(self):
         'time elapsed since test was started'

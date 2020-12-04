@@ -222,7 +222,7 @@ class LogTarget:
             if origin is None:
                 name = '-'
             elif isinstance(origin, Origin):
-                name = origin.name()
+                name = origin.src()
                 # only log ancestry when there is more than one
                 if origin._parent is not None:
                     deeper_origins = origin.ancestry_str()
@@ -447,6 +447,12 @@ class Origin:
     def name(self):
         return self._name or self.__class__.__name__
 
+    def src(self):
+        '''subclasses may override this to provide more detailed source
+        information with the name, for a backtrace. For example, a line number
+        in a test script.'''
+        return self.name()
+
     __str__ = name
     __repr__ = name
 
@@ -476,7 +482,7 @@ class Origin:
         return origins
 
     def ancestry_str(self):
-        return '↪'.join([o.name() for o in self.ancestry()])
+        return '↪'.join([o.src() for o in self.ancestry()])
 
     def highest_ancestor(self):
         if self._parent:

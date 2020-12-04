@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e -x
 
+if [ -z "$trial_binaries" ]; then
+  trial_binaries="srsue srsenb srsepc"
+fi
+
 base="$PWD"
 name="srslte"
 git_url="${git_url:-https://github.com/srsLTE}"
@@ -10,4 +14,4 @@ project_name="${project_name:-srsLTE}"
 #TODO: make sure libconfig, zeroMQ is installed
 build_repo $project_name $configure_opts
 
-create_bin_tgz "srsue srsenb srsepc"
+create_bin_tgz "$trial_binaries"

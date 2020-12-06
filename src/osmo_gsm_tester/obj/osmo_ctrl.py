@@ -39,17 +39,17 @@ class CtrlInterfaceExn(Exception):
     pass
 
 class OsmoCtrl(log.Origin):
+    _next_id = 1
 
     def __init__(self, host, port):
         super().__init__(log.C_BUS, 'Ctrl', host=host, port=port)
         self.host = host
         self.port = port
         self.sck = None
-        self._next_id = 0
 
     def next_id(self):
-        ret = self._next_id
-        self._next_id += 1
+        ret = OsmoCtrl._next_id
+        OsmoCtrl._next_id += 1
         return ret
 
     def prefix_ipa_ctrl_header(self, data):

@@ -338,7 +338,7 @@ class Process(log.Origin):
         with open(path, 'r') as f:
             if since_mark > 0:
                 f.seek(since_mark)
-            return f.read()
+            return self.end_ansi_colors(f.read())
 
     def get_output_file(self, which):
         ''' Return filename for given output '''
@@ -354,7 +354,7 @@ class Process(log.Origin):
             return None
         out = out.splitlines()
         tail = min(len(out), tail)
-        return prefix + ('\n' + prefix).join(out[-tail:])
+        return prefix + self.end_ansi_colors(('\n' + prefix).join(out[-tail:]))
 
     def get_output_mark(self, which):
         '''Usage:

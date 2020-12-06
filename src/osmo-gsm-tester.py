@@ -109,6 +109,11 @@ def main():
     parser.add_argument('-s', '--suite-scenario', dest='suite_scenario', action='append',
             help='''A suite-scenarios combination
 like suite:scenario+scenario''')
+    parser.add_argument('-S', '--suites-file', dest='suites_file', action='append',
+            default=[],
+            help='''Read suites to run from a yml listing,
+like default-suites.conf. The path is relative to
+--conf-path.''')
     parser.add_argument('-t', '--test', dest='test', action='append',
             help='''Run only tests matching this name.
 Any test name that contains the given string is run.
@@ -150,6 +155,12 @@ optional.''')
         trial_dir = config.get_main_config_value(config.CFG_TRIAL_DIR)
 
     combination_strs = list(args.suite_scenario or [])
+
+    for suites_file in args.suites_file:
+        suites_file = config.main_config_path_to_abspath(suites_file)
+        from_this_file = config.read(suites_file)
+        print(('Running suites from %r:\n  ' % suites_file) + ('\n  '.join(from_this_file)))
+        combination_strs.extend(from_this_file)
 
     if not combination_strs:
         combination_strs = config.read_config_file(config.CFG_DEFAULT_SUITES_CONF, if_missing_return=[])

@@ -18,7 +18,7 @@ prefix="/usr/local/jenkins-build/inst-$name"
 prefix_real="$DESTDIR$prefix"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-build_repo libosmocore --disable-pcsc --disable-doxygen --disable-gnutls --disable-detect-tls-gcc-arm-bug
+build_repo libosmocore --disable-pcsc --disable-libmnl --disable-doxygen --disable-gnutls --disable-detect-tls-gcc-arm-bug
 build_repo osmo-pcu --enable-sysmocom-dsp
 
 create_bin_tgz osmo-pcu

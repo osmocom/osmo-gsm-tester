@@ -1,7 +1,29 @@
 // All times are in ms. Use -1 for infinity, where available
 
 qci_config = (
-
+// UM - real time (RTP for VOIP)
+{
+  qci=1;
+  pdcp_config = {
+    discard_timer = 100;
+    pdcp_sn_size = 12;
+  }
+  rlc_config = {
+    ul_um = {
+      sn_field_length = 5;
+    };
+    dl_um = {
+      sn_field_length = 5;
+      t_reordering    = 45;
+    };
+  };
+  logical_channel_config = {
+    priority = 4;
+    prioritized_bit_rate   = 256;
+    bucket_size_duration  = 1000;
+    log_chan_group = 1;
+  };
+},
 {
   qci=7;
   pdcp_config = {

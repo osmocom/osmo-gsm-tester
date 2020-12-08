@@ -50,6 +50,7 @@ class OsmoBsc(log.Origin):
         self.mgw = mgw
         self.stp = stp
         self.vty = None
+        self.ctrl = None
 
     def start(self):
         self.log('Starting osmo-bsc')
@@ -83,6 +84,9 @@ class OsmoBsc(log.Origin):
 
         self.vty = OsmoBscVty(self)
         self.vty.connect()
+
+        self.ctrl = OsmoBscCtrl(self)
+        self.ctrl.connect()
 
     def configure(self):
         self.config_file = self.run_dir.new_file('osmo-bsc.cfg')
@@ -149,10 +153,8 @@ class OsmoBsc(log.Origin):
         # over this list, we have a 1:1 match in indexes.
         return self.bts.index(bts)
 
-    def bts_is_connected(self, bts, use_ctrl=None):
-        if use_ctrl is None:
-            use_ctrl = self.ctrl()
-        return use_ctrl.bts_is_connected(self.bts_num(bts))
+    def bts_is_connected(self, bts):
+        return self.ctrl.bts_is_connected(self.bts_num(bts))
 
     def running(self):
         return not self.process.terminated()
@@ -161,9 +163,9 @@ class OsmoBsc(log.Origin):
         if self.vty is not None:
             self.vty.disconnect()
             self.vty = None
-
-    def ctrl(self):
-        return OsmoBscCtrl(self)
+        if self.ctrl is not None:
+            self.ctrl.disconnect()
+            self.ctrl = None
 
 class OsmoBscCtrl(osmo_ctrl.OsmoCtrl):
     def __init__(self, bsc, port=4249):

@@ -194,7 +194,9 @@ class TestEnv(log_module.Origin):
         from .obj.nitb_osmo import OsmoNitb
         if ip_address is None:
             ip_address = self.ip_address()
-        return OsmoNitb(self, ip_address)
+        nitb_obj = OsmoNitb(self, ip_address)
+        self.register_for_cleanup(nitb_obj)
+        return nitb_obj
 
     def hlr(self, ip_address=None):
         from .obj.hlr_osmo import OsmoHlr
@@ -230,7 +232,9 @@ class TestEnv(log_module.Origin):
         from .obj import msc_osmo
         if ip_address is None:
             ip_address = self.ip_address()
-        return msc_osmo.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
+        msc_obj = msc_osmo.OsmoMsc(self, hlr, mgcpgw, stp, ip_address)
+        self.register_for_cleanup(msc_obj)
+        return msc_obj
 
     def bsc(self, msc, mgw, stp, ip_address=None):
         from .obj.bsc_osmo import OsmoBsc

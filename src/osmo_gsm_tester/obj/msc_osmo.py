@@ -49,6 +49,7 @@ class OsmoMsc(log.Origin):
         self.mgw = mgw
         self.stp = stp
         self.smsc = smsc.Smsc((ip_address.get('addr'), 2775))
+        self.ctrl = None
 
     def start(self):
         self.log('Starting osmo-msc')
@@ -74,6 +75,9 @@ class OsmoMsc(log.Origin):
                                        env=env)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
+
+        self.ctrl = OsmoMscCtrl(self)
+        self.ctrl.connect()
 
     def configure(self):
         self.config_file = self.run_dir.new_file('osmo-msc.cfg')
@@ -147,7 +151,7 @@ class OsmoMsc(log.Origin):
         return all([(imsi in attached) for imsi in imsis])
 
     def imsi_list_attached(self):
-        return OsmoMscCtrl(self).subscriber_list_active()
+        return self.ctrl.subscriber_list_active()
 
     def set_emergency_call_msisdn(self, msisdn):
         self.dbg('Setting Emergency Call MSISDN', msisdn=msisdn)
@@ -155,6 +159,11 @@ class OsmoMsc(log.Origin):
 
     def running(self):
         return not self.process.terminated()
+
+    def cleanup(self):
+        if self.ctrl is not None:
+            self.ctrl.disconnect()
+            self.ctrl = None
 
 
 class OsmoMscCtrl(osmo_ctrl.OsmoCtrl):

@@ -36,6 +36,7 @@ class OsmoNitb(log.Origin):
         self.ip_address = ip_address
         self.bts = []
         self.smsc = smsc.Smsc((ip_address.get('addr'), 2775))
+        self.ctrl = None
 
     def start(self):
         self.log('Starting osmo-nitb')
@@ -61,6 +62,9 @@ class OsmoNitb(log.Origin):
                                        env=env)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
+
+        self.ctrl = OsmoNitbCtrl(self)
+        self.ctrl.connect()
 
     def configure(self):
         self.config_file = self.run_dir.new_file('osmo-nitb.cfg')
@@ -134,11 +138,11 @@ class OsmoNitb(log.Origin):
             raise log.Error("Auth algo %r selected and no KI specified" % algo)
 
         self.log('Add subscriber', msisdn=msisdn, imsi=modem.imsi())
-        OsmoNitbCtrl(self).subscriber_add(modem.imsi(), msisdn, modem.ki(), algo)
+        return self.ctrl.subscriber_add(modem.imsi(), msisdn, modem.ki(), algo)
 
     def subscriber_delete(self, modem):
         self.log('Delete subscriber', imsi=modem.imsi())
-        OsmoNitbCtrl(self).subscriber_delete(modem.imsi())
+        return self.ctrl.subscriber_delete(modem.imsi())
 
     def subscriber_attached(self, *modems):
         return self.imsi_attached(*[m.imsi() for m in modems])
@@ -149,14 +153,18 @@ class OsmoNitb(log.Origin):
         return all([(imsi in attached) for imsi in imsis])
 
     def imsi_list_attached(self):
-        return OsmoNitbCtrl(self).subscriber_list_active()
+        return self.ctrl.subscriber_list_active()
 
     def bts_is_connected(self, bts):
-        return OsmoNitbCtrl(self).bts_is_connected(self.bts_num(bts))
+        return self.ctrl.bts_is_connected(self.bts_num(bts))
 
     def running(self):
         return not self.process.terminated()
 
+    def cleanup(self):
+        if self.ctrl is not None:
+            self.ctrl.disconnect()
+            self.ctrl = None
 
 class OsmoNitbCtrl(osmo_ctrl.OsmoCtrl):
     def __init__(self, nitb, port=4249):

@@ -89,7 +89,10 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         if self._gtp_bind_addr is None:
             self._gtp_bind_addr = self._run_node.run_addr()
         label = conf.get('label', None)
-        self.set_name('%s_%s' % (name, label if label is not None else self._run_node.run_addr()))
+        if label is not None:
+            self.set_name('%s_%s_%s' % (name, label, self._run_node.run_addr()))
+        else:
+            self.set_name('%s_%s' % (name, self._run_node.run_addr()))
         self._txmode = 0
         self._id = None
         self._duplex = None

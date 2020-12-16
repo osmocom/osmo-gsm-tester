@@ -381,3 +381,8 @@ airplane_t_off_ms = ${ue.airplane_t_off_ms}
 metrics_csv_enable  = true
 #metrics_period_secs = 1
 metrics_csv_filename = ${ue.metrics_filename}
+
+% if ue.rf_dev_type == 'zmq':
+[stack]
+have_tti_time_stats = false
+% endif

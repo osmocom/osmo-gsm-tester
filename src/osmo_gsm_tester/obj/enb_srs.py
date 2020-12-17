@@ -72,6 +72,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.remote_log_file = None
         self.remote_pcap_file = None
         self.enable_pcap = False
+        self.enable_ul_qam64 = False
         self.metrics_file = None
         self.stop_sleep_time = 6 # We require at most 5s to stop
         self.testenv = testenv
@@ -192,7 +193,9 @@ class srsENB(enb.eNodeB, srslte_common):
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
 
-        config.overlay(values, dict(enb={'enable_ul_qam64': util.str2bool(values['enb'].get('enable_ul_qam64', 'false'))}))
+        self.enable_ul_qam64 = util.str2bool(values['enb'].get('enable_ul_qam64', 'false'))
+        config.overlay(values, dict(enb={'enable_ul_qam64': self.enable_ul_qam64}))
+
         config.overlay(values, dict(enb={'enable_dl_awgn': util.str2bool(values['enb'].get('enable_dl_awgn', 'false'))}))
         config.overlay(values, dict(enb={'rf_dev_sync': values['enb'].get('rf_dev_sync', None)}))
 
@@ -287,7 +290,7 @@ class srsENB(enb.eNodeB, srslte_common):
                                    75: 55e6,
                                    100: 75e6}
 
-        if 'ul_qam64' in self.ue.features():
+        if self.enable_ul_qam64 and 'ul_qam64' in self.ue.features():
             max_phy_rate_tm1_ul = { 6 : 2.7e6,
                                     15 : 6.5e6,
                                     25 : 14e6,

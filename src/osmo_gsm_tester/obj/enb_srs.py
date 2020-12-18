@@ -276,14 +276,14 @@ class srsENB(enb.eNodeB, srslte_common):
     def ue_max_rate(self, downlink=True, num_carriers=1):
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28
         if 'dl_qam256' in self.ue.features():
-            max_phy_rate_tm1_dl = {6: 5.9e6,
-                                   15: 14.6e6,
-                                   25: 24.5e6,
-                                   50: 48.9e6,
-                                   75: 75.3e6,
-                                   100: 97.8e6}
+            max_phy_rate_tm1_dl = {6: 4.4e6,
+                                   15: 14e6,
+                                   25: 24e6,
+                                   50: 49e6,
+                                   75: 75e6,
+                                   100: 98e6}
         else:
-            max_phy_rate_tm1_dl = {6: 3.5e6,
+            max_phy_rate_tm1_dl = {6: 3.3e6,
                                    15: 11e6,
                                    25: 18e6,
                                    50: 36e6,
@@ -296,7 +296,7 @@ class srsENB(enb.eNodeB, srslte_common):
                                     25 : 14e6,
                                     50 : 32e6,
                                     75 : 34e6,
-                                    100 : 70e6 }
+                                    100 : 71e6 }
         else:
             max_phy_rate_tm1_ul = { 6 : 1.7e6,
                                     15 : 4.7e6,

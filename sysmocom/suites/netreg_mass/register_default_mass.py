@@ -7,21 +7,32 @@ from osmo_gsm_tester.testenv import *
 from datetime import timedelta
 
 print('Claiming resources for the test')
-nitb = tenv.nitb()
+hlr = tenv.hlr()
+mgw_msc = tenv.mgw()
+mgw_bsc = tenv.mgw()
+stp = tenv.stp()
+msc = tenv.msc(hlr, mgw_msc, stp)
+bsc = tenv.bsc(msc, mgw_bsc, stp)
 bts = tenv.bts()
 ms_driver = tenv.ms_driver()
 ul = ms_driver.add_test('ul_test')
 modems = tenv.all_resources(tenv.modem)
 
 print('Launching a simple network')
-nitb.bts_add(bts)
-nitb.start()
+hlr.start()
+stp.start()
+msc.start()
+mgw_msc.start()
+mgw_bsc.start()
+
+bsc.bts_add(bts)
+bsc.start()
 bts.start()
-wait(nitb.bts_is_connected, bts)
+wait(bsc.bts_is_connected, bts)
 
 # Configure all MS that are available to this test.
 for modem in modems:
-    nitb.subscriber_add(modem)
+    hlr.subscriber_add(modem)
     ms_driver.subscriber_add(modem)
 
 # Run the base test.

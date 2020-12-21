@@ -17,28 +17,8 @@ bts:
   ipa_unit_id: 13
   addr: 127.0.43.55
   band: GSM-1800
-
-arfcn:
-  - arfcn: 512
-    band: GSM-1800
-  - arfcn: 514
-    band: GSM-1800
-  - arfcn: 516
-    band: GSM-1800
-  - arfcn: 518
-    band: GSM-1800
-  - arfcn: 520
-    band: GSM-1800
-  - arfcn: 540
-    band: GSM-1900
-  - arfcn: 542
-    band: GSM-1900
-  - arfcn: 544
-    band: GSM-1900
-  - arfcn: 546
-    band: GSM-1900
-  - arfcn: 548
-    band: GSM-1900
+  trx_list:
+  - arfcn: 860
 
 modem:
   - imsi: "001010000000000"

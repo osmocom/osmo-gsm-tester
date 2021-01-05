@@ -164,6 +164,15 @@ class Process(log.Origin):
         self.outputs[name] = (path, f)
         return f
 
+    def get_counter_stdout(self, keyword):
+        # Match stdout against keyword
+        n = 0
+        stdout_lines = (self.get_stdout() or '').splitlines()
+        for l in stdout_lines:
+            if keyword in l:
+                n += 1
+        return n
+
     def launch(self):
         preexec_fn = None
         log.dbg('cd %r; %s %s' % (

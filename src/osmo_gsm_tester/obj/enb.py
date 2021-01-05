@@ -346,4 +346,8 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def addr(self):
         return self._run_node.run_addr()
 
+    @abstractmethod
+    def get_counter(self, counter_name):
+        pass
+
 # vim: expandtab tabstop=4 shiftwidth=4

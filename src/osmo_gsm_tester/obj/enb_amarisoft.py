@@ -247,6 +247,11 @@ class AmarisoftENB(enb.eNodeB):
     def running(self):
         return not self.process.terminated()
 
+    def get_counter(self, counter_name):
+        if counter_name == 'prach_received':
+            return self.process.get_counter_stdout('PRACH:')
+        raise log.Error('counter %s not implemented!' % counter_name)
+
     def get_rfemu(self, cell=0, dl=True):
         cell_list = self.gen_conf['enb'].get('cell_list', None)
         if cell_list is None or len(cell_list) < cell + 1:

@@ -31,9 +31,16 @@ proc = ue.run_netns_wait('ping', ('ping', '-c', '1', epc.tun_addr()))
 output = proc.get_stdout()
 
 # Check PRACH transmissions
+num_prachs = 2
 num_prach_sent = ue.get_counter('prach_sent')
-if num_prach_sent != 2:
-    raise Exception("Expected to have sent exactly 2 PRACHs, but in fact sent {}".format(num_prach_sent))
+if num_prach_sent != num_prachs:
+    raise Exception("Expected to have sent exactly {} PRACHs, but in fact sent {}".format(num_prachs, num_prach_sent))
 
+# Check PRACH receptions
+num_prach_received = enb.get_counter('prach_received')
+if num_prach_sent != num_prachs:
+    raise Exception("Expected to have received exactly {} PRACHs, but in fact received {}".format(num_prachs, num_prach_received))
+
+output += "\nnum_prach_sent={}\nnum_prach_received={}\n".format(num_prach_sent, num_prach_received)
 print(output)
 test.set_report_stdout(output)

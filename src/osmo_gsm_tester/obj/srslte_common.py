@@ -36,6 +36,8 @@ class srslte_common(): # don't inherit from log.Origin here but instead use .nam
             self.stop_sleep_time = 0
 
     def stop(self):
+        # Send q+Enter to stdin to self-terminate application
+        self.process.stdin_write('q\n')
         self.testenv.stop_process(self.process)
         self.sleep_after_stop()
 

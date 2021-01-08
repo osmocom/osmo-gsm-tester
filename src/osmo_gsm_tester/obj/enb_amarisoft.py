@@ -130,6 +130,10 @@ class AmarisoftENB(enb.eNodeB):
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 
+    def stop(self):
+        # Not implemented
+        pass
+
     def gen_conf_file(self, path, filename, values):
         self.dbg('AmarisoftENB ' + filename + ':\n' + pprint.pformat(values))
         with open(path, 'w') as f:

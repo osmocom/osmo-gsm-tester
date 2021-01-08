@@ -327,6 +327,10 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def stop(self):
+        pass
+
+    @abstractmethod
     def ue_add(self, ue):
         pass
 

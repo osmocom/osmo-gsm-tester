@@ -119,6 +119,10 @@ class srsENB(enb.eNodeB, srslte_common):
         self.dbg('Enabling console trace')
         self.process.stdin_write('t\n')
 
+    def stop(self):
+        # Implemented in srslte_common.py
+        srslte_common.stop(self)
+
     def start_remotely(self):
         remote_env = { 'LD_LIBRARY_PATH': self.remote_inst.child('lib') }
         remote_binary = self.remote_inst.child('bin', srsENB.BINFILE)

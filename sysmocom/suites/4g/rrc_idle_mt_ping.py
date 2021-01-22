@@ -26,8 +26,8 @@ print('UE is RRC idle')
 # Wait a bit
 sleep(5)
 
-# Generate MT traffic, send single ping
-proc = epc.prepare_process('ping', ('ping', '-c', '1', ue.get_assigned_addr()))
+# Generate MT traffic, send single ping (10s timeout)
+proc = epc.prepare_process('ping', ('ping', '-w', '10', '-c', '1', ue.get_assigned_addr()))
 proc.launch_sync()
 output = proc.get_stdout()
 

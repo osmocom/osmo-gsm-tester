@@ -150,6 +150,10 @@ class AmarisoftEPC(epc.EPC):
         config.overlay(values, dict(epc=dict(log_filename=logfile,
                                              ifup_filename=ifupfile)))
 
+        # Retrieve and overlay UE count parameter to first subscriber
+        sub_count = self.testenv.suite().config().get('modem', None)
+        sub_count = sub_count['count'] if sub_count is not None and 'count' in sub_count else 1
+        self.subscriber_list[0]['count'] = sub_count
         config.overlay(values, dict(epc=dict(hss=dict(subscribers=self.subscriber_list))))
 
         self.dbg('SRSEPC CONFIG:\n' + pprint.pformat(values))

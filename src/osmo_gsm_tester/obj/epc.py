@@ -116,4 +116,8 @@ class EPC(log.Origin, metaclass=ABCMeta):
     def run_node(self):
         return self._run_node
 
+    @abstractmethod
+    def get_kpis(self):
+        pass
+
 # vim: expandtab tabstop=4 shiftwidth=4

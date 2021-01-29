@@ -356,4 +356,8 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def get_counter(self, counter_name):
         pass
 
+    @abstractmethod
+    def get_kpis(self):
+        pass
+
 # vim: expandtab tabstop=4 shiftwidth=4

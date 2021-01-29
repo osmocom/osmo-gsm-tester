@@ -126,7 +126,7 @@ class srsUE(MS, srslte_common):
                 self.log(repr(e))
 
         # Collect KPIs for each TC
-        self.testenv.test().set_kpis(self.get_kpis())
+        self.testenv.test().set_kpis(self.get_kpi_tree())
 
     def features(self):
         return self._conf.get('features', [])

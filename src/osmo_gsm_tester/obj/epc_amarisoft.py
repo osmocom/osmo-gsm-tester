@@ -199,4 +199,7 @@ class AmarisoftEPC(epc.EPC):
         # TODO: set proper addr
         return '192.168.4.1'
 
+    def get_kpis(self):
+        return {}
+
 # vim: expandtab tabstop=4 shiftwidth=4

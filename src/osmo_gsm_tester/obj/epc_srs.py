@@ -219,4 +219,7 @@ class srsEPC(epc.EPC, srslte_common):
     def tun_addr(self):
         return '172.16.0.1'
 
+    def get_kpis(self):
+        return srslte_common.get_kpis(self)
+
 # vim: expandtab tabstop=4 shiftwidth=4

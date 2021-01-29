@@ -101,7 +101,7 @@ class srsENB(enb.eNodeB, srslte_common):
                 self.log(repr(e))
 
         # Collect KPIs for each TC
-        self.testenv.test().set_kpis(self.get_kpis())
+        self.testenv.test().set_kpis(self.get_kpi_tree())
         # Clean up for parent class:
         super().cleanup()
 
@@ -266,6 +266,9 @@ class srsENB(enb.eNodeB, srslte_common):
         if counter_name == 'prach_received':
             return self.process.get_counter_stdout('RACH:')
         raise log.Error('counter %s not implemented!' % counter_name)
+
+    def get_kpis(self):
+        return srslte_common.get_kpis(self)
 
     def get_rfemu(self, cell=0, dl=True):
         cell_list = self.gen_conf['enb'].get('cell_list', None)

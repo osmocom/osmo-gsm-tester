@@ -278,7 +278,34 @@
     },
   },
   {
-    qci: 9, /* AM - best effort (Internet traffic) */
+    qci: 9, /* AM - best effort (Internet traffic) with 150ms PDCP discard */
+    pdcp_config: {
+      discardTimer: 150, /* in ms, 0 means infinity */
+      statusReportRequired: true,
+    },
+    rlc_config: {
+      ul_am: {
+        t_PollRetransmit: 80, /* in ms */
+        pollPDU: 64,
+        pollByte: 125, /* in kBytes, 0 means infinity */
+        maxRetxThreshold: 32,
+      },
+      dl_am: {
+        t_Reordering: 45, /* in ms, should be > to max_harq_tx * HARQ latency */
+        t_StatusProhibit: 60, /* in ms */
+      },
+    },
+    logical_channel_config: {
+      priority: 15,
+      prioritisedBitRate: -1, /* in kb/s, -1 means infinity */
+      bucketSizeDuration: 100, /* in ms */
+      logicalChannelGroup: 3,
+      logicalChannelSR_Mask: false,
+      logicalChannelSR_Prohibit: false,
+    },
+  },
+  {
+    qci: 10, /* Same like QCI9 but with infinity PDCP discard */
     pdcp_config: {
       discardTimer: 0, /* in ms, 0 means infinity */
       statusReportRequired: true,

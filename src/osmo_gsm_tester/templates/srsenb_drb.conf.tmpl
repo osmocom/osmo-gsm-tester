@@ -93,6 +93,32 @@ qci_config = (
     bucket_size_duration  = 100;
     log_chan_group = 3;
   };
+},
+// QCI 10 is a modified QCI 9 with PDCP discard timer set to infinity to avoid SDU drops at PDCP
+{
+  qci=10;
+  pdcp_config = {
+    discard_timer = -1;
+    status_report_required = true;
+  }
+  rlc_config = {
+    ul_am = {
+      t_poll_retx = 120;
+      poll_pdu = 64;
+      poll_byte = 750;
+      max_retx_thresh = 16;
+    };
+    dl_am = {
+      t_reordering = 50;
+      t_status_prohibit = 50;
+    };
+  };
+  logical_channel_config = {
+    priority = 11;
+    prioritized_bit_rate   = -1;
+    bucket_size_duration  = 100;
+    log_chan_group = 3;
+  };
 }
 
 );

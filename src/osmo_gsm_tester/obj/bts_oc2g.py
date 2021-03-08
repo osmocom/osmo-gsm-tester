@@ -88,7 +88,7 @@ class OsmoBtsOC2G(bts_osmo.OsmoBts):
     def ready_for_pcu(self):
         if not self.proc_bts or not self.proc_bts.is_running:
             return False
-        return 'BTS is up' in (self.proc_bts.get_stdout() or '')
+        return 'Started listening on PCU socket' in (self.proc_bts.get_stdout() or '')
 
     def start(self, keepalive=False):
         if self.bsc is None:

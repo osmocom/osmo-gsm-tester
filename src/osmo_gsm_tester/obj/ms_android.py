@@ -79,6 +79,7 @@ class AndroidUE(MS, AndroidHost, srslte_common):
         self.remote_metrics_file = None
         self.metrics_file = None
         self.brate_mon = None
+        self.num_carriers = 1
 
     def configure(self):
         values = dict(ue=config.get_defaults('androidue'))

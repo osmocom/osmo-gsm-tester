@@ -19,6 +19,7 @@
 
 import os
 import pprint
+import time
 
 from ..core import log, util, config, template, process, remote
 from ..core import schema
@@ -37,6 +38,7 @@ class AmarisoftEPC(epc.EPC):
     CFGFILE = 'amarisoft_ltemme.cfg'
     LOGFILE = 'ltemme.log'
     IFUPFILE = 'mme-ifup'
+    LTESIM_BINFILE = 'ltesim_server'
 
     def __init__(self, testenv, run_node):
         super().__init__(testenv, run_node, 'amarisoftepc')
@@ -50,7 +52,7 @@ class AmarisoftEPC(epc.EPC):
         self.remote_inst = None
         self.remote_config_file = None
         self.remote_log_file = None
-        self.remote_ifup_file =None
+        self.remote_ifup_file = None
         self._bin_prefix = None
         self.inst = None
         self.subscriber_list = []
@@ -81,6 +83,7 @@ class AmarisoftEPC(epc.EPC):
             self.start_locally()
         else:
             self.start_remotely()
+            self.start_ltesim_remotely()
 
     def start_remotely(self):
         remote_binary = self.remote_inst.child('', AmarisoftEPC.BINFILE)
@@ -114,6 +117,16 @@ class AmarisoftEPC(epc.EPC):
         self.process = process.Process(self.name(), self.run_dir, args, env=env)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
+
+    def start_ltesim_remotely(self):
+        # Sleep for a moment to give MME time to start up create TUN device
+        time.sleep(5)
+        remote_binary = self.remote_inst.child('', AmarisoftEPC.LTESIM_BINFILE)
+        args = (remote_binary, "-a " + self.tun_addr())
+        self.log('Launching ltesim_server')
+        self.ltesim_process = self.rem_host.RemoteProcess(AmarisoftEPC.LTESIM_BINFILE, args)
+        self.testenv.remember_to_stop(self.ltesim_process)
+        self.ltesim_process.launch()
 
     def configure(self):
         self.inst = util.Dir(os.path.abspath(self.bin_prefix()))

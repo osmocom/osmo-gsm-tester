@@ -78,6 +78,10 @@ fi
 # Create amarisoftepc inst:
 rm -rf inst-amarisoftepc && mkdir inst-amarisoftepc || exit 1
 tar --strip-components=1 -zxf inst-tmp/*/ltemme-linux*.tar.gz -C inst-amarisoftepc/
+# Copy ltesim_server from UE package if available
+if [ "x${HAVE_AMARISOFT_LTEUE}" = "x1" ]; then
+        cp inst-amarisoftue/ltesim_server inst-amarisoftepc/
+fi
 this="amarisoftepc.build-${BUILD_NUMBER-$(date +%Y-%m-%d_%H_%M_%S)}"
 tar="${this}.tgz"
 tar -czf "$tar" -C inst-amarisoftepc/ .

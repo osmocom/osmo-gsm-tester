@@ -39,8 +39,12 @@ dl_earfcn = 2850,3050
 dl_earfcn = 2850
 % endif
 freq_offset = ${ue.freq_offset}
+% if int(ue.tx_gain) > 0:
 tx_gain = ${ue.tx_gain}
+% endif
+% if int(ue.rx_gain) > 0:
 rx_gain = ${ue.rx_gain}
+% endif
 
 #nof_radios = 1
 nof_antennas = ${ue.num_antennas}

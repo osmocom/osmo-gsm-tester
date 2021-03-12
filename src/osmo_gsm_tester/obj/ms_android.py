@@ -207,7 +207,7 @@ class AndroidUE(MS, AndroidHost, srslte_common):
             MainLoop.sleep(2)
             timer -= 2
 
-        if timer == 0:
+        if timer <= 0:
             raise log.Error('Connection timer of Android UE %s expired' % self._run_node.adb_serial_id())
 
         self.brate_mon = BitRateMonitor(self.testenv, self.run_dir, self._run_node, self.rem_host, self.data_interface)

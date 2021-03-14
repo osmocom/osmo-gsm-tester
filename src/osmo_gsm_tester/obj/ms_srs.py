@@ -42,6 +42,7 @@ def on_register_schemas():
         'tx_gain': schema.INT,
         'rx_gain': schema.INT,
         'freq_offset': schema.INT,
+        'force_ul_amplitude': schema.STR,
         }
     for key, val in RunNode.schema().items():
         resource_schema['run_node.%s' % key] = val

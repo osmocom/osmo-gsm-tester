@@ -357,7 +357,9 @@ nof_phy_threads     = 2
 #pregenerate_signals = false
 #pdsch_csi_enabled  = true
 #pdsch_8bit_decoder = false
-#force_ul_amplitude = 0
+% if float(ue.force_ul_amplitude) > 0:
+force_ul_amplitude = ${ue.force_ul_amplitude}
+% endif
 
 #####################################################################
 # Simulation configuration options

@@ -266,7 +266,7 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         else:
             ul_rem_addr = self.ue.addr()
 
-        rf_dev_args = 'fail_on_disconnect=true,log_trx_timeout=true,trx_timeout_ms=4000'
+        rf_dev_args = 'fail_on_disconnect=true,log_trx_timeout=true,trx_timeout_ms=8000'
         idx = 0
         cell_list = cfg_values['enb']['cell_list']
         # Define all 8 possible RF ports (2x CA with 2x2 MIMO)

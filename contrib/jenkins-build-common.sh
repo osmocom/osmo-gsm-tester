@@ -151,6 +151,13 @@ build_repo_dir() {
     rm -rf build && mkdir build && cd build || exit 1
     set +x; echo; echo; set -x
     cmake -DCMAKE_INSTALL_PREFIX=$prefix $configure_opts ../
+  elif [ -f meson.build ]; then
+    rm -rf build && mkdir build && cd build || exit 1
+    set +x; echo; echo; set -x
+    meson ../ --prefix=$prefix $configure_opts
+    ninja -j8
+    ninja install
+    return
   else
     echo "Unknwown build system" && exit 1
   fi

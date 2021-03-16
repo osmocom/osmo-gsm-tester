@@ -65,7 +65,7 @@ class srslte_common(): # don't inherit from log.Origin here but instead use .nam
         ''' Use the srsLTE KPI analyzer module (part of srsLTE.git) if available to collect KPIs '''
 
         # Make sure this only runs once
-        if self.csv_kpi is not None or self.log_kpi is not None or self.stdout_kpi is not None:
+        if self.csv_kpi is not None and self.log_kpi is not None and self.stdout_kpi is not None:
             return
 
         # Start with empty KPIs

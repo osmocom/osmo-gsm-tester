@@ -392,6 +392,13 @@ pip3 install \
         pydbus
 ----
 
+If one plans to use Open5GS EPC, pymongo modules to interact against MongoDB
+(_epc_open5gs.py_) shall be installed:
+----
+pip3 install \
+        pymongo
+----
+
 IMPORTANT: ofono may need to be installed from source to contain the most
 recent fixes needed to operate your modems. This depends on the modem hardware
 used and the tests run. Please see <<hardware_modems>>.

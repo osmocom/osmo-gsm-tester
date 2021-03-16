@@ -1,0 +1,245 @@
+#
+# logger:
+#
+#  o Set OGS_LOG_INFO to all domain level
+#   - If `level` is omitted, the default level is OGS_LOG_INFO)
+#   - If `domain` is omitted, the all domain level is set from 'level'
+#    (Nothing is needed)
+#
+#  o Set OGS_LOG_ERROR to all domain level
+#   - `level` can be set with none, fatal, error, warn, info, debug, trace
+#    level: error
+#
+#  o Set OGS_LOG_DEBUG to mme/emm domain level
+#    level: debug
+#    domain: mme,emm
+#
+#  o Set OGS_LOG_TRACE to all domain level
+#    level: trace
+#    domain: core,s1ap,nas,fd,gtp,mme,emm,esm,event,tlv,mem,sock
+#
+logger:
+    file: ${mme.log_filename}
+    level: debug
+
+mme:
+    freeDiameter: ${mme.diameter_filename}
+    s1ap:
+      - addr: ${epc.run_addr}
+    gtpc:
+      - addr: ${epc.run_addr}
+    gummei:
+      plmn_id:
+        mcc: ${epc.mcc}
+        mnc: ${epc.mnc}
+      mme_gid: 2
+      mme_code: 1
+    tai:
+      plmn_id:
+        mcc: ${epc.mcc}
+        mnc: ${epc.mnc}
+      tac: 7
+    security:
+        integrity_order : [ EIA2, EIA1, EIA0 ]
+        ciphering_order : [ EEA0, EEA1, EEA2 ]
+    network_name:
+        full: Open5GS
+    mme_name: open5gs-mme0
+
+#
+# sgwc:
+#
+# <GTP-C Client>
+#
+#  o Specify SGW addresses the GTP-C must connect to
+#
+#  o One SGW is defined.
+#    If prefer_ipv4 is not true, [fe80::2%lo] is selected.
+#    gtpc:
+#      addr:
+#        - 127.0.0.3
+#        - fe80::2%lo
+#
+#  o Two SGW are defined. MME selects SGW with round-robin manner per UE
+#    gtpc:
+#      - addr: 127.0.0.3
+#      - addr: fe80::2%lo
+#
+#  o Three SGW are defined. MME selects SGW with round-robin manner per UE
+#    gtpc:
+#      - addr
+#        - 127.0.0.3
+#        - fe80::2%lo
+#      - addr
+#        - 127.0.0.22
+#        - fe80::12%lo
+#      - name: sgw3.open5gs.org
+#
+# <SGW Selection Mode>
+#
+# o Round-Robin
+#
+#   gtpc:
+#     addr: 127.0.0.3
+#     addr: 127.0.2.2
+#     addr: 127.0.4.2
+#
+# o SGW selection by eNodeB TAC
+#   (either single TAC or multiple TACs, DECIMAL representation)
+#
+#   gtpc:
+#     - addr: 127.0.0.3
+#       tac: 26000
+#     - addr: 127.0.2.2
+#       tac: [25000, 27000, 28000]
+#
+# o SGW selection by e_cell_id(28bit)
+#   (either single or multiple e_cell_id, HEX representation)
+#
+#   gtpc:
+#     - addr: 127.0.0.3
+#       e_cell_id: abcde01
+#     - addr: 127.0.2.2
+#       e_cell_id: [12345, a9413, 98765]
+#
+sgwc:
+    gtpc:
+      - addr: ${epc.run_addr}
+        port: 2125
+
+#
+# smf:
+#
+#  <GTP-C Client>
+#
+#  o By default, the SMF uses the first SMF node.
+#    - To use a different APN for each SMF, specify gtpc.apn as the APN name.
+#    - If the HSS uses WebUI to set the SMF IP for each UE,
+#      you can use a specific SMF node for each UE.
+#
+#  o Two SMF are defined. 127.0.0.4:2123 is used.
+#    [fe80::3%lo]:2123 is ignored.
+#    gtpc:
+#      - addr: 127.0.0.4
+#      - addr: fe80::3%lo
+#
+#  o One SMF is defined. if prefer_ipv4 is not true,
+#    [fe80::3%lo] is selected.
+#    gtpc:
+#      - addr:
+#        - 127.0.0.4
+#        - fe80::3%lo
+#
+#  o Two SMF are defined with a different APN.
+#    - Note that if SMF IP for UE is configured in HSS,
+#      the following configurion for this UE is ignored.
+#    gtpc:
+#      - addr: 127.0.0.4
+#        apn: internet
+#      - addr: 127.0.0.5
+#        apn: volte
+#
+#  o If APN is omitted, the default APN uses the first SMF node.
+#    gtpc:
+#      - addr: 127.0.0.4
+#      - addr: 127.0.0.5
+#        apn: volte
+smf:
+    gtpc:
+      - addr: ${epc.run_addr}
+        port: 2124
+
+#
+# parameter:
+#
+#  o Number of output streams per SCTP associations.
+#      sctp_streams: 30
+#
+#  o Disable use of IPv4 addresses (only IPv6)
+#      no_ipv4: true
+#
+#  o Disable use of IPv6 addresses (only IPv4)
+#      no_ipv6: true
+#
+#  o Prefer IPv4 instead of IPv6 for estabishing new GTP connections.
+#      prefer_ipv4: true
+#
+#  o Enable Multicast traffic to the UE
+#      multicast: true
+#
+#  o Disable Stateless Address Autoconfiguration for IPv6
+#      no_slaac: true
+#
+#  o Use OAI UE
+#    - Remove HashMME in Security-mode command message
+#    - Use the length 1 of EPS network feature support in Attach accept message
+#      use_openair: true
+#
+parameter:
+
+#
+# max:
+#
+# o Maximum Number of UE per AMF/MME
+#    ue: 1024
+# o Maximum Number of gNB/eNB per AMF/MME
+#    gnb: 32
+#
+max:
+
+#
+# pool:
+#
+# o The default memory pool size was set assuming 1024 UEs.
+#   To connect more UEs, you need to increase the size further.
+#
+#   - Pool-size 128         => 65536 Number
+#   - Pool-size 256         => 16384 Number
+#   - Pool-size 512         => 4096 Number
+#   - Pool-size 1024        => 1024 Number
+#   - Pool-size 2048        => 512 Number
+#   - Pool-size 8192        => 128 Number
+#   - Pool-size 1024*1024   => 8 Number
+#
+#    128:  65536
+#    256:  16384
+#    512:  4096
+#    1024: 1024
+#    2048: 512
+#    8192: 128
+#    big:  8
+#
+pool:
+
+#
+# sctp:
+#
+#  o heartbit_interval : 5000 (5secs)
+#  o rto_initial : 3000 (3secs)
+#  o rto_min : 1000 (1sec)
+#  o rto_max : 5000 (5secs)
+#  o max_num_of_ostreams : 30
+#  o max_num_of_istreams : 65535
+#  o max_attempts : 4
+#  o max_initial_timeout : 8000(8secs)
+#  o usrsctp_udp_port : 9899
+#
+sctp:
+
+#
+# time:
+#
+#  o Message Wait Duration (Default : 10,000 ms = 10 seconds)
+#
+#  o Message Wait Duration (3000 ms)
+#    message:
+#        duration: 3000
+#
+#  o Handover Wait Duration (Default : 300 ms)
+#    Time to wait for MME to send UEContextReleaseCommand
+#    to the source eNB after receiving HandoverNotify
+#
+#  o Handover Wait Duration (500ms)
+#    handover:
+#        duration: 500
+time:

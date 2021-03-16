@@ -154,7 +154,7 @@ build_repo_dir() {
   elif [ -f meson.build ]; then
     rm -rf build && mkdir build && cd build || exit 1
     set +x; echo; echo; set -x
-    meson ../ --prefix=$prefix $configure_opts
+    meson ../ --prefix=$prefix --libdir="lib" $configure_opts
     ninja -j8
     ninja install
     return

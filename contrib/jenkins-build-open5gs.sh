@@ -9,4 +9,4 @@ project_name="${project_name:-open5gs}"
 
 build_repo $project_name "main" $configure_opts
 
-create_bin_tgz "open5gs-mmed"
+create_bin_tgz "open5gs-hssd open5gs-pcrfd open5gs-upfd open5gs-sgwud open5gs-smfd open5gs-sgwcd open5gs-mmed"

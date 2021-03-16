@@ -31,6 +31,7 @@ from ..core import schema
 def on_register_schemas():
     config_schema = {
         'enable_pcap': schema.BOOL_STR,
+        'enable_tracing': schema.BOOL_STR,
         'enable_ul_qam64': schema.BOOL_STR,
         'log_all_level': schema.STR,
         }
@@ -49,6 +50,8 @@ class srsENB(enb.eNodeB, srslte_common):
     CFGFILE_DRB = 'srsenb_drb.conf'
     LOGFILE = 'srsenb.log'
     PCAPFILE = 'srsenb.pcap'
+    TRACINGFILE = 'srsenb_tracing.log'
+    METRICSFILE = 'srsenb_metrics.csv'
 
     def __init__(self, testenv, conf):
         super().__init__(testenv, conf, srsENB.BINFILE)
@@ -60,6 +63,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.config_sib_file = None
         self.config_rr_file = None
         self.config_drb_file = None
+        self.tracing_file = None
         self.log_file = None
         self.pcap_file = None
         self.process = None
@@ -71,9 +75,13 @@ class srsENB(enb.eNodeB, srslte_common):
         self.remote_config_drb_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
+        self.remote_tracing_file = None
+        self.remote_metrics_file = None
         self.enable_pcap = False
         self.enable_ul_qam64 = False
+        self.enable_tracing = False
         self.metrics_file = None
+        self.have_metrics_file = False
         self.stop_sleep_time = 6 # We require at most 5s to stop
         self.testenv = testenv
         self._additional_args = []
@@ -90,6 +98,9 @@ class srsENB(enb.eNodeB, srslte_common):
         self.sleep_after_stop()
 
         # copy back files (may not exist, for instance if there was an early error of process):
+        self.scp_back_metrics(raiseException=False)
+
+        # copy back files (may not exist, for instance if there was an early error of process):
         try:
             self.rem_host.scpfrom('scp-back-log', self.remote_log_file, self.log_file)
         except Exception as e:
@@ -99,11 +110,39 @@ class srsENB(enb.eNodeB, srslte_common):
                 self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
             except Exception as e:
                 self.log(repr(e))
+        if self.enable_tracing:
+            try:
+                self.rem_host.scpfrom('scp-back-tracing', self.remote_tracing_file, self.tracing_file)
+            except Exception as e:
+                self.log(repr(e))
 
         # Collect KPIs for each TC
         self.testenv.test().set_kpis(self.get_kpi_tree())
         # Clean up for parent class:
         super().cleanup()
+
+    def scp_back_metrics(self, raiseException=True):
+        ''' Copy back metrics only if they have not been copied back yet '''
+        if not self.have_metrics_file:
+            # file is not properly flushed until the process has stopped.
+            if self.running():
+                self.stop()
+
+            # only SCP back if not running locally
+            if not self._run_node.is_local():
+                try:
+                    self.rem_host.scpfrom('scp-back-metrics', self.remote_metrics_file, self.metrics_file)
+                except Exception as e:
+                    if raiseException:
+                        self.err('Failed copying back metrics file from remote host')
+                        raise e
+                    else:
+                        # only log error
+                        self.log(repr(e))
+            # make sure to only call it once
+            self.have_metrics_file = True
+        else:
+            self.dbg('Metrics have already been copied back')
 
     def start(self, epc):
         self.log('Starting srsENB')
@@ -165,6 +204,8 @@ class srsENB(enb.eNodeB, srslte_common):
         self.config_drb_file = self.run_dir.child(srsENB.CFGFILE_DRB)
         self.log_file = self.run_dir.child(srsENB.LOGFILE)
         self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
+        self.metrics_file = self.run_dir.child(srsENB.METRICSFILE)
+        self.tracing_file = self.run_dir.child(srsENB.TRACINGFILE)
 
         if not self._run_node.is_local():
             self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
@@ -178,15 +219,21 @@ class srsENB(enb.eNodeB, srslte_common):
             self.remote_config_drb_file = self.remote_run_dir.child(srsENB.CFGFILE_DRB)
             self.remote_log_file = self.remote_run_dir.child(srsENB.LOGFILE)
             self.remote_pcap_file = self.remote_run_dir.child(srsENB.PCAPFILE)
+            self.remote_metrics_file = self.remote_run_dir.child(srsENB.METRICSFILE)
+            self.remote_tracing_file = self.remote_run_dir.child(srsENB.TRACINGFILE)
 
         values = super().configure(['srsenb'])
 
+        metricsfile = self.metrics_file if self._run_node.is_local() else self.remote_metrics_file
+        tracingfile = self.tracing_file if self._run_node.is_local() else self.remote_tracing_file
         sibfile = self.config_sib_file if self._run_node.is_local() else self.remote_config_sib_file
         rrfile = self.config_rr_file if self._run_node.is_local() else self.remote_config_rr_file
         drbfile = self.config_drb_file if self._run_node.is_local() else self.remote_config_drb_file
         logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
         pcapfile = self.pcap_file if self._run_node.is_local() else self.remote_pcap_file
-        config.overlay(values, dict(enb=dict(sib_filename=sibfile,
+        config.overlay(values, dict(enb=dict(metrics_filename=metricsfile,
+                                             tracing_filename=tracingfile,
+                                             sib_filename=sibfile,
                                              rr_filename=rrfile,
                                              drb_filename=drbfile,
                                              log_filename=logfile,
@@ -196,6 +243,9 @@ class srsENB(enb.eNodeB, srslte_common):
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))
         config.overlay(values, dict(enb={'enable_pcap': self.enable_pcap}))
+
+        self.enable_tracing = util.str2bool(values['enb'].get('enable_tracing', 'false'))
+        config.overlay(values, dict(enb={'enable_tracing': self.enable_tracing}))
 
         self.enable_ul_qam64 = util.str2bool(values['enb'].get('enable_ul_qam64', 'false'))
         config.overlay(values, dict(enb={'enable_ul_qam64': self.enable_ul_qam64}))

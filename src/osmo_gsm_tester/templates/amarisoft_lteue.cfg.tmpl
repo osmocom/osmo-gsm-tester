@@ -30,9 +30,24 @@
      allow dynamic UE creation from remote API */
   multi_ue: true,
 
+  custom_freq_band: [
+%for band in ue.custom_band_list:
+    {
+      band: ${band.number},
+      dl_earfcn_min: ${band.dl_earfcn_min},
+      dl_earfcn_max: ${band.dl_earfcn_max},
+      dl_freq_min: ${band.dl_freq_min},
+      ul_freq_min: ${band.ul_freq_min},
+      ul_earfcn_min: ${band.ul_earfcn_min},
+      ul_earfcn_max: ${band.ul_earfcn_max},
+    },
+%endfor
+  ],
+
   cells: [
     {
-      dl_earfcn: 2850,
+      dl_earfcn: ${ue.dl_earfcn},
+      ul_earfcn: ${ue.ul_earfcn},
       n_antenna_dl: 1,
       n_antenna_ul: 1,
 

@@ -32,7 +32,9 @@ def on_register_schemas():
         'auth_algo': schema.AUTH_ALGO,
         'apn_ipaddr': schema.IPV4,
         'ciphers[]': schema.CIPHER_2G,
-        'features[]': schema.MODEM_FEATURE
+        'features[]': schema.MODEM_FEATURE,
+        'dl_earfcn': schema.UINT,
+        'ul_earfcn': schema.UINT
         }
     schema.register_resource_schema('modem', resource_schema)
 

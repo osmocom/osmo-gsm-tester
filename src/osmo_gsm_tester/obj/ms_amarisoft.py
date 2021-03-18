@@ -27,7 +27,16 @@ from .run_node import RunNode
 from .ms import MS
 
 def on_register_schemas():
-    resource_schema = {}
+    resource_schema = {
+        'use_custom_band255': schema.BOOL_STR,
+        'custom_band_list[].number': schema.UINT,
+        'custom_band_list[].dl_earfcn_min': schema.UINT,
+        'custom_band_list[].dl_earfcn_max': schema.UINT,
+        'custom_band_list[].dl_freq_min': schema.UINT,
+        'custom_band_list[].ul_freq_min': schema.UINT,
+        'custom_band_list[].ul_earfcn_min': schema.UINT,
+        'custom_band_list[].ul_earfcn_max': schema.UINT,        
+        }
     for key, val in RunNode.schema().items():
         resource_schema['run_node.%s' % key] = val
     schema.register_resource_schema('modem', resource_schema)
@@ -244,6 +253,9 @@ class AmarisoftUE(MS):
         ifupfile = self.ifup_file if self._run_node.is_local() else self.remote_ifup_file
         config.overlay(values, dict(ue=dict(log_filename=logfile,
                                             ifup_filename=ifupfile)))
+
+        # Convert to Python bool and overlay config
+        config.overlay(values, dict(ue={'use_custom_band255': util.str2bool(values['ue'].get('use_custom_band255', 'false'))}))
 
         # We need to set some specific variables programatically here to match IP addresses:
         if self._conf.get('rf_dev_type') == 'zmq':

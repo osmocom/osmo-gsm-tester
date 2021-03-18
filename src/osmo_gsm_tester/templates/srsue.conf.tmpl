@@ -38,6 +38,12 @@ dl_earfcn = 2850,3050
 % else:
 dl_earfcn = 2850
 % endif
+% if ue.get('dl_freq', -1) != -1:
+dl_freq = ${ue.dl_freq}
+% endif
+% if ue.get('ul_freq', -1) != -1:
+ul_freq = ${ue.ul_freq}
+% endif
 freq_offset = ${ue.freq_offset}
 % if int(ue.tx_gain) > 0:
 tx_gain = ${ue.tx_gain}

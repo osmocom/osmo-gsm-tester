@@ -122,7 +122,7 @@ def integrity_4g(val):
     raise ValueError('Unknown 4G integrity value %r' % val)
 
 def modem_feature(val):
-    if val in ('sms', 'gprs', 'voice', 'ussd', 'sim', '2g', '3g', '4g', 'dl_qam256', 'ul_qam64', 'qc_diag'):
+    if val in ('sms', 'gprs', 'voice', 'ussd', 'sim', '2g', '3g', '4g', '5g', 'dl_qam256', 'ul_qam64', 'qc_diag'):
         return True
     raise ValueError('Unknown Modem Feature: %r' % val)
 

@@ -20,6 +20,7 @@
 #
 logger:
     file: ${smf.log_filename}
+    level: debug
 #
 # smf:
 #
@@ -310,22 +311,17 @@ smf:
       - addr: ${epc.run_addr}
         port: 7777
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8808
+      - addr: ${epc.addr_smf}
     gtpc:
-      - addr: ${epc.run_addr}
-        port: 2124
+      - addr: ${epc.addr_smf}
     gtpu:
       - addr: ${epc.run_addr}
         port: 2153
     subnet:
-      - addr: 10.45.0.1/16
-      - addr: 2001:230:cafe::1/48
+      - addr: ${epc.tun_addr}/16
     dns:
       - 8.8.8.8
       - 8.8.4.4
-      - 2001:4860:4860::8888
-      - 2001:4860:4860::8844
     mtu: 1400
     freeDiameter: ${smf.diameter_filename}
 
@@ -415,8 +411,7 @@ nrf:
 #
 upf:
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8807
+      - addr: ${epc.addr_upf}
 
 #
 # parameter:

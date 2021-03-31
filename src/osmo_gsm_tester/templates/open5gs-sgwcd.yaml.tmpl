@@ -52,11 +52,9 @@ logger:
 #
 sgwc:
     gtpc:
-      - addr: ${epc.run_addr}
-        port: 2125
+      - addr: ${epc.addr_sgwc}
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8805
+      - addr: ${epc.addr_sgwc}
 
 #
 # sgwu:
@@ -112,8 +110,7 @@ sgwc:
 #
 sgwu:
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8806
+      - addr: ${epc.addr_sgwu}
 
 #
 # parameter:

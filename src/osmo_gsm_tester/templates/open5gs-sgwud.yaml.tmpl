@@ -49,8 +49,7 @@ logger:
 #
 sgwu:
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8806
+      - addr: ${epc.addr_sgwu}
     gtpu:
       - addr: ${epc.run_addr}
         port: 2152
@@ -67,8 +66,7 @@ sgwu:
 #
 sgwc:
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8805
+      - addr: ${epc.addr_sgwc}
 
 #
 # parameter:

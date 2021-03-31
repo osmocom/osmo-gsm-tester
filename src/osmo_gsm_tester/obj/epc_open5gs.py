@@ -39,7 +39,9 @@ def on_register_schemas():
     schema.register_config_schema('epc', config_schema)
 
 class Open5gsEPC(epc.EPC):
-
+##############
+# PROTECTED
+##############
     REMOTE_DIR = '/osmo-gsm-tester-open5gs'
 
     def __init__(self, testenv, run_node):
@@ -53,6 +55,43 @@ class Open5gsEPC(epc.EPC):
         self.sgwc = None
         self.sgwu = None
         self.subscriber_list = []
+
+    def configure(self):
+        values = super().configure(['open5gsepc'])
+        db_host = values['epc']['db_host']
+        db_uri = 'mongodb://'+db_host+'/open5gs'
+        config.overlay(values, dict(epc=dict(db_uri=db_uri,
+                                             tun_addr=self.tun_addr(),
+                                             addr_smf=self.priv_addr_smf(),
+                                             addr_upf=self.priv_addr_upf(),
+                                             addr_sgwc=self.priv_addr_sgwc(),
+                                             addr_sgwu=self.priv_addr_sgwu(),
+                                             )))
+        self.fill_subscribers_mongodb(values['epc']['db_host'], 27017)
+        self.pcrf = Open5gsPCRF(self.testenv, self)
+        self.upf = Open5gsUPF(self.testenv, self)
+        self.smf = Open5gsSMF(self.testenv, self)
+        self.hss = Open5gsHSS(self.testenv, self)
+        self.mme = Open5gsMME(self.testenv, self)
+        self.sgwc = Open5gsSGWC(self.testenv, self)
+        self.sgwu = Open5gsSGWU(self.testenv, self)
+        self.pcrf.configure(copy.deepcopy(values))
+        self.upf.configure(copy.deepcopy(values))
+        self.smf.configure(copy.deepcopy(values))
+        self.hss.configure(copy.deepcopy(values))
+        self.mme.configure(copy.deepcopy(values))
+        self.sgwc.configure(copy.deepcopy(values))
+        self.sgwu.configure(copy.deepcopy(values))
+
+    def gen_priv_addr(self, suffix):
+        if ':' in self.addr():
+            raise log.Error('IPv6 not implemented!')
+        public_suffix = self.addr()[self.addr().rindex('.')+1:]
+        return '127.0.' + public_suffix + '.' + str(suffix)
+
+########################
+# PUBLIC - INTERNAL API
+########################
 
     def cleanup(self):
         if self.pcrf:
@@ -70,27 +109,21 @@ class Open5gsEPC(epc.EPC):
         if self.sgwu:
             self.sgwu.cleanup()
 
-    def configure(self):
-        values = super().configure(['open5gsepc'])
-        db_host = values['epc']['db_host']
-        db_uri = 'mongodb://'+db_host+'/open5gs'
-        config.overlay(values, dict(epc=dict(db_uri=db_uri)))
-        self.fill_subscribers_mongodb(values['epc']['db_host'], 27017)
-        self.pcrf = Open5gsPCRF(self.testenv, self)
-        self.upf = Open5gsUPF(self.testenv, self)
-        self.smf = Open5gsSMF(self.testenv, self)
-        self.hss = Open5gsHSS(self.testenv, self)
-        self.mme = Open5gsMME(self.testenv, self)
-        self.sgwc = Open5gsSGWC(self.testenv, self)
-        self.sgwu = Open5gsSGWU(self.testenv, self)
-        self.pcrf.configure(copy.deepcopy(values))
-        self.upf.configure(copy.deepcopy(values))
-        self.smf.configure(copy.deepcopy(values))
-        self.hss.configure(copy.deepcopy(values))
-        self.mme.configure(copy.deepcopy(values))
-        self.sgwc.configure(copy.deepcopy(values))
-        self.sgwu.configure(copy.deepcopy(values))
+    def priv_addr_smf(self):
+        return self.gen_priv_addr(1)
 
+    def priv_addr_upf(self):
+        return self.gen_priv_addr(2)
+
+    def priv_addr_sgwc(self):
+        return self.gen_priv_addr(3)
+
+    def priv_addr_sgwu(self):
+        return self.gen_priv_addr(4)
+
+###################
+# PUBLIC (test API included)
+###################
     def start(self):
         self.log('Starting srsepc')
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))

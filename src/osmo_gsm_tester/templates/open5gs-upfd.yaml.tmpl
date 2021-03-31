@@ -20,6 +20,7 @@
 #
 logger:
     file: ${upf.log_filename}
+    level: debug
 
 #
 # upf:
@@ -104,14 +105,12 @@ logger:
 #
 upf:
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8807
+      - addr: ${epc.addr_upf}
     gtpu:
       - addr: ${epc.run_addr}
         port: 2154
     subnet:
-      - addr: 10.45.0.1/16
-      - addr: 2001:230:cafe::1/48
+      - addr: ${epc.tun_addr}/16
 
 #
 # smf:
@@ -125,8 +124,7 @@ upf:
 #
 smf:
     pfcp:
-      - addr: ${epc.run_addr}
-        port: 8808
+      - addr: ${epc.addr_smf}
 
 #
 # parameter:

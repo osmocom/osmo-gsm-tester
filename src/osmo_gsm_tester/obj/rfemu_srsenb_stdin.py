@@ -44,7 +44,10 @@ class RFemulationSrsStdin(RFemulation):
     def set_attenuation(self, db):
         msg_str = 'cell_gain %d %f' % (self.cell_id, -db)
         self.dbg('sending stdin msg: "%s"' % msg_str)
-        self.enb.process.stdin_write(msg_str + '\n')
+        try:
+            self.enb.process.stdin_write(msg_str + '\n')
+        except Exception as e:
+            self.log(repr(e))
 
     def get_max_attenuation(self):
         return 200 # maximum cell_gain value in srs. Is this correct value?

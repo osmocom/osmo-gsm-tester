@@ -37,7 +37,7 @@ def on_register_schemas():
     schema.register_config_schema('amarisoftenb', config_schema)
 
 def rf_type_valid(rf_type_str):
-    return rf_type_str in ('uhd', 'zmq')
+    return rf_type_str in ('uhd', 'zmq', 'sdr')
 
 class AmarisoftENB(enb.eNodeB):
 

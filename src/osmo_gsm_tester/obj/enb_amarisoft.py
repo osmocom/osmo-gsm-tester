@@ -227,6 +227,7 @@ class AmarisoftENB(enb.eNodeB):
                                              rf_dev_sync=values['enb'].get('rf_dev_sync', None),
                                              rx_gain=values['enb'].get('rx_gain', None),
                                              tx_gain=values['enb'].get('tx_gain', None),
+                                             rx_ant=values['enb'].get('rx_ant', None),
                                             )))
 
         self.gen_conf = values

@@ -34,6 +34,7 @@ def on_register_schemas():
         'tdd_uldl_config': schema.UINT,
         'tdd_special_subframe_pattern': schema.UINT,
         'transmission_mode': schema.LTE_TRANSMISSION_MODE,
+        'rx_ant': schema.STR,
         'tx_gain': schema.UINT,
         'rx_gain': schema.UINT,
         'rf_dev_type': schema.STR,

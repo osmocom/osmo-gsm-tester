@@ -24,6 +24,9 @@ print('waiting for UE to attach...')
 wait(ue.is_registered)
 print('UE is attached')
 
+# Wait a bit
+sleep(5)
+
 proc = ue.run_netns_wait('ping', ('ping', '-c', '10', epc.tun_addr()))
 
 # Check zero lost pings

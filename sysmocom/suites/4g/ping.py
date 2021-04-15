@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 from osmo_gsm_tester.testenv import *
+import os
+
+# Overlay suite-specific templates folder if it exists
+if os.path.isdir(os.path.join(os.path.dirname(__file__), 'templates')):
+  tenv.set_overlay_template_dir(os.path.join(os.path.dirname(__file__), 'templates'))
 
 epc = tenv.epc()
 enb = tenv.enb()

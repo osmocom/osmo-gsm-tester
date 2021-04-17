@@ -390,7 +390,9 @@ class srsUE(MS, srslte_common):
         if counter_name == 'handover_success':
             return self.process.get_counter_stdout('HO successful')
         if counter_name == 'prach_sent':
-            return self.process.get_counter_stdout('Random Access Transmission')
+            return self.process.get_counter_stdout('Random Access Transmission: seq=')
+        if counter_name == 'prach_sent_nr':
+            return self.process.get_counter_stdout('Random Access Transmission: prach_occasion=')
         if counter_name == 'paging_received':
             return self.process.get_counter_stdout('S-TMSI match in paging message')
         if counter_name == 'reestablishment_attempts':

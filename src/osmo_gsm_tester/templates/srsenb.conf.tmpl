@@ -289,3 +289,6 @@ rrc_inactivity_timer = ${enb.inactivity_timer}
 #max_prach_offset_us  = 30
 eea_pref_list = ${', '.join(list(dict.fromkeys(enb.cipher_list))).upper()}
 eia_pref_list = ${', '.join(list(dict.fromkeys(enb.integrity_list))).upper()}
+% if "lime" in enb.rf_dev_args:
+lte_sample_rates = true
+% endif

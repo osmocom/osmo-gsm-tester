@@ -22,6 +22,7 @@ import pprint
 
 from ..core import log, util, config, template, process, remote
 from ..core import schema
+from ..core.event_loop import MainLoop
 from . import enb
 from . import rfemu
 
@@ -33,11 +34,15 @@ def on_register_schemas():
 
     config_schema = {
         'log_options': schema.STR,
+        'nr_bandwidth': schema.INT,
         }
     schema.register_config_schema('amarisoftenb', config_schema)
 
 def rf_type_valid(rf_type_str):
     return rf_type_str in ('uhd', 'zmq', 'sdr')
+
+def ran_type_valid(ran_type_str):
+    return ran_type_str in ('lte', '5g_nsa')
 
 class AmarisoftENB(enb.eNodeB):
 
@@ -48,6 +53,7 @@ class AmarisoftENB(enb.eNodeB):
     CFGFILE_SIB23 = 'amarisoft_sib23.asn'
     CFGFILE_RF = 'amarisoft_rf_driver.cfg'
     CFGFILE_DRB = 'amarisoft_drb.cfg'
+    CFGFILE_DRB_NR = 'amarisoft_drb_nr.cfg'
     LOGFILE = 'lteenb.log'
     PHY_SIGNAL_FILE = 'lteenb.log.bin'
 
@@ -63,6 +69,7 @@ class AmarisoftENB(enb.eNodeB):
         self.config_sib23_file = None
         self.config_rf_file = None
         self.config_drb_file = None
+        self.config_drb_nr_file = None
         self.log_file = None
         self.process = None
         self.rem_host = None
@@ -72,8 +79,11 @@ class AmarisoftENB(enb.eNodeB):
         self.remote_config_sib23_file = None
         self.remote_config_rf_file = None
         self.remote_config_drb_file = None
+        self.remote_config_drb_nr_file = None
         self.remote_log_file = None
         self.enable_measurements = False
+        self.nr_bandwidth = None
+        self.ran_type = None
         self.testenv = testenv
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -131,8 +141,8 @@ class AmarisoftENB(enb.eNodeB):
         self.process.launch()
 
     def stop(self):
-        # Not implemented
-        pass
+        # Allow for some time to flush logs
+        MainLoop.sleep(5)
 
     def gen_conf_file(self, path, filename, values):
         self.dbg('AmarisoftENB ' + filename + ':\n' + pprint.pformat(values))
@@ -151,6 +161,7 @@ class AmarisoftENB(enb.eNodeB):
         self.config_sib23_file = self.run_dir.child(AmarisoftENB.CFGFILE_SIB23)
         self.config_rf_file = self.run_dir.child(AmarisoftENB.CFGFILE_RF)
         self.config_drb_file = self.run_dir.child(AmarisoftENB.CFGFILE_DRB)
+        self.config_drb_nr_file = self.run_dir.child(AmarisoftENB.CFGFILE_DRB_NR)
         self.log_file = self.run_dir.child(AmarisoftENB.LOGFILE)
         self.phy_signal_file = self.run_dir.child(AmarisoftENB.PHY_SIGNAL_FILE)
 
@@ -165,6 +176,7 @@ class AmarisoftENB(enb.eNodeB):
             self.remote_config_sib23_file = remote_run_dir.child(AmarisoftENB.CFGFILE_SIB23)
             self.remote_config_rf_file = remote_run_dir.child(AmarisoftENB.CFGFILE_RF)
             self.remote_config_drb_file = remote_run_dir.child(AmarisoftENB.CFGFILE_DRB)
+            self.remote_config_drb_nr_file = remote_run_dir.child(AmarisoftENB.CFGFILE_DRB_NR)
             self.remote_log_file = remote_run_dir.child(AmarisoftENB.LOGFILE)
             self.remote_phy_signal_file = remote_run_dir.child(AmarisoftENB.PHY_SIGNAL_FILE)
 
@@ -175,6 +187,17 @@ class AmarisoftENB(enb.eNodeB):
         config.overlay(values, dict(enb={'enable_measurements': self.enable_measurements}))
 
         config.overlay(values, dict(enb={'enable_dl_awgn': util.str2bool(values['enb'].get('enable_dl_awgn', 'false'))}))
+
+        self.nr_bandwidth = int(values['enb'].get('nr_bandwidth', 10))
+        config.overlay(values, dict(enb={'nr_bandwidth': self.nr_bandwidth}))
+
+        if (self._num_cells > 0):
+            if (self._num_nr_cells <= 0):
+                self.ran_type = "lte"
+            else:
+                self.ran_type = "nsa"
+        else:
+            raise log.Error('5G SA not supported yet')
 
         # Remove EEA0 from cipher list, if specified, as it's always assumed as default
         cipher_list = values['enb'].get('cipher_list', None)
@@ -237,6 +260,7 @@ class AmarisoftENB(enb.eNodeB):
         self.gen_conf_file(self.config_sib23_file, AmarisoftENB.CFGFILE_SIB23, values)
         self.gen_conf_file(self.config_rf_file, AmarisoftENB.CFGFILE_RF, values)
         self.gen_conf_file(self.config_drb_file, AmarisoftENB.CFGFILE_DRB, values)
+        self.gen_conf_file(self.config_drb_nr_file, AmarisoftENB.CFGFILE_DRB_NR, values)
 
         if not self._run_node.is_local():
             self.rem_host.recreate_remote_dir(self.remote_inst)
@@ -247,6 +271,7 @@ class AmarisoftENB(enb.eNodeB):
             self.rem_host.scp('scp-cfg-sib23-to-remote', self.config_sib23_file, self.remote_config_sib23_file)
             self.rem_host.scp('scp-cfg-rr-to-remote', self.config_rf_file, self.remote_config_rf_file)
             self.rem_host.scp('scp-cfg-drb-to-remote', self.config_drb_file, self.remote_config_drb_file)
+            self.rem_host.scp('scp-cfg-drb-nr-to-remote', self.config_drb_nr_file, self.remote_config_drb_nr_file)
 
     def ue_add(self, ue):
         if self.ue is not None:
@@ -279,11 +304,17 @@ class AmarisoftENB(enb.eNodeB):
         rfemu_obj = rfemu.get_instance_by_type(rfemu_cfg['type'], rfemu_cfg)
         return rfemu_obj
 
+    def get_nr_bandwidth(self):
+        return self.nr_bandwidth
+
     def ue_max_rate(self, downlink=True, num_carriers=1):
-        if self._duplex == 'fdd':
-            return self.ue_max_rate_fdd(downlink, num_carriers)
+        if self.ran_type == 'lte':
+            if self._duplex == 'fdd':
+                return self.ue_max_rate_fdd(downlink, num_carriers)
+            else:
+                return self.ue_max_rate_tdd(downlink, num_carriers)
         else:
-            return self.ue_max_rate_tdd(downlink, num_carriers)
+            return self.ue_max_rate_nsa_tdd(downlink)
 
     def ue_max_rate_fdd(self, downlink, num_carriers):
         # The max rate for a single UE per PRB configuration in TM1 with MCS 28 QAM64
@@ -323,7 +354,7 @@ class AmarisoftENB(enb.eNodeB):
         return max_rate
 
     def ue_max_rate_tdd(self, downlink, num_carriers):
-        # Max rate calculation for TDD depends on the acutal TDD configuration
+        # Max rate calculation for TDD depends on the actual TDD configuration
         # See: https://www.sharetechnote.com/html/Handbook_LTE_ThroughputCalculationExample_TDD.html
         # and https://i0.wp.com/www.techtrained.com/wp-content/uploads/2017/09/Blog_Post_1_TDD_Max_Throughput_Theoretical.jpg
         max_phy_rate_tdd_uldl_config0_sp0 = { 6 : 1.5e6,
@@ -333,8 +364,21 @@ class AmarisoftENB(enb.eNodeB):
                                75 : 18.4e6,
                                100 : 54.5e6 }
         if downlink:
-            max_rate = max_phy_rate_tdd_uldl_config0_sp0[self.num_prb()]
+            return max_phy_rate_tdd_uldl_config0_sp0[self.num_prb()]
         else:
             return 1e6 # dummy value, we need to replace that later
+
+    def ue_max_rate_nsa_tdd(self, downlink):
+        # Max rate calculation based on https://5g-tools.com/5g-nr-throughput-calculator/
+        # Only FR1 15kHz SCS, QAM64, 6 DL slots, 3 UL slots
+        max_phy_rate_nsa_dl_fr1_15khz = { 10: 18.4e6,
+                                          20: 38.0e6 }
+        max_phy_rate_nsa_ul_fr1_15khz = { 10: 10.7e6,
+                                          20: 23.0e6 }
+
+        if downlink:
+            return max_phy_rate_nsa_dl_fr1_15khz[self.get_nr_bandwidth()]
+        else:
+            return max_phy_rate_nsa_ul_fr1_15khz[self.get_nr_bandwidth()]
 
 # vim: expandtab tabstop=4 shiftwidth=4

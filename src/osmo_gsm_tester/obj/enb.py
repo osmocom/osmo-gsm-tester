@@ -68,12 +68,18 @@ def on_register_schemas():
         'cell_list[].ncell_list[].pci': schema.UINT,
         'cell_list[].ncell_list[].dl_earfcn': schema.UINT,
         'cell_list[].scell_list[]': schema.UINT,
+        'cell_list[].nr_scell_list[]': schema.UINT,
         'cell_list[].dl_earfcn': schema.UINT,
         'cell_list[].root_seq_idx': schema.UINT,
         'cell_list[].tac': schema.UINT,
         'cell_list[].dl_rfemu.type': schema.STR,
         'cell_list[].dl_rfemu.addr': schema.IPV4,
         'cell_list[].dl_rfemu.ports[]': schema.UINT,
+        'num_nr_cells': schema.UINT,
+        'nr_cell_list[].rf_port': schema.UINT,
+        'nr_cell_list[].cell_id': schema.UINT,
+        'nr_cell_list[].band': schema.UINT,
+        'nr_cell_list[].dl_nr_arfcn': schema.UINT,
         }
     for key, val in run_node.RunNode.schema().items():
         resource_schema['run_node.%s' % key] = val
@@ -98,9 +104,11 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             self.set_name('%s_%s' % (name, self._run_node.run_addr()))
         self._txmode = 0
         self._id = None
+        self._ran_config = "lte" # Used to determine whether we are in NSA
         self._duplex = None
         self._num_prb = 0
         self._num_cells = None
+        self._num_nr_cells = None
         self._epc = None
         self.gen_conf = None
         self.gr_broker = GrBroker.ref()
@@ -126,10 +134,11 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
 
     def calc_required_zmq_ports(self, cfg_values):
         cell_list = cfg_values['enb']['cell_list']
-        return len(cell_list) * self.num_ports() # *2 if MIMO
+        nr_cell_list = cfg_values['enb']['nr_cell_list']
+        return len(cell_list) * self.num_ports() + len(nr_cell_list) # *2 if LTE MIMO
 
     def calc_required_zmq_ports_joined_earfcn(self, cfg_values):
-        #gr_broker will join the earfcns, so we need to count uniqe earfcns:
+        #gr_broker will join the earfcns, so we need to count unique earfcns (only implemented for LTE):
         cell_list = cfg_values['enb']['cell_list']
         earfcn_li = []
         [earfcn_li.append(int(cell['dl_earfcn'])) for cell in cell_list if int(cell['dl_earfcn']) not in earfcn_li]
@@ -142,6 +151,10 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         for cell in cell_list:
             cell[port_name] = base_port + port_offset
             port_offset += self.num_ports()
+        nr_cell_list = cfg_values['enb']['nr_cell_list']
+        for nr_cell in nr_cell_list:
+            nr_cell[port_name] = base_port + port_offset
+            port_offset += 1
         # TODO: do we need to assign cell_list back?
 
     def assign_enb_zmq_ports_joined_earfcn(self, cfg_values, port_name, base_port):
@@ -176,7 +189,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
         config.overlay(values, dict(enb={ 'mme_addr': self._epc.addr() }))
         config.overlay(values, dict(enb={ 'gtp_bind_addr': self._gtp_bind_addr }))
         self._num_cells = int(values['enb'].get('num_cells', None))
-        assert self._num_cells
+        self._num_nr_cells = int(values['enb'].get('num_nr_cells', None))
+        assert self._num_cells is not None
+        assert self._num_nr_cells is not None
 
         # adjust cell_list to num_cells length:
         len_cell_list = len(values['enb']['cell_list'])
@@ -231,6 +246,9 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
     def num_cells(self):
         return self._num_cells
 
+    def num_nr_cells(self):
+        return self._num_nr_cells
+
 ########################
 # PUBLIC - INTERNAL API
 ########################
@@ -280,6 +298,13 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
                 rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx + 1, ul_rem_addr, cell['zmq_enb_peer_port'] + 1)
             idx += self.num_ports()
 
+        # Only single antenna supported for NR cells
+        nr_cell_list = cfg_values['enb']['nr_cell_list']
+        for nr_cell in nr_cell_list:
+            rf_dev_args += ',tx_port%u=tcp://%s:%u' % (idx, self.addr(), nr_cell['zmq_enb_bind_port'] + 0)
+            rf_dev_args += ',rx_port%u=tcp://%s:%u' % (idx, ul_rem_addr, nr_cell['zmq_enb_peer_port'] + 0)
+            idx += 1
+
         rf_dev_args += ',id=enb,base_srate=' + str(base_srate)
         return rf_dev_args
 
@@ -300,6 +325,14 @@ class eNodeB(log.Origin, metaclass=ABCMeta):
             if self.num_ports() > 1:
                 rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx + 1, self.addr(), cell['zmq_ue_peer_port'] + 1)
             idx += self.num_ports()
+
+        # NR cells again only with single antenna support
+        nr_cell_list = self.gen_conf['enb']['nr_cell_list']
+        for nr_cell in nr_cell_list:
+            rf_dev_args += ',tx_port%u=tcp://%s:%u' %(idx, ue.addr(), nr_cell['zmq_ue_bind_port'] + 0)
+            rf_dev_args += ',rx_port%u=tcp://%s:%u' %(idx, self.addr(), nr_cell['zmq_ue_peer_port'] + 0)
+            idx += 1
+
         # remove trailing comma:
         if rf_dev_args[0] == ',':
             return rf_dev_args[1:]

@@ -15,6 +15,26 @@ rf_driver: {
 tx_gain: ${trx.tx_gain}, /* TX gain (in dB) B2x0: 0 to 89.8 dB */
 rx_gain: ${trx.rx_gain}, /* RX gain (in dB) B2x0: 0 to 73 dB */
 
+rf_ports: [
+  % if trx.rf_dev_type == 'sdr':
+    {
+        sample_rate: 23.04,
+    },
+    {
+        sample_rate: 61.44,
+        dl_freq: 3502.8, // Moves NR DL LO frequency -5.76 MHz
+        ul_freq: 3502.8, // Moves NR UL LO frequency -5.76 MHz
+    }
+  % else:
+    {
+      sample_rate: ${enb.sample_rate},
+    },
+    {
+      sample_rate: ${enb.sample_rate},
+    }
+  % endif
+],
+
 // only the B210 requires a sample offset
 % if "b200" in trx.rf_dev_args:
 tx_time_offset: -150,

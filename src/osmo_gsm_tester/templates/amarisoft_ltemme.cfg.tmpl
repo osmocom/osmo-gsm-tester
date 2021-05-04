@@ -51,6 +51,9 @@
   /* Control Plane Cellular IoT EPS optimization support */
   cp_ciot_opt: true,
 
+  /* DCNR support */
+  nr_support: true,
+
   /* Public Data Networks. The first one is the default. */
   pdn_list: [
     {
@@ -147,12 +150,6 @@
         7) Last IP address
   */
   tun_setup_script: "${epc.ifup_filename}",
-
-  /* If true, inter-UE routing is done inside the MME (hence no IP
-     packet is output to the virtual network interface in case of
-     inter-UE communication). Otherwise, it is done by the Linux IP
-     layer. */
-  ue_to_ue_forwarding: false,
 
   /* NAS ciphering algorithm preference. EEA0 is always the last. */
   nas_cipher_algo_pref: [ ],

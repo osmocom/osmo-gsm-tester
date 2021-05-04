@@ -22,22 +22,30 @@ device_name = ${ue.rf_dev_type}
 device_args = ${ue.rf_dev_args},${ue.rf_dev_sync}
 
 [rat.eutra]
-% if int(ue.num_carriers) == 4:
-dl_earfcn = 2850,3050,3250,3350
-% elif int(ue.num_carriers) == 2:
-dl_earfcn = 2850,3050
+
+% if ue.get('dl_earfcn', None) != None:
+dl_earfcn = ${ue.dl_earfcn}
+
 % else:
-dl_earfcn = 2850
+  % if int(ue.num_carriers) == 4:
+  dl_earfcn = 2850,3050,3250,3350
+  % elif int(ue.num_carriers) == 2:
+  dl_earfcn = 2850,3050
+  % else:
+  dl_earfcn = 2850
+  % endif
 % endif
-% if ue.get('dl_freq', -1) != -1:
+
+% if float(ue.get('dl_freq', -1)) != -1:
 dl_freq = ${ue.dl_freq}
 % endif
-% if ue.get('ul_freq', -1) != -1:
+% if float(ue.get('ul_freq', -1)) != -1:
 ul_freq = ${ue.ul_freq}
 % endif
-
 nof_carriers = ${ue.num_carriers}
 
+[rat.nr]
+nof_carriers = ${ue.num_nr_carriers}
 
 [pcap]
 enable = ${'mac' if ue.enable_pcap else 'none'}
@@ -65,19 +73,18 @@ k    = ${ue.ki}
 imsi = ${ue.imsi}
 imei = 353490069873319
 
-
 [rrc]
-% if "dl_qam256" in ue.features or "ul_qam64" in ue.features:
-ue_category       = 8
-release           = 13
-ue_category_dl    = 14
-ue_category_ul    = 5
-% elif int(ue.num_carriers) > 1:
-ue_category       = 7
-release           = 10
-% else:
-#ue_category       = 4
-#release           = 8
+% if ue.get('rrc_release', None) != None:
+release = ${ue.rrc_release}
+% endif
+% if ue.get('ue_category', None) != None:
+ue_category = ${ue.ue_category}
+% endif
+% if ue.get('ue_category_dl', None) != None:
+ue_category_dl = ${ue.ue_category_dl}
+% endif
+% if ue.get('ue_category_ul', None) != None:
+ue_category_ul = ${ue.ue_category_ul}
 % endif
 
 

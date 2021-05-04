@@ -36,6 +36,7 @@ def on_register_schemas():
         'rf_dev_args': schema.STR,
         'rf_dev_sync': schema.STR,
         'num_carriers': schema.UINT,
+        'num_nr_carriers': schema.UINT,
         'additional_args[]': schema.STR,
         'airplane_t_on_ms': schema.INT,
         'airplane_t_off_ms': schema.INT,
@@ -54,7 +55,11 @@ def on_register_schemas():
         'enable_pcap': schema.BOOL_STR,
         'log_all_level': schema.STR,
         'log_nas_level': schema.STR,
-        'nr_short_sn_support': schema.BOOL_STR
+        'nr_short_sn_support': schema.BOOL_STR,
+        'rrc_release': schema.INT,
+        'ue_category': schema.INT,
+        'ue_category_dl': schema.INT,
+        'ue_category_ul': schema.INT,
         }
     schema.register_config_schema('modem', config_schema)
 
@@ -101,6 +106,7 @@ class srsUE(MS, srslte_common):
         self.remote_metrics_file = None
         self.enable_pcap = False
         self.num_carriers = 1
+        self.num_nr_carriers = 0
         self._additional_args = []
         if not rf_type_valid(conf.get('rf_dev_type', None)):
             raise log.Error('Invalid rf_dev_type=%s' % conf.get('rf_dev_type', None))
@@ -270,6 +276,7 @@ class srsUE(MS, srslte_common):
             self._additional_args += add_args.split()
 
         self.num_carriers = int(values['ue'].get('num_carriers', 1))
+        self.num_nr_carriers = int(values['ue'].get('num_nr_carriers', 0))
 
         # Simply pass-through the sync options
         config.overlay(values, dict(ue={'rf_dev_sync': values['ue'].get('rf_dev_sync', None)}))
@@ -283,7 +290,7 @@ class srsUE(MS, srslte_common):
 
             if self.num_carriers == 1:
                 # Single carrier
-                if self.enb.num_ports() == 1:
+                if self.enb.num_ports() == 1 and self.num_nr_carriers == 0:
                     # SISO
                     rf_dev_args += ',rx_freq0=2630e6,tx_freq0=2510e6'
                 elif self.enb.num_ports() == 2:

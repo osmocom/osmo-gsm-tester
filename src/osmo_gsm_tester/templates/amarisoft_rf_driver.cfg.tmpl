@@ -15,8 +15,12 @@ rf_driver: {
 tx_gain: ${trx.tx_gain}, /* TX gain (in dB) B2x0: 0 to 89.8 dB */
 rx_gain: ${trx.rx_gain}, /* RX gain (in dB) B2x0: 0 to 73 dB */
 
+// Only SDR and ZMQ devices require dedicated rf_port parameters
+% if trx.rf_dev_type != 'uhd':
+
 rf_ports: [
   % if trx.rf_dev_type == 'sdr':
+    // NSA specific configuration
     {
         sample_rate: 23.04,
     },
@@ -26,14 +30,27 @@ rf_ports: [
         ul_freq: 3502.8, // Moves NR UL LO frequency -5.76 MHz
     }
   % else:
+    // default case for UHD and ZMQ usage
+    <%
+       # determine ports and sample rate from either eNB or UE object
+       num_ports = 1
+       try:
+         obj_sample_rate = enb.sample_rate
+         num_ports = int(enb.num_cells) + int(enb.num_nr_cells)
+       except AttributeError:
+         obj_sample_rate = ue.sample_rate
+    %>
+
+    %for port in range(num_ports):
     {
-      sample_rate: ${enb.sample_rate},
+      sample_rate: ${obj_sample_rate},
     },
-    {
-      sample_rate: ${enb.sample_rate},
-    }
-  % endif
+    %endfor
+
+ % endif
 ],
+
+% endif
 
 // only the B210 requires a sample offset
 % if "b200" in trx.rf_dev_args:

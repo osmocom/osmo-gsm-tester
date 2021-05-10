@@ -45,7 +45,7 @@ class Open5gsEPC(epc.EPC):
     REMOTE_DIR = '/osmo-gsm-tester-open5gs'
 
     def __init__(self, testenv, run_node):
-        super().__init__(testenv, run_node, 'open5gs_epc')
+        super().__init__(testenv, run_node, 'open5gs')
         self.run_dir = None
         self.pcrf = None
         self.upf = None
@@ -57,7 +57,7 @@ class Open5gsEPC(epc.EPC):
         self.subscriber_list = []
 
     def configure(self):
-        values = super().configure(['open5gsepc'])
+        values = super().configure(['open5gs'])
         db_host = values['epc']['db_host']
         db_uri = 'mongodb://'+db_host+'/open5gs'
         config.overlay(values, dict(epc=dict(db_uri=db_uri,

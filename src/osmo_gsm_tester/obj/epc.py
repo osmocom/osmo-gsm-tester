@@ -71,7 +71,7 @@ class EPC(log.Origin, metaclass=ABCMeta):
         elif epc_type == 'srsepc':
             from .epc_srs import srsEPC
             epc_class = srsEPC
-        elif epc_type == 'open5gsepc':
+        elif epc_type == 'open5gs':
             from .epc_open5gs import Open5gsEPC
             epc_class = Open5gsEPC
         else:

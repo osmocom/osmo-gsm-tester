@@ -125,7 +125,7 @@ class Open5gsEPC(epc.EPC):
 # PUBLIC (test API included)
 ###################
     def start(self):
-        self.log('Starting srsepc')
+        self.log('Starting open5gs')
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
         self.pcrf.start()

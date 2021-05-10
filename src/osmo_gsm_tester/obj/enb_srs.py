@@ -37,6 +37,7 @@ def on_register_schemas():
     schema.register_resource_schema('enb', resource_schema)
 
     config_schema = {
+        'enable_malloc_interceptor': schema.BOOL_STR,
         'enable_pcap': schema.BOOL_STR,
         'enable_tracing': schema.BOOL_STR,
         'enable_ul_qam64': schema.BOOL_STR,
@@ -60,6 +61,7 @@ class srsENB(enb.eNodeB, srslte_common):
     S1AP_PCAPFILE = 'srsenb_s1ap.pcap'
     TRACINGFILE = 'srsenb_tracing.log'
     METRICSFILE = 'srsenb_metrics.csv'
+    INTERCEPTORFILE = 'srsenb_minterceptor.log'
 
     def __init__(self, testenv, conf):
         super().__init__(testenv, conf, srsENB.BINFILE)
@@ -72,6 +74,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.config_rr_file = None
         self.config_drb_file = None
         self.tracing_file = None
+        self.interceptor_file = None
         self.log_file = None
         self.pcap_file = None
         self.s1ap_pcap_file = None
@@ -87,9 +90,11 @@ class srsENB(enb.eNodeB, srslte_common):
         self.remote_s1ap_pcap_file = None
         self.remote_tracing_file = None
         self.remote_metrics_file = None
+        self.remote_interceptor_file = None
         self.enable_pcap = False
         self.enable_ul_qam64 = False
         self.enable_tracing = False
+        self.enable_malloc_interceptor = False
         self.metrics_file = None
         self.have_metrics_file = False
         self.stop_sleep_time = 6 # We require at most 5s to stop
@@ -131,6 +136,12 @@ class srsENB(enb.eNodeB, srslte_common):
         if self.enable_tracing:
             try:
                 self.rem_host.scpfrom('scp-back-tracing', self.remote_tracing_file, self.tracing_file)
+            except Exception as e:
+                self.log(repr(e))
+
+        if self.enable_malloc_interceptor:
+            try:
+                self.rem_host.scpfrom('scp-back-interceptor', self.remote_interceptor_file, self.interceptor_file)
             except Exception as e:
                 self.log(repr(e))
 
@@ -244,9 +255,22 @@ class srsENB(enb.eNodeB, srslte_common):
 
     def start_remotely(self):
         remote_env = { 'LD_LIBRARY_PATH': self.remote_inst.child('lib') }
+        # Add the malloc interceptor env variable when it's required.
+        if self.enable_malloc_interceptor:
+            path = self._run_node.lib_path_malloc_interceptor()
+            if not path:
+                raise log.Error('Could not get the environment variables. Aborting')
+
+            self.log(f'Setting LD_PRELOAD var to value: {path}')
+            remote_env['LD_PRELOAD'] = path
+
         remote_binary = self.remote_inst.child('bin', srsENB.BINFILE)
         args = (remote_binary, self.remote_config_file)
         args += tuple(self._additional_args)
+
+        # Force the output of the malloc interceptor to the interceptor_file.
+        if self.enable_malloc_interceptor:
+            args += tuple([f" 2> {self.remote_interceptor_file}"])
 
         self.process = self.rem_host.RemoteProcessSafeExit(srsENB.BINFILE, self.remote_run_dir, args, remote_env=remote_env, wait_time_sec=7)
         self.testenv.remember_to_stop(self.process)
@@ -287,6 +311,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.s1ap_pcap_file = self.run_dir.child(srsENB.S1AP_PCAPFILE)
         self.metrics_file = self.run_dir.child(srsENB.METRICSFILE)
         self.tracing_file = self.run_dir.child(srsENB.TRACINGFILE)
+        self.interceptor_file = self.run_dir.child(srsENB.INTERCEPTORFILE)
 
         if not self._run_node.is_local():
             self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
@@ -310,6 +335,7 @@ class srsENB(enb.eNodeB, srslte_common):
             self.remote_s1ap_pcap_file = self.remote_run_dir.child(srsENB.S1AP_PCAPFILE)
             self.remote_metrics_file = self.remote_run_dir.child(srsENB.METRICSFILE)
             self.remote_tracing_file = self.remote_run_dir.child(srsENB.TRACINGFILE)
+            self.remote_interceptor_file = self.remote_run_dir.child(srsENB.INTERCEPTORFILE)
 
         values = super().configure(['srsenb'])
 
@@ -330,6 +356,9 @@ class srsENB(enb.eNodeB, srslte_common):
                                              pcap_filename=pcapfile,
                                              s1ap_pcap_filename=s1ap_pcapfile,
                                              )))
+
+        # Retrieve the malloc interceptor option.
+        self.enable_malloc_interceptor = util.str2bool(values['enb'].get('enable_malloc_interceptor', 'false'))
 
         # Convert parsed boolean string to Python boolean:
         self.enable_pcap = util.str2bool(values['enb'].get('enable_pcap', 'false'))

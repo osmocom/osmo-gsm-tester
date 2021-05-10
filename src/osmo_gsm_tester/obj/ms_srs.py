@@ -45,7 +45,8 @@ def on_register_schemas():
         'freq_offset': schema.INT,
         'force_ul_amplitude': schema.STR,
         'dl_freq': schema.STR,
-        'ul_freq': schema.STR
+        'ul_freq': schema.STR,
+        'prerun_scripts[]': schema.STR,
         }
     for key, val in RunNode.schema().items():
         resource_schema['run_node.%s' % key] = val
@@ -171,11 +172,60 @@ class srsUE(MS, srslte_common):
     def zmq_base_bind_port(self):
         return self._zmq_base_bind_port
 
+    def run_task(self, task):
+        # Get the arguments.
+        args_index = task.find('args=')
+
+        args = ()
+        # No arguments, all the string is the script.
+        if args_index == -1:
+            index = task.rfind('/')
+            task_name = task [index + 1:]
+            run_dir = util.Dir(self.run_dir.new_dir(task_name))
+            args = (task,)
+            self.log(f'task name is: {task_name}')
+            self.log(f'Running the script: {task} in the run dir: {run_dir}')
+        else:
+            ntask = task[:args_index - 1]
+            index = ntask.rfind('/')
+            task_name = ntask [index + 1:]
+            run_dir = util.Dir(self.run_dir.new_dir(task_name))
+            args = (ntask,)
+            args += tuple(task[args_index + 5:].split(','))
+            self.log(f'task name is: {task_name}')
+            self.log(f'Running the script: {task} in the run dir: {run_dir} with args: {args}')
+
+        proc = process.Process(task_name, run_dir, args)
+        # Set the timeout to a high value 20 minutes.
+        proc.set_default_wait_timeout(1200)
+        returncode = proc.launch_sync()
+        if returncode != 0:
+            raise log.Error('Error executing the pre run scripts. Aborting')
+            return False
+
+        return True
+
+    # Runs all the tasks that are intended to run before the execution of the MS.
+    def prerun_tasks(self):
+        prerun_tasklist = self._conf.get('prerun_scripts', None)
+        if not prerun_tasklist:
+            return True
+
+        for task in prerun_tasklist:
+            if not self.run_task(task):
+                return False
+
+        return True
+
     def connect(self, enb):
         self.log('Starting srsue')
         self.enb = enb
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
+
+        if not self.prerun_tasks():
+            return
+
         if self._run_node.is_local():
             self.start_locally()
         else:

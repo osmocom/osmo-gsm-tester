@@ -101,6 +101,9 @@ device_args = ${enb.rf_dev_args},${enb.rf_dev_sync}
 enable = ${'true' if enb.enable_pcap else 'false'}
 filename = ${enb.pcap_filename}
 
+s1ap_enable = ${'true' if enb.enable_pcap else 'false'}
+s1ap_filename = ${enb.s1ap_pcap_filename}
+
 #####################################################################
 # Log configuration
 #

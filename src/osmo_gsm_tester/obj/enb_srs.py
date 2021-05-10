@@ -49,7 +49,8 @@ class srsENB(enb.eNodeB, srslte_common):
     CFGFILE_RR = 'srsenb_rr.conf'
     CFGFILE_DRB = 'srsenb_drb.conf'
     LOGFILE = 'srsenb.log'
-    PCAPFILE = 'srsenb.pcap'
+    PCAPFILE = 'srsenb_mac.pcap'
+    S1AP_PCAPFILE = 'srsenb_s1ap.pcap'
     TRACINGFILE = 'srsenb_tracing.log'
     METRICSFILE = 'srsenb_metrics.csv'
 
@@ -66,6 +67,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.tracing_file = None
         self.log_file = None
         self.pcap_file = None
+        self.s1ap_pcap_file = None
         self.process = None
         self.rem_host = None
         self.remote_run_dir = None
@@ -75,6 +77,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.remote_config_drb_file = None
         self.remote_log_file = None
         self.remote_pcap_file = None
+        self.remote_s1ap_pcap_file = None
         self.remote_tracing_file = None
         self.remote_metrics_file = None
         self.enable_pcap = False
@@ -108,6 +111,10 @@ class srsENB(enb.eNodeB, srslte_common):
         if self.enable_pcap:
             try:
                 self.rem_host.scpfrom('scp-back-pcap', self.remote_pcap_file, self.pcap_file)
+            except Exception as e:
+                self.log(repr(e))
+            try:
+                self.rem_host.scpfrom('scp-back-s1-pcap', self.remote_s1ap_pcap_file, self.s1ap_pcap_file)
             except Exception as e:
                 self.log(repr(e))
         if self.enable_tracing:
@@ -204,6 +211,7 @@ class srsENB(enb.eNodeB, srslte_common):
         self.config_drb_file = self.run_dir.child(srsENB.CFGFILE_DRB)
         self.log_file = self.run_dir.child(srsENB.LOGFILE)
         self.pcap_file = self.run_dir.child(srsENB.PCAPFILE)
+        self.s1ap_pcap_file = self.run_dir.child(srsENB.S1AP_PCAPFILE)
         self.metrics_file = self.run_dir.child(srsENB.METRICSFILE)
         self.tracing_file = self.run_dir.child(srsENB.TRACINGFILE)
 
@@ -219,6 +227,7 @@ class srsENB(enb.eNodeB, srslte_common):
             self.remote_config_drb_file = self.remote_run_dir.child(srsENB.CFGFILE_DRB)
             self.remote_log_file = self.remote_run_dir.child(srsENB.LOGFILE)
             self.remote_pcap_file = self.remote_run_dir.child(srsENB.PCAPFILE)
+            self.remote_s1ap_pcap_file = self.remote_run_dir.child(srsENB.S1AP_PCAPFILE)
             self.remote_metrics_file = self.remote_run_dir.child(srsENB.METRICSFILE)
             self.remote_tracing_file = self.remote_run_dir.child(srsENB.TRACINGFILE)
 
@@ -231,6 +240,7 @@ class srsENB(enb.eNodeB, srslte_common):
         drbfile = self.config_drb_file if self._run_node.is_local() else self.remote_config_drb_file
         logfile = self.log_file if self._run_node.is_local() else self.remote_log_file
         pcapfile = self.pcap_file if self._run_node.is_local() else self.remote_pcap_file
+        s1ap_pcapfile = self.s1ap_pcap_file if self._run_node.is_local() else self.remote_s1ap_pcap_file
         config.overlay(values, dict(enb=dict(metrics_filename=metricsfile,
                                              tracing_filename=tracingfile,
                                              sib_filename=sibfile,
@@ -238,6 +248,7 @@ class srsENB(enb.eNodeB, srslte_common):
                                              drb_filename=drbfile,
                                              log_filename=logfile,
                                              pcap_filename=pcapfile,
+                                             s1ap_pcap_filename=s1ap_pcapfile,
                                              )))
 
         # Convert parsed boolean string to Python boolean:

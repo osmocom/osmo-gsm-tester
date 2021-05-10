@@ -81,8 +81,9 @@ class Open5gsMME(log.Origin):
         self.rem_host.setcap_net_admin(remote_binary)
 
         args = (remote_binary, '-c', self.remote_config_file)
+        remote_run_dir = util.Dir(util.Dir(Open5gsMME.REMOTE_DIR).child(Open5gsMME.BINFILE))
 
-        self.process = self.rem_host.RemoteProcess(Open5gsMME.BINFILE, args)
+        self.process = self.rem_host.RemoteProcessSafeExit(Open5gsMME.BINFILE, remote_run_dir, args)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 

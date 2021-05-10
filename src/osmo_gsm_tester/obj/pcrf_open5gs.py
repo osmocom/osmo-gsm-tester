@@ -75,8 +75,9 @@ class Open5gsPCRF(log.Origin):
         remote_binary = self.remote_inst.child('bin', Open5gsPCRF.BINFILE)
 
         args = (remote_binary, '-c', self.remote_config_file)
+        remote_run_dir = util.Dir(util.Dir(Open5gsPCRF.REMOTE_DIR).child(Open5gsPCRF.BINFILE))
 
-        self.process = self.rem_host.RemoteProcess(Open5gsPCRF.BINFILE, args, remote_env=remote_env)
+        self.process = self.rem_host.RemoteProcessSafeExit(Open5gsPCRF.BINFILE, remote_run_dir, args, remote_env=remote_env)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 

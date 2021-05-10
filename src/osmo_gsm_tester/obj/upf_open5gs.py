@@ -79,8 +79,9 @@ class Open5gsUPF(log.Origin):
         self.rem_host.setcap_net_admin(remote_binary)
 
         args = (remote_binary, '-c', self.remote_config_file)
+        remote_run_dir = util.Dir(util.Dir(Open5gsUPF.REMOTE_DIR).child(Open5gsUPF.BINFILE))
 
-        self.process = self.rem_host.RemoteProcess(Open5gsUPF.BINFILE, args)
+        self.process = self.rem_host.RemoteProcessSafeExit(Open5gsUPF.BINFILE, remote_run_dir, args)
         self.testenv.remember_to_stop(self.process)
         self.process.launch()
 

@@ -32,6 +32,7 @@ def on_register_schemas():
     config_schema = {
         'time': schema.DURATION,
         'protocol': 'iperf3_protocol',
+        'packet_length' : schema.UINT,
         }
     schema.register_config_schema('iperf3cli', config_schema)
 
@@ -271,6 +272,10 @@ class IPerf3Client(log.Origin):
             popen_args += ('--bidir',)
         if proto == IPerf3Client.PROTO_UDP:
             popen_args += ('-u', '-b', str(bitrate))
+            # Add the buffer length.
+            if values.get('packet_length'):
+                packet_length = str(values.get('packet_length'))
+                popen_args += ('-l', packet_length)
         if tos is not None:
             popen_args += ('-S', str(tos))
 

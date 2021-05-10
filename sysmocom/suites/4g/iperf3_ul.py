@@ -6,43 +6,92 @@ import os
 if os.path.isdir(os.path.join(os.path.dirname(__file__), 'templates')):
   tenv.set_overlay_template_dir(os.path.join(os.path.dirname(__file__), 'templates'))
 
+# Retrieve the number of physical ue from the test suite configuration.
+test_config = tenv.config_test_specific()
+nof_ue = int(test_config.get("nof_physical_ue", 1))
+
+print(f'Number of physical ue: {nof_ue}')
+
+ue_li = []
+
+# Get the ue from the test configuration.
+for n in range(0, nof_ue):
+  ue_li.append(tenv.modem())
+  print(f'ue index{n}: {ue_li[n]}')
+
 epc = tenv.epc()
 enb = tenv.enb()
-ue = tenv.modem()
-iperf3srv = tenv.iperf3srv({'addr': epc.tun_addr()})
-iperf3srv.set_run_node(epc.run_node())
-iperf3cli = iperf3srv.create_client()
-iperf3cli.set_run_node(ue.run_node())
 
-epc.subscriber_add(ue)
+iperf3srv = []
+for n in range(0, nof_ue):
+  iperf3srv.append(tenv.iperf3srv({'addr': epc.tun_addr()}))
+  iperf3srv[n].set_run_node(epc.run_node())
+  iperf3srv[n].set_port(iperf3srv[n].DEFAULT_SRV_PORT + n)
+
+# Set the iperf clients in the ue.
+iperf3cli = []
+for n in range(0, nof_ue):
+  iperf3cli.append(iperf3srv[n].create_client())
+  iperf3cli[n].set_run_node(ue_li[n].run_node())
+
+for n in range(0, nof_ue):
+  epc.subscriber_add(ue_li[n])
 epc.start()
-enb.ue_add(ue)
+
+enb.ue_add(ue_li[0])
 enb.start(epc)
 
 print('waiting for ENB to connect to EPC...')
 wait(epc.enb_is_connected, enb)
 print('ENB is connected to EPC')
 
-ue.connect(enb)
+for n in range(0, nof_ue):
+  ue_li[n].connect(enb)
 
-max_rate = enb.ue_max_rate(downlink=False, num_carriers=ue.num_carriers)
+for n in range(0, nof_ue):
+  iperf3srv[n].start()
 
-iperf3srv.start()
-proc = iperf3cli.prepare_test_proc(iperf3cli.DIR_UL, ue.netns(), bitrate=max_rate)
+proc_li = []
 
-print('waiting for UE to attach...')
-wait(ue.is_registered)
-print('UE is attached')
+# Attach all the ue's.
+for n in range(0, nof_ue):
+  max_rate = enb.ue_max_rate(downlink=False, num_carriers=ue_li[n].num_carriers)
+  client = iperf3cli[n].prepare_test_proc(iperf3cli[n].DIR_UL, ue_li[n].netns(), bitrate=max_rate)
+  print(f'Iperf client type: {type(client)}')
+  proc_li.append(client)
 
-print("Running iperf3 client to %s through %s" % (str(iperf3cli), ue.netns()))
-proc.launch_sync()
-iperf3srv.stop()
+for n in range(0, nof_ue):
+  print(f'waiting for UE {n} to attach...')
+  wait(ue_li[n].is_registered)
+  print(f'UE {n} is attached')
 
-iperf3cli.print_results()
-iperf3srv.print_results(iperf3cli.proto() == iperf3cli.PROTO_UDP)
+# Execute the iperfs and wait for its finish.
+try:
+  for proc in proc_li:
+    proc.launch()
+  for proc in proc_li:
+    proc.wait()
+except Exception as e:
+  for proc in proc_li:
+    try:
+      proc.terminate()
+    except Exception:
+      print("Exception while terminanting process %r" % repr(process))
+  raise e
+
+for n in range(0, nof_ue):
+  iperf3cli[n].print_results()
+  iperf3srv[n].print_results(iperf3cli[n].proto() == iperf3cli[n].PROTO_UDP)
 
 # 80% of the maximum rate for half of the test duration
-half_duration = int(round(iperf3cli.time_sec() / 2))
-res_str = ue.verify_metric(max_rate * 0.8, operation='max_rolling_avg', metric='ul_brate', criterion='gt', window=half_duration)
-print(res_str)
-test.set_report_stdout(res_str)
+out = ''
+for n in range(0, nof_ue):
+  half_duration = int(round(iperf3cli[n].time_sec() / 2))
+  max_rate = enb.ue_max_rate(downlink=False, num_carriers=ue_li[n].num_carriers)
+  res_str = ue_li[n].verify_metric(max_rate * 0.8, operation='max_rolling_avg', metric='ul_brate', criterion='gt', window=half_duration)
+  print(res_str)
+  out += res_str
+  if n != nof_ue - 1:
+    out += '\n'
+
+test.set_report_stdout(out)

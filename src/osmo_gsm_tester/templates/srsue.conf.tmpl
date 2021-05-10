@@ -1,6 +1,4 @@
-#####################################################################
-#                   srsUE configuration file
-#####################################################################
+# OGT templated configuration file for srsUE
 
 [rf]
 % if int(ue.tx_gain) > 0:
@@ -27,13 +25,15 @@ device_args = ${ue.rf_dev_args},${ue.rf_dev_sync}
 dl_earfcn = ${ue.dl_earfcn}
 
 % else:
-  % if int(ue.num_carriers) == 4:
-  dl_earfcn = 2850,3050,3250,3350
-  % elif int(ue.num_carriers) == 2:
-  dl_earfcn = 2850,3050
-  % else:
-  dl_earfcn = 2850
-  % endif
+
+% if int(ue.num_carriers) == 4:
+dl_earfcn = 2850,3050,3250,3350
+% elif int(ue.num_carriers) == 2:
+dl_earfcn = 2850,3050
+% else:
+dl_earfcn = 2850
+% endif
+
 % endif
 
 % if float(ue.get('dl_freq', -1)) != -1:
@@ -62,7 +62,6 @@ filename = ${ue.log_filename}
 file_max_size = -1
 nas_level = ${ue.log_nas_level}
 
-
 [usim]
 mode = soft
 algo = ${ue.auth_algo}
@@ -87,7 +86,6 @@ ue_category_dl = ${ue.ue_category_dl}
 ue_category_ul = ${ue.ue_category_ul}
 % endif
 
-
 [phy]
 % if ue.rf_dev_type == 'zmq':
 nof_phy_threads     = 2
@@ -96,11 +94,9 @@ nof_phy_threads     = 2
 force_ul_amplitude = ${ue.force_ul_amplitude}
 % endif
 
-
 [sim]
 airplane_t_on_ms  = ${ue.airplane_t_on_ms}
 airplane_t_off_ms = ${ue.airplane_t_off_ms}
-
 
 [general]
 metrics_csv_enable  = true

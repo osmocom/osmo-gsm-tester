@@ -29,6 +29,12 @@ from .srslte_common import srslte_common
 from ..core import schema
 
 def on_register_schemas():
+    resource_schema = {
+        'prerun_scripts[]': schema.STR,
+        'postrun_scripts[]': schema.STR,
+        }
+    schema.register_resource_schema('enb', resource_schema)
+
     config_schema = {
         'enable_pcap': schema.BOOL_STR,
         'enable_tracing': schema.BOOL_STR,
@@ -100,6 +106,10 @@ class srsENB(enb.eNodeB, srslte_common):
         # Make sure we give the UE time to tear down
         self.sleep_after_stop()
 
+        # Execute the post run tasks.
+        if not self.postrun_tasks():
+            self.log('Could not execute the post run tasks')
+
         # copy back files (may not exist, for instance if there was an early error of process):
         self.scp_back_metrics(raiseException=False)
 
@@ -151,11 +161,73 @@ class srsENB(enb.eNodeB, srslte_common):
         else:
             self.dbg('Metrics have already been copied back')
 
+    def run_task(self, task):
+        # Get the arguments.
+        args_index = task.find('args=')
+
+        args = ()
+        # No arguments, all the string is the script.
+        if args_index == -1:
+            index = task.rfind('/')
+            task_name = task [index + 1:]
+            run_dir = util.Dir(self.run_dir.new_dir(task_name))
+            args = (task,)
+            self.log(f'task name is: {task_name}')
+            self.log(f'Running the script: {task} in the run dir: {run_dir}')
+        else:
+            ntask = task[:args_index - 1]
+            index = ntask.rfind('/')
+            task_name = ntask [index + 1:]
+            run_dir = util.Dir(self.run_dir.new_dir(task_name))
+            args = (ntask,)
+            args += tuple(task[args_index + 5:].split(','))
+            self.log(f'task name is: {task_name}')
+            self.log(f'Running the script: {task} in the run dir: {run_dir} with args: {args}')
+
+        proc = process.Process(task_name, run_dir, args)
+        # Set the timeout to a high value 20 minutes.
+        proc.set_default_wait_timeout(1200)
+        returncode = proc.launch_sync()
+        if returncode != 0:
+            raise log.Error('Error executing the pre run scripts. Aborting')
+            return False
+
+        return True
+
+    # Runs all the tasks that are intended to run before the execution of the eNodeb.
+    def prerun_tasks(self):
+        prerun_tasklist = self._conf.get('prerun_scripts', None)
+        if not prerun_tasklist:
+            return True
+
+        for task in prerun_tasklist:
+            if not self.run_task(task):
+                return False
+
+        return True
+
+    # Runs all the tasks that are intended to run after the execution of the eNodeb.
+    def postrun_tasks(self):
+        postrun_tasklist = self._conf.get('postrun_scripts', None)
+        if not postrun_tasklist:
+            return True
+
+        for task in postrun_tasklist:
+            if not self.run_task(task):
+                return False
+
+        return True
+
     def start(self, epc):
         self.log('Starting srsENB')
         self._epc = epc
         self.run_dir = util.Dir(self.testenv.test().get_run_dir().new_dir(self.name()))
         self.configure()
+
+        if not self.prerun_tasks():
+            self.log('Pre run tasks failed. Aborting')
+            return
+
         if self._run_node.is_local():
             self.start_locally()
         else:

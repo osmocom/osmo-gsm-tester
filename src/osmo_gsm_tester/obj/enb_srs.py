@@ -32,6 +32,7 @@ def on_register_schemas():
     resource_schema = {
         'prerun_scripts[]': schema.STR,
         'postrun_scripts[]': schema.STR,
+        'remote_dir': schema.STR
         }
     schema.register_resource_schema('enb', resource_schema)
 
@@ -290,6 +291,13 @@ class srsENB(enb.eNodeB, srslte_common):
         if not self._run_node.is_local():
             self.rem_host = remote.RemoteHost(self.run_dir, self._run_node.ssh_user(), self._run_node.ssh_addr())
             remote_prefix_dir = util.Dir(srsENB.REMOTE_DIR)
+
+            # Modify the default remote directory if it is provided by the configuration.
+            remote_path = self._conf.get('remote_dir', None)
+            if remote_path:
+                remote_prefix_dir = util.Dir(remote_path)
+                self.log(f'Setting the remote dir to: {remote_path}')
+
             self.remote_inst = util.Dir(remote_prefix_dir.child(os.path.basename(str(self.inst))))
             self.remote_run_dir = util.Dir(remote_prefix_dir.child(self.name()))
 

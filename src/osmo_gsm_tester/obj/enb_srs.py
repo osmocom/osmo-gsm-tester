@@ -44,7 +44,7 @@ def on_register_schemas():
     schema.register_config_schema('enb', config_schema)
 
 def rf_type_valid(rf_type_str):
-    return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf')
+    return rf_type_str in ('zmq', 'uhd', 'soapy', 'bladerf', 'fapi')
 
 class srsENB(enb.eNodeB, srslte_common):
 
@@ -370,6 +370,10 @@ class srsENB(enb.eNodeB, srslte_common):
                         rf_dev_args += ',otw_format=sc12'
 
                 config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
+
+        if self._conf.get('rf_dev_type') == 'fapi':
+            rf_dev_args = ''
+            config.overlay(values, dict(enb=dict(rf_dev_args=rf_dev_args)))
 
         self.gen_conf = values
 

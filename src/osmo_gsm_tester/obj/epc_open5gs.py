@@ -61,7 +61,10 @@ class Open5gsEPC(epc.EPC):
         db_host = values['epc']['db_host']
         db_uri = 'mongodb://'+db_host+'/open5gs'
         config.overlay(values, dict(epc=dict(db_uri=db_uri,
+                                             apn_name=self.apn_name(),
+                                             tun_name=self.tun_name(),
                                              tun_addr=self.tun_addr(),
+                                             tun_netmask=self.tun_netmask(),
                                              addr_smf=self.priv_addr_smf(),
                                              addr_upf=self.priv_addr_upf(),
                                              addr_sgwc=self.priv_addr_sgwc(),
@@ -121,6 +124,15 @@ class Open5gsEPC(epc.EPC):
     def priv_addr_sgwu(self):
         return self.gen_priv_addr(4)
 
+    def tun_name(self):
+        return "ogstun"
+
+    def tun_netmask(self):
+        return "24"
+
+    def apn_name(self):
+        return "internet"
+
 ###################
 # PUBLIC (test API included)
 ###################
@@ -170,7 +182,7 @@ class Open5gsEPC(epc.EPC):
                 "default_indicator": True, \
                 "session": [ \
                     { \
-                    "name": "internet", \
+                    "name": self.apn_name(), \
                     "type": 3, "pcc_rule": [], "ambr": {"uplink": {"value": 1, "unit": 0}, "downlink": {"value": 1, "unit": 0}}, \
                     "qos": { "index": 9, "arp": {"priority_level": 8, "pre_emption_capability": 1, "pre_emption_vulnerability": 1} } \
                     } \

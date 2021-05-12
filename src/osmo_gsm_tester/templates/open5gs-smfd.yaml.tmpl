@@ -318,7 +318,7 @@ smf:
       - addr: ${epc.run_addr}
         port: 2153
     subnet:
-      - addr: ${epc.tun_addr}/16
+      - addr: ${epc.tun_addr}/${epc.tun_netmask}
     dns:
       - 8.8.8.8
       - 8.8.4.4

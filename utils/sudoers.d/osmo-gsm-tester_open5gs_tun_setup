@@ -1,0 +1,1 @@
+%osmo-gsm-tester ALL=(root) NOPASSWD: /usr/local/bin/osmo-gsm-tester_open5gs_tun_setup.sh

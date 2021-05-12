@@ -34,6 +34,7 @@ class Open5gsUPF(log.Origin):
     CFGFILE = 'open5gs-upfd.yaml'
     LOGFILE = 'open5gs-upfd.log'
     DIAMETERFILE = 'open5gs-freediameter.conf'
+    O5GS_TUN_SETUP_BIN = 'osmo-gsm-tester_open5gs_tun_setup.sh'
 
     def __init__(self, testenv, o5gs_epc):
         super().__init__(log.C_RUN, 'open5gs-upfd')
@@ -137,6 +138,9 @@ class Open5gsUPF(log.Origin):
             f.write(r)
 
         if not self._run_node.is_local():
+            self.rem_host.run_remote_sync('tun-setup', ('sudo', Open5gsUPF.O5GS_TUN_SETUP_BIN,
+                                          self.o5gs_epc.tun_name(), self.o5gs_epc.tun_addr(),
+                                          self.o5gs_epc.tun_netmask()))
             self.rem_host.recreate_remote_dir(self.remote_inst)
             self.rem_host.scp('scp-inst-to-remote', str(self.inst), remote_prefix_dir)
             self.rem_host.recreate_remote_dir(remote_run_dir)

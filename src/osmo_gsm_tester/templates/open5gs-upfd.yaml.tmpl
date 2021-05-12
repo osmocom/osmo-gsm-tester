@@ -110,7 +110,9 @@ upf:
       - addr: ${epc.run_addr}
         port: 2154
     subnet:
-      - addr: ${epc.tun_addr}/16
+      - addr: ${epc.tun_addr}/${epc.tun_netmask}
+        dnn: ${epc.apn_name}
+        dev: ${epc.tun_name}
 
 #
 # smf:

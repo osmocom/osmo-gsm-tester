@@ -107,8 +107,8 @@ upf:
     pfcp:
       - addr: ${epc.addr_upf}
     gtpu:
-      - addr: ${epc.run_addr}
-        port: 2154
+      - addr: ${epc.addr_upf}
+        port: 2152
     subnet:
       - addr: ${epc.tun_addr}/${epc.tun_netmask}
         dnn: ${epc.apn_name}

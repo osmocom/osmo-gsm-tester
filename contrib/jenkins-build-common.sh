@@ -204,11 +204,22 @@ add_rpath() {
 	#
 	# Add an rpath relative to the binary and library if the directory
 	# exists.
+
+  rpath_args='--set-rpath'
+  rpath_dir='$ORIGIN/../lib/'
+  if [ -n "$patchelf_rapth_extra_args" ]; then
+    rpath_args="$patchelf_rapth_extra_args $rpath_args"
+  fi
+
+  if [ -n "$patchelf_rpath_dir" ]; then
+    rpath_dir="$rpath_dir:$patchelf_rpath_dir"
+  fi
+
 	if [ -d bin/ ]; then
-		find bin -depth -type f -exec patchelf --set-rpath '$ORIGIN/../lib/' {} \;
+		find bin -depth -type f -exec patchelf $rpath_args "$rpath_dir" {} \;
 	fi
 	if [ -d sbin/ ]; then
-		find sbin -depth -type f -exec patchelf --set-rpath '$ORIGIN/../lib/' {} \;
+		find sbin -depth -type f -exec patchelf $rpath_args "$rpath_dir" {} \;
 	fi
 	if [ -d lib/ ]; then
 		find lib -depth -type f -name "lib*.so.*" -exec patchelf --set-rpath '$ORIGIN/' {} \;

@@ -25,7 +25,7 @@ prepare_docker() {
         PWD=$OLDPWD
 }
 
-docker pull registry.sysmocom.de/ttcn3-bts-test
+docker pull registry.osmocom.org/ttcn3-bts-test
 
 # remove older trial dirs and *-run.tgz, if any
 trial_dir_prefix="trial-"

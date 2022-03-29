@@ -5,7 +5,7 @@ base="$PWD"
 name="osmocom-bb"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-FW_RPM_URL="http://download.opensuse.org/repositories/home:/mnhauke:/osmocom:/nightly/SLE_15/x86_64/"
+FW_RPM_URL="http://download.opensuse.org/repositories/home:/mnhauke:/osmocom:/nightly/openSUSE_Tumbleweed/x86_64/"
 
 build_repo libosmocore --disable-doxygen
 build_repo_dir osmocom-bb src/host/virt_phy ${SANITIZE_FLAGS}

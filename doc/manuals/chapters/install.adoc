@@ -55,7 +55,7 @@ jenkins-build-osmo-nitb.sh script; all that differs to the other scripts is the
   system, e.g.: "linux_amd64_debian8"
 * 'Source Code Management':
 ** 'Git'
-*** 'Repository URL': "git://git.osmocom.org/osmo-gsm-tester"
+*** 'Repository URL': "https://gitea.osmocom.org/cellular-infrastructure/osmo-gsm-tester"
 *** 'Branch Specifier': "*/master"
 *** 'Additional Behaviors'
 **** 'Check out to a sub-directory': "osmo-gsm-tester"
@@ -262,7 +262,7 @@ Here is the configuration for the run job:
   (to match the 'Label' configured in <<install_add_jenkins_slave>>).
 * 'Source Code Management':
 ** 'Git'
-*** 'Repository URL': "git://git.osmocom.org/osmo-gsm-tester"
+*** 'Repository URL': "https://gitea.osmocom.org/cellular-infrastructure/osmo-gsm-tester"
 *** 'Branch Specifier': "*/master"
 *** 'Additional Behaviors'
 **** 'Check out to a sub-directory': "osmo-gsm-tester"
@@ -669,7 +669,7 @@ On the main unit, to install the latest in '/usr/local/src':
 apt-get install git
 mkdir -p /usr/local/src
 cd /usr/local/src
-git clone git://git.osmocom.org/osmo-gsm-tester
+git clone https://gitea.osmocom.org/cellular-infrastructure/osmo-gsm-tester
 ----
 
 To allow all users to run 'osmo-gsm-tester.py', from login as well as non-login

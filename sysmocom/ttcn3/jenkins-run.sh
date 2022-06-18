@@ -13,7 +13,7 @@ prepare_docker() {
         DIR=~/jenkins/docker-playground
         if [ ! -d "$DIR" ]; then
                 mkdir -p ~/jenkins/ && cd ~/jenkins
-                git clone git://git.osmocom.org/docker-playground
+                git clone https://gerrit.osmocom.org/docker-playground
         fi
         cd $DIR
         git remote prune origin; git fetch; git checkout -f -B master origin/master

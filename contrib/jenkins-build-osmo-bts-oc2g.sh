@@ -26,6 +26,7 @@ L1_OC2G_HEADERS="$PWD/oc2g-fw/inc"
 
 build_repo libosmocore --disable-pcsc --disable-libmnl --disable-doxygen --disable-gnutls --disable-detect-tls-gcc-arm-bug
 build_repo libosmo-abis --disable-dahdi
+build_repo libosmo-netif --disable-doxygen
 build_repo osmo-bts --disable-sysmocom-bts --enable-oc2g --with-oc2g="$L1_OC2G_HEADERS"
 
 create_bin_tgz osmo-bts-oc2g

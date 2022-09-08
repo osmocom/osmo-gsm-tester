@@ -12,6 +12,13 @@ _poky_path="$POKY_PATH"
 # Cross-compilation: all installations need to be put in the sysmo SDK sysroot
 export DESTDIR="$_poky_path/sysroots/armv5te-poky-linux-gnueabi"
 
+# Workaround to oe-core meta/site/* CONFIG_SITE files passed to autoconf forcing
+# unavailability of netinet/sctp.h.
+# Patch fixing issue upstream: https://patchwork.openembedded.org/patch/168892/
+# Merged: poky.git b11fc7795cd1a6d74c9bb50b922d928f4a17722d
+# See meta-telephony.git 7acf2bff4e279b7d974373b952bad8e400c3bff2
+export ac_cv_header_netinet_sctp_h=yes
+
 base="$PWD"
 name="osmo-bts-sysmo"
 prefix="/usr/local/jenkins-build/inst-$name"

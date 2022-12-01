@@ -18,6 +18,10 @@ network
  long name ${msc.net.long_name}
  encryption ${msc.net.encryption}
  authentication ${msc.net.authentication}
+ mgw 0
+  remote-ip ${mgw.ip_address.addr}
+  remote-port 2427
+  local-ip ${msc.ip_address.addr}
 cs7 instance 0
  point-code 0.0.1
  asp asp0 2905 0 m3ua
@@ -27,11 +31,6 @@ cs7 instance 0
   asp asp0
   routing-key 1 0.0.1
 msc
- mgw remote-ip ${mgw.ip_address.addr}
- mgw remote-port 2427
- mgw local-ip ${msc.ip_address.addr}
- mgw endpoint-range 1 31
- mgw bts-base 8000
  osmux ${msc.use_osmux}
  assign-tmsi
 %if msc.get('emergency_call_msisdn', None) is not None:

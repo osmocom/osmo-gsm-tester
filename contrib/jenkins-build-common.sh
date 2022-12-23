@@ -102,6 +102,8 @@ have_repo() {
 
   echo "$(git rev-parse HEAD) $repo" >> "$prefix_real/${name}_git_hashes.txt"
 
+  git submodule update --init
+
   cd "$base"
 }
 

@@ -8,6 +8,7 @@ name="osmocom-bb"
 FW_RPM_URL="http://download.opensuse.org/repositories/home:/mnhauke:/osmocom:/nightly/openSUSE_Tumbleweed/x86_64/"
 
 build_repo libosmocore --disable-doxygen
+build_repo libosmo-gprs
 build_repo_dir osmocom-bb src/host/virt_phy ${SANITIZE_FLAGS}
 build_repo_dir osmocom-bb src/host/osmocon ${SANITIZE_FLAGS}
 build_repo_dir osmocom-bb src/host/layer23 ${SANITIZE_FLAGS}

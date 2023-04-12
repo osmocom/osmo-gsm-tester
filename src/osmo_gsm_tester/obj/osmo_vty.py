@@ -178,7 +178,7 @@ class OsmoVty(log.Origin):
         if not self.prompt:
             raise VtyInterfaceExn('Could not find application name; needed to decode prompts.'
                     ' Initial data was: %r' % data)
-        self.re_prompt = re.compile('^%s(?:\(([\w-]*)\))?([#>]) (.*)$' % self.prompt)
+        self.re_prompt = re.compile('^%s(?:\(([\w-]*)\))?([#>]) (.*)$' % re.escape(self.prompt))
 
     def disconnect(self):
         '''Disconnect.

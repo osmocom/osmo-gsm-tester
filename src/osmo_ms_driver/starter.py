@@ -54,7 +54,7 @@ class OsmoVirtPhy(Launcher):
 
     def start(self, loop, testenv=None):
         if testenv is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
-            self.run_dir = util.Dir(testenv.suite().get_run_dir().new_dir(self.name()))
+            self.run_dir = util.Dir(testenv.test().get_run_dir().new_dir(self.name()))
         if len(self._phy_filename.encode()) > 107:
             raise log.Error('Path for unix socket is longer than max allowed len for unix socket path (107):', self._phy_filename)
 
@@ -136,7 +136,7 @@ class OsmoMobile(Launcher):
 
     def start(self, loop, testenv=None):
         if testenv is not None: # overwrite run_dir to store files if run from inside osmo-gsm-tester:
-            self.run_dir = util.Dir(testenv.suite().get_run_dir().new_dir(self.name()))
+            self.run_dir = util.Dir(testenv.test().get_run_dir().new_dir(self.name()))
         lua_filename = self.write_lua_cfg()
         mob_filename = self.write_mob_cfg(lua_filename, self._phy_filename)
 

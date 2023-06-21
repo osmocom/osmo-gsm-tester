@@ -112,13 +112,14 @@ network
 %  endfor
 % endfor
 %endfor
+ mgw 0
+  local-ip ${bsc.ip_address.addr}
+  remote-ip ${mgw.ip_address.addr}
+  remote-port 2427
 msc
  core-mobile-country-code ${bsc.net.mcc}
  core-mobile-network-code ${bsc.net.mnc}
  allow-emergency allow
- mgw remote-ip ${mgw.ip_address.addr}
- mgw remote-port 2427
- mgw local-ip ${bsc.ip_address.addr}
  codec-list ${' '.join(bsc.net.codec_list)}
  amr-config 12_2k forbidden
  amr-config 10_2k forbidden

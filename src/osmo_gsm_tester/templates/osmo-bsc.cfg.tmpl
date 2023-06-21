@@ -116,11 +116,9 @@ msc
  core-mobile-country-code ${bsc.net.mcc}
  core-mobile-network-code ${bsc.net.mnc}
  allow-emergency allow
- ip.access rtp-base 25000
  mgw remote-ip ${mgw.ip_address.addr}
  mgw remote-port 2427
  mgw local-ip ${bsc.ip_address.addr}
- mgw endpoint-range 1 31
  codec-list ${' '.join(bsc.net.codec_list)}
  amr-config 12_2k forbidden
  amr-config 10_2k forbidden

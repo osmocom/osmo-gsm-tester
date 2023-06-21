@@ -431,7 +431,7 @@ bsc_bts:
   location_area_code: 23
   base_station_id_code: 63
   stream_id: 255
-  osmobsc_bts_type: sysmobts
+  osmobsc_bts_type: osmo-bts
   trx_list:
   - nominal_power: 23
     max_power_red: 0

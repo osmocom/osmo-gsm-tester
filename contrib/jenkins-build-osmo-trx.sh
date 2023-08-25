@@ -31,7 +31,7 @@ make install
 # build_repo_limesuite
 
 # AddressSanitizer is not enabled on purpose since overhead affects the clocking.
-build_repo libosmocore --disable-doxygen
+build_repo libosmocore --disable-doxygen --disable-uring
 build_repo osmo-trx --with-uhd --with-lms
 
 create_bin_tgz "osmo-trx-uhd osmo-trx-lms"

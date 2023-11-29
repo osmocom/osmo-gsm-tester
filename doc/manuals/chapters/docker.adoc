@@ -3,8 +3,8 @@
 
 A sample {app-name} setup based on docker containers and maintained by the
 Osmocom community is available in Osmocom's git repository
-link:https://git.osmocom.org/docker-playground/[docker-playground.git], under
-'osmo-gsm-tester' subdirectory. In there, one can find:
+link:https://gitea.osmocom.org/osmocom/docker-playground/[docker-playground.git],
+under 'osmo-gsm-tester' subdirectory. In there, one can find:
 
 - A 'Dockerfile' file can be found which builds a docker image which can
 be used both to run as an osmo-gsm-tester <<install_main_unit,Main Unit>> or as

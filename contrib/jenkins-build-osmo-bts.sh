@@ -4,7 +4,8 @@ base="$PWD"
 name="osmo-bts"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
-have_repo octphy-2g-headers
+(git_url=https://gitea.osmocom.org/cellular-infrastructure
+ have_repo octphy-2g-headers)
 
 build_repo libosmocore ${SANITIZE_FLAGS} --disable-doxygen --disable-uring
 build_repo libosmo-abis ${SANITIZE_FLAGS} --disable-dahdi

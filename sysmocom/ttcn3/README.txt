@@ -1,5 +1,6 @@
 This directory contains a set of scripts and osmo-gsm-tester testsuites to run
-osmo-ttcn3-hacks.git BTS_tests.ttcn (https://git.osmocom.org/osmo-ttcn3-hacks/tree/bts).
+osmo-ttcn3-hacks.git BTS_tests.ttcn
+(https://gitea.osmocom.org/ttcn3/osmo-ttcn3-hacks/src/branch/master/bts).
 
 The idea is to set up automatically the following components:
 TTCN3 <-> osmocon (osmocom-bb) <-> motorola C123 <-> RF network <-> BTS_TO_TEST <-> TTCN3 + osmo-bsc

@@ -80,7 +80,7 @@ class OsmoVty(log.Origin):
 
     def _command(self, command_str, timeout=10, strict=True):
         '''Send a command and return the response.'''
-        # (copied from https://git.osmocom.org/python/osmo-python-tests/tree/osmopy/osmo_interact/vty.py)
+        # (copied from osmo-python-tests.git/osmopy/osmo_interact/vty.py)
         self.dbg('Sending', command_str=command_str)
         self.sck.send(command_str.encode())
 
@@ -159,7 +159,7 @@ class OsmoVty(log.Origin):
         self.sck.setblocking(1)
 
         # read first prompt
-        # (copied from https://git.osmocom.org/python/osmo-python-tests/tree/osmopy/osmo_interact/vty.py)
+        # (copied from osmo-python-tests.git/osmopy/osmo_interact/vty.py)
         self.this_node = None
         self.this_prompt_char = '>' # slight cheat for initial prompt char
         self.last_node = None
@@ -209,7 +209,7 @@ class OsmoVty(log.Origin):
             with self:
                 return self.cmd(command_str, timeout, strict)
 
-        # (copied from https://git.osmocom.org/python/osmo-python-tests/tree/osmopy/osmo_interact/vty.py)
+        # (copied from osmo-python-tests.git/osmopy/osmo_interact/vty.py)
         command_str = command_str or '\r'
         if command_str[-1] not in '?\r\t':
             command_str = command_str + '\r'

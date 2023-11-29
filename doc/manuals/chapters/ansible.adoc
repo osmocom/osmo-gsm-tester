@@ -5,8 +5,8 @@ Since the set of steps to set up a full {app-name} environment can be quite long
 and tedious, nowadays the Osmocom RnD and Production {app-name} setups are
 installed and maintained using Ansible scripts. The set of ansible scripts is
 available  in Osmocom's git repository
-link:https://git.osmocom.org/osmo-ci/[osmo-ci.git] under 'ansible' subdirectory,
-with the rest of ansible scripts to set jenkins slaves, etc.
+link:https://gitea.osmocom.org/osmocom/osmo-ci/[osmo-ci.git] under 'ansible'
+subdirectory, with the rest of ansible scripts to set jenkins slaves, etc.
 
 Since these set of scripts is mainly aimed at Osmocom's own setup, and debian is
 used there, so far only debian hosts are supported officially, though patches to

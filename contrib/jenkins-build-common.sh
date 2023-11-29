@@ -42,7 +42,7 @@ if [ -z "$name" -o -z "$base" ]; then
   exit 1
 fi
 
-git_url="${git_url:-https://git.osmocom.org}"
+git_url="${git_url:-https://gerrit.osmocom.org}"
 prefix="${prefix:-$base/inst-$name}"
 # prefix_real is usually identical with prefix, except when installing to a
 # different $DESTDIR than /, which is the case for example when building

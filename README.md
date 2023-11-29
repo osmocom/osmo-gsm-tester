@@ -16,11 +16,12 @@ under _sysmocom/_ as a reference for others.
 
 Ansible scripts to set up hosts to be used as Osmo-GSM-Tester Main Units or/and
 Slave Units on the above mentioned setup can be found at
-https://git.osmocom.org/osmo-ci/tree/ansible, which actually install sample
-system configuration files from _utils/_ directory in this same repository.
+https://gitea.osmocom.org/osmocom/osmo-ci/src/branch/master/ansible, which
+actually install sample system configuration files from _utils/_ directory in
+this same repository.
 
 A sample Docker setup is also maintained publicly at
-https://git.osmocom.org/docker-playground/tree/osmo-gsm-tester.
+https://gitea.osmocom.org/osmocom/docker-playground/src/branch/master/osmo-gsm-tester.
 
 For the complete documentation, please refer to Osmo-GSM-Tester User manual,
 available in sources under _doc/manuals/_ under this same repository, and

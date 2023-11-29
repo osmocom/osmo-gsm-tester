@@ -15,7 +15,7 @@ fi
 if [ -d "$OSMO_GSM_MANUALS_DIR" ]; then
 	git -C "$OSMO_GSM_MANUALS_DIR" pull
 else
-	git clone "https://git.osmocom.org/osmo-gsm-manuals" "$OSMO_GSM_MANUALS_DIR"
+	git clone "https://gerrit.osmocom.org/osmo-gsm-manuals" "$OSMO_GSM_MANUALS_DIR"
 fi
 git -C "$OSMO_GSM_MANUALS_DIR" checkout -f HEAD
 

@@ -7,7 +7,7 @@ name="osmo-bsc"
 build_repo libosmocore ${SANITIZE_FLAGS} --disable-doxygen --disable-uring
 build_repo libosmo-abis ${SANITIZE_FLAGS} --disable-dahdi
 build_repo libosmo-netif ${SANITIZE_FLAGS} --disable-doxygen
-build_repo libosmo-sccp ${SANITIZE_FLAGS}
+build_repo libosmo-sigtran ${SANITIZE_FLAGS}
 build_repo osmo-mgw ${SANITIZE_FLAGS}
 build_repo osmo-bsc ${SANITIZE_FLAGS}
 

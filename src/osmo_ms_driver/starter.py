@@ -68,9 +68,11 @@ class OsmoVirtPhy(Launcher):
 
     def verify_ready(self):
         while True:
+            print(f"PWD: {os.getcwd()}")
+            print(f"Waiting for: {self._phy_filename}")
             if os.path.exists(self._phy_filename):
                 return
-            time.sleep(0.2)
+            time.sleep(5)
 
     def terminate(self):
         """Clean up things."""
@@ -227,7 +229,7 @@ class MobileTestStarter(log.Origin):
         for phy in self._phys:
             phy.start(loop, self._testenv)
 
-        self.log("Checking if sockets are in the filesystem")
+        self.log("Checking if sockets are in the filesystem:")
         for phy in self._phys:
             phy.verify_ready()
 

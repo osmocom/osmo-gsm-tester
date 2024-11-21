@@ -26,8 +26,8 @@ prefix_real="$DESTDIR$prefix"
 . "$(dirname "$0")/jenkins-build-common.sh"
 
 build_repo libosmocore --disable-pcsc --disable-libmnl --disable-doxygen --disable-gnutls --disable-detect-tls-gcc-arm-bug --disable-uring
-build_repo libosmo-abis --disable-dahdi
 build_repo libosmo-netif --disable-doxygen
+build_repo libosmo-abis --disable-dahdi
 build_repo osmo-bts --enable-sysmocom-bts --with-openbsc=$base/openbsc/openbsc/include
 
 create_bin_tgz osmo-bts-sysmo
